@@ -1,0 +1,451 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{923e4b82-acbd-4b16-b420-40b8c40b86b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{bf5afb40-4468-436e-94a4-c820f76c89e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{589ad396-96a8-430f-b351-79f3df392025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{587de488-9c7f-4687-8f87-33eac1c4e255}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Camera">
+      <UniqueIdentifier>{5c914f07-9ec4-4dc7-b8dd-4bb82abb49a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\FrameBuffer">
+      <UniqueIdentifier>{ba020c9d-b9c5-4f06-b068-52f08a56d4b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\GeometricPrimitive">
+      <UniqueIdentifier>{4627d2e6-665b-4494-8341-1fb1abb075f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Sound">
+      <UniqueIdentifier>{ccebc5c8-7cab-4df5-9b6b-a546b7e37cde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Sprite">
+      <UniqueIdentifier>{ed2e277a-c885-4718-9db7-35703fed73c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\BillBoard">
+      <UniqueIdentifier>{14e8c36c-5cd0-436d-820a-277b79008250}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\BillBoard">
+      <UniqueIdentifier>{f7c62b5c-6bc4-4ec4-aa44-570b430a92b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Fog">
+      <UniqueIdentifier>{005762a3-b33d-40f9-ba0b-327578248f08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Function">
+      <UniqueIdentifier>{69c8702c-85da-4a59-96ef-5d9bdd891098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\GeometricPrimitive">
+      <UniqueIdentifier>{d4e68561-7caa-4b46-bfba-224b4014920c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Rasterizer">
+      <UniqueIdentifier>{b74d5531-3b50-4ac5-8bf0-85de5a5ed92e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SceneConstants">
+      <UniqueIdentifier>{84677bf4-a159-4e8e-97ac-a2d027987d98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\ScreenFilter">
+      <UniqueIdentifier>{e3ecab05-3165-4f53-8032-14db0e569080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Sprite">
+      <UniqueIdentifier>{32f6f7ef-f408-4621-8e27-1ab3f8270688}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\BillBoard">
+      <UniqueIdentifier>{233d9809-cd0e-4faa-a2f5-e7d9ca754268}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Camera">
+      <UniqueIdentifier>{1b029ebc-176b-4b79-b42f-1d8235d235ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\FrameBuffer">
+      <UniqueIdentifier>{506490d0-1cf1-4ae2-a365-f2a2f287c9f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\GeometricPrimitive">
+      <UniqueIdentifier>{9dd9ddbf-7149-4564-b242-ca3d1bbbe502}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Necessary">
+      <UniqueIdentifier>{611ec878-33df-4181-a6ec-074d16a32c67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Sound">
+      <UniqueIdentifier>{6d4041d7-d20b-4be4-8010-423d2f929b11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Sprite">
+      <UniqueIdentifier>{dbf55e62-e786-4495-b55c-150fe2001106}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\ECS">
+      <UniqueIdentifier>{19d386b4-ecff-4eaf-b6cb-143b585664fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Necessary">
+      <UniqueIdentifier>{4bc06979-b906-4085-8e94-ba5026860497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Function\Dissolve">
+      <UniqueIdentifier>{65db4150-e12d-4c92-b751-d160b079f49d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\FullScreen">
+      <UniqueIdentifier>{0b53100f-4c81-46fb-8ceb-632bdfcb8723}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Shaders">
+      <UniqueIdentifier>{caef7ca1-661d-4270-8b68-b6472b7aa24b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Shaders\ScreenFilter">
+      <UniqueIdentifier>{78d8041d-b647-4cda-8966-2cad7bf992eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Shaders">
+      <UniqueIdentifier>{8756de23-5ebf-4051-8d50-21fd1c0619e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Shaders\ScreenFilter">
+      <UniqueIdentifier>{2597052c-7571-4766-a031-98ed0f8311c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Shaders\Constants">
+      <UniqueIdentifier>{68b0bbbd-fbce-4904-9253-f2abd1da710e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Necessary\Comon">
+      <UniqueIdentifier>{22208c8f-8d02-4355-9c95-11cea5bb79a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Necessary\Comon">
+      <UniqueIdentifier>{2ab5b369-830a-4836-abfa-cfa40632d1e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Model">
+      <UniqueIdentifier>{fb230708-3140-4d68-a228-f134364dc560}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Model\SkinnedMesh">
+      <UniqueIdentifier>{636a3e76-8abb-4d40-8f83-46556e2aa00f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Model\StaticMesh">
+      <UniqueIdentifier>{7208a4b2-0cf7-4710-b36a-103b224271af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Model">
+      <UniqueIdentifier>{25056092-abde-4f02-9fe5-6896f4180e12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Model\SkinnedMesh">
+      <UniqueIdentifier>{73b91f1b-c948-4a7c-8542-1e975b55ecbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Model\StaticMesh">
+      <UniqueIdentifier>{b76bccc4-8147-43ae-871d-4f39ecabee05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Model\SkinnedMesh\Blend">
+      <UniqueIdentifier>{4b0e1b2c-e56a-4de8-8c2b-8791de8b8cce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model">
+      <UniqueIdentifier>{95b9d745-0444-4436-89f7-096c1acd6a95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model\SkinnedMesh">
+      <UniqueIdentifier>{d9f836c7-e3a7-4915-b572-c92932321ada}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model\StaticMesh">
+      <UniqueIdentifier>{51d8bd24-ad96-4882-bd38-94c2a7703e23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Model\SkinnedMesh\BlendConfig">
+      <UniqueIdentifier>{128205c4-78bb-4826-a50c-ce74c7dcb5ea}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imconfig.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_impl_dx11.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_impl_win32.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_internal.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imstb_rectpack.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imstb_textedit.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imstb_truetype.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Framework.h">
+      <Filter>Headers\Necessary</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\BillBoard.h">
+      <Filter>Headers\BillBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteBatch.h">
+      <Filter>Headers\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\FrameBuffer.h">
+      <Filter>Headers\FrameBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Rasterizer.h">
+      <Filter>Headers\FrameBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\ScreenFilter.h">
+      <Filter>Headers\Shaders\ScreenFilter</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Camera.h">
+      <Filter>Headers\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\SoundBuffer.h">
+      <Filter>Headers\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Sound.h">
+      <Filter>Headers\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\SoundData.h">
+      <Filter>Headers\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteData.h">
+      <Filter>Headers\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\ConstantBuffer.h">
+      <Filter>Headers\Shaders\Constants</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Constants.h">
+      <Filter>Headers\Shaders\Constants</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\GeometricPrimitve.h">
+      <Filter>Headers\GeometricPrimitive</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Easing.h">
+      <Filter>Headers\Necessary\Comon</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Vector.h">
+      <Filter>Headers\Necessary\Comon</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Input.h">
+      <Filter>Headers\Necessary\Comon</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Function.h">
+      <Filter>Headers\Necessary</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\EntityComponentSystem.h">
+      <Filter>Headers\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\ModelResource.h">
+      <Filter>Headers\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\SkinnedMesh.h">
+      <Filter>Headers\Model\SkinnedMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\ModelData.h">
+      <Filter>Headers\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh.h">
+      <Filter>Headers\Model\StaticMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\HighResolutionTimer.h">
+      <Filter>Headers\Necessary</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Misc.h">
+      <Filter>Headers\Necessary</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\vectorCombo.h">
+      <Filter>Headers\Necessary\Comon</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\InstanceData.h">
+      <Filter>Headers\Necessary\Comon</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\ChunkyTriMesh.h">
+      <Filter>Headers\Model\StaticMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\BlendingJob.h">
+      <Filter>Headers\Model\SkinnedMesh\BlendConfig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\PlayBackController.h">
+      <Filter>Headers\Model\SkinnedMesh\BlendConfig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\SamplingJob.h">
+      <Filter>Headers\Model\SkinnedMesh\BlendConfig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\HalfBodyLayer.h">
+      <Filter>Headers\Model\SkinnedMesh\BlendConfig</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_demo.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_draw.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_impl_dx11.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_impl_win32.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_widgets.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Framework.cpp">
+      <Filter>Sources\Necessary</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Function.cpp">
+      <Filter>Sources\Necessary</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Main.cpp">
+      <Filter>Sources\Necessary</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BillBoard.cpp">
+      <Filter>Sources\BillBoard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteBatch.cpp">
+      <Filter>Sources\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\FrameBuffer.cpp">
+      <Filter>Sources\FrameBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Rasterizer.cpp">
+      <Filter>Sources\FrameBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\ScreenFilter.cpp">
+      <Filter>Sources\Shaders\ScreenFilter</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Camera.cpp">
+      <Filter>Sources\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SoundBuffer.cpp">
+      <Filter>Sources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Sound.cpp">
+      <Filter>Sources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SoundData.cpp">
+      <Filter>Sources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteData.cpp">
+      <Filter>Sources\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\GeometricPrimitive.cpp">
+      <Filter>Sources\GeometricPrimitive</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Easing.cpp">
+      <Filter>Sources\Necessary\Comon</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Input.cpp">
+      <Filter>Sources\Necessary\Comon</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vector.cpp">
+      <Filter>Sources\Necessary\Comon</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\ModelResource.cpp">
+      <Filter>Sources\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SkinnedMesh.cpp">
+      <Filter>Sources\Model\SkinnedMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\ModelData.cpp">
+      <Filter>Sources\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh.cpp">
+      <Filter>Sources\Model\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\ChunkyTriMesh.cpp">
+      <Filter>Sources\Model\StaticMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BlendingJob.cpp">
+      <Filter>Sources\Model\SkinnedMesh\Blend</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\PlayBackController.cpp">
+      <Filter>Sources\Model\SkinnedMesh\Blend</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SamplingJob.cpp">
+      <Filter>Sources\Model\SkinnedMesh\Blend</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad.hlsli">
+      <Filter>Shaders\BillBoard</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteBatch.hlsli">
+      <Filter>Shaders\Sprite</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\Function.hlsli">
+      <Filter>Shaders\Function</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\Dissolve.hlsli">
+      <Filter>Shaders\Function\Dissolve</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\FullScreen.hlsli">
+      <Filter>Shaders\FullScreen</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\Rasterizer.hlsli">
+      <Filter>Shaders\Rasterizer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\ScreenFilter.hlsli">
+      <Filter>Shaders\ScreenFilter</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\GeometricPrimitive.hlsli">
+      <Filter>Shaders\GeometricPrimitive</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\SceneConstants.hlsli">
+      <Filter>Shaders\SceneConstants</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\SkinnedMesh.hlsli">
+      <Filter>Shaders\Model\SkinnedMesh</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh.hlsli">
+      <Filter>Shaders\Model\StaticMesh</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad_ps.hlsl">
+      <Filter>Shaders\BillBoard</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad_vs.hlsl">
+      <Filter>Shaders\BillBoard</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteBatch_ps.hlsl">
+      <Filter>Shaders\Sprite</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteBatch_vs.hlsl">
+      <Filter>Shaders\Sprite</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteDissolve_ps.hlsl">
+      <Filter>Shaders\Sprite</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\FullScreen_ps.hlsl">
+      <Filter>Shaders\FullScreen</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\FullScreen_vs.hlsl">
+      <Filter>Shaders\FullScreen</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Rasterizer_ps.hlsl">
+      <Filter>Shaders\Rasterizer</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Rasterizer_vs.hlsl">
+      <Filter>Shaders\Rasterizer</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\ScreenFilter_ps.hlsl">
+      <Filter>Shaders\ScreenFilter</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\ScreenFilter_vs.hlsl">
+      <Filter>Shaders\ScreenFilter</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\GeometricPrimitive_vs.hlsl">
+      <Filter>Shaders\GeometricPrimitive</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\GeometricPrimitive_ps.hlsl">
+      <Filter>Shaders\GeometricPrimitive</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SkinnedMesh_ps.hlsl">
+      <Filter>Shaders\Model\SkinnedMesh</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SkinnedMesh_vs.hlsl">
+      <Filter>Shaders\Model\SkinnedMesh</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh_ps.hlsl">
+      <Filter>Shaders\Model\StaticMesh</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh_vs.hlsl">
+      <Filter>Shaders\Model\StaticMesh</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

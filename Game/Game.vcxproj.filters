@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headers\Scene">
+      <UniqueIdentifier>{d42b9ab0-5156-49f7-afaa-a61bf3836969}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Scene">
+      <UniqueIdentifier>{33bcbe6b-244a-494c-bcec-ce9c33c22c5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Component">
+      <UniqueIdentifier>{846f9fb7-4573-45a9-a9cc-e5eaed97a1a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Component">
+      <UniqueIdentifier>{fba74c4e-565c-4d82-9714-ee122d74dc0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Component\Actor">
+      <UniqueIdentifier>{b70c4f0b-a60a-4739-ab84-9f914fcade69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Component\Actor">
+      <UniqueIdentifier>{016fed39-e5b4-4777-8f3c-37b02de4b61a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Component\Model">
+      <UniqueIdentifier>{f49e2f1c-0b25-49b0-a0da-4dc12abe0365}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects">
+      <UniqueIdentifier>{f8c4b5cb-1038-4aa9-8932-d6fd1e49dd6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Characters">
+      <UniqueIdentifier>{b3ac5d43-8b6d-484f-9f96-b588b27d3d7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Characters\Player">
+      <UniqueIdentifier>{02957eb6-88ef-4da6-bdba-9c4ea6db032f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Characters\Enemy">
+      <UniqueIdentifier>{a61e33ae-f33f-45a8-94a7-f91ba3dd63b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Characters">
+      <UniqueIdentifier>{ec1c12f0-794d-4505-aeb5-3d76ebcf3621}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Characters\Player">
+      <UniqueIdentifier>{fdf4d319-64e0-4f75-a94b-5aed646eb007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\Stage">
+      <UniqueIdentifier>{7f1cfc50-751d-40d0-bb73-c62e80e33e54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Stage">
+      <UniqueIdentifier>{c5fccd82-89c1-4a19-89d5-728a4ec34740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Collision">
+      <UniqueIdentifier>{44d46777-fd6a-49a2-a306-e0db986813df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Blend">
+      <UniqueIdentifier>{9613ce54-1c3d-4166-a663-eab42254b9b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Blend\AnimationBlending">
+      <UniqueIdentifier>{3905a482-b0bd-4ece-b51f-31f0bebf3c50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Blend\PartialAnimationsBlending">
+      <UniqueIdentifier>{a71c8817-0838-4701-be01-aed2578dd942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Blend">
+      <UniqueIdentifier>{0edb6fb4-26d2-4825-baec-edae92d49d5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Blend\AnimationBlending">
+      <UniqueIdentifier>{15019072-ad54-4917-ba0c-2feb9399d46f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Blend\PartialAnimationsBlending">
+      <UniqueIdentifier>{ff7734bc-0387-4a00-8d84-5d38756c17d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Collision">
+      <UniqueIdentifier>{2f81d110-37f5-4315-b570-59abb722ebbb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameSource\Scene.cpp">
+      <Filter>Sources\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\SceneClear.cpp">
+      <Filter>Sources\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\SceneGame.cpp">
+      <Filter>Sources\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\SceneOver.cpp">
+      <Filter>Sources\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\SceneTitle.cpp">
+      <Filter>Sources\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\SceneTutorial.cpp">
+      <Filter>Sources\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\ActorComponent.cpp">
+      <Filter>Sources\Component\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\PlayerAdminist.cpp">
+      <Filter>Sources\Characters\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\SaberCharacter.cpp">
+      <Filter>Sources\Characters\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\AnimationBlending.cpp">
+      <Filter>Sources\Blend\AnimationBlending</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\Stage.cpp">
+      <Filter>Sources\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\PartialBlendAnimation.cpp">
+      <Filter>Sources\Blend\PartialAnimationsBlending</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\DebugObject.cpp">
+      <Filter>Sources\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\ArcherCharacter.cpp">
+      <Filter>Sources\Characters\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\FighterCharacter.cpp">
+      <Filter>Sources\Characters\Player</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GameSource\Scene.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SceneClear.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SceneGame.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SceneOver.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SceneTitle.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SceneTutorial.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\ActorComponent.h">
+      <Filter>Headers\Component\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PlayCharacters.h">
+      <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SaberCharacter.h">
+      <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PlayerAdminist.h">
+      <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AnimationBlend.h">
+      <Filter>Headers\Blend\AnimationBlending</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Stage.h">
+      <Filter>Headers\Objects\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PartialBlendAnimation.h">
+      <Filter>Headers\Blend\PartialAnimationsBlending</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\CharacterParameter.h">
+      <Filter>Headers\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\DebugObject.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\ArcherCharacter.h">
+      <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\FighterCharacter.h">
+      <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

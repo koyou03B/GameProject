@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameSource\ActorComponent.cpp" />
+    <ClCompile Include="GameSource\AnimationBlending.cpp" />
+    <ClCompile Include="GameSource\ArcherCharacter.cpp" />
+    <ClCompile Include="GameSource\DebugObject.cpp" />
+    <ClCompile Include="GameSource\FighterCharacter.cpp" />
+    <ClCompile Include="GameSource\PartialBlendAnimation.cpp" />
+    <ClCompile Include="GameSource\PlayerAdminist.cpp" />
+    <ClCompile Include="GameSource\SaberCharacter.cpp" />
+    <ClCompile Include="GameSource\Scene.cpp" />
+    <ClCompile Include="GameSource\SceneClear.cpp" />
+    <ClCompile Include="GameSource\SceneGame.cpp" />
+    <ClCompile Include="GameSource\SceneOver.cpp" />
+    <ClCompile Include="GameSource\SceneTitle.cpp" />
+    <ClCompile Include="GameSource\SceneTutorial.cpp" />
+    <ClCompile Include="GameSource\Stage.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GameSource\ActorComponent.h" />
+    <ClInclude Include="GameSource\AnimationBlend.h" />
+    <ClInclude Include="GameSource\ArcherCharacter.h" />
+    <ClInclude Include="GameSource\CharacterParameter.h" />
+    <ClInclude Include="GameSource\DebugObject.h" />
+    <ClInclude Include="GameSource\FighterCharacter.h" />
+    <ClInclude Include="GameSource\PartialBlendAnimation.h" />
+    <ClInclude Include="GameSource\PlayCharacters.h" />
+    <ClInclude Include="GameSource\SaberCharacter.h" />
+    <ClInclude Include="GameSource\PlayerAdminist.h" />
+    <ClInclude Include="GameSource\Scene.h" />
+    <ClInclude Include="GameSource\SceneClear.h" />
+    <ClInclude Include="GameSource\SceneGame.h" />
+    <ClInclude Include="GameSource\SceneOver.h" />
+    <ClInclude Include="GameSource\SceneTitle.h" />
+    <ClInclude Include="GameSource\SceneTutorial.h" />
+    <ClInclude Include="GameSource\Stage.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{2A4B4768-7341-4A12-A6BD-8B7B3286FBED}</ProjectGuid>
+    <RootNamespace>Game</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\Library\Library.vcxitems" Label="Shared" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\External_libraries\DirectXTK-master\Bin\Desktop_2015\$(PlatformName)\$(Configuration);..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);..\External_libraries\DirectXTex\Bin\Desktop_2015\$(PlatformName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x86\debug\libfbxsdk-md.lib;..\External_libraries\DirectXTex\Bin\Desktop_2015\Win32\Debug\DirectXTex.lib;..\External_libraries\DirectXTK-master\Bin\Desktop_2015\Win32\Debug\DirectXTK.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>..\Library\LibraryShader\%(Filename).cso</ObjectFileOutput>
+      <AssemblerOutput>AssemblyCode</AssemblerOutput>
+      <AssemblerOutputFile>..\Library\LibraryShader\%(Filename).cod</AssemblerOutputFile>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\External_libraries\DirectXTK-master\Bin\Desktop_2015\$(PlatformName)\$(Configuration);..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);..\External_libraries\DirectXTex\Bin\Desktop_2015\$(PlatformName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x64\debug\libfbxsdk-md.lib;..\External_libraries\DirectXTex\Bin\Desktop_2015\x64\Debug\DirectXTex.lib;..\External_libraries\DirectXTK-master\Bin\Desktop_2015\x64\Debug\DirectXTK.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>..\Library\LibraryShader\%(Filename).cso</ObjectFileOutput>
+      <AssemblerOutput>AssemblyCode</AssemblerOutput>
+      <AssemblerOutputFile>..\Library\LibraryShader\%(Filename).cod</AssemblerOutputFile>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\External_libraries\DirectXTK-master\Bin\Desktop_2015\$(PlatformName)\$(Configuration);..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);..\External_libraries\DirectXTex\Bin\Desktop_2015\$(PlatformName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x86\Release\libfbxsdk-md.lib;..\External_libraries\DirectXTex\Bin\Desktop_2015\Win32\Release\DirectXTex.lib;..\External_libraries\DirectXTK-master\Bin\Desktop_2015\Win32\Release\DirectXTK.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>..\Library\LibraryShader\%(Filename).cso</ObjectFileOutput>
+      <AssemblerOutput>AssemblyCode</AssemblerOutput>
+      <AssemblerOutputFile>..\Library\LibraryShader\%(Filename).cod</AssemblerOutputFile>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x64\Release\libfbxsdk-md.lib;..\External_libraries\DirectXTex\Bin\Desktop_2015\x64\Release\DirectXTex.lib;..\External_libraries\DirectXTK-master\Bin\Desktop_2015\x64\Release\DirectXTK.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\External_libraries\DirectXTK-master\Bin\Desktop_2015\$(PlatformName)\$(Configuration);..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);..\External_libraries\DirectXTex\Bin\Desktop_2015\$(PlatformName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>..\Library\LibraryShader\%(Filename).cso</ObjectFileOutput>
+      <AssemblerOutput>AssemblyCode</AssemblerOutput>
+      <AssemblerOutputFile>..\Library\LibraryShader\%(Filename).cod</AssemblerOutputFile>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
