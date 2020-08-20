@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 #include "Scene.h"
-#include "PlayerAdminist.h"
+#include "MetaAI.h"
 #include "Stage.h"
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\Constants.h"
@@ -29,7 +29,7 @@ class Game : public Scene
 	VECTOR4F direction = { sinf(angle.y * 0.01745f), 0.0f, cosf(angle.y * 0.01745f),1.0f };
 	float focalLength = 5.0f;
 
-	PlayerAdminist m_playerAdminist;
+	std::shared_ptr<MetaAI> m_metaAI;
 	Stage m_stage;
 public:
 	Game() = default;
@@ -40,4 +40,7 @@ public:
 	void Render(ID3D11DeviceContext* immediateContext, float elapsedTime)override;
 	void ImGui()override;
 	void Uninitialize()override;
+
+	VECTOR3F DistancePlayerToEnemy();
+
 };

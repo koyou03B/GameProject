@@ -11,40 +11,131 @@
 
 void Saber::Init()
 {
-	m_transformParm.translate = { 0.0f,0.0f,0.0f };
-	m_transformParm.angle = { 0.0f * 0.01745f, 180.0f * 0.01745f,0.0f * 0.017454f };
-	m_transformParm.scale = { 0.05f,0.05f,0.05f };
+	m_transformParm.position = { 0.0f,0.0f,0.0f };
+	m_transformParm.angle = { 0.0f * 0.01745f, 0.0f * 0.01745f,0.0f * 0.017454f };
+	m_transformParm.scale = { 0.07f,0.07f,0.07f };
 	m_transformParm.WorldUpdate();
+	m_changeComand.isPlay = true;
+	m_status.speed = { 20.0f,0.0f, 20.0f };
 
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::Saber);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Walk.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Run.fbx",60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Slash.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Slash2.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Slash3.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Spell.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Impact.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Death.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Saber/Idle.fbx", 60);
-	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::Saber);
+//	Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::Saber);
 
 	m_blendAnimation.animationBlend.Init(m_model);
-//	m_blendAnimation.partialBlend.Init(m_model);
+
+
+	if (PathFileExistsA((std::string("../Asset/Binary/Player/Saber/Parameter") + ".bin").c_str()))
+	{
+		std::ifstream ifs;
+		ifs.open((std::string("../Asset/Binary/Player/Saber/Parameter") + ".bin").c_str(), std::ios::binary);
+		cereal::BinaryInputArchive i_archive(ifs);
+		i_archive(*this);
+	}
+
 }
 
 void Saber::Update(float& elapsedTime)
 {
     m_blendAnimation.animationBlend.Update(m_model,elapsedTime);
-//	m_blendAnimation.partialBlend.Update(m_model, elapsedTime);
+
+	if (m_changeComand.isPlay)
+	{
+		auto input = PAD.GetPad(0);
+
+		if (input->StickDeadzoneLX(10000) || input->StickDeadzoneLY(10000))
+		{
+			FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
+			view._14 = 0.0f;
+			view._24 = 0.0f;
+			view._34 = 0.0f;
+			view._41 = 0.0f;
+			view._42 = 0.0f;
+			view._43 = 0.0f;
+			view._44 = 1.0f;
+
+			DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
+			VECTOR3F stickVec(-input->StickVectorLeft().x, 0.0f, -input->StickVectorLeft().y);
+			DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
+
+			vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
+			DirectX::XMStoreFloat3(&m_status.velocity, vStickVex);
+
+			VECTOR3F position = m_transformParm.position;
+			VECTOR3F angle = m_transformParm.angle;
+
+			VECTOR3F frontVec(sinf(angle.y), 0.0f, cosf(angle.y));
+
+
+			DirectX::XMVECTOR vFront = DirectX::XMLoadFloat3(&frontVec);
+			DirectX::XMVECTOR vCross = DirectX::XMVector3Cross(vFront, vStickVex);
+	
+			VECTOR4F crossF;
+			DirectX::XMStoreFloat4(&crossF, vCross);
+			float dot = frontVec.x * m_status.velocity.x +
+				frontVec.y * m_status.velocity.y +
+				frontVec.z * m_status.velocity.z;
+
+
+			float dangle = 1 - dot;
+
+			if (dangle >= DirectX::XMConvertToRadians(5))
+			{
+				dangle = DirectX::XMConvertToRadians(5);
+			}
+
+
+			if (1 - ::abs(dot) > DirectX::XMConvertToRadians(5))
+			{
+				if (crossF.y < 0.0f)
+				{
+
+					angle.y += dangle;
+				}
+				else
+				{
+
+					angle.y -= dangle;
+
+				}
+			}
+			else if (dot > 0.0f)
+			{
+				dangle = DirectX::XMConvertToRadians(5);
+				if (crossF.y < 0.0f)
+				{
+
+					angle.y += dangle;
+				}
+				else
+				{
+
+					angle.y -= dangle;
+
+				}
+			}
+
+			m_transformParm.angle = angle;
+
+			m_status.velocity.x = sinf(angle.y) * m_status.speed.x;
+			m_status.velocity.y = 0.0f;
+			m_status.velocity.z = cosf(angle.y) * m_status.speed.z;
+
+			position += m_status.velocity * elapsedTime;
+
+			m_transformParm.position = position;
+
+			m_transformParm.WorldUpdate();
+		}
+
+	}
 }
 
 void Saber::Render(ID3D11DeviceContext* immediateContext)
 {
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
-//	auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
-//	m_debugObjects.debugObject.Render(immediateContext);
+	m_debugObjects.debugObject.Render(immediateContext);
 }
 
 void Saber::ImGui(ID3D11Device* device)
@@ -57,52 +148,60 @@ void Saber::ImGui(ID3D11Device* device)
 	{
 		if (ImGui::BeginMenu("File"))//ファイルの中には
 		{
+			if (ImGui::MenuItem("Save"))//データの保存とか
+			{
+				std::ofstream ofs;
+				ofs.open((std::string("../Asset/Binary/Player/Saber/Parameter") + ".bin").c_str(), std::ios::binary);
+				cereal::BinaryOutputArchive o_archive(ofs);
+				o_archive(*this);
+			}
 
-			//if (ImGui::MenuItem("Save"))//データの保存とか
-			//{
-			//	std::ofstream ofs;
-			//	ofs.open((std::string("./Data/Bin/player") + ".bin").c_str(), std::ios::binary);
-			//	cereal::BinaryOutputArchive o_archive(ofs);
-			//	o_archive(*this);
-			//}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
 	}
 
+	static int currentMesh = 0;
+	ImGui::BulletText(u8"Mesh%d番目", currentMesh);
+	ImGui::SameLine();
+	if (ImGui::ArrowButton("Front", ImGuiDir_Left))
+	{
+		if (0 >= currentMesh)
+			currentMesh = 0;
+		else
+			--currentMesh;
+	}
+	ImGui::SameLine();
+	if (ImGui::ArrowButton("Next", ImGuiDir_Right))
+	{
+		if (currentMesh >= static_cast<int>(m_blendAnimation.animationBlend.GetBoneName().size()) - 1)
+			currentMesh = static_cast<int>(m_blendAnimation.animationBlend.GetBoneName().size()) - 1;
+		else
+			++currentMesh;
+	}
 
-#if 0
-	auto BoneName = m_blendAnimation.partialBlend.GetBoneName().at(0);
-	static int curringBone = 0;
+	static int currentBone = 0;
+
 	ImGui::Combo("Name_of_BoneName",
-		&curringBone,
+		&currentBone,
 		vectorGetter,
-		static_cast<void*>(&BoneName),
-		static_cast<int>(BoneName.size())
+		static_cast<void*>(&m_blendAnimation.animationBlend.GetBoneName()[currentMesh]),
+		static_cast<int>(m_blendAnimation.animationBlend.GetBoneName()[currentMesh].size())
 	);
 
-	std::vector<std::string> nodes;
-	for (auto& n : m_blendAnimation.partialBlend.GetNodes())
-	{
-		nodes.push_back(n.name);
-	}
-	static int curringNode = 0;
-	auto nodeName = nodes;
-	ImGui::Combo("Name_of_NodeName",
-		&curringNode,
-		vectorGetter,
-		static_cast<void*>(&nodeName),
-		static_cast<int>(nodeName.size())
-		);
 
-
+	//**************************************
+	// DebugCollijion
+	//**************************************
+	if (ImGui::CollapsingHeader("DebugCollijion"))
 	{
-		FLOAT4X4 blendBone = m_blendAnimation.partialBlend._blendLocals[0].at(curringBone);
+		
+		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
 		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 		FLOAT4X4 getBone = blendBone * m_transformParm.world * modelAxisTransform;
 
-		float boneTranslates[] = { getBone._41,getBone._42,getBone._43 };
 
+		float boneTranslates[] = { getBone._41,getBone._42,getBone._43 };
 		VECTOR3F boneTranslate = { boneTranslates[0],boneTranslates[1],boneTranslates[2] };
 
 		ImGui::SliderFloat3("BoneTranslate", boneTranslates, -1.0f, 1.0f);
@@ -127,76 +226,111 @@ void Saber::ImGui(ID3D11Device* device)
 		if (m_debugObjects.debugObject.IsGeomety())
 		{
 			auto& geomtry = m_debugObjects.debugObject.GetInstanceData(0);
-			geomtry.position = boneTranslate;
+
+
+			VECTOR3F front = { getBone._31,getBone._32,getBone._33 };
+
+			front = NormalizeVec3(front);
+			front.y = 0.0f;
+
+			static float frontVector = 0.0f;
+			ImGui::InputFloat("Front", &frontVector, 1.0f, 1.0f);
+
+
+			geomtry.position = boneTranslate + front * frontVector;
+			
 			geomtry.CreateWorld();
 		}
 	}
 
-	{
-		auto& lowerBodyBone = m_blendAnimation.partialBlend.GetPartialBoens().at(0);
-		auto& upBodyBone = m_blendAnimation.partialBlend.GetPartialBoens().at(1);
 
+	//**************************************
+	// Animation
+	//**************************************
+	if (ImGui::CollapsingHeader("Animation"))
+	{
 		static float raito = 1.0f;
 		ImGui::SliderFloat("BlendRatio", &raito, 0.0f, 1.0f);
+		m_blendAnimation.animationBlend._blendRatio = raito;
 
-		float& lowerWeight = lowerBodyBone.weight;
-		float& upWeight = upBodyBone.weight;
+		auto animCount = m_model->_resource->_animationTakes.size();
 
-		lowerWeight = 1.0f - raito;
-		upWeight = raito;
-
-		m_blendAnimation.partialBlend.SetupHalfBody(m_model);
-
-		if (ImGui::Button("UpperBodyRoot?"))
+		static int currentAnim = 0;
+		ImGui::BulletText("%d", currentAnim); 
+		ImGui::SameLine();
+		if (ImGui::ArrowButton("AnimFront", ImGuiDir_Left))
 		{
-			m_blendAnimation.partialBlend._upperBodyRoot = curringNode;
-			m_blendAnimation.partialBlend.SetupHalfBody(m_model);
-
+			if (0 >= currentAnim)
+				currentAnim = 0;
+			else
+				--currentAnim;
+		}
+		ImGui::SameLine();
+		if (ImGui::ArrowButton("AnimNext", ImGuiDir_Right))
+		{
+			if (currentAnim >= static_cast<int>(animCount) - 1)
+				currentAnim = static_cast<int>(animCount) - 1;
+			else
+				++currentAnim;
 		}
 
+		if (ImGui::Button(u8"ChangeAnim"))
+		{
+			m_blendAnimation.animationBlend.ChangeSampler(0, currentAnim, m_model);
+		}
 
+		if (ImGui::Button(u8"AddAnim"))
+		{
+			m_blendAnimation.animationBlend.AddSampler(currentAnim, m_model);
+		}
 
+		if (ImGui::Button(u8"DeleateAnim"))
+		{
+			m_blendAnimation.animationBlend.ReleaseSampler(currentAnim);
+		}
 	}
 
-#else
-	static float raito = 1.0f;
-	ImGui::SliderFloat("BlendRatio", &raito, 0.0f, 1.0f);
-	m_blendAnimation.animationBlend._blendRatio = raito;
-
-	auto animCount = m_model->_resource->_animationTakes.size();
-
-	static int currentAnim = 0;
-	if (ImGui::ArrowButton("Front", ImGuiDir_Left))
+	//**************************************
+	// Camera
+	//**************************************
+	if (ImGui::CollapsingHeader("Camera"))
 	{
-		if (0 >= currentAnim)
-			currentAnim = 0;
-		else
-			--currentAnim;
-	}
-	ImGui::SameLine();
-	if (ImGui::ArrowButton("Next", ImGuiDir_Right))
-	{
-		if (currentAnim >= static_cast<int>(animCount))
-			currentAnim = static_cast<int>(animCount);
-		else
-			++currentAnim;
+		static float length = m_cameraParm.lenght.x;
+		ImGui::SliderFloat("CameraLength", &length, -100, 100);
+
+		ImGui::InputFloat("HeightAboveGround", &m_cameraParm.heightAboveGround, 0.5f, 0.5f);
+
+		ImGui::InputFloat("Value", &m_cameraParm.value, 0.0, 1.0f);
+		ImGui::InputFloat("Right", &m_cameraParm.focalLength, 0.0, 100.0f);
+
+		m_cameraParm.lenght.x = length;
+		m_cameraParm.lenght.y = 0.0f;
+		m_cameraParm.lenght.z = length;
+
 	}
 
-	if (ImGui::Button(u8"ChangeAnim"))
+	if (ImGui::CollapsingHeader("Status"))
 	{
-		m_blendAnimation.animationBlend.ChangeSampler(0,currentAnim,m_model);
+
+		static float  speed = m_status.speed.x;
+		ImGui::SliderFloat("Speed", &speed, 0.0f, 50.0f);
+
+		m_status.speed.x = speed;
+		m_status.speed.z = speed;
+
 	}
 
-	if (ImGui::Button(u8"AddAnim"))
+	//**************************************
+	// Position
+	//**************************************
+	if (ImGui::CollapsingHeader("Position"))
 	{
-		m_blendAnimation.animationBlend.AddSampler(currentAnim, m_model);
-	}
 
-	if (ImGui::Button(u8"DeleateAnim"))
-	{
-		m_blendAnimation.animationBlend.ReleaseSampler(currentAnim);
+		float position[] = { m_transformParm.position.x,m_transformParm.position.y,m_transformParm.position.z };
+		ImGui::SliderFloat3("Position", position, -2000.0f, 2000.0f);
+
+
 	}
-#endif
 	ImGui::End();
 
 #endif

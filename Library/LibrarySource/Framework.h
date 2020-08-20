@@ -137,15 +137,18 @@ public:
 		case WM_CREATE:
 			break;
 		case WM_KILLFOCUS:
-			DINPUT.ReleaseDInputMouse();
-			DINPUT.ReleaseDInputKeyboard();
-			DINPUT.ReleaseDInput();		// DirectInputオブジェクトの開放
-
+			KEYBOARD.ReleaseDInputKeyboard();
+			KEYBOARD.ReleaseDInput();
+			
+			MOUSE.ReleaseDInputMouse();
+			MOUSE.ReleaseDInput();
 			break;
 		case WM_SETFOCUS:
-			DINPUT.InitDInput(m_hinstance, hwnd);
-			DINPUT.InitDInputMouse(hwnd);
-			DINPUT.InitDInputKeyboard(hwnd);
+			KEYBOARD.InitDInput(m_hinstance, hwnd);	
+			KEYBOARD.InitDInputKeyboard(hwnd);
+			
+			MOUSE.InitDInput(m_hinstance, hwnd);
+			MOUSE.InitDInputMouse(hwnd);
 			break;
 		case WM_ACTIVATEAPP:
 			break;

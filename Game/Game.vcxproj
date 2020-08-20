@@ -19,13 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameSource\ActorComponent.cpp" />
     <ClCompile Include="GameSource\AnimationBlending.cpp" />
     <ClCompile Include="GameSource\ArcherCharacter.cpp" />
     <ClCompile Include="GameSource\DebugObject.cpp" />
+    <ClCompile Include="GameSource\Enemy.cpp" />
     <ClCompile Include="GameSource\FighterCharacter.cpp" />
+    <ClCompile Include="GameSource\FighterState.cpp" />
+    <ClCompile Include="GameSource\MetaAI.cpp" />
     <ClCompile Include="GameSource\PartialBlendAnimation.cpp" />
-    <ClCompile Include="GameSource\PlayerAdminist.cpp" />
     <ClCompile Include="GameSource\SaberCharacter.cpp" />
     <ClCompile Include="GameSource\Scene.cpp" />
     <ClCompile Include="GameSource\SceneClear.cpp" />
@@ -36,16 +37,19 @@
     <ClCompile Include="GameSource\Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameSource\ActorComponent.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />
+    <ClInclude Include="GameSource\CharacterAI.h" />
     <ClInclude Include="GameSource\CharacterParameter.h" />
     <ClInclude Include="GameSource\DebugObject.h" />
+    <ClInclude Include="GameSource\FighterState.h" />
+    <ClInclude Include="GameSource\MessengTo.h" />
     <ClInclude Include="GameSource\FighterCharacter.h" />
+    <ClInclude Include="GameSource\Enemy.h" />
+    <ClInclude Include="GameSource\MessengType.h" />
+    <ClInclude Include="GameSource\MetaAI.h" />
     <ClInclude Include="GameSource\PartialBlendAnimation.h" />
-    <ClInclude Include="GameSource\PlayCharacters.h" />
     <ClInclude Include="GameSource\SaberCharacter.h" />
-    <ClInclude Include="GameSource\PlayerAdminist.h" />
     <ClInclude Include="GameSource\Scene.h" />
     <ClInclude Include="GameSource\SceneClear.h" />
     <ClInclude Include="GameSource\SceneGame.h" />
@@ -53,6 +57,7 @@
     <ClInclude Include="GameSource\SceneTitle.h" />
     <ClInclude Include="GameSource\SceneTutorial.h" />
     <ClInclude Include="GameSource\Stage.h" />
+    <ClInclude Include="GameSource\State.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

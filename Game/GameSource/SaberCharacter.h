@@ -1,10 +1,9 @@
 #pragma once
-#include "PlayCharacters.h"
-#include "CharacterParameter.h"
+#include "CharacterAI.h"
 #include ".\LibrarySource\Vector.h"
 
 
-class Saber : public PlayCharacter
+class Saber : public CharacterAI
 {
 public:
 
@@ -18,8 +17,19 @@ public:
 	void Render(ID3D11DeviceContext* immediateContext) override;
 
 	void ImGui(ID3D11Device* device) override;
+
+	template<class T>
+	void serialize(T& archive)
+	{
+		archive
+		(
+			m_status,
+			m_cameraParm
+
+		);
+	}
 private:
-	CharacterParameter::WorldTransform m_transformParm;
 	CharacterParameter::BlendAnimation m_blendAnimation;
 	CharacterParameter::DebugObjects   m_debugObjects;
+
 };

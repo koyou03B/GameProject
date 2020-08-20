@@ -89,7 +89,8 @@ public:
 float ToDistVec2(const VECTOR2F v);
 VECTOR2F NormalizeVec2(const VECTOR2F v);
 VECTOR2F ConvertVec2(const float conv, const VECTOR2F v);
-VECTOR2F SphereLinearVec2(VECTOR2F* start, VECTOR2F* end, float t);
+VECTOR2F LerpVec2(VECTOR2F lerpStart, VECTOR2F lerpEnd, float value);
+VECTOR2F SphereLinearVec2(VECTOR2F origin, VECTOR2F start, VECTOR2F end, float t);
 float CrossVec2(const VECTOR2F v1, const VECTOR2F v2);
 float DotVec2(const VECTOR2F v1, const VECTOR2F v2);
 
@@ -178,7 +179,8 @@ public:
 float ToDistVec3(const VECTOR3F v);
 VECTOR3F NormalizeVec3(const VECTOR3F v);
 VECTOR3F ConvertVec3(const float conv, const VECTOR3F v);
-VECTOR3F SphereLinearVec3(VECTOR3F* start, VECTOR3F* end, float t);
+VECTOR3F LerpVec3(VECTOR3F lerpStart, VECTOR3F lerpEnd, float value);
+VECTOR3F SphereLinearVec3(VECTOR3F origin,VECTOR3F start,VECTOR3F end, float t);
 VECTOR3F CrossVec3(const VECTOR3F v1, const VECTOR3F v2);
 float DotVec3(const VECTOR3F v1, const VECTOR3F v2);
 

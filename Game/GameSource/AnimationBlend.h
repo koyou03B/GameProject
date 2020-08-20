@@ -43,6 +43,28 @@ public:
 		m_samplers.erase(m_samplers.begin()+samplerNum);
 	}
 
+	inline void ResetAnimationSampler(int samplerNum)
+	{
+		m_samplers[samplerNum].second->animtion.Reset();
+	}
+
+	inline void FalseAnimationLoop(int samplerNum)
+	{
+		m_samplers[samplerNum].second->animtion.SetIsLoop(false);
+	}
+
+	inline void SetAnimationSpeed(int samplerNum,float speed)
+	{
+		m_samplers[samplerNum].second->animtion.SetPlayBackSpeed(speed);
+	}
+
+	inline float GetAnimationTime(int samplerNum)
+	{
+		return m_samplers[samplerNum].second->animtion.GetTimeRatio();
+	}
+
+
+
 	void ReleaseAllSampler(int samplerNum)
 	{
 		m_samplers.clear();

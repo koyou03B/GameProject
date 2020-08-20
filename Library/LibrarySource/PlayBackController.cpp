@@ -22,6 +22,7 @@ namespace Source
 			m_previousTimeRatio = m_timeRatio = 0.0f;
 			m_playBackSpeed = 1.0f;
 			m_isPlay = true;
+			m_isLoop = true;
 		}
 
 		void PlayBackController::SetTimeratio(float time)

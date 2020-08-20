@@ -18,10 +18,11 @@ bool Framework::Initialize()
 	m_volume[0] = 0.0f;
 	m_volume[1] = 1.0f;
 
-	DINPUT.InitDInput(m_hinstance, m_hwnd);
-	DINPUT.InitDInputKeyboard(m_hwnd);
-	DINPUT.InitDInputMouse(m_hwnd);
-
+	KEYBOARD.InitDInput(m_hinstance, m_hwnd);
+	KEYBOARD.InitDInputKeyboard(m_hwnd);
+	MOUSE.InitDInput(m_hinstance, m_hwnd);
+	MOUSE.InitDInputMouse(m_hwnd);
+	PAD.SetUpPads();
 	ActivateScene.ChangeScene(Scene::SceneLabel::TITLE);
 	ActivateScene.Initialize(m_device.Get());
 
@@ -582,9 +583,8 @@ void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	SoundTrack.Update();
 	KEYBOARD.GetKeyStateAll();
-	XINPUT.XInputState();
 	MOUSE.MouseState(m_hwnd);
-
+	PAD.Update();
 
 	//SoundTrack.SoundPlay(SoundData::SoundLabel::BGM_Title);
 
@@ -594,40 +594,81 @@ void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 	//SoundTrack.SoundOutputMatrix(SoundLabel::SE_Select, m_volume[0], m_volume[1]);
 
 #if 0
-	static float time = 0; ++time;
-	static bool isOut = false;
-	if (!SoundTrack.SoundFade(SoundLabel::BGM_Title, 1.0f, 600.0f, time)&& !isOut)
-	{
-		if (KEYBOARD._keys[DIK_Q] == 1)
-			SoundTrack.SoundStop(SoundLabel::BGM_Title);
+	//static float time = 0; ++time;
+	//static bool isOut = false;
+	//if (!SoundTrack.SoundFade(SoundLabel::BGM_Title, 1.0f, 600.0f, time)&& !isOut)
+	//{
+	//	if (KEYBOARD._keys[DIK_Q] == 1)
+	//		SoundTrack.SoundStop(SoundLabel::BGM_Title);
+	//	if (KEYBOARD._keys[DIK_W])
+	//		SoundTrack.SoundVolume(SoundLabel::BGM_Title, 0.0f);
+	//	if (KEYBOARD._keys[DIK_R])
+	//		SoundTrack.SoundVolume(SoundLabel::BGM_Title, 1.0f);
+	//	if (KEYBOARD._keys[DIK_E] == 1)
+	//		SoundTrack.SoundPitch(SoundLabel::BGM_Title, 2.0f);
+	//	if (KEYBOARD._keys[DIK_F] == 1)
+	//	{
+	//		isOut = true;
+	//		time = 0.0f;
+	//	}
+	//	
+	//}
+	//else if (isOut)
+	//{
+	//	if (!SoundTrack.SoundFade(SoundLabel::BGM_Title, 0.0f, 600.0f, time))
+	//	{
+	//		isOut = false;
+	//		time = 0;
+	//		SoundTrack.SoundVolume(SoundLabel::BGM_Title, 0.1f);
+	//	}
+	//}
 
-		if (KEYBOARD._keys[DIK_W])
-			SoundTrack.SoundVolume(SoundLabel::BGM_Title, 0.0f);
+	ImGui::Begin("Framework");
 
-		if (KEYBOARD._keys[DIK_R])
-			SoundTrack.SoundVolume(SoundLabel::BGM_Title, 1.0f);
+	static int i = 0;
+	static float j = 0;
+	static float j2 = 0;
+	auto input = PAD.GetPad(0);
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_UP))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_UP);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_DOWN))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_DOWN);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LEFT))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LEFT);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_X))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_X);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_B))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_B);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_Y))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_Y);
+	
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LSHOULDER))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LSHOULDER);
 
-		if (KEYBOARD._keys[DIK_E] == 1)
-			SoundTrack.SoundPitch(SoundLabel::BGM_Title, 2.0f);
+	if (input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER))
+		i = input.GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER);
 
-		if (KEYBOARD._keys[DIK_F] == 1)
-		{
-			isOut = true;
-			time = 0.0f;
-		}
 
-		
-	}
-	else if (isOut)
-	{
-		if (!SoundTrack.SoundFade(SoundLabel::BGM_Title, 0.0f, 600.0f, time))
-		{
-			isOut = false;
-			time = 0;
-			SoundTrack.SoundVolume(SoundLabel::BGM_Title, 0.1f);
-		}
-	}
-
+//	j = JOYPAD.GetStickLxValue();
+//	j = JOYPAD.GetStickLyValue();
+	j = input.GetStickRxValue();
+//	j = JOYPAD.GetStickRyValue();
+	j2 = input.StickVectorL().x;
+	ImGui::Text("%d", i);
+	ImGui::Text("%f", j);
+	ImGui::Text("%f", j2);
+	ImGui::End();
 #endif
 //	ImGui::Begin("INPUT Try");
 //
@@ -649,8 +690,7 @@ void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 //	ImGui::Text("m_volume[0] = %f", m_volume[0]);
 //	ImGui::Text("m_volume[1] = %f", m_volume[1]);
 //	ImGui::End();
-
-	//	SOUND.Stop(SoundLabel::BGM_Title);
+//	SOUND.Stop(SoundLabel::BGM_Title);
 
 	ActivateScene.Initialize(m_device.Get());
 	ActivateScene.Update(elapsedTime);

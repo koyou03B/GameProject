@@ -19,10 +19,22 @@ VECTOR2F ConvertVec2(const float conv, const VECTOR2F v)
 	const VECTOR2F normalize_vec2 = NormalizeVec2(v);
 	return normalize_vec2 * conv;
 }
-VECTOR2F SphereLinearVec2(VECTOR2F* start, VECTOR2F* end, float t)
+
+VECTOR2F LerpVec2(VECTOR2F lerpStart, VECTOR2F lerpEnd, float value)
 {
-	VECTOR2F sphereLinerStart = NormalizeVec2(*start);
-	VECTOR2F sphereLinerEnd = NormalizeVec2(*end);
+	DirectX::XMVECTOR start, end, lerpPosition;
+	VECTOR2F outPosition;
+	start = DirectX::XMLoadFloat2(&lerpStart);
+	end = DirectX::XMLoadFloat2(&lerpEnd);
+	lerpPosition = DirectX::XMVectorLerp(start, end, value);
+	DirectX::XMStoreFloat2(&outPosition, lerpPosition);
+	return outPosition;
+}
+
+VECTOR2F SphereLinearVec2(VECTOR2F origin, VECTOR2F start, VECTOR2F end, float t)
+{
+	VECTOR2F sphereLinerStart = NormalizeVec2(start - origin);
+	VECTOR2F sphereLinerEnd = NormalizeVec2(end - origin);
 
 	// 2ベクトル間の角度（鋭角側）
 	float angle = acosf(DotVec2(sphereLinerStart, sphereLinerEnd));
@@ -34,15 +46,20 @@ VECTOR2F SphereLinearVec2(VECTOR2F* start, VECTOR2F* end, float t)
 	float Ps = sinf(angle * (1.0f - t));
 	float Pe = sinf(angle * t);
 
-	//VECTOR2F out = (Ps * sphereLinerStart + Pe * sphereLinerEnd) / SinTh;
 	VECTOR2F out;
-	out.x = (Ps * sphereLinerStart.x + Pe * sphereLinerEnd.x) / SinTh;
-	out.y = (Ps * sphereLinerStart.y + Pe * sphereLinerEnd.y) / SinTh;
+	if (angle == 0.0f)
+	{
+		out.x = 0.0f;
+		out.y = 0.0f;
+	}
+	else
+	{
+		out.x = (Ps * sphereLinerStart.x + Pe * sphereLinerEnd.x) / SinTh;
+		out.y = (Ps * sphereLinerStart.y + Pe * sphereLinerEnd.y) / SinTh;
+	}
 
-	// 一応正規化して球面線形補間に
-	return NormalizeVec2(out);
+	return out;
 }
-;
 
 float CrossVec2(const VECTOR2F v1, const VECTOR2F v2)
 {	//ベクトルの外積
@@ -75,10 +92,21 @@ VECTOR3F ConvertVec3(const float conv, VECTOR3F v)
 	return normalize_vec3 * conv;
 }
 
-VECTOR3F SphereLinearVec3(VECTOR3F* start, VECTOR3F* end, float t)
+VECTOR3F LerpVec3(VECTOR3F lerpStart, VECTOR3F lerpEnd, float value)
 {
-	VECTOR3F sphereLinerStart = NormalizeVec3(*start);
-	VECTOR3F sphereLinerEnd = NormalizeVec3(*end);
+	DirectX::XMVECTOR start, end, lerpPosition;
+	VECTOR3F outPosition;
+	start = DirectX::XMLoadFloat3(&lerpStart);
+	end = DirectX::XMLoadFloat3(&lerpEnd);
+	lerpPosition = DirectX::XMVectorLerp(start, end, value);
+	DirectX::XMStoreFloat3(&outPosition, lerpPosition);
+	return outPosition;
+}
+
+VECTOR3F SphereLinearVec3(VECTOR3F origin,VECTOR3F start, VECTOR3F end, float t)
+{
+	VECTOR3F sphereLinerStart = NormalizeVec3(start - origin);
+	VECTOR3F sphereLinerEnd = NormalizeVec3(end - origin);
 
 	// 2ベクトル間の角度（鋭角側）
 	float angle = acosf(DotVec3(sphereLinerStart, sphereLinerEnd));
@@ -90,14 +118,21 @@ VECTOR3F SphereLinearVec3(VECTOR3F* start, VECTOR3F* end, float t)
 	float Ps = sinf(angle * (1.0f - t));
 	float Pe = sinf(angle * t);
 
-	//VECTOR2F out = (Ps * sphereLinerStart + Pe * sphereLinerEnd) / SinTh;
 	VECTOR3F out;
-	out.x = (Ps * sphereLinerStart.x + Pe * sphereLinerEnd.x) / SinTh;
-	out.y = (Ps * sphereLinerStart.y + Pe * sphereLinerEnd.y) / SinTh;
-	out.z = (Ps * sphereLinerStart.z + Pe * sphereLinerEnd.z) / SinTh;
+	if (angle == 0.0f)
+	{
+		out.x = 0.0f;
+		out.y = 0.0f;
+		out.z = 0.0f;
+	}
+	else
+	{
+		out.x = (Ps * sphereLinerStart.x + Pe * sphereLinerEnd.x) / SinTh;
+		out.y = (Ps * sphereLinerStart.y + Pe * sphereLinerEnd.y) / SinTh;
+		out.z = (Ps * sphereLinerStart.z + Pe * sphereLinerEnd.z) / SinTh;
+	}
 
-	// 一応正規化して球面線形補間に
-	return NormalizeVec3(out);
+	return out;
 }
 
 VECTOR3F CrossVec3(const VECTOR3F v1, const VECTOR3F v2)

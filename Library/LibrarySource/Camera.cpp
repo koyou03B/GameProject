@@ -7,7 +7,9 @@ namespace Source
 		void Camera::Initialize()
 		{
 			m_eye = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
+			m_newEye = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
 			m_focus = VECTOR4F(0.0f, 0.0f, 1.0f, 1.0f);
+
 			m_up = VECTOR4F(0.0f, 1.0f, 0.0f, 1.0f);
 			m_right = VECTOR4F(1.0f, 0.0f, .0f, 1.0f);
 			m_front = VECTOR4F(.0f, 0.0f, 1.0f, 1.0f);
@@ -23,6 +25,65 @@ namespace Source
 			m_rotateX = 0.0f;
 			m_rotateY = 0.0f;
 			m_distance = 0.0f;
+
+			m_speed = 0.0f;
+		}	
+
+		void Camera::MoveEye(const VECTOR4F& eye)
+		{
+# if 0
+			VECTOR3F origin = { m_focus.x,m_focus.y,m_focus.z };
+			VECTOR3F start = { eye.x,eye.y,eye.z };
+			VECTOR3F s_start = { m_eye.x,m_eye.y,m_eye.z };
+			VECTOR3F end = { m_newEye.x ,m_newEye.y,m_newEye.z };
+
+			m_speed += 0.02f;
+			if (m_speed >= 1.0f) m_speed = 1.0f;
+			VECTOR3F vector = SphereLinearVec3(origin, s_start, end, m_speed);
+
+			if (vector.x == 0.0f && vector.y == 0.0f && vector.z == 0.0f)
+			{
+				m_eye = m_newEye;
+				m_speed = 0.0f;
+				CameraManager::GetInstance()->SetNowChangeTarget(false);
+			}
+			else 
+			{
+				VECTOR3F length = { m_newEye.x - origin.x,m_newEye.y - origin.y,m_newEye.z - origin.z};
+				DirectX::XMStoreFloat3(&length, DirectX::XMVector3Length(DirectX::XMLoadFloat3(&length)));
+
+				m_eye.x = m_focus.x + vector.x * length.x;
+				m_eye.y = m_focus.y + vector.y * length.y;
+				m_eye.z = m_focus.z + vector.z * length.z;
+			}
+#else
+			VECTOR3F normalDist = { m_newEye.x - m_eye.x,m_newEye.y - m_eye.y,m_newEye.z - m_eye.z };
+			float dist = ToDistVec3(normalDist);
+			normalDist = NormalizeVec3(normalDist);
+
+			m_eye.x += normalDist.x * m_speed;
+			m_eye.y += normalDist.y * m_speed;
+			m_eye.z += normalDist.z * m_speed;
+
+			m_speed+=0.02f;
+
+			if (dist <= 0.5f)
+			{
+				m_eye = m_newEye;
+				m_speed = 0.0f;
+				CameraManager::GetInstance()->SetNowChangeTarget(false);
+			}
+#endif		
+		}	
+
+		void Camera::NewEye(const VECTOR4F& target, const VECTOR4F& direction,
+			const float& focalLength, const float& heightAboveGround)
+		{
+			m_focus = target;
+			m_newEye.x = target.x - direction.x * focalLength;
+			m_newEye.y = target.y - direction.y * focalLength + heightAboveGround;
+			m_newEye.z = target.z - direction.z * focalLength;
+			m_newEye.w = 1.0f;
 		}
 
 		void Camera::DebugCamera()
@@ -121,13 +182,20 @@ namespace Source
 			m_constantsBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<ShaderConstants>>(device);
 
 			m_angle = VECTOR3F(0.0f, 0.0f, 0.0f);
-			m_direction = VECTOR4F(sinf(m_angle.x), m_angle.y, cosf(m_angle.z), 1.f);
+			m_direction = VECTOR3F(0.0f,0.0f,0.0f);
+			m_oldDirection = VECTOR3F(0.0f, 0.0f, 0.0f);
+			m_object = VECTOR3F(0.0f, 0.0f, 0.0f);
 
-			m_target = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
-			m_focalLength = 120.0f;
-			m_heightAboveGround = 34.0f;
+			m_target = VECTOR3F(0.0f, 0.0f, 0.0f);
+			m_oldTarget = VECTOR3F(0.0f, 0.0f, 0.0f);
+			m_length = VECTOR3F(0.0f, 15.0f, 50.0f);
 
+			m_focalLength = 50.0f;
+			m_heightAboveGround = 15.0f;
+			m_value = 1.0f;
 			m_nowFreeMode = false;
+
+			m_mode = CameraMode::LOCK_ON;
 
 			m_camera = std::make_unique<Camera>();
 			m_camera->Initialize();
@@ -135,21 +203,101 @@ namespace Source
 
 		void CameraManager::Update(float& elapsedTime)
 		{
-			if (XINPUT.StickDeadzoneRX(10000))
+#if 0
+			if (m_nowChangeTarget)
 			{
-				m_angle.y += 0.005f * (XINPUT.GetStickRxValue() / 33000.0f);
-				if (m_angle.y > DirectX::XM_PI)
+				m_camera->MoveEye(m_eye);
+			}
+			else
+			{
+				Source::Input::Input input = PAD.GetPad(0);
+				if (input.StickDeadzoneRX(0.7f))
 				{
-					m_angle.y -= DirectX::XM_PI;
+					m_angle.y += 0.005f * (input.GetStickRxValue());
+					if (m_angle.y > DirectX::XM_PI)
+					{
+						m_angle.y -= DirectX::XM_2PI;
+					}
 				}
+
+				m_direction = VECTOR4F(sinf(m_angle.y), 0.f, cosf(m_angle.y), 1.f);
+
+				if (!m_nowFreeMode)
+					m_camera->Reset(m_target, m_direction, m_focalLength, m_heightAboveGround);
+				else
+					m_camera->DebugCamera();
+			}
+#else
+			switch (m_mode)
+			{
+			case CameraManager::LOCK_ON:
+				LockON();
+				break;
+			case CameraManager::CHANGE_OBJECT:
+				ChangeObject();
+				break;
+			case CameraManager::ORBIT:
+				break;
+			case CameraManager::FREE:
+				break;
+			default:
+				break;
+			}
+#endif
+		}
+
+		void CameraManager::LockON()
+		{
+			VECTOR3F n_Vec = LerpVec3(m_oldDirection, m_direction, m_value);
+			m_eye.x = m_object.x + n_Vec.x * m_length.x + m_focalLength;
+			m_eye.y = m_object.y + n_Vec.y * m_length.y + m_heightAboveGround;
+			m_eye.z = m_object.z + n_Vec.z * m_length.z;
+
+			m_camera->SetEye(m_eye);
+			
+			m_target = LerpVec3(m_oldTarget, m_target, m_value);
+			m_camera->SetFocus(m_target);
+
+			m_oldDirection = m_direction;
+			m_oldTarget = m_target;
+		}
+
+		void CameraManager::ChangeObject()
+		{
+#if 0
+			m_value = 0.02;
+			VECTOR3F n_Vec = SphereLinearVec3(m_oldTarget,m_oldDirection, m_direction, m_value);
+			m_eye = m_oldTarget + n_Vec * m_focalLength;
+			m_eye.y += m_heightAboveGround;
+			m_camera->SetEye(m_eye);
+
+			m_oldDirection = m_eye - m_oldTarget;
+			if (m_oldDirection == m_direction)
+			{
+				m_value = 0.6f;
+				m_direction = NormalizeVec3(m_direction);
+				m_oldDirection = m_direction;
+				m_mode = CameraMode::LOCK_ON;
 			}
 
-			m_direction = VECTOR4F(sinf(m_angle.y), 0.f, cosf(m_angle.y), 1.f);
+#else
 
-			if (!m_nowFreeMode)
-				m_camera->Reset(m_target, m_direction, m_focalLength, m_heightAboveGround);
-			else
-				m_camera->DebugCamera();
+			if (m_oldDirection == m_direction)
+			{
+				m_value = 0.6f;
+				m_mode = CameraMode::LOCK_ON;
+				return;
+			}
+			m_value = 0.02f;
+			VECTOR3F n_Vec = LerpVec3(m_oldDirection, m_direction, m_value);
+			m_eye = m_object + n_Vec * 0.02f;
+			m_eye.y += m_heightAboveGround;
+			m_camera->SetEye(m_eye);
+
+			m_oldDirection = m_direction;
+
+
+#endif
 		}
 
 		void CameraManager::Activate(ID3D11DeviceContext* immediateContext)
@@ -214,7 +362,7 @@ namespace Source
 			if (ImGui::CollapsingHeader("Mode_Config"))
 			{
 				bool isCameraFreeMode = m_nowFreeMode;
-				VECTOR4F target;
+				VECTOR3F target;
 
 				if (ImGui::Checkbox("CameraFree", &m_nowFreeMode))
 				{
@@ -239,6 +387,15 @@ namespace Source
 					ImGui::InputFloat(u8"focalLength", &focalLength, 1.0f, 1.0f);
 					ImGui::InputFloat(u8"heightAboveGround", &heightAboveGround, 1.0f, 1.0f);
 					CameraManager::GetInstance()->Reset(m_target, m_direction, focalLength, heightAboveGround);
+					ImGui::TreePop();
+				};
+				if (ImGui::TreeNode(u8"ÉJÉÅÉâÉ|ÉWÉVÉáÉì"))
+				{
+					VECTOR4F pos = m_camera->GetEye();
+					float eye[] = { pos.x,pos.y,pos.z,pos.z };
+					ImGui::SliderFloat4(u8"âÊäp", eye, 0.00f, 3.14f);
+
+					ImGui::Text("%d", m_nowChangeTarget);
 					ImGui::TreePop();
 				};
 				if (ImGui::TreeNode(u8"âÊäpí≤êÆ"))

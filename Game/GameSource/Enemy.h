@@ -1,15 +1,12 @@
 #pragma once
 #include "CharacterAI.h"
-#include "CharacterParameter.h"
-#include ".\LibrarySource\Vector.h"
 
 
-class Archer : public CharacterAI
+class Enemy : public CharacterAI
 {
 public:
-
-	Archer() = default;
-	~Archer() = default;
+	Enemy() = default;
+	~Enemy() = default;
 
 	void Init() override;
 
@@ -18,17 +15,6 @@ public:
 	void Render(ID3D11DeviceContext* immediateContext) override;
 
 	void ImGui(ID3D11Device* device) override;
-
-	template<class T>
-	void serialize(T& archive)
-	{
-		archive
-		(
-			m_status,
-			m_cameraParm
-
-		);
-	}
 private:
 	CharacterParameter::BlendAnimation m_blendAnimation;
 	CharacterParameter::DebugObjects   m_debugObjects;

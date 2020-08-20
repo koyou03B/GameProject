@@ -15,21 +15,6 @@
     <Filter Include="Sources\Scene">
       <UniqueIdentifier>{33bcbe6b-244a-494c-bcec-ce9c33c22c5d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Component">
-      <UniqueIdentifier>{846f9fb7-4573-45a9-a9cc-e5eaed97a1a6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Component">
-      <UniqueIdentifier>{fba74c4e-565c-4d82-9714-ee122d74dc0e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Component\Actor">
-      <UniqueIdentifier>{b70c4f0b-a60a-4739-ab84-9f914fcade69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Component\Actor">
-      <UniqueIdentifier>{016fed39-e5b4-4777-8f3c-37b02de4b61a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Component\Model">
-      <UniqueIdentifier>{f49e2f1c-0b25-49b0-a0da-4dc12abe0365}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Headers\Objects">
       <UniqueIdentifier>{f8c4b5cb-1038-4aa9-8932-d6fd1e49dd6e}</UniqueIdentifier>
     </Filter>
@@ -78,6 +63,12 @@
     <Filter Include="Headers\Collision">
       <UniqueIdentifier>{2f81d110-37f5-4315-b570-59abb722ebbb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Characters\Enemy">
+      <UniqueIdentifier>{2bdd4146-7c9d-47e0-9b4e-e6f8f60b6644}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Messeng">
+      <UniqueIdentifier>{b751c32c-39e7-4139-8677-6c4254f98870}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -97,12 +88,6 @@
     </ClCompile>
     <ClCompile Include="GameSource\SceneTutorial.cpp">
       <Filter>Sources\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSource\ActorComponent.cpp">
-      <Filter>Sources\Component\Actor</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSource\PlayerAdminist.cpp">
-      <Filter>Sources\Characters\Player</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\SaberCharacter.cpp">
       <Filter>Sources\Characters\Player</Filter>
@@ -125,6 +110,15 @@
     <ClCompile Include="GameSource\FighterCharacter.cpp">
       <Filter>Sources\Characters\Player</Filter>
     </ClCompile>
+    <ClCompile Include="GameSource\MetaAI.cpp">
+      <Filter>Sources\Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\Enemy.cpp">
+      <Filter>Sources\Characters\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\FighterState.cpp">
+      <Filter>Sources\Characters\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -145,16 +139,7 @@
     <ClInclude Include="GameSource\SceneTutorial.h">
       <Filter>Headers\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\ActorComponent.h">
-      <Filter>Headers\Component\Actor</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\PlayCharacters.h">
-      <Filter>Headers\Characters\Player</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\SaberCharacter.h">
-      <Filter>Headers\Characters\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\PlayerAdminist.h">
       <Filter>Headers\Characters\Player</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\AnimationBlend.h">
@@ -176,6 +161,27 @@
       <Filter>Headers\Characters\Player</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\FighterCharacter.h">
+      <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Enemy.h">
+      <Filter>Headers\Characters\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\MetaAI.h">
+      <Filter>Headers\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\CharacterAI.h">
+      <Filter>Headers\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\MessengType.h">
+      <Filter>Headers\Messeng</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\MessengTo.h">
+      <Filter>Headers\Messeng</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\State.h">
+      <Filter>Headers\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\FighterState.h">
       <Filter>Headers\Characters\Player</Filter>
     </ClInclude>
   </ItemGroup>

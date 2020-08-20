@@ -11,8 +11,8 @@
 
 void Archer::Init()
 {
-	m_transformParm.translate = { 10.0f,0.0f,0.0f };
-	m_transformParm.angle = { 0.0f * 0.01745f, 180.0f * 0.01745f,0.0f * 0.017454f };
+	m_transformParm.position = { 30.0f,0.0f,0.0f };
+	m_transformParm.angle = { 0.0f * 0.01745f, 0.0f * 0.01745f,0.0f * 0.017454f };
 	m_transformParm.scale = { 0.05f,0.05f,0.05f };
 	m_transformParm.WorldUpdate();
 
@@ -32,12 +32,114 @@ void Archer::Init()
 
 	m_blendAnimation.animationBlend.Init(m_model);
 	//m_blendAnimation.partialBlend.Init(m_model);
+
+
+	if (PathFileExistsA((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str()))
+	{
+		std::ifstream ifs;
+		ifs.open((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str(), std::ios::binary);
+		cereal::BinaryInputArchive i_archive(ifs);
+		i_archive(*this);
+	}
+
+
 }
 
 void Archer::Update(float& elapsedTime)
 {
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
-    //m_blendAnimation.partialBlend.Update(m_model, elapsedTime);
+
+	if (m_changeComand.isPlay)
+	{
+		auto input = PAD.GetPad(0);
+
+		if (input->StickDeadzoneLX(10000) || input->StickDeadzoneLY(10000))
+		{
+			FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
+			view._14 = 0.0f;
+			view._24 = 0.0f;
+			view._34 = 0.0f;
+			view._41 = 0.0f;
+			view._42 = 0.0f;
+			view._43 = 0.0f;
+			view._44 = 1.0f;
+
+			DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
+			VECTOR3F stickVec(-input->StickVectorLeft().x, 0.0f, -input->StickVectorLeft().y);
+			DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
+
+			vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
+			DirectX::XMStoreFloat3(&m_status.velocity, vStickVex);
+
+			VECTOR3F position = m_transformParm.position;
+			VECTOR3F angle = m_transformParm.angle;
+
+			VECTOR3F frontVec(sinf(angle.y), 0.0f, cosf(angle.y));
+
+
+			DirectX::XMVECTOR vFront = DirectX::XMLoadFloat3(&frontVec);
+			DirectX::XMVECTOR vCross = DirectX::XMVector3Cross(vFront, vStickVex);
+
+			VECTOR4F crossF;
+			DirectX::XMStoreFloat4(&crossF, vCross);
+			float dot = frontVec.x * m_status.velocity.x +
+				frontVec.y * m_status.velocity.y +
+				frontVec.z * m_status.velocity.z;
+
+
+			float dangle = 1 - dot;
+
+			if (dangle >= DirectX::XMConvertToRadians(3))
+			{
+				dangle = DirectX::XMConvertToRadians(3);
+			}
+
+
+			if (1 - ::abs(dot) > DirectX::XMConvertToRadians(3))
+			{
+				if (crossF.y < 0.0f)
+				{
+
+					angle.y += dangle;
+				}
+				else
+				{
+
+					angle.y -= dangle;
+
+				}
+			}
+			else if (dot > 0.0f)
+			{
+				dangle = DirectX::XMConvertToRadians(3);
+				if (crossF.y < 0.0f)
+				{
+
+					angle.y += dangle;
+				}
+				else
+				{
+
+					angle.y -= dangle;
+
+				}
+			}
+
+			m_transformParm.angle = angle;
+
+			m_status.velocity.x = sinf(angle.y) * m_status.speed.x;
+			m_status.velocity.y = 0.0f;
+			m_status.velocity.z = cosf(angle.y) * m_status.speed.z;
+
+			position += m_status.velocity * elapsedTime;
+
+			m_transformParm.position = position;
+
+			m_transformParm.WorldUpdate();
+		}
+
+	}
+
 }
 
 void Archer::Render(ID3D11DeviceContext* immediateContext)
@@ -59,14 +161,13 @@ void Archer::ImGui(ID3D11Device* device)
 	{
 		if (ImGui::BeginMenu("File"))//ファイルの中には
 		{
-
-			//if (ImGui::MenuItem("Save"))//データの保存とか
-			//{
-			//	std::ofstream ofs;
-			//	ofs.open((std::string("./Data/Bin/player") + ".bin").c_str(), std::ios::binary);
-			//	cereal::BinaryOutputArchive o_archive(ofs);
-			//	o_archive(*this);
-			//}
+			if (ImGui::MenuItem("Save"))//データの保存とか
+			{
+				std::ofstream ofs;
+				ofs.open((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str(), std::ios::binary);
+				cereal::BinaryOutputArchive o_archive(ofs);
+				o_archive(*this);
+			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
@@ -196,6 +297,52 @@ void Archer::ImGui(ID3D11Device* device)
 	}
 
 #else
+	{
+		auto BoneName = m_blendAnimation.animationBlend.GetBoneName().at(0);
+		static int curringBone = 0;
+		ImGui::Combo("Name_of_BoneName",
+			&curringBone,
+			vectorGetter,
+			static_cast<void*>(&BoneName),
+			static_cast<int>(BoneName.size())
+		);
+		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[0].at(curringBone);
+		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+		FLOAT4X4 getBone = blendBone * m_transformParm.world * modelAxisTransform;
+
+		float boneTranslates[] = { getBone._41,getBone._42,getBone._43 };
+
+		VECTOR3F boneTranslate = { boneTranslates[0],boneTranslates[1],boneTranslates[2] };
+
+		ImGui::SliderFloat3("BoneTranslate", boneTranslates, -1.0f, 1.0f);
+
+		static bool isVisualization = false;
+		if (ImGui::Button("Make visible?"))
+			isVisualization = true;
+
+		if (isVisualization)
+		{
+			if (!m_debugObjects.debugObject.IsGeomety())
+			{
+				auto primitive = m_debugObjects.GetCube(device);
+				m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
+			}
+			m_debugObjects.debugObject.AddInstanceData(boneTranslate, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
+				VECTOR3F(1.0f, 1.0f, 1.0f), VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+
+			isVisualization = false;
+		}
+
+		if (m_debugObjects.debugObject.IsGeomety())
+		{
+			auto& geomtry = m_debugObjects.debugObject.GetInstanceData(0);
+			geomtry.position = boneTranslate;
+			geomtry.CreateWorld();
+		}
+	}
+
+
+
 	static float raito = 1.0f;
 	ImGui::SliderFloat("BlendRatio", &raito, 0.0f, 1.0f);
 	m_blendAnimation.animationBlend._blendRatio = raito;
@@ -232,6 +379,61 @@ void Archer::ImGui(ID3D11Device* device)
 	if (ImGui::Button(u8"DeleateAnim"))
 	{
 		m_blendAnimation.animationBlend.ReleaseSampler(currentAnim);
+	}
+
+	//**************************************
+	// Camera
+	//**************************************
+	if (ImGui::CollapsingHeader("Camera"))
+	{
+		static float length =  m_cameraParm.lenght.x;
+		ImGui::SliderFloat("CameraLength", &length, -100, 100);
+
+		ImGui::InputFloat("HeightAboveGround", &m_cameraParm.heightAboveGround, 0.5f, 0.5f);
+
+		ImGui::SliderFloat("Value", &m_cameraParm.value, 0.0, 1.0f);
+		static float right = 0.0f;
+		ImGui::SliderFloat("Right", &right, 0.0, -100.0f);
+
+		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+		FLOAT4X4 world =  m_transformParm.world * modelAxisTransform;
+
+		VECTOR3F rightAxis = { world._11,world._12,world._13 };
+		rightAxis = NormalizeVec3(rightAxis);
+		if (rightAxis.x >= 0)
+			rightAxis.x *= -1;
+		if (rightAxis.z >= 0)
+			rightAxis.z *= -1;
+
+		m_cameraParm.lenght.x = length + rightAxis.x * right;
+		m_cameraParm.lenght.y = 0.0f;
+		m_cameraParm.lenght.z = length + rightAxis.z * right;
+
+	}
+	//**************************************
+	// Status
+	//**************************************
+	if (ImGui::CollapsingHeader("Status"))
+	{
+
+		static float  speed = m_status.speed.x;
+		ImGui::SliderFloat("Speed", &speed, 0.0f, 50.0f);
+
+		m_status.speed.x = speed;
+		m_status.speed.z = speed;
+
+	}
+
+	//**************************************
+	// Position
+	//**************************************
+	if (ImGui::CollapsingHeader("Position"))
+	{
+
+		static float position[] = { m_transformParm.position.x,m_transformParm.position.y,m_transformParm.position.z };
+		ImGui::SliderFloat3("Position", position, -2000.0f, 2000.0f);
+
+
 	}
 #endif
 	ImGui::End();

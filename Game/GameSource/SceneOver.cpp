@@ -16,7 +16,7 @@ bool Over::Initialize(ID3D11Device* device)
 
 	{
 		Source::CameraControlle::CameraManager().GetInstance()->Initialize(device);
-		Source::CameraControlle::CameraManager().GetInstance()->SetTarget(VECTOR4F(0.0f, 0.0f, 10.0f, 0.0f));
+		Source::CameraControlle::CameraManager().GetInstance()->SetTarget(VECTOR3F(0.0f, 0.0f, 10.0f));
 		float tmp = 0;
 		Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
 	}
@@ -27,7 +27,7 @@ bool Over::Initialize(ID3D11Device* device)
 
 void Over::Update(float& elapsedTime)
 {
-	Source::CameraControlle::CameraManager().GetInstance()->SetTarget(VECTOR4F(0.0f, 0.0f, 10.0f, 0.0f));
+	Source::CameraControlle::CameraManager().GetInstance()->SetTarget(VECTOR3F(0.0f, 0.0f, 10.0f));
 	Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 }
 

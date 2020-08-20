@@ -7,10 +7,10 @@ namespace Source
 		//	{ TEXNO::,"Data/Texture/.png","../Asset/Texture/Noise.png",1U },
 		LoadActorModel actorModel[] =
 		{
-			{ ActorModel::Saber,	"../Asset/Model/Actor/Players/Saber/Saber.fbx", 60},
+			{ ActorModel::Saber,	"../Asset/Model/Actor/Test/player_motion_tex.fbx", 60},
 			{ ActorModel::Archer,	"../Asset/Model/Actor/Players/Archer/Archer.fbx", 60},
 			{ ActorModel::Fighter,	"../Asset/Model/Actor/Players/Fighter/Fighter.fbx",   60},
-			{ ActorModel::ENEMY,	"../Asset/Model/Actor/BlackKnight.fbx", 60},
+			{ ActorModel::ENEMY,	"../Asset/Model/Actor/Enemy/Hannyabal.fbx", 60},
 		};
 
 		LoadStaticModel staticModel[] = {

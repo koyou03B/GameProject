@@ -46,7 +46,7 @@ bool AnimationBlend::Init(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& mod
 		//m_samplers.push_back(std::make_pair(2, &anim3));
 	}
 
-	_blendRatio = 0.3f;
+	_blendRatio = 0.0f;
 	return true;
 }
 
