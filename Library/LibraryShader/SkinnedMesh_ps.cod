@@ -4,6 +4,25 @@
 //
 // Buffer Definitions: 
 //
+// cbuffer CAMERA_CONSTANTS
+// {
+//
+//   struct CAMERA
+//   {
+//       
+//       float4 position;               // Offset:    0
+//       float4 direction;              // Offset:   16
+//       row_major float4x4 view;       // Offset:   32
+//       row_major float4x4 projection; // Offset:   96
+//       row_major float4x4 view_projection;// Offset:  160
+//       row_major float4x4 inverse_view;// Offset:  224
+//       row_major float4x4 inverse_view_projection;// Offset:  288
+//       row_major float4x4 previous_view_projection;// Offset:  352
+//
+//   } camera;                          // Offset:    0 Size:   416
+//
+// }
+//
 // cbuffer SCENE_CONSTANTS
 // {
 //
@@ -21,7 +40,7 @@
 //       float4 position;               // Offset:   32
 //       float4 color;                  // Offset:   48
 //
-//   } point_light;                     // Offset:   32 Size:    32 [unused]
+//   } point_light;                     // Offset:   32 Size:    32
 //   
 //   struct SPOT_LIGHT
 //   {
@@ -42,6 +61,8 @@
 // ------------------------------ ---------- ------- ----------- -------------- ------
 // diffuse_map_sampler_state         sampler      NA          NA             s0      1 
 // diffuse_map                       texture  float4          2d             t0      1 
+// specular_map                      texture  float4          2d             t2      1 
+// CAMERA_CONSTANTS                  cbuffer      NA          NA            cb1      1 
 // SCENE_CONSTANTS                   cbuffer      NA          NA            cb2      1 
 //
 //
@@ -51,7 +72,7 @@
 // Name                 Index   Mask Register SysValue  Format   Used
 // -------------------- ----- ------ -------- -------- ------- ------
 // SV_POSITION              0   xyzw        0      POS   float       
-// POSITION                 0   xyzw        1     NONE   float       
+// POSITION                 0   xyzw        1     NONE   float   xyz 
 // NORMAL                   0   xyzw        2     NONE   float   xyz 
 // COLOR                    0   xyzw        3     NONE   float   xyzw
 // TEXCOORD                 0   xy          4     NONE   float   xy  
@@ -65,14 +86,17 @@
 //
 ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
+dcl_constantbuffer CB1[1], immediateIndexed
 dcl_constantbuffer CB2[8], immediateIndexed
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
+dcl_resource_texture2d (float,float,float,float) t2
+dcl_input_ps linear v1.xyz
 dcl_input_ps linear v2.xyz
 dcl_input_ps linear v3.xyzw
 dcl_input_ps linear v4.xy
 dcl_output o0.xyzw
-dcl_temps 5
+dcl_temps 13
 //
 // Initial variable locations:
 //   v0.x <- pin.sv_position.x; v0.y <- pin.sv_position.y; v0.z <- pin.sv_position.z; v0.w <- pin.sv_position.w; 
@@ -86,59 +110,208 @@ dcl_temps 5
 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t0.xyzw, s0
 mov r0.xyz, r0.xyzx  // r0.x <- diffuseColor.x; r0.y <- diffuseColor.y; r0.z <- diffuseColor.z
 
+#line 16
+sample_indexable(texture2d)(float,float,float,float) r1.xyz, v4.xyxx, t2.xyzw, s0
+mov r1.xyz, r1.xyzx  // r1.x <- specularColor.x; r1.y <- specularColor.y; r1.z <- specularColor.z
+
 #line 27
 dp3 r0.w, v2.xyzx, v2.xyzx
 rsq r0.w, r0.w
-mul r1.xyz, r0.wwww, v2.xyzx  // r1.x <- N.x; r1.y <- N.y; r1.z <- N.z
+mul r2.xyz, r0.wwww, v2.xyzx  // r2.x <- N.x; r2.y <- N.y; r2.z <- N.z
 
 #line 32
 dp3 r0.w, cb2[0].xyzx, cb2[0].xyzx
 rsq r0.w, r0.w
-mul r2.xyz, r0.wwww, cb2[0].xyzx  // r2.x <- L.x; r2.y <- L.y; r2.z <- L.z
+mul r3.xyz, r0.wwww, cb2[0].xyzx  // r3.x <- L.x; r3.y <- L.y; r3.z <- L.z
+
+#line 33
+mov r4.xyz, -v1.xyzx
+add r4.xyz, r4.xyzx, cb1[0].xyzx
+dp3 r0.w, r4.xyzx, r4.xyzx
+rsq r0.w, r0.w
+mul r4.xyz, r0.wwww, r4.xyzx  // r4.x <- E.x; r4.y <- E.y; r4.z <- E.z
 
 #line 34
-mov r3.xyz, cb2[1].xyzx  // r3.x <- C.x; r3.y <- C.y; r3.z <- C.z
+mov r5.xyz, cb2[1].xyzx  // r5.x <- C.x; r5.y <- C.y; r5.z <- C.z
 
 #line 35
-mov r4.xyz, cb2[7].xyzx  // r4.x <- A.x; r4.y <- A.y; r4.z <- A.z
+mov r6.xyz, cb2[7].xyzx  // r6.x <- A.x; r6.y <- A.y; r6.z <- A.z
 
 #line 36
 mov r0.xyz, r0.xyzx  // r0.x <- Kd.x; r0.y <- Kd.y; r0.z <- Kd.z
 
 #line 37
 nop 
-mov r1.xyz, r1.xyzx
 mov r2.xyz, r2.xyzx
 mov r3.xyz, r3.xyzx
+mov r5.xyz, r5.xyzx
 mov r0.xyz, r0.xyzx
 
 #line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
-mov r2.xyz, -r2.xyzx
-dp3 r0.w, r1.xyzx, r2.xyzx  // r0.w <- D
+mov r7.xyz, -r3.xyzx
+dp3 r0.w, r2.xyzx, r7.xyzx
+add r0.w, r0.w, l(0.750000)  // r0.w <- D
 
 #line 26
-itof r1.x, l(0)
-max r0.w, r0.w, r1.x
+itof r1.w, l(0)
+max r0.w, r0.w, r1.w
 
 #line 27
-mul r0.xyz, r3.xyzx, r0.xyzx
-mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <Diffuse return value>.x; r0.y <- <Diffuse return value>.y; r0.z <- <Diffuse return value>.z
+mul r7.xyz, r5.xyzx, r0.xyzx
+mul r7.xyz, r0.wwww, r7.xyzx  // r7.x <- <Diffuse return value>.x; r7.y <- <Diffuse return value>.y; r7.z <- <Diffuse return value>.z
 
 #line 37 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
-mov r0.xyz, r0.xyzx  // r0.x <- D.x; r0.y <- D.y; r0.z <- D.z
+mov r7.xyz, r7.xyzx  // r7.x <- D.x; r7.y <- D.y; r7.z <- D.z
+
+#line 38
+mov r1.xyz, r1.xyzx  // r1.x <- Ks.x; r1.y <- Ks.y; r1.z <- Ks.z
 
 #line 39
 nop 
+mov r2.xyz, r2.xyzx
+mov r3.xyz, r3.xyzx
+mov r5.xyz, r5.xyzx
+mov r4.xyz, r4.xyzx
+mov r1.xyz, r1.xyzx
+
+#line 44 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
+mov r3.xyz, -r3.xyzx
+add r3.xyz, r4.xyzx, r3.xyzx
+dp3 r0.w, r3.xyzx, r3.xyzx
+rsq r0.w, r0.w
+mul r3.xyz, r0.wwww, r3.xyzx  // r3.x <- H.x; r3.y <- H.y; r3.z <- H.z
+
+#line 46
+dp3 r3.z, r3.xyzx, r2.xyzx
+mov r3.xyz, r3.zzzz  // r3.x <- S.x; r3.y <- S.y; r3.z <- S.z
+
+#line 47
+itof r8.xyz, l(0, 0, 0, 0)
+max r3.xyz, r3.xyzx, r8.xyzx
+
+#line 48
+mov r8.xyz, l(1.000000,1.000000,1.000000,0)
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r8.xyz, r3.xyzx, r8.xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r8.xyzx  // r3.x <- S.x; r3.y <- S.y; r3.z <- S.z
+
+#line 49
+mul r3.xyz, r1.xyzx, r3.xyzx
+mul r3.xyz, r5.xyzx, r3.xyzx  // r3.x <- S.x; r3.y <- S.y; r3.z <- S.z
+
+#line 50
+mov r3.xyz, r3.xyzx  // r3.x <- <BlinnPhongSpecular return value>.x; r3.y <- <BlinnPhongSpecular return value>.y; r3.z <- <BlinnPhongSpecular return value>.z
+
+#line 39 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
+mov r3.xyz, r3.xyzx  // r3.x <- S.x; r3.y <- S.y; r3.z <- S.z
+
+#line 42
+itof r5.xyz, l(0, 0, 0, 0)  // r5.x <- PD.x; r5.y <- PD.y; r5.z <- PD.z
+
+#line 43
+itof r8.xyz, l(0, 0, 0, 0)  // r8.x <- PS.x; r8.y <- PS.y; r8.z <- PS.z
+
+#line 45
+mov r9.xyz, -cb2[2].xyzx
+add r9.xyz, r9.xyzx, v1.xyzx  // r9.x <- point_light_direction.x; r9.y <- point_light_direction.y; r9.z <- point_light_direction.z
+
+#line 47
+dp3 r0.w, r9.xyzx, r9.xyzx
+sqrt r0.w, r0.w  // r0.w <- distance
+
+#line 48
+mov r1.w, cb2[2].w  // r1.w <- range
+
+#line 49
+div r0.w, r0.w, r1.w
+mov r0.w, -r0.w
+add r0.w, r0.w, l(1.000000)
+max r0.w, r0.w, l(0.000000)
+min r0.w, r0.w, l(1.000000)  // r0.w <- influence
+
+#line 51
+dp3 r1.w, r9.xyzx, r9.xyzx
+rsq r1.w, r1.w
+mul r9.xyz, r1.wwww, r9.xyzx
+
+#line 52
+mov r10.xyz, cb2[3].xyzx  // r10.x <- point_light_color.x; r10.y <- point_light_color.y; r10.z <- point_light_color.z
 
 #line 54
 nop 
+mov r11.xyz, v2.xyzx
+mov r9.xyz, r9.xyzx
+mov r10.xyz, r10.xyzx
+
+#line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
+mov r12.xyz, -r9.xyzx
+dp3 r1.w, r11.xyzx, r12.xyzx
+add r1.w, r1.w, l(0.750000)  // r1.w <- D
+
+#line 26
+itof r2.w, l(0)
+max r1.w, r1.w, r2.w
+
+#line 27
+mul r0.xyz, r10.xyzx, r0.xyzx
+mul r0.xyz, r1.wwww, r0.xyzx  // r0.x <- <Diffuse return value>.x; r0.y <- <Diffuse return value>.y; r0.z <- <Diffuse return value>.z
+
+#line 54 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
+mul r0.xyz, r0.wwww, r0.xyzx
+mul r0.xyz, r0.wwww, r0.xyzx
+add r0.xyz, r0.xyzx, r5.xyzx  // r0.x <- PD.x; r0.y <- PD.y; r0.z <- PD.z
 
 #line 55
 nop 
+mov r2.xyz, r2.xyzx
+mov r9.xyz, r9.xyzx
+mov r10.xyz, r10.xyzx
+
+#line 44 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
+mov r5.xyz, -r9.xyzx
+add r4.xyz, r4.xyzx, r5.xyzx
+dp3 r1.w, r4.xyzx, r4.xyzx
+rsq r1.w, r1.w
+mul r4.xyz, r1.wwww, r4.xyzx  // r4.x <- H.x; r4.y <- H.y; r4.z <- H.z
+
+#line 46
+dp3 r2.z, r4.xyzx, r2.xyzx
+mov r2.xyz, r2.zzzz  // r2.x <- S.x; r2.y <- S.y; r2.z <- S.z
+
+#line 47
+itof r4.xyz, l(0, 0, 0, 0)
+max r2.xyz, r2.xyzx, r4.xyzx
+
+#line 48
+mov r4.xyz, l(1.000000,1.000000,1.000000,0)
+mul r2.xyz, r2.xyzx, r2.xyzx
+mul r2.xyz, r2.xyzx, r2.xyzx
+mul r4.xyz, r2.xyzx, r4.xyzx
+mul r2.xyz, r2.xyzx, r2.xyzx
+mul r2.xyz, r2.xyzx, r2.xyzx
+mul r2.xyz, r2.xyzx, r4.xyzx  // r2.x <- S.x; r2.y <- S.y; r2.z <- S.z
+
+#line 49
+mul r1.xyz, r1.xyzx, r2.xyzx
+mul r1.xyz, r10.xyzx, r1.xyzx  // r1.x <- S.x; r1.y <- S.y; r1.z <- S.z
+
+#line 50
+mov r1.xyz, r1.xyzx  // r1.x <- <BlinnPhongSpecular return value>.x; r1.y <- <BlinnPhongSpecular return value>.y; r1.z <- <BlinnPhongSpecular return value>.z
+
+#line 55 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
+mul r1.xyz, r0.wwww, r1.xyzx
+mul r1.xyz, r0.wwww, r1.xyzx
+add r1.xyz, r1.xyzx, r8.xyzx  // r1.x <- PS.x; r1.y <- PS.y; r1.z <- PS.z
 
 #line 58
-add r0.xyz, r0.xyzx, r4.xyzx
+add r2.xyz, r6.xyzx, r7.xyzx
+add r2.xyz, r3.xyzx, r2.xyzx
+add r1.xyz, r1.xyzx, r2.xyzx
+add r0.xyz, r0.xyzx, r1.xyzx
 mov r0.w, l(1.000000)
 mul o0.xyzw, r0.xyzw, v3.xyzw
 ret 
-// Approximately 30 instruction slots used
+// Approximately 121 instruction slots used

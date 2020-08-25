@@ -38,34 +38,21 @@ public:
 
 	struct Status
 	{
-		VECTOR3F speed;
-		VECTOR3F velocity;
-		float    attackPoint;
-		float    life;
+		float    attackPoint = 0.0f;
+		float    life = 0.0f;
 
 		bool isExit = false;
 		bool isAttack = false;
 		bool isDamage = false;
 
-		void Init()
-		{
-			speed = {};
-			velocity = {};
-			attackPoint = 0.0f;
-			life = 0.0f;
-		}
-
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
 
-			if (1 <= version)
+			if (8 <= version)
 			{
 				archive
 				(
-					speed,
-					velocity,
-					attackPoint,
 					life
 				);
 			}
@@ -73,9 +60,6 @@ public:
 			{
 				archive
 				(
-					speed,
-					velocity,
-					attackPoint,
 					life
 				);
 			}
@@ -83,35 +67,34 @@ public:
 		}
 	};
 
-
-
-	struct Step
+	struct Move
 	{
-		VECTOR3F speed;
-		VECTOR3F accel;
+		VECTOR3F speed = {};
+		VECTOR3F accle = {};
+		VECTOR3F maxSpeed[2] = {};
+		VECTOR3F velocity = {};
 
-		float maxSpeed;
-		bool isStep;
+		float decleleration = 0.0f;
+		float turnSpeed = 0.0f;
 
-		void Init()
-		{
-			speed = {};
-			accel = {};
-			maxSpeed = 0.0f;
-			isStep = false;
-		}
+		bool isMove = false;
+		bool isWalk = false;
+		bool isRun  = false;
 
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
 
-			if (1 <= version)
+			if (8 <= version)
 			{
 				archive
 				(
 					speed,
-					accel,
-					maxSpeed
+					accle,
+					maxSpeed[0], maxSpeed[1],
+					velocity,
+					decleleration,
+					turnSpeed
 				);
 			}
 			else
@@ -119,8 +102,78 @@ public:
 				archive
 				(
 					speed,
-					accel,
-					maxSpeed
+					accle,
+					maxSpeed[0], maxSpeed[1],
+					velocity,
+					decleleration,
+					turnSpeed
+				);
+			}
+
+		}
+	};
+
+	struct Step
+	{
+		VECTOR3F speed = {};
+		VECTOR3F maxSpeed = {};
+		VECTOR3F deceleration = {};
+		float frameCount = 0.0f;
+		bool isStep = false;
+
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version)
+		{
+
+			if (8 <= version)
+			{
+				archive
+				(
+					speed,
+					deceleration,
+					frameCount
+				);
+			}
+			else
+			{
+				archive
+				(
+					speed,
+					deceleration,
+					frameCount
+				);
+			}
+
+		}
+	};
+
+	struct Attack
+	{
+		uint32_t frameCount = 0;
+		uint32_t inputRange[2] = {};
+		float attackPoint = 0;
+		std::vector<XINPUT_GAMEPAD_BUTTONS> buttons;
+
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version)
+		{
+
+			if (8 <= version)
+			{
+				archive
+				(
+					frameCount,
+					inputRange[0], inputRange[1],
+					attackPoint,buttons
+				);
+			}
+			else
+			{
+				archive
+				(
+					frameCount,
+					inputRange[0], inputRange[1],
+					attackPoint, buttons
 				);
 			}
 
@@ -152,22 +205,15 @@ public:
 
 	struct Camera
 	{
-		VECTOR3F lenght;
-		float value;
-		float focalLength;
-		float heightAboveGround;
+		VECTOR3F lenght = {};
+		float value = 0.0f;
+		float focalLength = 0.0f;
+		float heightAboveGround = 0.0f;
 
-		void Init()
-		{
-			lenght = {};
-			value = 0.0f;
-			focalLength = 0.0f;
-			heightAboveGround = 0.0f;
-		}
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
-			if (1 <= version)
+			if (8 <= version)
 			{
 				archive
 				(
@@ -194,8 +240,72 @@ public:
 	{
 		AnimationBlend animationBlend;
 		PartialBlendAnimation partialBlend;
-		float animtionTime = -1.0f;
+		uint32_t animtionTime = 1000;
 		float animtionSpeed = 1.0f;
+		float attackBlendRtio = 0.0f;
+		float idleBlendRtio = 0.0f;
+		float moveBlendRatio = 0.0f;
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version)
+		{
+			if (8 <= version)
+			{
+				archive
+				(
+					attackBlendRtio,
+					idleBlendRtio,
+					moveBlendRatio
+				);
+			}
+			else
+			{
+				archive
+				(
+					attackBlendRtio,
+					idleBlendRtio
+				);
+			}
+		}
+	};
+	
+	struct Collision
+	{
+		VECTOR3F position[2] = {};
+		float radius = 0.0f;
+		float scale = 0.0f;
+
+		enum CollisionType
+		{
+			CUBE,
+			SPHER,
+			CAPSULE,
+			CIRCLE,
+		} collisionType;
+
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version)
+		{
+			if (7 <= version)
+			{
+				archive
+				(
+					position[0],
+					position[1],
+					radius,
+					scale
+				);
+			}
+			else
+			{
+				archive
+				(
+					position[0],
+					position[1],
+					radius,
+					scale
+				);
+			}
+		}
 	};
 
 	struct DebugObjects
@@ -205,6 +315,13 @@ public:
 		{
 			return std::make_unique<Source::GeometricPrimitive::GeometricCube>(device);
 		}
-
+		std::unique_ptr<Source::GeometricPrimitive::GeometricSphere> GetSphere(ID3D11Device* device)
+		{
+			return std::make_unique<Source::GeometricPrimitive::GeometricSphere>(device);
+		}
+		std::unique_ptr<Source::GeometricPrimitive::GeometricCapsule> GetCapsule(ID3D11Device* device)
+		{
+			return std::make_unique<Source::GeometricPrimitive::GeometricCapsule>(device);
+		}
 	};
 };

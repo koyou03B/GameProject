@@ -38,7 +38,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 Ks = specularColor.xyz;
     float3 S = BlinnPhongSpecular(N, L, C, E, Ks, 20);
 
-    	// point light
+    // point light
     float3 PD = float3(0, 0, 0);
     float3 PS = float3(0, 0, 0);
 	{
@@ -55,6 +55,6 @@ float4 main(VS_OUT pin) : SV_TARGET
         PS += BlinnPhongSpecular(N, point_light_direction, point_light_color, E, Ks, 20) * influence * influence;
     }
     
-    return pin.color * float4(A + D, 1.0f);
+    return pin.color * float4(A + D + S + PS +PD, 1.0f);
 
 }

@@ -21,9 +21,9 @@ namespace Source
 				return false;
 
 			const float animRatio = Source::Math::Clamp(0.0f, _ratio, 1.0f);
-			const uint32_t animetionFrame = static_cast<uint32_t>(animRatio * _duration * 60.0f);
+			*_animationFrame = static_cast<uint32_t>(animRatio * _duration * 60.0f);
 
-			auto& skeltal = _animation->skeletalTransform[animetionFrame];
+			auto& skeltal = _animation->skeletalTransform[*_animationFrame];
 		
 			for (int i = 0; i < static_cast<int>(_output->size()); ++i)
 			{

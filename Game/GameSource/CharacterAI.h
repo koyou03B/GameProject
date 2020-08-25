@@ -30,13 +30,14 @@ public:
 
 	inline void SetState(State* state) { m_state = state; }
 	inline int GetID() { return m_id; }
-	inline std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& GetModel()  { return m_model; }
-	inline CharacterParameter::WorldTransform& GetWorldTransform()		  { return m_transformParm; }
-	inline CharacterParameter::Change& GetChangeComand()				  { return m_changeComand; }
-	inline CharacterParameter::Status& GetStatus()						  { return m_status; }
-	inline CharacterParameter::MessageFlg& GetMessageFlg()				  { return m_message; }
-	inline CharacterParameter::Camera& GetCamera()						  { return m_cameraParm; }
-
+	inline std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& GetModel()	{ return m_model; }
+	inline CharacterParameter::WorldTransform& GetWorldTransform()			{ return m_transformParm; }
+	inline CharacterParameter::Status& GetStatus()							{ return m_statusParm; }
+	inline CharacterParameter::Move& GetMove()								{ return m_moveParm; }
+	inline CharacterParameter::Change& GetChangeComand()					{ return m_changeParm; }
+	inline CharacterParameter::MessageFlg& GetMessageFlg()					{ return m_messageParm; }
+	inline CharacterParameter::Camera& GetCamera()							{ return m_cameraParm; }
+	inline std::vector<CharacterParameter::Collision>& GetCollsion()		{ return m_collision; }
 	void SetID(int id) { m_id = id; }
 	inline void SetCharacter(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> model){ m_model = model;}
 
@@ -44,11 +45,13 @@ protected:
 	int m_id = -1;
 	std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> m_model;
 
-	CharacterParameter::WorldTransform m_transformParm;
-	CharacterParameter::Status		   m_status;
-	CharacterParameter::Change		   m_changeComand;
-	CharacterParameter::MessageFlg     m_message;
-	CharacterParameter::Camera		   m_cameraParm;
+	CharacterParameter::WorldTransform			m_transformParm;
+	CharacterParameter::Status					m_statusParm;
+	CharacterParameter::Move					m_moveParm;
+	CharacterParameter::Change					m_changeParm;
+	CharacterParameter::MessageFlg				m_messageParm;
+	CharacterParameter::Camera					m_cameraParm;
+	std::vector<CharacterParameter::Collision>	m_collision;
 	State* m_state;
 
 };

@@ -24,7 +24,7 @@ public:
 	{
 		archive
 		(
-			m_status,
+			m_statusParm,
 			m_cameraParm
 
 		);

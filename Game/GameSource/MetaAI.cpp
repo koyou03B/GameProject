@@ -89,7 +89,24 @@ void MetaAI::UpdateOfPlayers(float& elapsedTime)
 	for (int i = 0; i < playerCount; ++i)
 	{
 		if (m_players[i] != nullptr)
+		{
 			m_players[i]->Update(elapsedTime);
+			if (m_players[i]->GetStatus().isAttack && !m_players[i]->GetStatus().isDamage)
+			{
+				for (auto& collision : m_players[i]->GetCollsion())
+				{
+					switch (collision.collisionType)
+					{
+					case CharacterParameter::Collision::CUBE:
+						break;
+					case CharacterParameter::Collision::SPHER:
+						break;
+					case CharacterParameter::Collision::CAPSULE:
+							break;
+					}
+				}
+			}
+		}
 	}
 }
 

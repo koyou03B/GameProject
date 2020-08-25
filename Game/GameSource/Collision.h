@@ -1,0 +1,54 @@
+#pragma once
+#include <DirectXMath.h>
+#include "..\LibrarySource\Vector.h"
+
+class Collision
+{
+public:
+	Collision() = default;
+	virtual ~Collision() = default;
+	
+	struct AABB
+	{
+		float left;
+		float right;
+		float top;
+		float down;
+	};
+
+	struct AABB3D
+	{
+		DirectX::XMFLOAT3 max;
+		DirectX::XMFLOAT3 min;
+
+	};
+	bool JudgePointAndAABB(const VECTOR2F& myself, const AABB& target);
+	bool JudgeAABBAndAABB(const AABB& myself, const AABB& target);
+	bool JudgeAABB3DAndAABB3D(const AABB3D& myself, const AABB3D& target);
+
+	struct Sphere
+	{
+		VECTOR3F position;
+		float scale;
+		float radius;
+	};
+	bool JudgeSphereAndSphere(const Sphere& myself, const Sphere& target);
+
+	struct Capsule
+	{
+		VECTOR3F startPos;
+		VECTOR3F endPos;
+		float scale;
+		float radius;
+	};
+	bool JudgeCapsuleAndCapsule(const Capsule& myself, const Sphere& target);
+
+	struct Circle
+	{
+		VECTOR2F position;
+		float scale;
+		float radius;
+	};
+	bool JudgeCircleAndCircle(const Circle& myself, const Circle& target);
+
+};

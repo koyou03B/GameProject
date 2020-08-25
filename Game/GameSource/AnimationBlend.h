@@ -28,6 +28,12 @@ public:
 
 	void AddSampler(int animNum, std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model)
 	{
+		int count = static_cast<int>(m_samplers.size());
+		for (int i = 0; i < count; ++i)
+		{
+			if (m_samplers[i].first == animNum)
+				return;
+		}
 		auto& anim = model->_resource->_animationTakes[animNum];
 		m_samplers.push_back(std::make_pair(animNum, &anim));
 	}
@@ -40,12 +46,27 @@ public:
 
 	void ReleaseSampler(int samplerNum)
 	{
-		m_samplers.erase(m_samplers.begin()+samplerNum);
+		int samplerCount = static_cast<int>(m_samplers.size());
+		if (samplerCount >= 2)
+		{
+			for (int i = 0; i < samplerCount; ++i)
+			{
+				if (samplerNum == i)
+				{
+					m_samplers[i] = m_samplers.back();
+					m_samplers.pop_back();
+					break;
+				}
+			}
+		}
 	}
+
+	std::vector<std::pair<int, Sampler*>>& GetSampler() { return m_samplers; }
 
 	inline void ResetAnimationSampler(int samplerNum)
 	{
-		m_samplers[samplerNum].second->animtion.Reset();
+		if(samplerNum < static_cast<int>(m_samplers.size()))
+			m_samplers[samplerNum].second->animtion.Reset();
 	}
 
 	inline void FalseAnimationLoop(int samplerNum)
@@ -58,11 +79,19 @@ public:
 		m_samplers[samplerNum].second->animtion.SetPlayBackSpeed(speed);
 	}
 
-	inline float GetAnimationTime(int samplerNum)
+	inline uint32_t GetAnimationTime(int samplerNum)
 	{
-		return m_samplers[samplerNum].second->animtion.GetTimeRatio();
+		return m_animationFrame[samplerNum];
 	}
 
+	inline void ResetAnimationFrame()
+	{
+		int count = static_cast<int>(m_animationFrame.size());
+		for (int i = 0; i < count; ++i)
+		{
+			m_animationFrame[i] = 0;
+		}
+	}
 
 
 	void ReleaseAllSampler(int samplerNum)
@@ -75,6 +104,7 @@ public:
 protected:
 	std::vector<std::pair<int, Sampler*>> m_samplers;
 	std::vector<std::vector<std::string>> m_boneNames;
+	std::vector<uint32_t> m_animationFrame;
 };
 
 

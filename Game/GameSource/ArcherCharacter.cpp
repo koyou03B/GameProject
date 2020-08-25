@@ -49,7 +49,7 @@ void Archer::Update(float& elapsedTime)
 {
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
 
-	if (m_changeComand.isPlay)
+	if (m_changeParm.isPlay)
 	{
 		auto input = PAD.GetPad(0);
 
@@ -69,7 +69,7 @@ void Archer::Update(float& elapsedTime)
 			DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
 
 			vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
-			DirectX::XMStoreFloat3(&m_status.velocity, vStickVex);
+			DirectX::XMStoreFloat3(&m_moveParm.velocity, vStickVex);
 
 			VECTOR3F position = m_transformParm.position;
 			VECTOR3F angle = m_transformParm.angle;
@@ -82,9 +82,9 @@ void Archer::Update(float& elapsedTime)
 
 			VECTOR4F crossF;
 			DirectX::XMStoreFloat4(&crossF, vCross);
-			float dot = frontVec.x * m_status.velocity.x +
-				frontVec.y * m_status.velocity.y +
-				frontVec.z * m_status.velocity.z;
+			float dot = frontVec.x * m_moveParm.velocity.x +
+				frontVec.y * m_moveParm.velocity.y +
+				frontVec.z * m_moveParm.velocity.z;
 
 
 			float dangle = 1 - dot;
@@ -127,11 +127,11 @@ void Archer::Update(float& elapsedTime)
 
 			m_transformParm.angle = angle;
 
-			m_status.velocity.x = sinf(angle.y) * m_status.speed.x;
-			m_status.velocity.y = 0.0f;
-			m_status.velocity.z = cosf(angle.y) * m_status.speed.z;
+			m_moveParm.velocity.x = sinf(angle.y) * m_moveParm.speed.x;
+			m_moveParm.velocity.y = 0.0f;
+			m_moveParm.velocity.z = cosf(angle.y) * m_moveParm.speed.z;
 
-			position += m_status.velocity * elapsedTime;
+			position += m_moveParm.velocity * elapsedTime;
 
 			m_transformParm.position = position;
 
@@ -416,11 +416,11 @@ void Archer::ImGui(ID3D11Device* device)
 	if (ImGui::CollapsingHeader("Status"))
 	{
 
-		static float  speed = m_status.speed.x;
+		static float  speed = m_moveParm.speed.x;
 		ImGui::SliderFloat("Speed", &speed, 0.0f, 50.0f);
 
-		m_status.speed.x = speed;
-		m_status.speed.z = speed;
+		m_moveParm.speed.x = speed;
+		m_moveParm.speed.z = speed;
 
 	}
 

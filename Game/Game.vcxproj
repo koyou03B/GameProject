@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="GameSource\AnimationBlending.cpp" />
     <ClCompile Include="GameSource\ArcherCharacter.cpp" />
+    <ClCompile Include="GameSource\Collision.cpp" />
     <ClCompile Include="GameSource\DebugObject.cpp" />
     <ClCompile Include="GameSource\Enemy.cpp" />
     <ClCompile Include="GameSource\FighterCharacter.cpp" />
@@ -41,6 +42,7 @@
     <ClInclude Include="GameSource\ArcherCharacter.h" />
     <ClInclude Include="GameSource\CharacterAI.h" />
     <ClInclude Include="GameSource\CharacterParameter.h" />
+    <ClInclude Include="GameSource\Collision.h" />
     <ClInclude Include="GameSource\DebugObject.h" />
     <ClInclude Include="GameSource\FighterState.h" />
     <ClInclude Include="GameSource\MessengTo.h" />

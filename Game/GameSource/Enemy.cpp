@@ -54,7 +54,7 @@ void Enemy::ImGui(ID3D11Device* device)
 		ImGui::EndMenuBar();
 	}
 
-	ImGui::Text("askAttackFlg %d", m_message.askAttack);
+	ImGui::Text("askAttackFlg %d", m_messageParm.askAttack);
 
 	if (ImGui::Button("ASK_ATTACK"))
 	{

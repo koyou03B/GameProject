@@ -55,7 +55,7 @@ void Game::Update(float& elapsedTime)
 	Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
 	Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
-	if (!Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() == 
+	if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() != 
 		Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
 	{
 
@@ -219,7 +219,9 @@ void Game::ImGui()
 		//-----------
 		// Position
 		//-----------
-		static float position[4] = { 0.f, 0.f, 0.f, 15.f };
+		CharacterAI* player = m_metaAI->GetPlayCharacter();
+		VECTOR3F playerPosition = player->GetWorldTransform().position;
+		 float position[4] = { playerPosition.x, 0.0f, playerPosition.z, 20.0f };
 		ImGui::DragFloat4("Position", position, 0.1f);
 		m_sceneConstantBuffer->data.pointLight.position = VECTOR4F(position[0], position[1], position[2], position[3]);
 

@@ -21,26 +21,33 @@ public:
 
 	void Step(float& elapsedTime);
 
+	void Attack(float& elapsedTime);
+
 	void ImGui(ID3D11Device* device) override;
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 1)
+		if (version >= 8)
 		{
 			archive
 			(
-				m_status,
+				m_blendAnimation,
+				m_attackParm,
+				m_statusParm,
+				m_moveParm,
 				m_cameraParm,
 				m_stepParm
-
 			);
 		}
 		else
 		{
 			archive
 			(
-				m_status,
+				m_blendAnimation,
+				m_attackParm,
+				m_statusParm,
+				m_moveParm,
 				m_cameraParm,
 				m_stepParm
 
@@ -51,21 +58,34 @@ private:
 	enum Animation
 	{
 		IDLE=1,
-		MOVE = 3,
-		DIVE = 4,
-		ATTACK,
-		IMPACT = 8,
+		WALK,
+		RUN,
+		DIVE,
+		RIGHTPUNCHING,
+		LEFTPUNCHING,
+		LASTTPUNCHING,
+		RIGHTKICK,
+		LEFTKICKING,
+		IMPACT,
 		DEATH,
 		IDLE2,
 		ARMSET,
 		FIGHTIDLE,
 		HEAL
 	} m_animationType = IDLE;
+
+	void Attacking(Animation currentAnimation, Animation nextAnimations[2],
+		CharacterParameter::Attack& attack,CharacterParameter::Collision collision);
+
+	void Stepping(float& elapsedTime);
+
 private:
-	CharacterParameter::BlendAnimation m_blendAnimation;
-	CharacterParameter::DebugObjects   m_debugObjects;
-	CharacterParameter::Step		   m_stepParm;
+	CharacterParameter::BlendAnimation		m_blendAnimation;
+	CharacterParameter::DebugObjects		m_debugObjects;
+	CharacterParameter::Step				m_stepParm;
+	std::vector<CharacterParameter::Attack>	m_attackParm;
 	Source::Input::Input* m_input;
+	float radian;
 	float m_padDeadLine;
-	
+	float m_elapsedTime;
 };

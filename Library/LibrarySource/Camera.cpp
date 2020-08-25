@@ -239,6 +239,7 @@ namespace Source
 			case CameraManager::ORBIT:
 				break;
 			case CameraManager::FREE:
+				m_camera->DebugCamera();
 				break;
 			default:
 				break;
@@ -370,6 +371,7 @@ namespace Source
 					{
 						target = m_target;
 					}
+					m_mode = CameraMode::FREE;
 				}
 				if (isCameraFreeMode && !m_nowFreeMode)
 				{

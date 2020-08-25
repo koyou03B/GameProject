@@ -119,6 +119,9 @@
     <ClCompile Include="GameSource\FighterState.cpp">
       <Filter>Sources\Characters\Player</Filter>
     </ClCompile>
+    <ClCompile Include="GameSource\Collision.cpp">
+      <Filter>Sources\Collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -183,6 +186,9 @@
     </ClInclude>
     <ClInclude Include="GameSource\FighterState.h">
       <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Collision.h">
+      <Filter>Headers\Collision</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

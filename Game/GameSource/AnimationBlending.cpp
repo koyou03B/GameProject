@@ -40,10 +40,12 @@ bool AnimationBlend::Init(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& mod
 	{
 		auto& anim = model->_resource->_animationTakes[0];
 		m_samplers.push_back(std::make_pair(0, &anim));
-		//auto& anim2 = model->_resource->_animationTakes[1];
-		//m_samplers.push_back(std::make_pair(1, &anim2));
-		//auto& anim3 = model->_resource->_animationTakes[2];
-		//m_samplers.push_back(std::make_pair(2, &anim3));
+	}
+	
+	m_animationFrame.resize(5);
+	for (int i = 0; i < 5; ++i)
+	{
+		m_animationFrame.at(i) = 0;
 	}
 
 	_blendRatio = 0.0f;
@@ -71,7 +73,7 @@ void AnimationBlend::Update(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& m
 			sampligJob._output = &mesh.animations[numSampler].locals;
 			sampligJob._outputToParents = &mesh.animations[numSampler].localsToParent;
 			sampligJob._duration = sampler.duration;
-
+			sampligJob._animationFrame = &m_animationFrame[i];
 			if (!sampligJob.Run())
 				assert(!"samplingJob Error");
 		}
