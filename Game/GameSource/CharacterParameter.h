@@ -39,17 +39,19 @@ public:
 	struct Status
 	{
 		float    attackPoint = 0.0f;
+		float	 damagePoint = 0.0f;
 		float    life = 0.0f;
 
 		bool isExit = false;
 		bool isAttack = false;
 		bool isDamage = false;
 
+		uint32_t serialVersion = 0;
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
 
-			if (8 <= version)
+			if (serialVersion <= version)
 			{
 				archive
 				(
@@ -81,11 +83,12 @@ public:
 		bool isWalk = false;
 		bool isRun  = false;
 
+		uint32_t serialVersion = 0;
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
 
-			if (8 <= version)
+			if (serialVersion <= version)
 			{
 				archive
 				(
@@ -121,11 +124,12 @@ public:
 		float frameCount = 0.0f;
 		bool isStep = false;
 
+		uint32_t serialVersion = 0;
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
 
-			if (8 <= version)
+			if (serialVersion <= version)
 			{
 				archive
 				(
@@ -154,11 +158,13 @@ public:
 		float attackPoint = 0;
 		std::vector<XINPUT_GAMEPAD_BUTTONS> buttons;
 
+		uint32_t serialVersion = 0;
+
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
 
-			if (8 <= version)
+			if (serialVersion <= version)
 			{
 				archive
 				(
@@ -210,10 +216,11 @@ public:
 		float focalLength = 0.0f;
 		float heightAboveGround = 0.0f;
 
+		uint32_t serialVersion = 0;
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
-			if (8 <= version)
+			if (serialVersion <= version)
 			{
 				archive
 				(
@@ -245,10 +252,13 @@ public:
 		float attackBlendRtio = 0.0f;
 		float idleBlendRtio = 0.0f;
 		float moveBlendRatio = 0.0f;
+
+		uint32_t serialVersion = 0;
+
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
-			if (8 <= version)
+			if (serialVersion <= version)
 			{
 				archive
 				(
@@ -262,7 +272,8 @@ public:
 				archive
 				(
 					attackBlendRtio,
-					idleBlendRtio
+					idleBlendRtio,
+					moveBlendRatio
 				);
 			}
 		}
@@ -280,32 +291,44 @@ public:
 			SPHER,
 			CAPSULE,
 			CIRCLE,
+			RECT
 		} collisionType;
+
+		inline void SetCurrentMesh(const uint32_t& mesh,const uint32_t& num) { currentMesh[num] = mesh; }
+		inline void SetCurrentBone(const uint32_t& bone,const uint32_t& num) { currentBone[num] = bone; }
+		inline int GetCurrentMesh(const uint32_t& num) { return currentMesh[num]; }
+		inline int GetCurrentBone(const uint32_t& num) { return currentBone[num]; }
+
+		uint32_t serialVersion = 0;
 
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
 		{
-			if (7 <= version)
+			if (serialVersion <= version)
 			{
 				archive
 				(
-					position[0],
-					position[1],
 					radius,
-					scale
+					scale,
+					currentMesh[0], currentMesh[1],
+					currentBone[0], currentBone[1]
 				);
 			}
 			else
 			{
 				archive
 				(
-					position[0],
-					position[1],
 					radius,
-					scale
+					scale,
+					currentMesh,
+					currentBone
 				);
 			}
 		}
+
+	private:
+		uint32_t currentMesh[2] = {};
+		uint32_t currentBone[2] = {};
 	};
 
 	struct DebugObjects
@@ -324,4 +347,5 @@ public:
 			return std::make_unique<Source::GeometricPrimitive::GeometricCapsule>(device);
 		}
 	};
+
 };

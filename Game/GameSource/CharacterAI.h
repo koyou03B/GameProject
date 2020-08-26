@@ -37,7 +37,7 @@ public:
 	inline CharacterParameter::Change& GetChangeComand()					{ return m_changeParm; }
 	inline CharacterParameter::MessageFlg& GetMessageFlg()					{ return m_messageParm; }
 	inline CharacterParameter::Camera& GetCamera()							{ return m_cameraParm; }
-	inline std::vector<CharacterParameter::Collision>& GetCollsion()		{ return m_collision; }
+	inline std::vector<CharacterParameter::Collision>& GetCollision()		{ return m_collision; }
 	void SetID(int id) { m_id = id; }
 	inline void SetCharacter(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> model){ m_model = model;}
 

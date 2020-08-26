@@ -3,6 +3,7 @@
 #include "SaberCharacter.h"
 #include "ArcherCharacter.h"
 #include "FighterCharacter.h"
+#include "Collision.h"
 
 bool MetaAI::Init()
 {
@@ -91,21 +92,94 @@ void MetaAI::UpdateOfPlayers(float& elapsedTime)
 		if (m_players[i] != nullptr)
 		{
 			m_players[i]->Update(elapsedTime);
-			if (m_players[i]->GetStatus().isAttack && !m_players[i]->GetStatus().isDamage)
+		
 			{
-				for (auto& collision : m_players[i]->GetCollsion())
+				Collision::Circle mySelf, target;
+				mySelf.position = { m_players[i]->GetCollision()[0].position[0].x,m_players[i]->GetCollision()[0].position[0].z };
+				mySelf.radius = m_players[i]->GetCollision()[0].radius;
+				mySelf.scale = m_players[i]->GetCollision()[0].scale;
+
+				auto& enemy = m_enemys[0]->GetCollision()[0];
+				target.position = { enemy.position[0].x,enemy.position[0].z };
+				target.radius = enemy.radius;
+				target.scale = enemy.scale;
+				Collision collision;
+				if (collision.JudgeCircleAndCircle(mySelf, target))
 				{
-					switch (collision.collisionType)
-					{
-					case CharacterParameter::Collision::CUBE:
-						break;
-					case CharacterParameter::Collision::SPHER:
-						break;
-					case CharacterParameter::Collision::CAPSULE:
-							break;
-					}
+					VECTOR2F distance;
+					distance.x = mySelf.position.x - enemy.position[0].x;
+					distance.y = mySelf.position.y - enemy.position[0].z;
+
+					float length = sqrtf(distance.x * distance.x + distance.y * distance.y);
+					float sub = (mySelf.scale + target.scale) - length;
+					distance.x /= length;
+					distance.y /= length;
+					distance.x *= sub;
+					distance.y *= sub;
+					m_players[i]->GetWorldTransform().position.x += distance.x;
+					m_players[i]->GetWorldTransform().position.z += distance.y;
+
+					m_players[i]->GetWorldTransform().WorldUpdate();
 				}
 			}
+
+			//if (m_players[i]->GetStatus().isAttack && !m_players[i]->GetStatus().isDamage)
+			//{
+			//	for (auto& player : m_players[i]->GetCollision())
+			//	{
+			//		switch (player.collisionType)
+			//		{
+			//		case CharacterParameter::Collision::SPHER:
+			//		{
+			//			Collision::Sphere mySelf, target;
+			//			mySelf.position = player.position[0];
+			//			mySelf.radius = player.radius;
+			//			mySelf.scale = player.scale;
+
+			//			auto& enemy = m_enemys[0]->GetCollision()[0];
+			//			target.position = enemy.position[0];
+			//			target.radius = enemy.radius;
+			//			target.scale = enemy.scale;
+			//			Collision collision;
+			//			if (collision.JudgeSphereAndSphere(mySelf, target))
+			//			{
+			//				m_enemys[0]->GetStatus().life -= m_players[i]->GetStatus().attackPoint;
+			//				
+			//				if (m_enemys[0]->GetStatus().life <= 0)
+			//				{
+			//					m_enemys[0]->GetStatus().isExit = false;
+			//				}
+			//			}
+			//		}
+			//			break;
+			//		case CharacterParameter::Collision::CAPSULE:
+			//		{
+			//			Collision::Capsule mySelf;
+			//			mySelf.startPos = player.position[0];
+			//			mySelf.endPos = player.position[1];
+			//			mySelf.radius = player.radius;
+			//			mySelf.scale = player.scale;
+
+			//			Collision::Sphere target;
+			//			auto& enemy = m_enemys[0]->GetCollision()[0];
+			//			target.position = enemy.position[0];
+			//			target.radius = enemy.radius;
+			//			target.scale = enemy.scale;
+			//			Collision collision;
+			//			if (collision.JudgeCapsuleAndSphere(mySelf, target))
+			//			{
+			//				m_enemys[0]->GetStatus().life -= m_players[i]->GetStatus().attackPoint;
+
+			//				if (m_enemys[0]->GetStatus().life <= 0)
+			//				{
+			//					m_enemys[0]->GetStatus().isExit = false;
+			//				}
+			//			}
+			//		}
+			//			break;
+			//		}
+			//	}
+			//}
 		}
 	}
 }

@@ -9,14 +9,14 @@
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
 
-//CEREAL_CLASS_VERSION(CharacterParameter::Collision, 7);
-CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 8);
-CEREAL_CLASS_VERSION(CharacterParameter::Status, 8);
-CEREAL_CLASS_VERSION(CharacterParameter::Move, 8);
-CEREAL_CLASS_VERSION(CharacterParameter::Step, 8);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 8);
-CEREAL_CLASS_VERSION(CharacterParameter::Camera, 8);
-CEREAL_CLASS_VERSION(Fighter, 8);
+CEREAL_CLASS_VERSION(CharacterParameter::Collision, 10);
+CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 10);
+CEREAL_CLASS_VERSION(CharacterParameter::Status, 10);
+CEREAL_CLASS_VERSION(CharacterParameter::Move, 10);
+CEREAL_CLASS_VERSION(CharacterParameter::Step, 10);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 10);
+CEREAL_CLASS_VERSION(CharacterParameter::Camera, 10);
+CEREAL_CLASS_VERSION(Fighter, 10);
 
 
 void Fighter::Init()
@@ -48,12 +48,11 @@ void Fighter::Init()
 	m_blendAnimation.animationBlend.Init(m_model);
 	m_blendAnimation.animationBlend.ChangeSampler(0, Fighter::Animation::IDLE, m_model);
 
-	//m_blendAnimation.animationBlend.AddSampler(2, m_model);
-	//m_blendAnimation.animationBlend.AddSampler(3, m_model);
-
 	m_padDeadLine = 5000.0f;
-	radian = 0.714f;
 	m_changeParm.isPlay = true;
+
+
+	SerialVersionUpdate(10);
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str()))
 	{
@@ -62,12 +61,14 @@ void Fighter::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
-	m_stepParm.maxSpeed = m_stepParm.speed;
+
+
 
 }
 
 void Fighter::Update(float& elapsedTime)
 {
+
 	m_elapsedTime = elapsedTime;
 	if (m_changeParm.isPlay)
 	{
@@ -142,13 +143,17 @@ void Fighter::Update(float& elapsedTime)
 			m_state->Execute(this);
 	}
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
+	FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
+	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+	FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
 
+	float bonePositions[] = { getBone._41,getBone._42,getBone._43 };
+	m_collision[0].position[0] = { bonePositions[0],bonePositions[1],bonePositions[2] };
 }
 
 void Fighter::Render(ID3D11DeviceContext* immediateContext)
 {
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
-	//auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
 	m_debugObjects.debugObject.Render(immediateContext);
@@ -399,22 +404,7 @@ void Fighter::ImGui(ID3D11Device* device)
 
 	static int currentMesh = 0;
 	ImGui::BulletText(u8"Mesh%d”Ô–Ú", currentMesh);
-	//ImGui::SameLine();
-	//if (ImGui::ArrowButton("Front", ImGuiDir_Left))
-	//{
-	//	if (0 >= currentMesh)
-	//		currentMesh = 0;
-	//	else
-	//		--currentMesh;
-	//}
-	//ImGui::SameLine();
-	//if (ImGui::ArrowButton("Next", ImGuiDir_Right))
-	//{
-	//	if (currentMesh >= static_cast<int>(m_blendAnimation.animationBlend.GetBoneName().size()) - 1)
-	//		currentMesh = static_cast<int>(m_blendAnimation.animationBlend.GetBoneName().size()) - 1;
-	//	else
-	//		++currentMesh;
-	//}
+	
 
 	static int currentBone = 0;
 
@@ -425,34 +415,44 @@ void Fighter::ImGui(ID3D11Device* device)
 		static_cast<int>(m_blendAnimation.animationBlend.GetBoneName()[currentMesh].size())
 	);
 
-
 	//**************************************
-	// DebugCollijion
+	// Collision
 	//**************************************
-	if (ImGui::CollapsingHeader("DebugCollijion"))
+	if (ImGui::CollapsingHeader("Collision"))
 	{
-		int animationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0) ;
+		static int current = 0;
+		ImGui::RadioButton("Body", &current, 0);
+		ImGui::RadioButton("RightPunch", &current, 1); ImGui::SameLine();
+		ImGui::RadioButton("LeftPunch", &current, 2);
+		ImGui::RadioButton("RightKick", &current, 3); ImGui::SameLine();
+		ImGui::RadioButton("LeftKick", &current, 4);
+
 		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
 		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 		FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
 
-		float boneTranslates[] = { getBone._41,getBone._42,getBone._43 };
-		VECTOR3F boneTranslate = { boneTranslates[0],boneTranslates[1],boneTranslates[2] };
+		float bonePositions[] = { getBone._41,getBone._42,getBone._43 };
+		VECTOR3F bonePosition = { bonePositions[0],bonePositions[1],bonePositions[2] };
 
-		ImGui::SliderFloat3("BoneTranslate", boneTranslates, -1.0f, 1.0f);
+		ImGui::SliderFloat3("BoneTranslate", bonePositions, -10.0f, 10.0f);
 
 		static bool isVisualization = false;
-		if (ImGui::Button("Make visible?"))
+		if (ImGui::Button("Visible?"))
 			isVisualization = true;
 
 		if (isVisualization)
 		{
-			if (!m_debugObjects.debugObject.IsGeomety())
+			if (current != 0)
 			{
 				auto primitive = m_debugObjects.GetSphere(device);
 				m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
 			}
-			m_debugObjects.debugObject.AddInstanceData(boneTranslate, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
+			else
+			{
+				auto primitive = m_debugObjects.GetCapsule(device);
+				m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
+			}
+			m_debugObjects.debugObject.AddInstanceData(bonePosition, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
 				VECTOR3F(1.0f, 1.0f, 1.0f), VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
 
 			isVisualization = false;
@@ -460,10 +460,73 @@ void Fighter::ImGui(ID3D11Device* device)
 
 		if (m_debugObjects.debugObject.IsGeomety())
 		{
-			auto& geomtry = m_debugObjects.debugObject.GetInstanceData(0);
-			geomtry.position = boneTranslate;
+			if (m_debugObjects.debugObject.GetInstance().size() > current)
+			{
+				auto& geomtry = m_debugObjects.debugObject.GetInstanceData(current);
 
-			geomtry.CreateWorld();
+				//Position
+				{
+					geomtry.position = bonePosition;
+				}
+				//Scale
+				{
+					static float scale = m_collision[current].scale;
+					ImGui::SliderFloat("Scale", &scale, 0.1f, 10.0f);
+					geomtry.scale = { scale ,scale ,scale };
+					m_collision[current].scale = scale;
+				}
+
+				//Radius
+				{
+					static float radius = m_collision[current].radius;
+					ImGui::SliderFloat("Radius", &radius, 1, 10);
+					geomtry.scale *= radius;
+					m_collision[current].radius = radius;
+				}
+
+				//Mesh & Bone SetNumber
+				{
+					if (ImGui::Button("Mesh 0"))
+						m_collision[current].SetCurrentMesh(currentMesh,0);
+					ImGui::SameLine();
+					if (ImGui::Button("Mesh 1"))
+						m_collision[current].SetCurrentMesh(currentMesh, 0);
+
+					int mesh0 = m_collision[current].GetCurrentMesh(0);
+					ImGui::BulletText("Mesh Number %d", mesh0);
+					int mesh1 = m_collision[current].GetCurrentMesh(1);
+					ImGui::BulletText("Mesh Number %d", mesh1);
+
+					if (ImGui::Button("Bone 0"))
+						m_collision[current].SetCurrentBone(currentBone, 0);
+					ImGui::SameLine();
+					if (ImGui::Button("Bone 1"))
+						m_collision[current].SetCurrentBone(currentBone, 1);
+
+
+					int bone0 = m_collision[current].GetCurrentBone(0);
+					ImGui::BulletText("Bone Number %d", bone0);
+					int bone1 = m_collision[current].GetCurrentBone(1);
+					ImGui::BulletText("Bone Number %d", bone1);
+				}
+
+				//CollisionType
+				{
+					std::vector<std::string> collisionType = { "Cube","SPHER","CAPSULE","CIRCLE","RECT" };
+					static int currentCollisionType = 0;
+
+					ImGui::Combo("Name_of_CollisionType",
+						&currentCollisionType,
+						vectorGetter,
+						static_cast<void*>(&collisionType),
+						static_cast<int>(collisionType.size())
+					);
+
+					if (ImGui::Button("CollisionType"))
+						m_collision[current].collisionType = static_cast<CharacterParameter::Collision::CollisionType>(currentCollisionType);
+				}
+				geomtry.CreateWorld();
+			}
 		}
 	}
 
@@ -660,10 +723,6 @@ void Fighter::ImGui(ID3D11Device* device)
 		float animationSpeed = m_blendAnimation.animtionSpeed;
 		ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 5.0f);
 
-
-		ImGui::SliderFloat("Radian", &radian, 0.0f, 50.0f);
-
-
 		m_stepParm.deceleration = VECTOR3F(accel, 0.0f, accel);
 		m_stepParm.speed = VECTOR3F(speed, 0.0f, speed);
 		m_blendAnimation.animtionSpeed = animationSpeed;
@@ -792,6 +851,9 @@ void Fighter::ImGui(ID3D11Device* device)
 				m_attackParm[current].attackPoint = point;
 		}
 	}
+
+
+
 
 	ImGui::End();
 #endif

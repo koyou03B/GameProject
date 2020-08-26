@@ -49,7 +49,7 @@ bool Collision::JudgeSphereAndSphere(const Sphere& mySelf, const Sphere& target)
 }
 
 
-bool Collision::JudgeCapsuleAndCapsule(const Capsule& mySelf, const Sphere& target)
+bool Collision::JudgeCapsuleAndSphere(const Capsule& mySelf, const Sphere& target)
 {
 	VECTOR3F vector = mySelf.endPos - mySelf.startPos;//Capsuleのスタートポジションとエンドポジション間のベクトル
 	float scalar = ToDistVec3(vector);//上のベクトル大きさ

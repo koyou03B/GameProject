@@ -28,7 +28,7 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 8)
+		if (version >= 10)
 		{
 			archive
 			(
@@ -37,7 +37,8 @@ public:
 				m_statusParm,
 				m_moveParm,
 				m_cameraParm,
-				m_stepParm
+				m_stepParm,
+				m_collision
 			);
 		}
 		else
@@ -49,7 +50,8 @@ public:
 				m_statusParm,
 				m_moveParm,
 				m_cameraParm,
-				m_stepParm
+				m_stepParm,
+				m_collision
 
 			);
 		}
@@ -79,13 +81,30 @@ private:
 
 	void Stepping(float& elapsedTime);
 
+	void SerialVersionUpdate(uint32_t version)
+	{
+		m_blendAnimation.serialVersion = version;
+		m_statusParm.serialVersion = version;
+		m_moveParm.serialVersion = version;
+		m_cameraParm.serialVersion = version;
+		m_stepParm.serialVersion = version;
+
+		for (auto& atk : m_attackParm)
+		{
+			atk.serialVersion= version;
+		}
+
+		for (auto& coll : m_collision)
+		{
+			coll.serialVersion = version;
+		}
+	}
 private:
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	CharacterParameter::Step				m_stepParm;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 	Source::Input::Input* m_input;
-	float radian;
 	float m_padDeadLine;
 	float m_elapsedTime;
 };

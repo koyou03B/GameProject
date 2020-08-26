@@ -41,7 +41,7 @@ public:
 		float scale;
 		float radius;
 	};
-	bool JudgeCapsuleAndCapsule(const Capsule& myself, const Sphere& target);
+	bool JudgeCapsuleAndSphere(const Capsule& myself, const Sphere& target);
 
 	struct Circle
 	{
