@@ -3,8 +3,8 @@
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\VectorCombo.h"
 
-CEREAL_CLASS_VERSION(CharacterParameter::Collision, 0);
-CEREAL_CLASS_VERSION(Enemy, 0);
+//CEREAL_CLASS_VERSION(CharacterParameter::Collision, 1);
+CEREAL_CLASS_VERSION(Enemy, 1);
 
 void Enemy::Init()
 {
@@ -16,9 +16,11 @@ void Enemy::Init()
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::ENEMY);
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
+	m_statusParm.life = 12000.0f;
+
 	m_blendAnimation.animationBlend.Init(m_model);
 	m_collision.resize(4);
-	SerialVersionUpdate(0);
+	//SerialVersionUpdate(1);
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Enemy/Parameter") + ".bin").c_str()))
 	{
@@ -44,7 +46,7 @@ void Enemy::Render(ID3D11DeviceContext* immediateContext)
 	//	auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
-	m_debugObjects.debugObject.Render(immediateContext);
+	//m_debugObjects.debugObject.Render(immediateContext, m_debugObjects.scrollValue,false);
 }
 
 void Enemy::ImGui(ID3D11Device* device)
@@ -127,7 +129,7 @@ void Enemy::ImGui(ID3D11Device* device)
 
 		if (isVisualization)
 		{
-			auto primitive = m_debugObjects.GetSphere(device);
+			auto primitive = m_debugObjects.GetSphere(device, "../Asset/Texture/n64.png");
 			m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
 			m_debugObjects.debugObject.AddInstanceData(bonePosition, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
 				VECTOR3F(1.0f, 1.0f, 1.0f), VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
@@ -163,7 +165,7 @@ void Enemy::ImGui(ID3D11Device* device)
 				{
 					static float radius = m_collision[current].radius;
 					if (radius <= 0.0f) radius = 1.0f;
-					ImGui::SliderFloat("Radius", &radius, 1, 10);
+					ImGui::SliderFloat("Radius", &radius, 1.0f, 20.0f);
 
 					geomtry.scale *= radius;
 					m_collision[current].radius = radius;
@@ -216,6 +218,14 @@ void Enemy::ImGui(ID3D11Device* device)
 	}
 
 
+	//*******************************************
+	// Status
+	//*******************************************
+	if (ImGui::CollapsingHeader("Status"))
+	{
+		ImGui::BulletText("LIFE : %f", m_statusParm.life);
+	}
+	
 
 
 	ImGui::End();

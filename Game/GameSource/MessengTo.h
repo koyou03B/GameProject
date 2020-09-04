@@ -18,6 +18,13 @@ public:
 		m_metaAI->DeterminationOfPlayer(id, type);
 	}
 
+	bool AttackingMessage(const int id,CharacterParameter::Collision& player)
+	{
+		if (m_metaAI->CollisionPlayerAttack(id, player))
+			return true;
+
+		return false;
+	}
 
 	inline void SetMetaAI(const std::shared_ptr<MetaAI>& metaAI)
 	{

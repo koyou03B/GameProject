@@ -34,6 +34,10 @@ public:
 
 	void DeterminationOfPlayer(int id, MessengType type);
 
+	bool CollisionPlayerAttack(int id, CharacterParameter::Collision& collision);
+
+	void CollisionPlayerAndEnemy(std::shared_ptr<CharacterAI>& player);
+
 	void Release();
 	void ReleaseCharacter();
 

@@ -49,15 +49,17 @@ public:
 		int samplerCount = static_cast<int>(m_samplers.size());
 		if (samplerCount >= 2)
 		{
-			for (int i = 0; i < samplerCount; ++i)
-			{
-				if (samplerNum == i)
-				{
-					m_samplers[i] = m_samplers.back();
-					m_samplers.pop_back();
-					break;
-				}
-			}
+			m_samplers.erase(m_samplers.begin() + samplerNum);
+			//for (auto& sampler = *m_samplers.begin(); sampler != *m_samplers.end();)
+			//{
+			//	if (sampler.first == samplerNum)
+			//	{
+			//		sampler = m_samplers.erase(&(sampler));
+			//		break;
+			//	}
+			//	else
+			//		++sampler;
+			//}
 		}
 	}
 

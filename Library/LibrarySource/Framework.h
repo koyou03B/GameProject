@@ -199,7 +199,7 @@ public:
 		D3D11_VIEWPORT m_viewPort = {};
 
 		float m_volume[2] = {};
-		float m_color[4] = { 0.3f, 0.3f, 0.3f, 1.f };
+		float m_color[4] = { 0.8f, 0.8f, 0.8f, 1.f };
 
 		bool Initialize();
 		void Update(float elapsedTime/*Elapsed seconds from last frame*/);

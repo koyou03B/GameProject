@@ -19,7 +19,7 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 0)
+		if (version >= 1)
 		{
 			archive
 			(
@@ -38,10 +38,6 @@ public:
 private:
 	void SerialVersionUpdate(uint32_t version)
 	{
-		for (auto& coll : m_collision)
-		{
-			coll.serialVersion = version;
-		}
 	}
 private:
 	CharacterParameter::BlendAnimation		m_blendAnimation;

@@ -5,15 +5,21 @@ namespace Source
 {
 	namespace GeometricPrimitive
 	{
-		GeometricPrimitive::GeometricPrimitive(ID3D11Device* device)
+		GeometricPrimitive::GeometricPrimitive(ID3D11Device* device, std::string fileName)
 		{
 			HRESULT hr = S_OK;
 
 			m_geometricPrimitiveVS = std::make_unique<Source::Shader::VertexShader<Vertex>>(device, "../Library/LibraryShader/GeometricPrimitive_vs.cso");
 			m_geometricPrimitivePS = std::make_unique<Source::Shader::PixelShader>(device, "../Library/LibraryShader/GeometricPrimitive_ps.cso");
 
-		//	m_constantBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<ShaderConstants>>(device);
+			m_constantBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<ShaderConstants>>(device);
 
+			if (fileName.empty())
+				Texture::MakeDummyTexture(device, m_shaderResourceView.GetAddressOf());
+			else
+				Texture::LoadTextureFromFile(device, fileName.c_str(), m_shaderResourceView.GetAddressOf(), true);
+
+			Texture::Texture2dDescription(m_shaderResourceView.Get(), m_texture2dDesc);
 
 			Instance* instances = new Instance[MAX_INSTANCES];
 			{
@@ -82,7 +88,7 @@ namespace Source
 			}
 		}
 
-		void GeometricPrimitive::Begin(ID3D11DeviceContext* immediateContext, bool wireframe)
+		void GeometricPrimitive::Begin(ID3D11DeviceContext* immediateContext, bool isScroll, bool wireframe)
 		{
 			UINT strides[2] = { sizeof(Vertex), sizeof(Instance) };
 			UINT offsets[2] = { 0, 0 };
@@ -94,19 +100,20 @@ namespace Source
 			m_geometricPrimitiveVS->Activate(immediateContext);
 			m_geometricPrimitivePS->Activate(immediateContext);
 
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ADD), nullptr, 0xFFFFFFFF);
 			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_TRUE), 1);
+
 			if (wireframe)
-			{
 				immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CULL_BACK_WIRE));
-			}
 			else
-			{
 				immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CULL_BACK));
-			}
+
+
+			immediateContext->PSSetSamplers(0, 1, Framework::GetSamplerState(Framework::SS_WRAP));
 		}
 
 		void GeometricPrimitive::Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& view, const FLOAT4X4& projection,
-			const std::vector<Source::InstanceData::InstanceData>& instanceData, const VECTOR4F& materialColor)
+			const std::vector<Source::InstanceData::InstanceData>& instanceData, const VECTOR4F& materialColor,const VECTOR4F& scrollValue)
 		{
 			D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
 			D3D11_MAPPED_SUBRESOURCE mappedBuffer;
@@ -129,8 +136,11 @@ namespace Source
 			}
 			immediateContext->Unmap(m_instanceBuffer.Get(), 0);
 
-//			m_constantBuffer->data.materialColor = materialColor;
-//			m_constantBuffer->Activate(immediateContext, SLOT0, true, true);
+			m_constantBuffer->data.scrollValue = scrollValue;
+			m_constantBuffer->Activate(immediateContext, SLOT0, true, true);
+
+			immediateContext->PSSetShaderResources(SLOT0, 1, m_shaderResourceView.GetAddressOf());
+
 
 			D3D11_BUFFER_DESC bufferDesc;
 			m_indexBuffer->GetDesc(&bufferDesc);
@@ -139,7 +149,7 @@ namespace Source
 
 		void GeometricPrimitive::End(ID3D11DeviceContext* immediateContext)
 		{
-			//m_constantBuffer->Deactivate(immediateContext);
+			m_constantBuffer->Deactivate(immediateContext);
 
 			m_geometricPrimitivePS->Deactivate(immediateContext);
 			m_geometricPrimitiveVS->Deactivate(immediateContext);
@@ -147,7 +157,7 @@ namespace Source
 
 
 
-		GeometricCube::GeometricCube(ID3D11Device* device) : GeometricPrimitive(device)
+		GeometricCube::GeometricCube(ID3D11Device* device, std::string fileName) : GeometricPrimitive(device,fileName)
 		{
 			Vertex vertices[24] = {};
 			u_int indices[36] = {};
@@ -320,7 +330,7 @@ namespace Source
 		}
 
 #include <vector>
-		GeometricCylinder::GeometricCylinder(ID3D11Device* device, u_int slices) : GeometricPrimitive(device)
+		GeometricCylinder::GeometricCylinder(ID3D11Device* device,std::string fileName,u_int slices) : GeometricPrimitive(device, fileName)
 		{
 			std::vector<Vertex> vertices;
 			std::vector<u_int> indices;
@@ -415,7 +425,7 @@ namespace Source
 			CreateBuffers(device, vertices.data(), static_cast<int>(vertices.size()), indices.data(), static_cast<int>(indices.size()));
 		}
 
-		GeometricSphere::GeometricSphere(ID3D11Device* device, u_int slices, u_int stacks) : GeometricPrimitive(device)
+		GeometricSphere::GeometricSphere(ID3D11Device* device,std::string fileName, u_int slices, u_int stacks) : GeometricPrimitive(device,fileName)
 		{
 			std::vector<Vertex> vertices;
 			std::vector<u_int> indices;
@@ -462,6 +472,8 @@ namespace Source
 					DirectX::XMVECTOR p = DirectX::XMLoadFloat3(&v.position);
 					DirectX::XMStoreFloat3(&v.normal, DirectX::XMVector3Normalize(p));
 
+					v.texcoord.x = 1.0f - (float)j / slices;
+					v.texcoord.y = (float)i / stacks - 1.0f;
 					vertices.push_back(v);
 				}
 			}
@@ -521,7 +533,7 @@ namespace Source
 			CreateBuffers(device, vertices.data(), static_cast<int>(vertices.size()), indices.data(), static_cast<int>(indices.size()));
 		}
 
-		GeometricCapsule::GeometricCapsule(ID3D11Device* device, u_int slices, u_int stacks) : GeometricPrimitive(device)
+		GeometricCapsule::GeometricCapsule(ID3D11Device* device,std::string fileName, u_int slices, u_int stacks) : GeometricPrimitive(device,fileName)
 		{
 			//Vertex Data Input
 			std::vector<Vertex> vertices = {};

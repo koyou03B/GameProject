@@ -12,7 +12,7 @@ public:
 	DebugObject() : m_isWireFrame(0) {};
 	~DebugObject() = default;
 
-	void Render(ID3D11DeviceContext* immediateContext);
+	void Render(ID3D11DeviceContext* immediateContext,const VECTOR4F& scrollValue,bool isScroll);
 
 	template<typename T>
 	void AddGeometricPrimitive(std::unique_ptr<T> geometry)

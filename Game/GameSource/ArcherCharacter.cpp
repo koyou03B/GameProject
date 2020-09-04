@@ -29,7 +29,7 @@ void Archer::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Spell.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/AimWalk.fbx", 60);
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::Archer);
-
+	m_changeParm.isPlay = true;
 	m_blendAnimation.animationBlend.Init(m_model);
 	//m_blendAnimation.partialBlend.Init(m_model);
 
@@ -49,96 +49,96 @@ void Archer::Update(float& elapsedTime)
 {
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
 
-	if (m_changeParm.isPlay)
-	{
-		auto input = PAD.GetPad(0);
+	//if (m_changeParm.isPlay)
+	//{
+	//	auto input = PAD.GetPad(0);
 
-		if (input->StickDeadzoneLX(10000) || input->StickDeadzoneLY(10000))
-		{
-			FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
-			view._14 = 0.0f;
-			view._24 = 0.0f;
-			view._34 = 0.0f;
-			view._41 = 0.0f;
-			view._42 = 0.0f;
-			view._43 = 0.0f;
-			view._44 = 1.0f;
+	//	if (input->StickDeadzoneLX(10000) || input->StickDeadzoneLY(10000))
+	//	{
+	//		FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
+	//		view._14 = 0.0f;
+	//		view._24 = 0.0f;
+	//		view._34 = 0.0f;
+	//		view._41 = 0.0f;
+	//		view._42 = 0.0f;
+	//		view._43 = 0.0f;
+	//		view._44 = 1.0f;
 
-			DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
-			VECTOR3F stickVec(-input->StickVectorLeft().x, 0.0f, -input->StickVectorLeft().y);
-			DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
+	//		DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
+	//		VECTOR3F stickVec(-input->StickVectorLeft().x, 0.0f, -input->StickVectorLeft().y);
+	//		DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
 
-			vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
-			DirectX::XMStoreFloat3(&m_moveParm.velocity, vStickVex);
+	//		vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
+	//		DirectX::XMStoreFloat3(&m_moveParm.velocity, vStickVex);
 
-			VECTOR3F position = m_transformParm.position;
-			VECTOR3F angle = m_transformParm.angle;
+	//		VECTOR3F position = m_transformParm.position;
+	//		VECTOR3F angle = m_transformParm.angle;
 
-			VECTOR3F frontVec(sinf(angle.y), 0.0f, cosf(angle.y));
-
-
-			DirectX::XMVECTOR vFront = DirectX::XMLoadFloat3(&frontVec);
-			DirectX::XMVECTOR vCross = DirectX::XMVector3Cross(vFront, vStickVex);
-
-			VECTOR4F crossF;
-			DirectX::XMStoreFloat4(&crossF, vCross);
-			float dot = frontVec.x * m_moveParm.velocity.x +
-				frontVec.y * m_moveParm.velocity.y +
-				frontVec.z * m_moveParm.velocity.z;
+	//		VECTOR3F frontVec(sinf(angle.y), 0.0f, cosf(angle.y));
 
 
-			float dangle = 1 - dot;
+	//		DirectX::XMVECTOR vFront = DirectX::XMLoadFloat3(&frontVec);
+	//		DirectX::XMVECTOR vCross = DirectX::XMVector3Cross(vFront, vStickVex);
 
-			if (dangle >= DirectX::XMConvertToRadians(3))
-			{
-				dangle = DirectX::XMConvertToRadians(3);
-			}
+	//		VECTOR4F crossF;
+	//		DirectX::XMStoreFloat4(&crossF, vCross);
+	//		float dot = frontVec.x * m_moveParm.velocity.x +
+	//			frontVec.y * m_moveParm.velocity.y +
+	//			frontVec.z * m_moveParm.velocity.z;
 
 
-			if (1 - ::abs(dot) > DirectX::XMConvertToRadians(3))
-			{
-				if (crossF.y < 0.0f)
-				{
+	//		float dangle = 1 - dot;
 
-					angle.y += dangle;
-				}
-				else
-				{
+	//		if (dangle >= DirectX::XMConvertToRadians(3))
+	//		{
+	//			dangle = DirectX::XMConvertToRadians(3);
+	//		}
 
-					angle.y -= dangle;
 
-				}
-			}
-			else if (dot > 0.0f)
-			{
-				dangle = DirectX::XMConvertToRadians(3);
-				if (crossF.y < 0.0f)
-				{
+	//		if (1 - ::abs(dot) > DirectX::XMConvertToRadians(3))
+	//		{
+	//			if (crossF.y < 0.0f)
+	//			{
 
-					angle.y += dangle;
-				}
-				else
-				{
+	//				angle.y += dangle;
+	//			}
+	//			else
+	//			{
 
-					angle.y -= dangle;
+	//				angle.y -= dangle;
 
-				}
-			}
+	//			}
+	//		}
+	//		else if (dot > 0.0f)
+	//		{
+	//			dangle = DirectX::XMConvertToRadians(3);
+	//			if (crossF.y < 0.0f)
+	//			{
 
-			m_transformParm.angle = angle;
+	//				angle.y += dangle;
+	//			}
+	//			else
+	//			{
 
-			m_moveParm.velocity.x = sinf(angle.y) * m_moveParm.speed.x;
-			m_moveParm.velocity.y = 0.0f;
-			m_moveParm.velocity.z = cosf(angle.y) * m_moveParm.speed.z;
+	//				angle.y -= dangle;
 
-			position += m_moveParm.velocity * elapsedTime;
+	//			}
+	//		}
 
-			m_transformParm.position = position;
+	//		m_transformParm.angle = angle;
 
-			m_transformParm.WorldUpdate();
-		}
+	//		m_moveParm.velocity.x = sinf(angle.y) * m_moveParm.speed.x;
+	//		m_moveParm.velocity.y = 0.0f;
+	//		m_moveParm.velocity.z = cosf(angle.y) * m_moveParm.speed.z;
 
-	}
+	//		position += m_moveParm.velocity * elapsedTime;
+
+	//		m_transformParm.position = position;
+
+	//		m_transformParm.WorldUpdate();
+	//	}
+
+	//}
 
 }
 
@@ -148,7 +148,8 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 	//auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
-	//	m_debugObjects.debugObject.Render(immediateContext);
+	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
+	m_debugObjects.debugObject.Render(immediateContext, scroll, true);
 }
 
 void Archer::ImGui(ID3D11Device* device)
@@ -298,7 +299,7 @@ void Archer::ImGui(ID3D11Device* device)
 
 #else
 	{
-		auto BoneName = m_blendAnimation.animationBlend.GetBoneName().at(0);
+		auto BoneName = m_blendAnimation.animationBlend.GetBoneName().at(2);
 		static int curringBone = 0;
 		ImGui::Combo("Name_of_BoneName",
 			&curringBone,
@@ -306,14 +307,14 @@ void Archer::ImGui(ID3D11Device* device)
 			static_cast<void*>(&BoneName),
 			static_cast<int>(BoneName.size())
 		);
-		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[0].at(curringBone);
+		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[2].at(curringBone);
 		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
-		FLOAT4X4 getBone = blendBone * m_transformParm.world * modelAxisTransform;
+		FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world ;
 
 		float boneTranslates[] = { getBone._41,getBone._42,getBone._43 };
 
 		VECTOR3F boneTranslate = { boneTranslates[0],boneTranslates[1],boneTranslates[2] };
-
+		VECTOR3F boneFront = { getBone._31,getBone._32,getBone._33 };
 		ImGui::SliderFloat3("BoneTranslate", boneTranslates, -1.0f, 1.0f);
 
 		static bool isVisualization = false;
@@ -324,7 +325,7 @@ void Archer::ImGui(ID3D11Device* device)
 		{
 			if (!m_debugObjects.debugObject.IsGeomety())
 			{
-				auto primitive = m_debugObjects.GetCube(device);
+				auto primitive = m_debugObjects.GetCube(device, "../Asset/Texture/n64.png");
 				m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
 			}
 			m_debugObjects.debugObject.AddInstanceData(boneTranslate, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
@@ -336,7 +337,18 @@ void Archer::ImGui(ID3D11Device* device)
 		if (m_debugObjects.debugObject.IsGeomety())
 		{
 			auto& geomtry = m_debugObjects.debugObject.GetInstanceData(0);
-			geomtry.position = boneTranslate;
+			boneFront = NormalizeVec3(boneFront);
+			static float frontX = 1.0f, frontY = 1.0f, frontZ = 1.0f;
+			ImGui::SliderFloat("frontX", &frontX, -100.0f, 100.0f);
+			ImGui::SliderFloat("frontY", &frontY, -100.0f, 100.0f);
+			ImGui::SliderFloat("frontZ", &frontZ, -100.0f, 100.0f);
+
+			boneFront.x *= frontX;
+			boneFront.y *= frontY;
+			boneFront.z *= frontZ;
+
+
+			geomtry.position = boneTranslate + boneFront;
 			geomtry.CreateWorld();
 		}
 	}

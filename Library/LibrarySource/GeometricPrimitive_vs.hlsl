@@ -18,9 +18,10 @@ VS_OUT main(
     float4 N = normalize(mul(normal, world));
 
     float4 L = normalize(-directional_light.direction);
-    vout.color = color * max(0, dot(L, N));
+    vout.color = color; //* max(0, dot(L, N));
     vout.color.a = color.a;
-    vout.texcoord = texcoord;
+    vout.texcoord.x = texcoord.x + scrollValue.x;
+    vout.texcoord.y = texcoord.y + scrollValue.y;
 
     return vout;
 }

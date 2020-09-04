@@ -5,8 +5,8 @@ struct VS_OUT
     float4 color : COLOR;
 };
 
-//cbuffer ShaderConstants : register(b0)
-//{
-//    float4 materialColor;
-//};
+cbuffer ShaderConstants : register(b0)
+{
+    float4 scrollValue;
+};
 

@@ -4,6 +4,7 @@
 #include <wrl.h>
 #include <memory>
 #include <vector>
+#include <string>
 #include "Vector.h"
 #include "Constants.h"
 #include "ConstantBuffer.h"
@@ -17,17 +18,22 @@ namespace Source
 		class GeometricPrimitive
 		{
 		public:
-			GeometricPrimitive(ID3D11Device* device);
+			GeometricPrimitive(ID3D11Device* device,std::string fileName);
 			virtual ~GeometricPrimitive() = default;
 
-			void Begin(ID3D11DeviceContext * immediateContext, bool wireframe = false);
+			void Begin(ID3D11DeviceContext * immediateContext,bool isScroll = false, bool wireframe = false);
 			void Render(ID3D11DeviceContext * immediateContext,
 				const FLOAT4X4 & view,
 				const FLOAT4X4 & projection,
 				const std::vector<Source::InstanceData::InstanceData> & instanceData,
-				const VECTOR4F & materialColor);
+				const VECTOR4F & materialColor, const VECTOR4F& scrollValue);
 			void End(ID3D11DeviceContext * immediateContext);
 
+			void PutUpTexture(ID3D11Device* device,std::string fileName)
+			{
+				Texture::LoadTextureFromFile(device, fileName.c_str(), m_shaderResourceView.GetAddressOf(), true);
+				Texture::Texture2dDescription(m_shaderResourceView.Get(), m_texture2dDesc);
+			}
 		protected:
 			struct Vertex
 			{
@@ -66,10 +72,10 @@ namespace Source
 
 		private:
 
-			//struct ShaderConstants
-			//{
-			//	VECTOR4F materialColor;
-			//};
+			struct ShaderConstants
+			{
+				VECTOR4F scrollValue;
+			};
 
 			struct Instance
 			{
@@ -81,10 +87,12 @@ namespace Source
 			Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 			Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
 			Microsoft::WRL::ComPtr<ID3D11Buffer> m_instanceBuffer;
+			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	m_shaderResourceView;
+			D3D11_TEXTURE2D_DESC     m_texture2dDesc;
 
 			std::unique_ptr<Source::Shader::VertexShader<Vertex>> m_geometricPrimitiveVS;
 			std::unique_ptr<Source::Shader::PixelShader> m_geometricPrimitivePS;
-		//	std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<ShaderConstants>> m_constantBuffer;
+			std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<ShaderConstants>> m_constantBuffer;
 
 			const size_t MAX_INSTANCES = 256;
 
@@ -93,26 +101,26 @@ namespace Source
 		class GeometricCube : public GeometricPrimitive
 		{
 		public:
-			GeometricCube(ID3D11Device* device);
+			GeometricCube(ID3D11Device* device,std::string fileName);
 		};
 
 		class GeometricCylinder : public GeometricPrimitive
 		{
 		public:
-			GeometricCylinder(ID3D11Device* device, u_int slices = 16);
+			GeometricCylinder(ID3D11Device* device, std::string fileName, u_int slices = 16);
 		};
 
 		class GeometricSphere : public GeometricPrimitive
 		{
 		public:
-			GeometricSphere(ID3D11Device* device, u_int slices = 16, u_int stacks = 16);
+			GeometricSphere(ID3D11Device* device, std::string fileName, u_int slices = 16, u_int stacks = 16);
 		};
 
 
 		class GeometricCapsule : public GeometricPrimitive
 		{
 		public:
-			GeometricCapsule(ID3D11Device* device, u_int slices = 35, u_int stacks = 35);
+			GeometricCapsule(ID3D11Device* device, std::string fileName, u_int slices = 35, u_int stacks = 35);
 		};
 
 	}

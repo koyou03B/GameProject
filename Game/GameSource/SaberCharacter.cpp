@@ -134,7 +134,7 @@ void Saber::Render(ID3D11DeviceContext* immediateContext)
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
-	m_debugObjects.debugObject.Render(immediateContext);
+	//m_debugObjects.debugObject.Render(immediateContext, m_debugObjects.scrollValue,false);
 }
 
 void Saber::ImGui(ID3D11Device* device)
@@ -213,7 +213,7 @@ void Saber::ImGui(ID3D11Device* device)
 		{
 			if (!m_debugObjects.debugObject.IsGeomety())
 			{
-				auto primitive = m_debugObjects.GetCube(device);
+				auto primitive = m_debugObjects.GetCube(device,"../Asset/Texture/n64.png");
 				m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
 			}
 			m_debugObjects.debugObject.AddInstanceData(boneTranslate, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),

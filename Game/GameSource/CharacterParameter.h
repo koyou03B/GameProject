@@ -186,11 +186,17 @@ public:
 		}
 	};
 
+	struct Effect
+	{
+		std::unique_ptr<DebugObject> ballEffects;
+		VECTOR4F	scrollValue;
+	};
+
 	struct Change
 	{
 		enum class PlayerType
 		{
-			SABER,
+			//SABER,
 			ARCHER,
 			FIGHTER
 		};
@@ -311,7 +317,8 @@ public:
 					radius,
 					scale,
 					currentMesh[0], currentMesh[1],
-					currentBone[0], currentBone[1]
+					currentBone[0], currentBone[1],
+					collisionType
 				);
 			}
 			else
@@ -320,8 +327,8 @@ public:
 				(
 					radius,
 					scale,
-					currentMesh,
-					currentBone
+					currentMesh[0], currentMesh[1],
+					currentBone[0], currentBone[1]
 				);
 			}
 		}
@@ -334,17 +341,17 @@ public:
 	struct DebugObjects
 	{
 		DebugObject debugObject;
-		std::unique_ptr<Source::GeometricPrimitive::GeometricCube> GetCube(ID3D11Device* device) 
+		std::unique_ptr<Source::GeometricPrimitive::GeometricCube> GetCube(ID3D11Device* device,std::string fileName) 
 		{
-			return std::make_unique<Source::GeometricPrimitive::GeometricCube>(device);
+			return std::make_unique<Source::GeometricPrimitive::GeometricCube>(device, fileName);
 		}
-		std::unique_ptr<Source::GeometricPrimitive::GeometricSphere> GetSphere(ID3D11Device* device)
+		std::unique_ptr<Source::GeometricPrimitive::GeometricSphere> GetSphere(ID3D11Device* device, std::string fileName)
 		{
-			return std::make_unique<Source::GeometricPrimitive::GeometricSphere>(device);
+			return std::make_unique<Source::GeometricPrimitive::GeometricSphere>(device, fileName);
 		}
-		std::unique_ptr<Source::GeometricPrimitive::GeometricCapsule> GetCapsule(ID3D11Device* device)
+		std::unique_ptr<Source::GeometricPrimitive::GeometricCapsule> GetCapsule(ID3D11Device* device, std::string fileName)
 		{
-			return std::make_unique<Source::GeometricPrimitive::GeometricCapsule>(device);
+			return std::make_unique<Source::GeometricPrimitive::GeometricCapsule>(device,fileName);
 		}
 	};
 

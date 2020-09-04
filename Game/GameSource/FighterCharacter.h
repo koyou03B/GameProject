@@ -28,7 +28,7 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 10)
+		if (version >= 11)
 		{
 			archive
 			(
@@ -77,7 +77,7 @@ private:
 	} m_animationType = IDLE;
 
 	void Attacking(Animation currentAnimation, Animation nextAnimations[2],
-		CharacterParameter::Attack& attack,CharacterParameter::Collision collision);
+		CharacterParameter::Attack& attack,CharacterParameter::Collision& collision);
 
 	void Stepping(float& elapsedTime);
 
@@ -103,6 +103,7 @@ private:
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	CharacterParameter::Step				m_stepParm;
+	std::vector<CharacterParameter::Effect> m_effect;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 	Source::Input::Input* m_input;
 	float m_padDeadLine;

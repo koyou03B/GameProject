@@ -56,7 +56,9 @@ namespace Source
 
 			immediateContext->PSSetShaderResources(0, 1, m_shaderResourceView.GetAddressOf());
 
-			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_FALSE), 1);
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
+
+			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_TRUE), 1);
 			immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CULL_BACK));
 			immediateContext->PSSetSamplers(0, 1, Framework::GetSamplerState(Framework::SS_WRAP));
 		}
