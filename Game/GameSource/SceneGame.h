@@ -4,10 +4,12 @@
 #include "Scene.h"
 #include "MetaAI.h"
 #include "Stage.h"
+#include ".\LibrarySource\Fog.h"
+#include ".\LibrarySource\Camera.h"
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\Constants.h"
+#include ".\LibrarySource\FrameBuffer.h"
 #include ".\LibrarySource\ConstantBuffer.h"
-#include ".\LibrarySource\Camera.h"
 #include ".\LibrarySource\EntityComponentSystem.h"
 
 #ifdef _DEBUG
@@ -30,6 +32,8 @@ class Game : public Scene
 	float focalLength = 5.0f;
 
 	std::shared_ptr<MetaAI> m_metaAI;
+	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer;
+	std::unique_ptr<Source::Fog::Fog> m_fog;
 	Stage m_stage;
 public:
 	Game() = default;

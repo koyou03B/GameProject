@@ -22,7 +22,7 @@ float4 Dissolve(float dissolve, float4 baseColorMap,float4 color)
 // K:”½Ë—¦(0`1.0)
 float3 Diffuse(float3 N, float3 L, float3 C, float3 K)
 {
-    float D = dot(N, -L) + 0.75;
+    float D = dot(N, -L) /*+ 0.75*/;
     D = max(0,D);
     return K * C * D;
 }

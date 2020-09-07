@@ -142,6 +142,12 @@
     <Filter Include="Headers\Model\SkinnedMesh\BlendConfig">
       <UniqueIdentifier>{128205c4-78bb-4826-a50c-ce74c7dcb5ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Shaders\Fog">
+      <UniqueIdentifier>{a5b385a3-d956-4688-8253-0152dd28d9a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Shaders\Fog">
+      <UniqueIdentifier>{c7cf5ca8-6dc4-4dc6-aa21-cf8de4510642}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imconfig.h">
@@ -264,6 +270,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\HalfBodyLayer.h">
       <Filter>Headers\Model\SkinnedMesh\BlendConfig</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.h">
+      <Filter>Headers\Shaders\Fog</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui.cpp">
@@ -359,6 +368,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SamplingJob.cpp">
       <Filter>Sources\Model\SkinnedMesh\Blend</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.cpp">
+      <Filter>Sources\Shaders\Fog</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad.hlsli">
@@ -393,6 +405,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh.hlsli">
       <Filter>Shaders\Model\StaticMesh</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.hlsli">
+      <Filter>Shaders\Fog</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -446,6 +461,12 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh_vs.hlsl">
       <Filter>Shaders\Model\StaticMesh</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog_ps.hlsl">
+      <Filter>Shaders\Fog</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog_vs.hlsl">
+      <Filter>Shaders\Fog</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

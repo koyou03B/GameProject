@@ -7,7 +7,6 @@ namespace Source
 		void Camera::Initialize()
 		{
 			m_eye = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
-			m_newEye = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
 			m_focus = VECTOR4F(0.0f, 0.0f, 1.0f, 1.0f);
 
 			m_up = VECTOR4F(0.0f, 1.0f, 0.0f, 1.0f);
@@ -28,63 +27,6 @@ namespace Source
 
 			m_speed = 0.0f;
 		}	
-
-		void Camera::MoveEye(const VECTOR4F& eye)
-		{
-# if 0
-			VECTOR3F origin = { m_focus.x,m_focus.y,m_focus.z };
-			VECTOR3F start = { eye.x,eye.y,eye.z };
-			VECTOR3F s_start = { m_eye.x,m_eye.y,m_eye.z };
-			VECTOR3F end = { m_newEye.x ,m_newEye.y,m_newEye.z };
-
-			m_speed += 0.02f;
-			if (m_speed >= 1.0f) m_speed = 1.0f;
-			VECTOR3F vector = SphereLinearVec3(origin, s_start, end, m_speed);
-
-			if (vector.x == 0.0f && vector.y == 0.0f && vector.z == 0.0f)
-			{
-				m_eye = m_newEye;
-				m_speed = 0.0f;
-				CameraManager::GetInstance()->SetNowChangeTarget(false);
-			}
-			else 
-			{
-				VECTOR3F length = { m_newEye.x - origin.x,m_newEye.y - origin.y,m_newEye.z - origin.z};
-				DirectX::XMStoreFloat3(&length, DirectX::XMVector3Length(DirectX::XMLoadFloat3(&length)));
-
-				m_eye.x = m_focus.x + vector.x * length.x;
-				m_eye.y = m_focus.y + vector.y * length.y;
-				m_eye.z = m_focus.z + vector.z * length.z;
-			}
-#else
-			VECTOR3F normalDist = { m_newEye.x - m_eye.x,m_newEye.y - m_eye.y,m_newEye.z - m_eye.z };
-			float dist = ToDistVec3(normalDist);
-			normalDist = NormalizeVec3(normalDist);
-
-			m_eye.x += normalDist.x * m_speed;
-			m_eye.y += normalDist.y * m_speed;
-			m_eye.z += normalDist.z * m_speed;
-
-			m_speed+=0.02f;
-
-			if (dist <= 0.5f)
-			{
-				m_eye = m_newEye;
-				m_speed = 0.0f;
-				CameraManager::GetInstance()->SetNowChangeTarget(false);
-			}
-#endif		
-		}	
-
-		void Camera::NewEye(const VECTOR4F& target, const VECTOR4F& direction,
-			const float& focalLength, const float& heightAboveGround)
-		{
-			m_focus = target;
-			m_newEye.x = target.x - direction.x * focalLength;
-			m_newEye.y = target.y - direction.y * focalLength + heightAboveGround;
-			m_newEye.z = target.z - direction.z * focalLength;
-			m_newEye.w = 1.0f;
-		}
 
 		void Camera::DebugCamera()
 		{
@@ -283,21 +225,20 @@ namespace Source
 
 #else
 
-			if (m_oldDirection == m_direction)
+			if (m_eye == m_nextEye)
 			{
-				m_value = 0.6f;
+				m_value = 1.0f;
 				m_mode = CameraMode::LOCK_ON;
+
 				return;
 			}
-			m_value = 0.02f;
-			VECTOR3F n_Vec = LerpVec3(m_oldDirection, m_direction, m_value);
-			m_eye = m_object + n_Vec * 0.02f;
-			m_eye.y += m_heightAboveGround;
+
+			m_eye = LerpVec3(m_eye, m_nextEye, m_value);
 			m_camera->SetEye(m_eye);
 
-			m_oldDirection = m_direction;
 
-
+			m_value += 0.003f;
+			if (m_value >= 1.0f) m_value = 1.0f;
 #endif
 		}
 

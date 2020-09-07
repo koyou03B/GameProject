@@ -55,6 +55,6 @@ float4 main(VS_OUT pin) : SV_TARGET
         PS += BlinnPhongSpecular(N, point_light_direction, point_light_color, E, Ks, 20) * influence * influence;
     }
     
-    return pin.color * float4(A + D + S + PS +PD, 1.0f);
+    return pin.color * float4(A + D + S, 1.0f);
 
 }

@@ -24,6 +24,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imstb_truetype.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\BillBoard.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\BlendingJob.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\HalfBodyLayer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\PlayBackController.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Camera.h" />
@@ -64,6 +65,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_widgets.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BillBoard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BlendingJob.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\PlayBackController.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\ChunkyTriMesh.cpp" />
@@ -91,6 +93,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad.hlsli" />
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\Dissolve.hlsli" />
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.hlsli" />
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\FullScreen.hlsli" />
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\Function.hlsli" />
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\GeometricPrimitive.hlsli" />
@@ -129,6 +132,18 @@
       <AssemblerOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\Library\LibraryShader\%(Filename).cod</AssemblerOutputFile>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\Library\LibraryShader\%(Filename).cso</ObjectFileOutput>
       <AssemblerOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\Library\LibraryShader\%(Filename).cod</AssemblerOutputFile>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\FullScreen_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

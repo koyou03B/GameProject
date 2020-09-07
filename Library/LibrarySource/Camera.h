@@ -29,9 +29,6 @@ namespace Source
 
 			void MoveEye(const VECTOR4F& eye);
 
-			void NewEye(const VECTOR4F& target, const VECTOR4F& direction,
-				const float& focalLength, const float& heightAboveGround);
-
 			void DebugCamera();
 
 			inline const VECTOR4F& GetEye()		const { return m_eye; }
@@ -55,7 +52,6 @@ namespace Source
 
 		private:
 			VECTOR4F m_eye = {};
-			VECTOR4F m_newEye = {};
 			VECTOR4F m_focus = {};
 			VECTOR4F m_up = {};
 			VECTOR4F m_right = {};
@@ -126,6 +122,7 @@ namespace Source
 			inline void SetOldDistance(const VECTOR3F& oldDistance)  { this->m_oldDirection = oldDistance; }
 
 			inline void SetObject(const VECTOR3F& object)			 { this->m_object = object; }
+			inline void SetOldObject(const VECTOR3F& object)		 { this->m_oldObject = object; }
 			inline void SetTarget(const VECTOR3F& target)			 { this->m_target = target; }
 			inline void SetOldTarget(const VECTOR3F& oldTarget)		 { this->m_oldTarget = oldTarget; }
 			inline void SetLength(const VECTOR3F& length)			 { this->m_length = length; }
@@ -137,7 +134,9 @@ namespace Source
 	
 			inline void SetNextEye()
 			{
-
+				m_nextEye.x = m_object.x + m_direction.x * m_length.x + m_focalLength;
+				m_nextEye.y = m_object.y + m_direction.y * m_length.y + m_heightAboveGround;
+				m_nextEye.z = m_object.z + m_direction.z * m_length.z;
 			}
 
 
@@ -172,10 +171,11 @@ namespace Source
 
 			VECTOR3F m_eye = {};
 			VECTOR3F m_nextEye = {};
+
 			VECTOR3F m_target = {};
 			VECTOR3F m_oldTarget = {};
-			VECTOR3F m_length = {};
 
+			VECTOR3F m_length = {};
 			VECTOR3F m_angle = {};
 
 			float m_focalLength = 0.0f;

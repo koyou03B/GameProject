@@ -17,12 +17,6 @@ public:
 
 	void Render(ID3D11DeviceContext* immediateContext) override;
 
-	void Move(float& elapsedTime);
-
-	void Step(float& elapsedTime);
-
-	void Attack(float& elapsedTime);
-
 	void ImGui(ID3D11Device* device) override;
 
 	template<class T>
@@ -75,6 +69,16 @@ private:
 		FIGHTIDLE,
 		HEAL
 	} m_animationType = IDLE;
+
+	void Move(float& elapsedTime);
+
+	void Step(float& elapsedTime);
+
+	void Attack(float& elapsedTime);
+
+	void RestAnimationIdle();
+
+	void ChangeCharacter();
 
 	void Attacking(Animation currentAnimation, Animation nextAnimations[2],
 		CharacterParameter::Attack& attack,CharacterParameter::Collision& collision);

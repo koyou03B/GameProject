@@ -9,17 +9,7 @@
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
-
-CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation,2);
-CEREAL_CLASS_VERSION(CharacterParameter::Status, 2);
-CEREAL_CLASS_VERSION(CharacterParameter::Move, 2);
-CEREAL_CLASS_VERSION(CharacterParameter::Step, 2);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 2);
-CEREAL_CLASS_VERSION(CharacterParameter::Camera, 2);
-CEREAL_CLASS_VERSION(CharacterParameter::Collision, 2);
 CEREAL_CLASS_VERSION(Fighter, 11);
-
-
 void Fighter::Init()
 {
 	m_transformParm.position = { -10.0f,0.0f,0.0f };
@@ -54,7 +44,7 @@ void Fighter::Init()
 	m_changeParm.isPlay = false;
 
 
-	SerialVersionUpdate(2);
+	SerialVersionUpdate(4);
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str()))
 	{
@@ -101,34 +91,23 @@ void Fighter::Update(float& elapsedTime)
 
 			Attack(m_elapsedTime);
 
-			//ŠÖ”‰»«
-			if (m_blendAnimation.animationBlend.GetSampler().size() == 2)
-			{
-				if (m_statusParm.isAttack || m_stepParm.isStep)
-				{
-					if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
-					{
-						m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
-						if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
-						{
-							m_blendAnimation.animationBlend.ReleaseSampler(0);
-							m_statusParm.isAttack = false;
-							m_stepParm.isStep = false;
-							m_moveParm.isMove = false;
-							m_blendAnimation.animationBlend._blendRatio = 0.0f;
-							m_stepParm.speed = m_stepParm.maxSpeed;
-
-						}
-					}
-				}
-			}
+			ChangeCharacter();
+			
+			RestAnimationIdle();
 		}
 	}
 	else
 	{
-		//if (m_state)
-		//	m_state->Execute(this);
+		m_input = PAD.GetPad(0);
+
+		Step(m_elapsedTime);
+
+		Attack(m_elapsedTime);
+
+		RestAnimationIdle();
+
 	}
+
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
 	FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
 	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
@@ -181,13 +160,14 @@ void Fighter::Move(float& elapsedTime)
 {
 	if (m_stepParm.isStep || m_statusParm.isAttack) return;
 	if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
-	{	
+	{
 		if (!m_moveParm.isMove)
 		{
 			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
 			m_blendAnimation.animationBlend.AddSampler(Animation::WALK, m_model);
 			m_blendAnimation.animationBlend.AddSampler(Animation::RUN, m_model);
 			m_moveParm.isMove = true;
+			m_moveParm.isWalk = true;
 		}
 
 		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -202,67 +182,124 @@ void Fighter::Move(float& elapsedTime)
 		view._42 = 0.0f;
 		view._43 = 0.0f;
 		view._44 = 1.0f;
-		
+
 		DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
 		VECTOR3F stickVec(m_input->StickVectorLeft().x, 0.0f, m_input->StickVectorLeft().y);
 		DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
-		
+
 		VECTOR3F stickVector;
 		vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
 		DirectX::XMStoreFloat3(&stickVector, vStickVex);
-	
+
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+		// Giving an acceleration value 
+		// to the direction of the stick
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 		m_moveParm.velocity.x += stickVector.x * m_moveParm.accle.x;
 		m_moveParm.velocity.y += stickVector.y * m_moveParm.accle.y;
 		m_moveParm.velocity.z += stickVector.z * m_moveParm.accle.z;
 
-		//*-*-*-*-*-*-*-*-
-		// VectorLength
-		//*-*-*-*-*-*-*-*-
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+		// VectorLength be the speed
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 		float speed = ToDistVec3(m_moveParm.velocity);
 
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+		// Get the distance of the stick.
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 		float leftX = m_input->GetStickLeftXValue();
 		float leftY = m_input->GetStickLeftYValue();
-		float dean = sqrtf(leftX * leftX + leftY * leftY) / 32767;
+		float distance = sqrtf(leftX * leftX + leftY * leftY) / 32767;
 
 		VECTOR3F vector = {};
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+		// If it's faster than a deceleration.
+		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 		if (speed > m_moveParm.decleleration)
 		{
+			//*-*-*-*-*-*-*-*-
+			//Get Directions
+			//*-*-*-*-*-*-*-*-
 			vector = m_moveParm.velocity / speed;
 
-			m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.moveBlendRatio;
-
-			if (speed > m_moveParm.maxSpeed[0].x)
+			if (m_moveParm.isWalk)
 			{
-				if (0 < dean && dean < 0.7f)
-				{
+				//*-*-*-*-*-*-*-*-*-*-*-*-
+				//If it's over max speed.
+				//*-*-*-*-*-*-*-*-*-*-*-*-
+				if (speed > m_moveParm.maxSpeed[0].x)
 					m_moveParm.velocity = vector * m_moveParm.maxSpeed[0].x;
-					if (m_blendAnimation.animationBlend._blendRatio >= 0.7f)
+				else
+				{
+					m_moveParm.velocity -= vector * m_moveParm.decleleration;
+					//m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.moveBlendRatio;
+					//if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendValueRange[0])
+					//{
+					//	m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendValueRange[0];
+					//	m_moveParm.isWalk = true;
+
+					//}
+				}
+
+			}
+			else if (m_moveParm.isRun)
+			{
+				if (speed > m_moveParm.maxSpeed[1].x)
+					m_moveParm.velocity = vector * m_moveParm.maxSpeed[1].x;
+				else
+				{
+					m_moveParm.velocity -= vector * m_moveParm.decleleration;
+					//m_blendAnimation.animationBlend._blendRatio -= m_blendAnimation.moveBlendRatio;
+					//if (m_blendAnimation.animationBlend._blendRatio <= m_blendAnimation.blendValueRange[0])
+					//{
+					//	m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendValueRange[0];
+					//	m_moveParm.isRun = false;
+					//}
+				}
+
+			}
+
+			//*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+			//Calculation of Blend Value
+			//*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+			if (0.0f < distance && distance < m_blendAnimation.blendValueRange[0])
+			{
+				if (m_moveParm.isRun)
+				{
+					m_blendAnimation.animationBlend._blendRatio -= m_blendAnimation.moveBlendRatio;
+					if (m_blendAnimation.animationBlend._blendRatio <= m_blendAnimation.blendValueRange[0])
 					{
-						m_blendAnimation.animationBlend._blendRatio = 0.7f;
+						m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendValueRange[0];
+						m_moveParm.isRun = false;
 					}
 				}
 				else
 				{
-					m_moveParm.velocity = vector * m_moveParm.maxSpeed[1].x;
+					m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.moveBlendRatio;
+					if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendValueRange[0])
+					{
+						m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendValueRange[0];
+						m_moveParm.isWalk = true;
+
+					}
 				}
+
 			}
 			else
 			{
-				m_moveParm.velocity -= vector * m_moveParm.decleleration;
-				if (m_blendAnimation.animationBlend._blendRatio >= 0.7)
+				m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.moveBlendRatio;
+				if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendValueRange[1])
 				{
-					m_blendAnimation.animationBlend._blendRatio -= m_blendAnimation.moveBlendRatio;
-					if (m_blendAnimation.animationBlend._blendRatio >= 0.7f)
-						m_blendAnimation.animationBlend._blendRatio = 0.7f;
+					m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendValueRange[1];
 				}
-				
+				m_moveParm.isRun = true;
+				m_moveParm.isWalk = false;
+
 			}
 
+
 			m_transformParm.position += m_moveParm.velocity * elapsedTime;
-			if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
-			{
-				m_blendAnimation.animationBlend._blendRatio = 1.0f;
-			}
+
 
 			VECTOR3F angle = m_transformParm.angle;
 
@@ -311,6 +348,8 @@ void Fighter::Move(float& elapsedTime)
 				m_blendAnimation.animationBlend.ReleaseSampler(1);
 				m_blendAnimation.animationBlend.ReleaseSampler(1);
 				m_moveParm.isMove = false;
+				m_moveParm.isWalk = false;
+				m_moveParm.isRun = false;
 			}
 		}
 	}
@@ -354,7 +393,7 @@ void Fighter::Attack(float& elapsedTime)
 		Animation nextaAnimtions[] = { Animation::LEFTPUNCHING,Animation::LEFTKICKING };
 
 		int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
-		if (samplerCount > 2)
+		if (samplerCount > m_blendAnimation.samplerSize)
 		{
 			m_blendAnimation.animationBlend._blendRatio -= m_blendAnimation.idleBlendRtio;
 			if (m_blendAnimation.animationBlend._blendRatio <= 0.0f)
@@ -397,6 +436,41 @@ void Fighter::Attack(float& elapsedTime)
 		break;
 	default:
 		break;
+	}
+}
+
+void Fighter::RestAnimationIdle()
+{
+	if (m_blendAnimation.animationBlend.GetSampler().size() == m_blendAnimation.samplerSize)
+	{
+		if (m_statusParm.isAttack || m_stepParm.isStep)
+		{
+			if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
+			{
+				m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+				if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
+				{
+					m_blendAnimation.animationBlend.ReleaseSampler(0);
+					m_statusParm.isAttack = false;
+					m_stepParm.isStep = false;
+					m_moveParm.isMove = false;
+					m_blendAnimation.animationBlend._blendRatio = 0.0f;
+					m_stepParm.speed = m_stepParm.maxSpeed;
+
+				}
+			}
+		}
+	}
+
+}
+
+void Fighter::ChangeCharacter()
+{
+	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT) == 1)
+	{
+		m_changeParm.changeType = CharacterParameter::Change::PlayerType::ARCHER;
+
+		MESSENGER.MessageFromPlayer(m_id, MessengType::CHANGE_PLAYER);
 	}
 }
 
@@ -598,6 +672,18 @@ void Fighter::ImGui(ID3D11Device* device)
 		}
 
 		{
+			static float blendValue0 = 0.7f;
+			ImGui::SliderFloat("WalkBlendValue", &blendValue0, 0.0f, 1.0f);
+			if (ImGui::Button("Set WalkBlendValue"))
+				m_blendAnimation.blendValueRange[0] = blendValue0;
+
+			static float blendValue1 = 1.0f;
+			ImGui::SliderFloat("RunBlendValue", &blendValue1, 0.0f, 1.0f);
+			if (ImGui::Button("Set RunBlendValue"))
+				m_blendAnimation.blendValueRange[1] = blendValue1;
+		}
+
+		{
 			auto animCount = m_model->_resource->_animationTakes.size();
 
 			static int currentAnim = 0;
@@ -764,8 +850,7 @@ void Fighter::ImGui(ID3D11Device* device)
 		ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 5.0f);
 
 		m_stepParm.deceleration = VECTOR3F(accel, 0.0f, accel);
-		m_stepParm.speed = VECTOR3F(speed, 0.0f, speed);
-		m_blendAnimation.animtionSpeed = animationSpeed;
+
 	}
 
 	//**************************************
@@ -948,9 +1033,9 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations[2],
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 	m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.attackBlendRtio;
-	if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
+	if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
 	{
-		m_blendAnimation.animationBlend._blendRatio = 1.0f;
+		m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendRatioMax;
 
 		m_blendAnimation.animationBlend.ReleaseSampler(0);
 		m_blendAnimation.animationBlend.FalseAnimationLoop(0);
@@ -1074,7 +1159,7 @@ void Fighter::Stepping(float& elapsedTime)
 	// Set the direction and move it.
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	m_stepParm.speed -= m_stepParm.deceleration;
-	if (m_stepParm.speed.x <= 0)
+	if (m_stepParm.speed.x <= 0.0f)
 		m_stepParm.speed = { 0.0f,0.0f,0.0f };
 
 	m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_stepParm.speed.x);

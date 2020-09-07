@@ -195,8 +195,9 @@ namespace Source
 				m_constantBuffer->Deactivate(immediateContext);
 			}
 
-			m_skinnedMeshVS->Deactivate(immediateContext);
 			m_skinnedMeshPS->Deactivate(immediateContext);
+			m_skinnedMeshVS->Deactivate(immediateContext);
+
 		}
 	}
 }

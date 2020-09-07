@@ -146,6 +146,21 @@ void MetaAI::DeterminationOfPlayer(int id, MessengType type)
 			assert(id != nextPlay);
 
 			m_players[nextPlay]->GetChangeComand().isPlay = true;
+		
+			VECTOR3F playerPosition = m_players[nextPlay]->GetWorldTransform().position;
+			VECTOR3F enemyPosition = m_enemys[0]->GetWorldTransform().position;
+
+			VECTOR3F distance = playerPosition - enemyPosition;
+			distance = NormalizeVec3(distance);
+			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+			Source::CameraControlle::CameraManager().GetInstance()->SetObject(playerPosition);
+			Source::CameraControlle::CameraManager().GetInstance()->SetLength(m_players[nextPlay]->GetCamera().lenght);
+			Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(m_players[nextPlay]->GetCamera().focalLength);
+			Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(m_players[nextPlay]->GetCamera().heightAboveGround);
+			Source::CameraControlle::CameraManager().GetInstance()->SetNextEye();
+			Source::CameraControlle::CameraManager().GetInstance()->SetValue(0.f);
+			Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager().CameraMode::CHANGE_OBJECT);
+		
 		}
 		break;
 	}

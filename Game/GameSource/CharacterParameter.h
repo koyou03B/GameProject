@@ -75,7 +75,7 @@ public:
 		VECTOR3F accle = {};
 		VECTOR3F maxSpeed[2] = {};
 		VECTOR3F velocity = {};
-
+		VECTOR3F x = {};
 		float decleleration = 0.0f;
 		float turnSpeed = 0.0f;
 
@@ -253,12 +253,14 @@ public:
 	{
 		AnimationBlend animationBlend;
 		PartialBlendAnimation partialBlend;
-		uint32_t animtionTime = 1000;
 		float animtionSpeed = 1.0f;
 		float attackBlendRtio = 0.0f;
 		float idleBlendRtio = 0.0f;
 		float moveBlendRatio = 0.0f;
+		float blendValueRange[2] = {};
 
+		const int samplerSize = 2;
+		const float blendRatioMax = 1.0f;
 		uint32_t serialVersion = 0;
 
 		template<class T>
@@ -270,7 +272,9 @@ public:
 				(
 					attackBlendRtio,
 					idleBlendRtio,
-					moveBlendRatio
+					moveBlendRatio,
+					blendValueRange[0],
+					blendValueRange[1]
 				);
 			}
 			else
@@ -356,3 +360,12 @@ public:
 	};
 
 };
+
+
+CEREAL_CLASS_VERSION(CharacterParameter::Status, 4);
+CEREAL_CLASS_VERSION(CharacterParameter::Move, 4);
+CEREAL_CLASS_VERSION(CharacterParameter::Camera, 4);
+CEREAL_CLASS_VERSION(CharacterParameter::Collision, 4);
+CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 4);
+CEREAL_CLASS_VERSION(CharacterParameter::Step, 4);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 4);

@@ -50,15 +50,16 @@ bool Game::Initialize(ID3D11Device* device)
 
 void Game::Update(float& elapsedTime)
 {	
-	VECTOR3F distance = DistancePlayerToEnemy();
-	distance = NormalizeVec3(distance);
-	Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-	Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+
 
 	if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() != 
 		Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
 	{
 
+		VECTOR3F distance = DistancePlayerToEnemy();
+		distance = NormalizeVec3(distance);
+		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
 		CharacterAI* player = m_metaAI->GetPlayCharacter();
 		VECTOR3F pos = player->GetWorldTransform().position;
@@ -70,9 +71,9 @@ void Game::Update(float& elapsedTime)
 		m_metaAI->UpdateOfEnemys(elapsedTime);
 		m_metaAI->UpdateOfPlayers(elapsedTime);
 	}
-
-
-	//GetEntityManager().Update(elapsedTime);
+	else
+		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+	
 
 //	if (GetEntityManager().FindEntity(2).HasComponent<StaticModel>())
 //	{
@@ -270,9 +271,12 @@ void Game::ImGui()
 
 			player->ImGui(Framework::GetInstance().GetDevice());
 			Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-			Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
 			Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
 			Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
+
+			VECTOR3F currentDistance = DistancePlayerToEnemy();
+			currentDistance = NormalizeVec3(currentDistance);
 
 			if (ImGui::Button("kkkk"))
 			{
@@ -300,15 +304,18 @@ void Game::ImGui()
 
 			if (!player->GetChangeComand().isPlay)
 			{
-
 				VECTOR3F distance = DistancePlayerToEnemy();
 				distance = NormalizeVec3(distance);
 				Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-
 				player = m_metaAI->GetPlayCharacter();
 				VECTOR3F position = player->GetWorldTransform().position;
 				Source::CameraControlle::CameraManager().GetInstance()->SetObject(position);
-				//		Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager().CameraMode::CHANGE_OBJECT);
+				Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
+				Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
+				Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
+				Source::CameraControlle::CameraManager().GetInstance()->SetNextEye();
+				Source::CameraControlle::CameraManager().GetInstance()->SetValue(0.f);
+				Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager().CameraMode::CHANGE_OBJECT);
 			}
 		}
 	}
