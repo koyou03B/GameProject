@@ -142,7 +142,7 @@ namespace Source
 			inline float& GetStickLeftYValue() { return m_stickLeftYValue; }
 
 			int GetButtons(XINPUT_GAMEPAD_BUTTONS command) { return m_buttons[command]; }
-
+			void ResetButton(XINPUT_GAMEPAD_BUTTONS command) { m_buttons[command] = -1; }
 		protected:
 			int m_buttons[GAMEPAD_MAX_BUTTON] = {};
 			int m_userIndex = -1;

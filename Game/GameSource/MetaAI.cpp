@@ -100,13 +100,8 @@ void MetaAI::UpdateOfPlayers(float& elapsedTime)
 
 void MetaAI::RenderOfPlayer(ID3D11DeviceContext* immediateContext, uint16_t characterNomber)
 {
-	auto playerCount = m_players.size();
-
-	for (int i = 0; i < playerCount; ++i)
-	{
-		if (m_players[i] != nullptr)
-			m_players[i]->Render(immediateContext);
-	}
+	if (m_players[characterNomber] != nullptr)
+		m_players[characterNomber]->Render(immediateContext);
 }
 
 void MetaAI::ImGuiOfPlayer(ID3D11Device* device, uint16_t characterNomber)

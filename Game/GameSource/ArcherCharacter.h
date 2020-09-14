@@ -3,6 +3,45 @@
 #include "CharacterParameter.h"
 #include ".\LibrarySource\Vector.h"
 
+struct AimMode
+{
+	CharacterParameter::Camera	aimCameraParm;
+	CharacterParameter::Move	aimMoveParm;
+	std::shared_ptr<Source::Sprite::SpriteBatch> scopeTexture;
+	VECTOR2F texturePosition;
+	VECTOR2F textureScale;
+	VECTOR2F textureSize;
+	VECTOR4F textureColor;
+	int serialVersion = 0;
+	template<class T>
+	void serialize(T& archive, const std::uint32_t version)
+	{
+		if (serialVersion <= version)
+		{
+			archive
+			(
+				aimCameraParm,
+				aimMoveParm,
+				texturePosition,
+				textureScale,
+				textureSize,
+				textureColor
+			);
+		}
+		else
+		{
+			archive
+			(
+				aimCameraParm,
+				aimMoveParm,
+				texturePosition,
+				textureScale,
+				textureSize,
+				textureColor
+			);
+		}
+	}
+};
 
 class Archer : public CharacterAI
 {
@@ -51,36 +90,21 @@ public:
 		}
 	}
 private:
-	enum Animation
-	{
-		IDLE,
-		WALK,
-		RUN,
-		DIVE,
-		DrawArrow,
-		Idle2,
-		IdleWalk,
-		AimRecoil,
-		Impact,
-		Death,
-		Spell,
-		AimWalk
-	} m_animationType = IDLE;
-
-	void Move(float& elapsedTime);
-
-	void Step(float& elapsedTime);
-
-	void Attack(float& elapsedTime);
 
 	void RestAnimationIdle();
 
-	void ChangeCharacter();
+	void Aim();
+	void Aiming();
 
-	void Attacking(Animation currentAnimation, Animation nextAnimations[2],
-		CharacterParameter::Attack& attack, CharacterParameter::Collision& collision);
+	void Move(float& elapsedTime);
+	void AimMove(float& elapsedTime) {};
 
+	void Step(float& elapsedTime);
 	void Stepping(float& elapsedTime);
+
+	void Shot();
+
+	void ChangeCharacter();
 
 	void SerialVersionUpdate(uint32_t version)
 	{
@@ -102,12 +126,40 @@ private:
 	}
 
 private:
-	CharacterParameter::BlendAnimation m_blendAnimation;
-	CharacterParameter::DebugObjects   m_debugObjects;
-	CharacterParameter::Step				m_stepParm;
-	std::vector<CharacterParameter::Effect> m_effect;
-	std::vector<CharacterParameter::Attack>	m_attackParm;
-	Source::Input::Input* m_input;
+	enum Animation
+	{
+		IDLE,
+		WALK,
+		RUN,
+		DIVE,
+		AIMRECOIL,
+		AIM,
+		AIMWALKUNDER,
+		ARROWSHOT,
+		IMPACT,
+		DEATH,
+		SPELL,
+		AIMWALK
+	} m_animationType = IDLE;
+
+	enum class Mode
+	{
+		Moving,
+		Aiming
+	};
+
+	Mode m_mode = Mode::Moving;
+
 	float m_padDeadLine;
 	float m_elapsedTime;
+
+	AimMode									m_aimMode;
+	Source::Input::Input*					m_input;
+
+	CharacterParameter::Step				m_stepParm;
+	CharacterParameter::DebugObjects		m_debugObjects;
+	CharacterParameter::BlendAnimation		m_blendAnimation;
+	std::vector<CharacterParameter::Effect> m_effect;
+	std::vector<CharacterParameter::Attack>	m_attackParm;
+
 };

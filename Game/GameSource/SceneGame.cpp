@@ -19,6 +19,7 @@ bool Game::Initialize(ID3D11Device* device)
 		m_metaAI->Init();
 		m_stage.Init();
 		MESSENGER.GetInstance().SetMetaAI(m_metaAI);
+
 	}
 
 
@@ -44,7 +45,21 @@ bool Game::Initialize(ID3D11Device* device)
 		Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
 	}
 
+	{
+		m_frameBuffer = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
+			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
+		m_fog = std::make_unique<Source::Fog::Fog>(device);
 
+
+		m_fog->_fogBuffer->data.fogStartDepth = .0f;
+		m_fog->_fogBuffer->data.fogHeightFallOff = 0.000f;
+		m_fog->_fogBuffer->data.fogGlobalDensity = 0.00f;
+		m_fog->_fogBuffer->data.fogColor = VECTOR3F(1.0f, 0.0f, 0.0f);
+		m_fog->_fogBuffer->data.fogHighlightColor = VECTOR3F(1.0f, 1.0f, 1.0f);
+
+		m_screenFilter = std::make_unique<Source::ScreenFilter::ScreenFilter>(device);
+
+	}
 	return true;
 }
 
@@ -136,24 +151,27 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 {
 	VECTOR4F lightDirection(0, -1, 1, 0);
 
-	Source::CameraControlle::CameraManager().GetInstance()->Activate(immediateContext);
-	m_sceneConstantBuffer->Activate(immediateContext, SLOT2, true, true);
+	{
+		m_frameBuffer->Clear(immediateContext);
+		m_frameBuffer->Activate(immediateContext);
 
-	m_stage.Render(immediateContext);
+		m_sceneConstantBuffer->Activate(immediateContext, SLOT2, true, true);
+		Source::CameraControlle::CameraManager().GetInstance()->Activate(immediateContext);
 
-	m_metaAI->RenderOfEnemy(immediateContext, 0);
-	
-	m_metaAI->RenderOfPlayer(immediateContext, 0);
-	m_metaAI->RenderOfPlayer(immediateContext, 1);
-	//m_metaAI->RenderOfPlayer(immediateContext, 2);
+		m_stage.Render(immediateContext);
 
+		m_metaAI->RenderOfEnemy(immediateContext, 0);
 
-//	
+		m_metaAI->RenderOfPlayer(immediateContext, 0);
+		m_metaAI->RenderOfPlayer(immediateContext, 1);
+		//m_metaAI->RenderOfPlayer(immediateContext, 2);
+		
+		m_frameBuffer->Deactivate(immediateContext);
+		m_fog->Blit(immediateContext, m_frameBuffer->GetRenderTargetShaderResourceView().Get(), m_frameBuffer->GetDepthStencilShaderResourceView().Get());
 
-
-	m_sceneConstantBuffer->Deactivate(immediateContext);
-	Source::CameraControlle::CameraManager().GetInstance()->Deactivate(immediateContext);
-
+		Source::CameraControlle::CameraManager().GetInstance()->Deactivate(immediateContext);
+		m_sceneConstantBuffer->Deactivate(immediateContext);
+	}
 }
 
 void Game::ImGui()
@@ -255,6 +273,54 @@ void Game::ImGui()
 
 		}
 
+		if (ImGui::CollapsingHeader("Fog"))
+		{
+			ImGui::InputFloat("fogGlobalDensity", &m_fog->_fogBuffer->data.fogGlobalDensity, 0.0001f, 0.001f, "%.4f");
+			ImGui::InputFloat("fogHeightFalloff", &m_fog->_fogBuffer->data.fogHeightFallOff, 0.0001f, 0.001f, "%.4f");
+			ImGui::InputFloat("fogStartDepth", &m_fog->_fogBuffer->data.fogStartDepth, 0.1f, 1.0f);
+
+			ImGuiColorEditFlags flag = ImGuiColorEditFlags_Float; // 0 ~ 255表記ではなく、0.0 ~ 1.0表記にします。
+
+			ImGui::ColorEdit3("fogColor", reinterpret_cast<float*>(&m_fog->_fogBuffer->data.fogColor), flag);
+			ImGui::ColorEdit3("fogHighlightColor", reinterpret_cast<float*>(&m_fog->_fogBuffer->data.fogHighlightColor), flag);
+
+			ImGui::InputFloat("R", &m_fog->_fogBuffer->data.fogColor.x, 0.0f, 1.0f, "%f");
+			ImGui::InputFloat("G", &m_fog->_fogBuffer->data.fogColor.y, 0.0f, 1.0f, "%f");
+			ImGui::InputFloat("B", &m_fog->_fogBuffer->data.fogColor.z, 0.0f, 1.0f, "%f");
+		}
+
+		if (ImGui::CollapsingHeader("ScreenFilter"))
+		{
+			//--------------
+			// Bright(明度)
+			//--------------
+			static float bright = 0.0f;
+			ImGui::SliderFloat("Bright", &bright, -1.0f, 1.0f);
+			m_screenFilter->_screenBuffer->data.bright = bright;
+
+			//--------------
+			// Contrast(濃淡)
+			//--------------
+			static float contrast = 1.0f;
+			ImGui::SliderFloat("Contrast", &contrast, -1.0f, 1.0f);
+			m_screenFilter->_screenBuffer->data.contrast = contrast;
+
+			//-----------------
+			// Saturate(彩度)
+			//-----------------
+			static float saturate = 1.0f;
+			ImGui::SliderFloat("Saturate", &saturate, -1.0f, 1.0f);
+			m_screenFilter->_screenBuffer->data.saturate = saturate;
+
+			//--------
+			// Color
+			//--------
+			static float color[4] = { 1.f, 1.f, 1.f, 1.f };
+			ImGuiColorEditFlags flag = ImGuiColorEditFlags_Float; // 0 ~ 255表記ではなく、0.0 ~ 1.0表記にします。
+			ImGui::ColorEdit4("Color", color, flag);
+			m_screenFilter->_screenBuffer->data.screenColor = VECTOR4F(color[0], color[1], color[2], color[3]);
+
+		}
 		if (ImGui::CollapsingHeader("Camera"))
 		{
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ

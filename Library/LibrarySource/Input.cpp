@@ -298,6 +298,11 @@ namespace Source
 				else if (m_buttons[PAD_UP] >= 1)
 				{
 					m_buttons[PAD_UP]++;
+
+					if (m_buttons[PAD_UP] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_UP] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -321,6 +326,10 @@ namespace Source
 				else if (m_buttons[PAD_DOWN] >= 1)
 				{
 					m_buttons[PAD_DOWN]++;
+					if (m_buttons[PAD_DOWN] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_DOWN] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -344,6 +353,10 @@ namespace Source
 				else if (m_buttons[PAD_LEFT] >= 1)
 				{
 					m_buttons[PAD_LEFT]++;
+					if (m_buttons[PAD_LEFT] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_LEFT] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -367,6 +380,10 @@ namespace Source
 				else if (m_buttons[PAD_RIGHT] >= 1)
 				{
 					m_buttons[PAD_RIGHT]++;
+					if (m_buttons[PAD_RIGHT] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_RIGHT] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -390,6 +407,10 @@ namespace Source
 				else if (m_buttons[PAD_START] >= 1)
 				{
 					m_buttons[PAD_START]++;
+					if (m_buttons[PAD_START] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_START] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -413,6 +434,10 @@ namespace Source
 				else if (m_buttons[PAD_BACK] >= 1)
 				{
 					m_buttons[PAD_BACK]++;
+					if (m_buttons[PAD_BACK] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_BACK] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -436,6 +461,10 @@ namespace Source
 				else if (m_buttons[PAD_LTHUMB] >= 1)
 				{
 					m_buttons[PAD_LTHUMB]++;
+					if (m_buttons[PAD_LTHUMB] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_LTHUMB] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -460,6 +489,10 @@ namespace Source
 				else if (m_buttons[PAD_RTHUMB] >= 1)
 				{
 					m_buttons[PAD_RTHUMB]++;
+					if (m_buttons[PAD_RTHUMB] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_RTHUMB] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -483,6 +516,10 @@ namespace Source
 				else if (m_buttons[PAD_LSHOULDER] >= 1)
 				{
 					m_buttons[PAD_LSHOULDER]++;
+					if (m_buttons[PAD_LSHOULDER] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_LSHOULDER] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -507,6 +544,10 @@ namespace Source
 				else if (m_buttons[PAD_RSHOULDER] >= 1)
 				{
 					m_buttons[PAD_RSHOULDER]++;
+					if (m_buttons[PAD_RSHOULDER] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_RSHOULDER] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -531,6 +572,10 @@ namespace Source
 				else if (m_buttons[PAD_A] >= 1)
 				{
 					m_buttons[PAD_A]++;
+					if (m_buttons[PAD_A] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_A] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -555,6 +600,10 @@ namespace Source
 				else if (m_buttons[PAD_B] >= 1)
 				{
 					m_buttons[PAD_B]++;
+					if (m_buttons[PAD_B] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_B] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -579,6 +628,10 @@ namespace Source
 				else if (m_buttons[PAD_X] >= 1)
 				{
 					m_buttons[PAD_X]++;
+					if (m_buttons[PAD_X] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_X] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -603,6 +656,10 @@ namespace Source
 				else if (m_buttons[PAD_Y] >= 1)
 				{
 					m_buttons[PAD_Y]++;
+					if (m_buttons[PAD_Y] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_Y] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -695,6 +752,10 @@ namespace Source
 				else if (m_buttons[CrossKey[angle]] >= 1)
 				{
 					m_buttons[CrossKey[angle]]++;
+					if (m_buttons[CrossKey[angle]] >= INT_MAX * 0.5)
+					{
+						m_buttons[CrossKey[angle]] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -722,6 +783,10 @@ namespace Source
 				else if (m_buttons[PAD_X] >= 1)
 				{
 					m_buttons[PAD_X]++;
+					if (m_buttons[PAD_X] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_X] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -745,6 +810,10 @@ namespace Source
 				else if (m_buttons[PAD_A] >= 1)
 				{
 					m_buttons[PAD_A]++;
+					if (m_buttons[PAD_A] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_A] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -768,6 +837,10 @@ namespace Source
 				else if (m_buttons[PAD_B] >= 1)
 				{
 					m_buttons[PAD_B]++;
+					if (m_buttons[PAD_B] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_B] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -791,6 +864,10 @@ namespace Source
 				else if (m_buttons[PAD_Y] >= 1)
 				{
 					m_buttons[PAD_Y]++;
+					if (m_buttons[PAD_Y] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_Y] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -814,6 +891,10 @@ namespace Source
 				else if (m_buttons[PAD_LSHOULDER] >= 1)
 				{
 					m_buttons[PAD_LSHOULDER]++;
+					if (m_buttons[PAD_LSHOULDER] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_LSHOULDER] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -837,6 +918,10 @@ namespace Source
 				else if (m_buttons[PAD_RSHOULDER] >= 1)
 				{
 					m_buttons[PAD_RSHOULDER]++;
+					if (m_buttons[PAD_RSHOULDER] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_RSHOULDER] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -860,6 +945,10 @@ namespace Source
 				else if (m_buttons[PAD_LTHUMB] >= 1)
 				{
 					m_buttons[PAD_LTHUMB]++;
+					if (m_buttons[PAD_LTHUMB] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_LTHUMB] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -883,6 +972,10 @@ namespace Source
 				else if (m_buttons[PAD_RTHUMB] >= 1)
 				{
 					m_buttons[PAD_RTHUMB]++;
+					if (m_buttons[PAD_RTHUMB] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_RTHUMB] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -906,6 +999,10 @@ namespace Source
 				else if (m_buttons[PAD_BACK] >= 1)
 				{
 					m_buttons[PAD_BACK]++;
+					if (m_buttons[PAD_BACK] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_BACK] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else
@@ -929,6 +1026,10 @@ namespace Source
 				else if (m_buttons[PAD_START] >= 1)
 				{
 					m_buttons[PAD_START]++;
+					if (m_buttons[PAD_START] >= INT_MAX * 0.5)
+					{
+						m_buttons[PAD_START] = static_cast<int>(INT_MAX * 0.5);
+					}
 				}
 			}
 			else

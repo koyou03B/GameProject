@@ -6,7 +6,7 @@ namespace Source
 {
 	namespace Sprite
 	{
-		SpriteBatch::SpriteBatch(ID3D11Device* device, const char* filename, UINT maxInstance)
+		SpriteBatch::SpriteBatch(ID3D11Device* device, const char* filename, const char* noiseTexName, UINT maxInstance)
 		{
 			HRESULT hr = S_OK;
 
@@ -54,71 +54,23 @@ namespace Source
 			delete[] instances;
 
 			bool sRGB = false;
+
 			m_spriteVS = std::make_unique<Source::Shader::VertexShader<Vertex>>(device, "../Library/LibraryShader/SpriteBatch_vs.cso");
 			m_spritePS = std::make_unique<Source::Shader::PixelShader>(device, "../Library/LibraryShader/SpriteBatch_ps.cso");
 
 			hr = Source::Texture::LoadTextureFromFile(device, filename, m_shaderResourceView.GetAddressOf(), sRGB);
 			hr = Source::Texture::Texture2dDescription(m_shaderResourceView.Get(), m_texture2dDesc);
-		}
 
-		SpriteBatch::SpriteBatch(ID3D11Device* device, const char* filename, const char* noisTexName, UINT maxInstance)
-		{
-			HRESULT hr = S_OK;
-
-			Vertex vertices[] =
+			if (noiseTexName != "")
 			{
-				{ VECTOR3F(0, 0, 0), VECTOR2F(0, 0) },
-				{ VECTOR3F(1, 0, 0), VECTOR2F(1, 0) },
-				{ VECTOR3F(0, 1, 0), VECTOR2F(0, 1) },
-				{ VECTOR3F(1, 1, 0), VECTOR2F(1, 1) },
-			};
-
-			D3D11_BUFFER_DESC bufferDesc = {};
-			bufferDesc.ByteWidth = sizeof(vertices);
-			bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-			bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			bufferDesc.CPUAccessFlags = 0;
-			bufferDesc.MiscFlags = 0;
-			bufferDesc.StructureByteStride = 0;
-			D3D11_SUBRESOURCE_DATA subresource_data = {};
-			subresource_data.pSysMem = vertices;
-			subresource_data.SysMemPitch = 0; //Not use for vertex buffers.
-			subresource_data.SysMemSlicePitch = 0; //Not use for vertex buffers.
-			hr = device->CreateBuffer(&bufferDesc, &subresource_data, m_vertexBuffer.GetAddressOf());
-			if (FAILED(hr))
-				assert(!"Could not Create a VertexBuffer");
-
-			Instance* instances = new Instance[MAX_INSTANCES];
-			{
-				D3D11_BUFFER_DESC bufferDesc = {};
-				D3D11_SUBRESOURCE_DATA subresourceData = {};
-
-				bufferDesc.ByteWidth = static_cast<UINT>(sizeof(Instance) * MAX_INSTANCES);
-				bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-				bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-				bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-				bufferDesc.MiscFlags = 0;
-				bufferDesc.StructureByteStride = 0;
-				subresourceData.pSysMem = instances;
-				subresourceData.SysMemPitch = 0; //Not use for vertex buffers.mm 
-				subresourceData.SysMemSlicePitch = 0; //Not use for vertex buffers.
-				hr = device->CreateBuffer(&bufferDesc, &subresourceData, m_instanceBuffer.GetAddressOf());
-				if (FAILED(hr))
-					assert(!"Could not Create a InstanceBuffer");
+				hr = Source::Texture::LoadTextureFromFile(device, noiseTexName, m_dissolveShaderResourceView.GetAddressOf(), sRGB);
+				hr = Source::Texture::Texture2dDescription(m_dissolveShaderResourceView.Get(), m_dissolveTexture2dDesc);
 			}
-			delete[] instances;
+			else
+			{
+				Texture::MakeDummyTexture(device, m_dissolveShaderResourceView.GetAddressOf());
 
-			bool sRGB = false;
-
-			m_spriteVS = std::make_unique<Source::Shader::VertexShader<Vertex>>(device, "../Library/LibraryShader/SpriteBatch_vs.cso");
-			m_spritePS = std::make_unique<Source::Shader::PixelShader>(device, "../Library/LibraryShader/SpriteDissolve_ps.cso");
-
-			hr = Source::Texture::LoadTextureFromFile(device, filename, m_shaderResourceView.GetAddressOf(), sRGB);
-			hr = Source::Texture::Texture2dDescription(m_shaderResourceView.Get(), m_texture2dDesc);
-
-			hr = Source::Texture::LoadTextureFromFile(device, noisTexName, m_dissolveShaderResourceView.GetAddressOf(), sRGB);
-			hr = Source::Texture::Texture2dDescription(m_dissolveShaderResourceView.Get(), m_dissolveTexture2dDesc);
-
+			}
 		}
 
 		void SpriteBatch::Begin(ID3D11DeviceContext* immediateContext)
@@ -131,12 +83,14 @@ namespace Source
 			ID3D11Buffer* vbs[2] = { m_vertexBuffer.Get(), m_instanceBuffer.Get() };
 			immediateContext->IASetVertexBuffers(0, 2, vbs, strides, offsets);
 			immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ADD), nullptr, 0xFFFFFFFF);
 			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_FALSE), 1);
 			immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CULL_BACK));
 
 			immediateContext->PSSetShaderResources(SLOT0, 1, m_shaderResourceView.GetAddressOf());
-			if (m_dissolveShaderResourceView.Get())
-				immediateContext->PSSetShaderResources(SLOT1, 1, m_dissolveShaderResourceView.GetAddressOf());
+			immediateContext->PSSetShaderResources(SLOT1, 1, m_dissolveShaderResourceView.GetAddressOf());
+			
 			immediateContext->PSSetSamplers(0, 1, Framework::GetSamplerState(Framework::SS_MIRROR));
 
 			UINT numViewports = 1;

@@ -11,9 +11,6 @@ bool Framework::Initialize()
 	CreateBlendState();
 	CreateSamplerState();
 
-	m_texture = std::make_shared<Source::SpriteData::SpriteData>();
-	m_texture->Load(m_device.Get());
-
 	SoundTrack.Load();
 	m_volume[0] = 0.0f;
 	m_volume[1] = 1.0f;
@@ -241,7 +238,7 @@ bool Framework::CreateRasterizerState()
 			rasterizerDesc.DepthBias = 0;
 			rasterizerDesc.DepthBiasClamp = 0;
 			rasterizerDesc.SlopeScaledDepthBias = 0;
-			rasterizerDesc.DepthClipEnable = TRUE;
+			rasterizerDesc.DepthClipEnable = FALSE;
 			rasterizerDesc.ScissorEnable = FALSE;
 			rasterizerDesc.MultisampleEnable = FALSE;
 			rasterizerDesc.AntialiasedLineEnable = FALSE;

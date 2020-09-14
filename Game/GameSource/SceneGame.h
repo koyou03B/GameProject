@@ -11,7 +11,7 @@
 #include ".\LibrarySource\FrameBuffer.h"
 #include ".\LibrarySource\ConstantBuffer.h"
 #include ".\LibrarySource\EntityComponentSystem.h"
-
+#include ".\LibrarySource\ScreenFilter.h"
 #ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
 #include "..\External_libraries\imgui\imgui_impl_dx11.h"
@@ -34,6 +34,8 @@ class Game : public Scene
 	std::shared_ptr<MetaAI> m_metaAI;
 	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer;
 	std::unique_ptr<Source::Fog::Fog> m_fog;
+	std::unique_ptr<Source::ScreenFilter::ScreenFilter> m_screenFilter;
+
 	Stage m_stage;
 public:
 	Game() = default;

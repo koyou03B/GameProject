@@ -4,7 +4,7 @@
 
 bool Title::Initialize(ID3D11Device* device)
 {
-	m_sprite = Framework::GetInstance().GetTexture(Source::SpriteData::TextureLabel::TITLE);
+	m_sprite = TEXTURELOADER.GetTexture(Source::SpriteLoad::TextureLabel::TITLE);
 	m_frameBuffer = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), 
 		static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
 		false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
@@ -178,5 +178,4 @@ void Title::ImGui()
 
 void Title::Uninitialize()
 {
-
 }

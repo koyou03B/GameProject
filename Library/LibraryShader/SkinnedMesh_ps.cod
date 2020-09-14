@@ -149,7 +149,8 @@ mov r0.xyz, r0.xyzx
 
 #line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
 mov r7.xyz, -r3.xyzx
-dp3 r0.w, r2.xyzx, r7.xyzx  // r0.w <- D
+dp3 r0.w, r2.xyzx, r7.xyzx
+add r0.w, r0.w, l(0.750000)  // r0.w <- D
 
 #line 26
 itof r1.w, l(0)
@@ -219,4 +220,4 @@ add r0.xyz, r1.xyzx, r0.xyzx
 mov r0.w, l(1.000000)
 mul o0.xyzw, r0.xyzw, v3.xyzw
 ret 
-// Approximately 64 instruction slots used
+// Approximately 65 instruction slots used

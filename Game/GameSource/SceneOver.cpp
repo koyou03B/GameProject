@@ -5,7 +5,7 @@
 bool Over::Initialize(ID3D11Device* device)
 {
 	{
-		m_board = std::make_unique<Source::BillBoard::BillBoard>(device, Source::SpriteData::loadTexture[static_cast<int>(Source::SpriteData::TextureLabel::LOAD)].fileName, true);
+		m_board = std::make_unique<Source::BillBoard::BillBoard>(device, Source::SpriteLoad::loadTexture[static_cast<int>(Source::SpriteLoad::TextureLabel::SCOPE)].fileName, true);
 
 	}
 

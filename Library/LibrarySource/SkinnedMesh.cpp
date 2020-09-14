@@ -191,8 +191,10 @@ namespace Source
 
 					immediateContext->PSSetSamplers(0, 1, Framework::GetSamplerState(Framework::SS_WRAP));
 					immediateContext->DrawIndexed(material.indexCount, material.indexStart, 0);
+
 				}
 				m_constantBuffer->Deactivate(immediateContext);
+
 			}
 
 			m_skinnedMeshPS->Deactivate(immediateContext);

@@ -182,8 +182,6 @@ public:
 	static ID3D11SamplerState** GetSamplerState(int state) { return Framework::GetInstance().m_samplerState[state].GetAddressOf(); }
 	static ID3D11BlendState* GetBlendState(int state) { return Framework::GetInstance().m_blendState[state].Get(); }
 
-	std::shared_ptr<Source::Sprite::SpriteBatch> GetTexture(Source::SpriteData::TextureLabel texNum) { return Framework::GetInstance().m_texture->GetSprite(texNum); }
-
 	private:
 		const HWND m_hwnd;
 		HINSTANCE m_hinstance;
@@ -199,7 +197,7 @@ public:
 		D3D11_VIEWPORT m_viewPort = {};
 
 		float m_volume[2] = {};
-		float m_color[4] = { 0.8f, 0.8f, 0.8f, 1.f };
+		float m_color[4] = { 0.f, 0.f, 0.f, 1.f };
 
 		bool Initialize();
 		void Update(float elapsedTime/*Elapsed seconds from last frame*/);
@@ -236,8 +234,6 @@ public:
 				timeTlapsed += 1.0f;
 			}
 		}
-		std::shared_ptr<Source::SpriteData::SpriteData> m_texture;
-
 };
 
 

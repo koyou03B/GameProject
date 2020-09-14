@@ -8,14 +8,13 @@
 
 namespace Source
 {
-	namespace SpriteData
+	namespace SpriteLoad
 	{
 		enum class TextureLabel
 		{
 			TITLE,
-			SELECT,
-			LOAD,
-			LOADICON,
+			EFFECT0,
+			SCOPE,
 			END,
 		};
 
@@ -24,32 +23,16 @@ namespace Source
 			TextureLabel texNum;//テクスチャ番号
 			const char* fileName;//ファイル名
 			const char* noiseFileName;//ファイル名
-			bool isDissolve;
 			UINT maxInstance; //最大数
 		};
 
-		class SpriteData
+		class SpriteLoader
 		{
 		public:
-			SpriteData() = default;
-			~SpriteData() = default;
+			SpriteLoader() = default;
+			~SpriteLoader() = default;
 
-			void Load(ID3D11Device* device);
-
-			void RenderC(ID3D11DeviceContext* immediateContext, int texNo,
-				const VECTOR2F& position, const VECTOR2F& scale,
-				const VECTOR2F& texPos, const VECTOR2F& texSize,
-				float angle, const VECTOR4F& color, bool reverse);
-
-
-			void RenderL(ID3D11DeviceContext* immediateContext, int texNo,
-				const VECTOR2F& position, const VECTOR2F& scale,
-				const VECTOR2F& texPos, const VECTOR2F& texSize,
-				float angle, const VECTOR4F& color, bool reverse);
-
-
-			std::shared_ptr<Source::Sprite::SpriteBatch> GetSprite(TextureLabel texNo) { return m_texture[static_cast<int>(texNo)]; }
-
+			std::shared_ptr<Source::Sprite::SpriteBatch> GetTexture(TextureLabel texNo);
 
 		private:
 			std::shared_ptr<Source::Sprite::SpriteBatch> m_texture[static_cast<int>(TextureLabel::END)];
@@ -57,6 +40,14 @@ namespace Source
 		};
 
 		extern LoadTexture loadTexture[];
+
+
+		inline Source::SpriteLoad::SpriteLoader& TextureLode()
+		{
+			static 	Source::SpriteLoad::SpriteLoader texLoder;
+			return texLoder;
+		}
 	}
 }
 
+#define TEXTURELOADER Source::SpriteLoad::TextureLode()

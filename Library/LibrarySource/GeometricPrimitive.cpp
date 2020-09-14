@@ -153,6 +153,8 @@ namespace Source
 
 			m_geometricPrimitivePS->Deactivate(immediateContext);
 			m_geometricPrimitiveVS->Deactivate(immediateContext);
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
+
 		}
 
 

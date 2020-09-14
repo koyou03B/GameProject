@@ -75,7 +75,6 @@ public:
 		VECTOR3F accle = {};
 		VECTOR3F maxSpeed[2] = {};
 		VECTOR3F velocity = {};
-		VECTOR3F x = {};
 		float decleleration = 0.0f;
 		float turnSpeed = 0.0f;
 

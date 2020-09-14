@@ -60,7 +60,7 @@ void Fighter::Init()
 	{
 		int  current = i - 1;
 		m_effect[current].ballEffects = std::make_unique<DebugObject>();
-		auto primitive = m_debugObjects.GetSphere(Framework::GetInstance().GetDevice(), "../Asset/Texture/fire.png");
+		auto primitive = m_debugObjects.GetSphere(Framework::GetInstance().GetDevice(), "../Asset/Texture/Effect/fire.png");
 		m_effect[current].ballEffects->AddGeometricPrimitive(std::move(primitive));
 
 		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[i].GetCurrentMesh(0)].at(m_collision[i].GetCurrentBone(0));
@@ -144,13 +144,13 @@ void Fighter::Render(ID3D11DeviceContext* immediateContext)
 	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
 	m_debugObjects.debugObject.Render(immediateContext, scroll,true);
 
-	for (auto& effect : m_effect)
-	{
-		if (effect.ballEffects)
-		{
-			effect.ballEffects->Render(immediateContext, effect.scrollValue, true);
-		}
-	}
+	//for (auto& effect : m_effect)
+	//{
+	//	if (effect.ballEffects)
+	//	{
+	//		effect.ballEffects->Render(immediateContext, effect.scrollValue, true);
+	//	}
+	//}
 }
 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -471,6 +471,7 @@ void Fighter::ChangeCharacter()
 		m_changeParm.changeType = CharacterParameter::Change::PlayerType::ARCHER;
 
 		MESSENGER.MessageFromPlayer(m_id, MessengType::CHANGE_PLAYER);
+		m_input->ResetButton(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT);
 	}
 }
 

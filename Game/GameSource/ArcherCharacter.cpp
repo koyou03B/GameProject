@@ -12,11 +12,6 @@
 CEREAL_CLASS_VERSION(Archer, 1);
 void Archer::Init()
 {
-	m_transformParm.position = { 30.0f,0.0f,0.0f };
-	m_transformParm.angle = { 0.0f * 0.01745f, 0.0f * 0.01745f,0.0f * 0.017454f };
-	m_transformParm.scale = { 0.05f,0.05f,0.05f };
-	m_transformParm.WorldUpdate();
-
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::Archer);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Walk.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Run.fbx",60);
@@ -32,6 +27,18 @@ void Archer::Init()
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::Archer);
 
 	m_padDeadLine = 5000.0f;
+	m_elapsedTime = 0.0f;
+
+	m_aimMode.scopeTexture = TEXTURELOADER.GetTexture(Source::SpriteLoad::TextureLabel::SCOPE);
+	m_aimMode.texturePosition = VECTOR2F(Framework::GetInstance().SCREEN_WIDTH * 0.5f, Framework::GetInstance().SCREEN_HEIGHT * 0.5f);
+	m_aimMode.textureScale = VECTOR2F(512, 512);
+	m_aimMode.textureSize = VECTOR2F(512, 512);
+
+	m_transformParm.position = { 30.0f,0.0f,0.0f };
+	m_transformParm.angle = { 0.0f * 0.01745f, 0.0f * 0.01745f,0.0f * 0.017454f };
+	m_transformParm.scale = { 0.05f,0.05f,0.05f };
+	m_transformParm.WorldUpdate();
+
 	m_changeParm.isPlay = true;
 	m_blendAnimation.animationBlend.Init(m_model);
 	//m_blendAnimation.partialBlend.Init(m_model);
@@ -59,11 +66,17 @@ void Archer::Update(float& elapsedTime)
 
 		if (m_input != nullptr)
 		{
-			Move(m_elapsedTime);
+			Aim();
+
+			if(m_mode != Mode::Aiming)
+				Move(m_elapsedTime);
+			else
+			{
+				Aiming();
+				AimMove(m_elapsedTime);
+			}
 
 			Step(m_elapsedTime);
-
-			Attack(m_elapsedTime);
 
 			ChangeCharacter();
 
@@ -82,7 +95,7 @@ void Archer::Update(float& elapsedTime)
 
 	}
 
-	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
+	m_blendAnimation.animationBlend.Update(m_model, m_elapsedTime);
 
 }
 
@@ -92,8 +105,60 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 	//auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
+
+	if (m_mode != Mode::Moving)
+	{
+		m_aimMode.scopeTexture->Begin(immediateContext);
+		m_aimMode.scopeTexture->RenderCenter(m_aimMode.texturePosition, m_aimMode.textureScale,
+			VECTOR2F(0, 0), m_aimMode.textureSize, 0, VECTOR4F(1.0, .0, .0, 1.0), false);
+		m_aimMode.scopeTexture->End(immediateContext);
+	}
+
 	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
 	m_debugObjects.debugObject.Render(immediateContext, scroll, true);
+}
+
+void Archer::RestAnimationIdle()
+{
+	if (m_blendAnimation.animationBlend.GetSampler().size() == m_blendAnimation.samplerSize)
+	{
+		if (m_statusParm.isAttack || m_stepParm.isStep)
+		{
+			if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
+			{
+				m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+				if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
+				{
+					m_blendAnimation.animationBlend.ReleaseSampler(0);
+					m_statusParm.isAttack = false;
+					m_stepParm.isStep = false;
+					m_moveParm.isMove = false;
+					m_blendAnimation.animationBlend._blendRatio = 0.0f;
+					m_stepParm.speed = m_stepParm.maxSpeed;
+
+				}
+			}
+		}
+	}
+
+}
+
+void Archer::Aim()
+{
+	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LSHOULDER) > 0)
+	{
+		m_mode = Mode::Aiming;
+	}
+	else
+	{
+		m_mode = Mode::Moving;
+
+	}
+}
+
+void Archer::Aiming()
+{
+
 }
 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -311,32 +376,83 @@ void Archer::Step(float& elapsedTime)
 	}
 }
 
-
-void Archer::Attack(float& elapsedTime)
+void Archer::Stepping(float& elapsedTime)
 {
-}
-
-void Archer::RestAnimationIdle()
-{
-	if (m_blendAnimation.animationBlend.GetSampler().size() == m_blendAnimation.samplerSize)
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-
+	// Reset the first time.
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-
+	if (!m_stepParm.isStep)
 	{
-		if (m_statusParm.isAttack || m_stepParm.isStep)
+		m_blendAnimation.animationBlend.ResetAnimationFrame();
+		int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
+		for (int i = 0; i < samplerCount - 1; ++i)
 		{
-			if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
-			{
-				m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
-				if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
-				{
-					m_blendAnimation.animationBlend.ReleaseSampler(0);
-					m_statusParm.isAttack = false;
-					m_stepParm.isStep = false;
-					m_moveParm.isMove = false;
-					m_blendAnimation.animationBlend._blendRatio = 0.0f;
-					m_stepParm.speed = m_stepParm.maxSpeed;
-
-				}
-			}
+			m_blendAnimation.animationBlend.ReleaseSampler(1);
 		}
+		m_blendAnimation.animationBlend.ChangeSampler(0, m_animationType, m_model);
+		m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+		m_blendAnimation.animationBlend._blendRatio = 0.0f;
+		m_stepParm.isStep = true;
+		m_moveParm.isMove = false;
+		m_moveParm.isWalk = false;
+		m_moveParm.isRun = false;
+
+		//********************************
+		//	Angle in the STEP direction
+		//********************************
+		if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
+		{
+			FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
+			view._14 = 0.0f;
+			view._24 = 0.0f;
+			view._34 = 0.0f;
+			view._41 = 0.0f;
+			view._42 = 0.0f;
+			view._43 = 0.0f;
+			view._44 = 1.0f;
+
+			DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
+			VECTOR3F stickVec(m_input->StickVectorLeft().x, 0.0f, m_input->StickVectorLeft().y);
+			DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
+
+			VECTOR3F stickVector;
+			vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
+			DirectX::XMStoreFloat3(&stickVector, vStickVex);
+
+			float dot = atan2f(stickVector.x, stickVector.z);
+
+			m_transformParm.angle.y = dot;
+		}
+	}
+
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	// Set the direction and move it.
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	m_stepParm.speed -= m_stepParm.deceleration;
+	if (m_stepParm.speed.x <= 0)
+		m_stepParm.speed = { 0.0f,0.0f,0.0f };
+
+	m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_stepParm.speed.x);
+	m_moveParm.velocity.y = 0.0f;
+	m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_stepParm.speed.z);
+
+	m_transformParm.position += m_moveParm.velocity * elapsedTime;
+	m_transformParm.WorldUpdate();
+
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	//When the animation ends, the attack ends.
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+	if (currentAnimationFrame == m_stepParm.frameCount)
+	{
+		m_blendAnimation.animationBlend._blendRatio = 0.0f;
+		m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+		m_blendAnimation.animationBlend.ResetAnimationFrame();
+		m_animationType = Animation::IDLE;
+		m_blendAnimation.animationBlend.ChangeSampler(0, m_animationType, m_model);
+		m_stepParm.isStep = false;
+		m_blendAnimation.animationBlend._blendRatio = 0.0f;
+		m_stepParm.speed = m_stepParm.maxSpeed;
 	}
 
 }
@@ -348,6 +464,8 @@ void Archer::ChangeCharacter()
 		m_changeParm.changeType = CharacterParameter::Change::PlayerType::FIGHTER;
 
 		MESSENGER.MessageFromPlayer(m_id, MessengType::CHANGE_PLAYER);
+
+		m_input->ResetButton(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT);
 	}
 }
 
@@ -744,99 +862,25 @@ void Archer::ImGui(ID3D11Device* device)
 		ImGui::SliderFloat("Dist", &f, -40000.0f, 40000.0f);
 	}
 
+	//**************************************
+	// Texture
+	//**************************************
+	if (ImGui::CollapsingHeader("Texture"))
+	{
+		ImGui::SliderFloat("XPosition", &m_aimMode.texturePosition.x, 0.0f, Framework::GetInstance().SCREEN_WIDTH);
+		ImGui::SliderFloat("YPosition", &m_aimMode.texturePosition.y, 0.0f, Framework::GetInstance().SCREEN_HEIGHT);
+
+		static float scale = m_aimMode.textureScale.x;
+		ImGui::SliderFloat("Scale", &scale, 0.0f, 512.0f);
+		m_aimMode.textureScale.x = m_aimMode.textureScale.y = scale;
+
+		ImGuiColorEditFlags flag = ImGuiColorEditFlags_Float; // 0 ~ 255表記ではなく、0.0 ~ 1.0表記にします。
+
+		ImGui::ColorEdit3("Color", reinterpret_cast<float*>(&m_aimMode.textureColor), flag);
+	}
 #endif
 	ImGui::End();
 
 #endif
 }
-
-
-
-
-
-
-
-void Archer::Attacking(Animation currentAnimation, Animation nextAnimations[2], CharacterParameter::Attack& attack, CharacterParameter::Collision& collision)
-{
-
-}
-
-void Archer::Stepping(float& elapsedTime)
-{
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-
-	// Reset the first time.
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-
-	if (!m_stepParm.isStep)
-	{
-		m_blendAnimation.animationBlend.ResetAnimationFrame();
-		int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
-		for (int i = 0; i < samplerCount - 1; ++i)
-		{
-			m_blendAnimation.animationBlend.ReleaseSampler(1);
-		}
-		m_blendAnimation.animationBlend.ChangeSampler(0, m_animationType, m_model);
-		m_blendAnimation.animationBlend.FalseAnimationLoop(0);
-		m_blendAnimation.animationBlend._blendRatio = 0.0f;
-		m_stepParm.isStep = true;
-
-		//********************************
-		//	Angle in the STEP direction
-		//********************************
-		if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
-		{
-			FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
-			view._14 = 0.0f;
-			view._24 = 0.0f;
-			view._34 = 0.0f;
-			view._41 = 0.0f;
-			view._42 = 0.0f;
-			view._43 = 0.0f;
-			view._44 = 1.0f;
-
-			DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
-			VECTOR3F stickVec(m_input->StickVectorLeft().x, 0.0f, m_input->StickVectorLeft().y);
-			DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
-
-			VECTOR3F stickVector;
-			vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
-			DirectX::XMStoreFloat3(&stickVector, vStickVex);
-
-			float dot = atan2f(stickVector.x, stickVector.z);
-
-			m_transformParm.angle.y = dot;
-		}
-	}
-
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	// Set the direction and move it.
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	m_stepParm.speed -= m_stepParm.deceleration;
-	if (m_stepParm.speed.x <= 0)
-		m_stepParm.speed = { 0.0f,0.0f,0.0f };
-
-	m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_stepParm.speed.x);
-	m_moveParm.velocity.y = 0.0f;
-	m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_stepParm.speed.z);
-
-	m_transformParm.position += m_moveParm.velocity * elapsedTime;
-	m_transformParm.WorldUpdate();
-
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	//When the animation ends, the attack ends.
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-	if (currentAnimationFrame == m_stepParm.frameCount)
-	{
-		m_blendAnimation.animationBlend._blendRatio = 0.0f;
-		m_blendAnimation.animationBlend.ResetAnimationSampler(0);
-		m_blendAnimation.animationBlend.ResetAnimationFrame();
-		m_animationType = Animation::IDLE;
-		m_blendAnimation.animationBlend.ChangeSampler(0,m_animationType, m_model);
-		m_stepParm.isStep = false;
-		m_blendAnimation.animationBlend._blendRatio = 0.0f;
-		m_stepParm.speed = m_stepParm.maxSpeed;
-	}
-
-}
-
 

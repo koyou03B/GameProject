@@ -14,8 +14,8 @@ namespace Source
 		class SpriteBatch
 		{
 		public:
-			SpriteBatch(ID3D11Device* device, const char* filename, UINT maxInstance);
-			SpriteBatch(ID3D11Device* device, const char* filename, const char* noisTexName, UINT maxInstance);
+
+			SpriteBatch(ID3D11Device* device, const char* filename, const char* noiseTexName, UINT maxInstance);
 			virtual ~SpriteBatch() = default;
 			void Begin(ID3D11DeviceContext * immediateContext);
 
