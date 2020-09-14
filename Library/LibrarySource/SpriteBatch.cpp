@@ -56,20 +56,20 @@ namespace Source
 			bool sRGB = false;
 
 			m_spriteVS = std::make_unique<Source::Shader::VertexShader<Vertex>>(device, "../Library/LibraryShader/SpriteBatch_vs.cso");
-			m_spritePS = std::make_unique<Source::Shader::PixelShader>(device, "../Library/LibraryShader/SpriteBatch_ps.cso");
 
 			hr = Source::Texture::LoadTextureFromFile(device, filename, m_shaderResourceView.GetAddressOf(), sRGB);
 			hr = Source::Texture::Texture2dDescription(m_shaderResourceView.Get(), m_texture2dDesc);
 
 			if (noiseTexName != "")
 			{
+				m_spritePS = std::make_unique<Source::Shader::PixelShader>(device, "../Library/LibraryShader/SpriteDissolve_ps.cso");
 				hr = Source::Texture::LoadTextureFromFile(device, noiseTexName, m_dissolveShaderResourceView.GetAddressOf(), sRGB);
 				hr = Source::Texture::Texture2dDescription(m_dissolveShaderResourceView.Get(), m_dissolveTexture2dDesc);
 			}
 			else
 			{
 				Texture::MakeDummyTexture(device, m_dissolveShaderResourceView.GetAddressOf());
-
+				m_spritePS = std::make_unique<Source::Shader::PixelShader>(device, "../Library/LibraryShader/SpriteBatch_ps.cso");
 			}
 		}
 
