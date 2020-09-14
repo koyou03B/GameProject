@@ -106,7 +106,7 @@ dcl_temps 8
 //   v4.x <- pin.texcoord.x; v4.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 15 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
+#line 15 "C:\Users\光優\Desktop\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t0.xyzw, s0
 mov r0.xyz, r0.xyzx  // r0.x <- diffuseColor.x; r0.y <- diffuseColor.y; r0.z <- diffuseColor.z
 
@@ -147,7 +147,7 @@ mov r3.xyz, r3.xyzx
 mov r5.xyz, r5.xyzx
 mov r0.xyz, r0.xyzx
 
-#line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
+#line 25 "C:\Users\光優\Desktop\GameProject\Library\LibrarySource\Function.hlsli"
 mov r7.xyz, -r3.xyzx
 dp3 r0.w, r2.xyzx, r7.xyzx
 add r0.w, r0.w, l(0.750000)  // r0.w <- D
@@ -160,7 +160,7 @@ max r0.w, r0.w, r1.w
 mul r0.xyz, r5.xyzx, r0.xyzx
 mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <Diffuse return value>.x; r0.y <- <Diffuse return value>.y; r0.z <- <Diffuse return value>.z
 
-#line 37 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
+#line 37 "C:\Users\光優\Desktop\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
 mov r0.xyz, r0.xyzx  // r0.x <- D.x; r0.y <- D.y; r0.z <- D.z
 
 #line 38
@@ -174,7 +174,7 @@ mov r5.xyz, r5.xyzx
 mov r4.xyz, r4.xyzx
 mov r1.xyz, r1.xyzx
 
-#line 44 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
+#line 44 "C:\Users\光優\Desktop\GameProject\Library\LibrarySource\Function.hlsli"
 mov r3.xyz, -r3.xyzx
 add r3.xyz, r4.xyzx, r3.xyzx
 dp3 r0.w, r3.xyzx, r3.xyzx
@@ -205,7 +205,7 @@ mul r1.xyz, r5.xyzx, r1.xyzx  // r1.x <- S.x; r1.y <- S.y; r1.z <- S.z
 #line 50
 mov r1.xyz, r1.xyzx  // r1.x <- <BlinnPhongSpecular return value>.x; r1.y <- <BlinnPhongSpecular return value>.y; r1.z <- <BlinnPhongSpecular return value>.z
 
-#line 39 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
+#line 39 "C:\Users\光優\Desktop\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
 mov r1.xyz, r1.xyzx  // r1.x <- S.x; r1.y <- S.y; r1.z <- S.z
 
 #line 54

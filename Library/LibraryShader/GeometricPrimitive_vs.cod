@@ -80,7 +80,7 @@ dcl_temps 3
 //   o1.x <- <main return value>.texcoord.x; o1.y <- <main return value>.texcoord.y; 
 //   o0.x <- <main return value>.position.x; o0.y <- <main return value>.position.y; o0.z <- <main return value>.position.z; o0.w <- <main return value>.position.w
 //
-#line 15 "D:\Lib関連\GameProject\Library\LibrarySource\GeometricPrimitive_vs.hlsl"
+#line 15 "C:\Users\光優\Desktop\GameProject\Library\LibrarySource\GeometricPrimitive_vs.hlsl"
 mul r0.xyzw, v0.xxxx, v4.xyzw
 mul r1.xyzw, v0.yyyy, v5.xyzw
 add r0.xyzw, r0.xyzw, r1.xyzw

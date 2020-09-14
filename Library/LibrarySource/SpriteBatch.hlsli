@@ -4,3 +4,4 @@ struct VS_OUT
 	float2 texcoord : TEXCOORD;
 	float4 color : COLOR;
 };
+

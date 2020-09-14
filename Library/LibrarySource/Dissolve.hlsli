@@ -5,8 +5,6 @@
 //    float4 color : COLOR;
 //};
 
-#define DISSOLVE
-
 cbuffer Dissolve : register(b5)
 {
     float dissolveGlowAmoument;
@@ -16,5 +14,3 @@ cbuffer Dissolve : register(b5)
     float4 dissolveGlowColor;
     float4 dissolveEmission;
 };
-
-#include "SpriteBatch_ps.hlsl"
