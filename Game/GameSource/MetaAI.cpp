@@ -15,6 +15,9 @@ bool MetaAI::Init()
 	AddPlayer(m_playerID, std::make_shared<Archer>());
 	AddPlayer(m_playerID, std::make_shared<Fighter>());
 
+
+	m_scope = std::make_unique<Scope>();
+	m_scope->Init();
 	return true;
 }
 
@@ -96,6 +99,12 @@ void MetaAI::UpdateOfPlayers(float& elapsedTime)
 			CollisionPlayerAndEnemy(m_players[i]);
 		}
 	}
+
+	if (m_scope->GetAimMode())
+	{
+		VECTOR3F target = m_enemys[0]->GetWorldTransform().position;
+		m_scope->Update(target);
+	}
 }
 
 void MetaAI::RenderOfPlayer(ID3D11DeviceContext* immediateContext, uint16_t characterNomber)
@@ -158,7 +167,23 @@ void MetaAI::DeterminationOfPlayer(int id, MessengType type)
 		
 		}
 		break;
+	case MessengType::SHIFT_AIM_MODE:
+		m_scope->SetAimMode();
+		break;
 	}
+}
+
+void MetaAI::RenderOfScope(ID3D11DeviceContext* immediateContext)
+{
+	if (m_scope->GetAimMode())
+	{
+		m_scope->Render(immediateContext);
+	}
+}
+
+void MetaAI::ImGuiOfScope(ID3D11Device* device)
+{
+	m_scope->ImGui(device);
 }
 
 bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collision)

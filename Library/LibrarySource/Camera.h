@@ -104,9 +104,11 @@ namespace Source
 				m_camera->Reset(target, direction, focalLength, heightAboveGround);
 			}
 
-			inline const CameraMode GetCameraMode() const	  { return m_mode; }
-			inline const VECTOR3F GetTarget() const			  { return m_target; }
+			inline const CameraMode GetCameraMode()		const { return m_mode; }
+			inline const VECTOR3F GetTarget()			const { return m_target; }
 			inline const VECTOR3F GetEye()				const { return m_eye; }
+			inline const VECTOR3F GetDirection()		const { return m_direction; }
+			inline const VECTOR3F GetLength()			const { return m_length; }
 			inline const FLOAT4X4& GetView()			const { return m_constantsBuffer->data.view; }
 			inline const FLOAT4X4& GetProjection()		const { return m_constantsBuffer->data.projection; }
 			inline const FLOAT4X4& GetViewProjection()  const { return m_constantsBuffer->data.viewProjection; }

@@ -10,6 +10,8 @@ namespace Source
 			m_fogPixel = std::make_unique<Shader::PixelShader>(device, "../Library/LibraryShader/Fog_ps.cso");
 			_fogBuffer = std::make_unique<ConstantBuffer::ConstantBuffer<FogBuffer>>(device);
 
+
+
 			D3D11_SAMPLER_DESC samplerDesc;
 			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR; //D3D11_FILTER_MIN_MAG_MIP_POINT D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR
 			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER; //D3D11_TEXTURE_ADDRESS_BORDER D3D11_TEXTURE_ADDRESS_CLAMP D3D11_TEXTURE_ADDRESS_MIRROR

@@ -7,22 +7,30 @@
 
 bool Game::Initialize(ID3D11Device* device)
 {
+	//**********************
+	// SceneConstantBuffer
+	//**********************
 	{
 		m_sceneConstantBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>>(device);
 		m_sceneConstantBuffer->data.directionalLight.direction = { 0.0f, -1.0f, 1.0f, 0.0f };
 		m_sceneConstantBuffer->data.ambientColor = { 0.147f,0.147f,0.147f,1.0f };
 	}
 
-
+	//*********************
+	// MetaAI
+	//*********************
 	{
 		m_metaAI = std::make_shared<MetaAI>();
 		m_metaAI->Init();
-		m_stage.Init();
+		m_stage = std::make_unique<Stage>();
+		m_stage->Init();
 		MESSENGER.GetInstance().SetMetaAI(m_metaAI);
 
 	}
 
-
+	//*********************
+	// Camera
+	//*********************
 	{
 		Source::CameraControlle::CameraManager().GetInstance()->Initialize(device);
 
@@ -45,17 +53,15 @@ bool Game::Initialize(ID3D11Device* device)
 		Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
 	}
 
+	//*********************
+	// Shader
+	//*********************
 	{
 		m_frameBuffer = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
 			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
 		m_fog = std::make_unique<Source::Fog::Fog>(device);
 
-
-		m_fog->_fogBuffer->data.fogStartDepth = .0f;
-		m_fog->_fogBuffer->data.fogHeightFallOff = 0.000f;
-		m_fog->_fogBuffer->data.fogGlobalDensity = 0.00f;
-		m_fog->_fogBuffer->data.fogColor = VECTOR3F(1.0f, 0.0f, 0.0f);
-		m_fog->_fogBuffer->data.fogHighlightColor = VECTOR3F(1.0f, 1.0f, 1.0f);
+		m_fog->ReadBinary();
 
 		m_screenFilter = std::make_unique<Source::ScreenFilter::ScreenFilter>(device);
 
@@ -158,7 +164,7 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 		m_sceneConstantBuffer->Activate(immediateContext, SLOT2, true, true);
 		Source::CameraControlle::CameraManager().GetInstance()->Activate(immediateContext);
 
-		m_stage.Render(immediateContext);
+		m_stage->Render(immediateContext);
 
 		m_metaAI->RenderOfEnemy(immediateContext, 0);
 
@@ -168,6 +174,8 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 		
 		m_frameBuffer->Deactivate(immediateContext);
 		m_fog->Blit(immediateContext, m_frameBuffer->GetRenderTargetShaderResourceView().Get(), m_frameBuffer->GetDepthStencilShaderResourceView().Get());
+
+		m_metaAI->RenderOfScope(immediateContext);
 
 		Source::CameraControlle::CameraManager().GetInstance()->Deactivate(immediateContext);
 		m_sceneConstantBuffer->Deactivate(immediateContext);
@@ -287,6 +295,9 @@ void Game::ImGui()
 			ImGui::InputFloat("R", &m_fog->_fogBuffer->data.fogColor.x, 0.0f, 1.0f, "%f");
 			ImGui::InputFloat("G", &m_fog->_fogBuffer->data.fogColor.y, 0.0f, 1.0f, "%f");
 			ImGui::InputFloat("B", &m_fog->_fogBuffer->data.fogColor.z, 0.0f, 1.0f, "%f");
+
+			if (ImGui::Button("Save"))
+				m_fog->SaveBinary();
 		}
 
 		if (ImGui::CollapsingHeader("ScreenFilter"))
@@ -321,6 +332,7 @@ void Game::ImGui()
 			m_screenFilter->_screenBuffer->data.screenColor = VECTOR4F(color[0], color[1], color[2], color[3]);
 
 		}
+
 		if (ImGui::CollapsingHeader("Camera"))
 		{
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//ƒTƒCƒY
@@ -336,10 +348,10 @@ void Game::ImGui()
 			CharacterAI* player = m_metaAI->GetPlayCharacter();
 
 			player->ImGui(Framework::GetInstance().GetDevice());
-			Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
-			Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
-			Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
+			////Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
 
 			VECTOR3F currentDistance = DistancePlayerToEnemy();
 			currentDistance = NormalizeVec3(currentDistance);
@@ -367,22 +379,6 @@ void Game::ImGui()
 				player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::FIGHTER;
 				MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
 			}
-
-			if (!player->GetChangeComand().isPlay)
-			{
-				VECTOR3F distance = DistancePlayerToEnemy();
-				distance = NormalizeVec3(distance);
-				Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-				player = m_metaAI->GetPlayCharacter();
-				VECTOR3F position = player->GetWorldTransform().position;
-				Source::CameraControlle::CameraManager().GetInstance()->SetObject(position);
-				Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-				Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
-				Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
-				Source::CameraControlle::CameraManager().GetInstance()->SetNextEye();
-				Source::CameraControlle::CameraManager().GetInstance()->SetValue(0.f);
-				Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager().CameraMode::CHANGE_OBJECT);
-			}
 		}
 	}
 
@@ -390,15 +386,18 @@ void Game::ImGui()
 	if (!ActivateScene.GetIsStart())
 	{
 		m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice(), 0);
-		m_stage.ImGui();
+		m_stage->ImGui();
+		m_metaAI->ImGuiOfScope(Framework::GetInstance().GetDevice());
 	}
 #endif
 }
 
 void Game::Uninitialize()
 {
-	GetEntityManager().Relese();
+	//GetEntityManager().Relese();
+	//m_stage.release();
 	m_metaAI->Release();
+
 }
 
 VECTOR3F Game::DistancePlayerToEnemy()

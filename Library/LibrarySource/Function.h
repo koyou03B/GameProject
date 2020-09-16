@@ -98,6 +98,11 @@ namespace Source
 	{
 		float Clamp(float a, float x, float b);
 		float Max(float a, float b);
+
+		void WorldToScreen(VECTOR3F* screenPosition, const VECTOR3F& worldPosition);
+
+		void ScreenToWorld(VECTOR3F* worldPosition, const VECTOR3F& screenPosition);
+
 	}
 
 	namespace RayTriangle

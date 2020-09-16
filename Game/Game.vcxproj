@@ -35,9 +35,11 @@
     <ClCompile Include="GameSource\SceneOver.cpp" />
     <ClCompile Include="GameSource\SceneTitle.cpp" />
     <ClCompile Include="GameSource\SceneTutorial.cpp" />
+    <ClCompile Include="GameSource\Scope.cpp" />
     <ClCompile Include="GameSource\Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />
     <ClInclude Include="GameSource\CharacterAI.h" />

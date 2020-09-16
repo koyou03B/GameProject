@@ -36,9 +36,6 @@
     <Filter Include="Headers\Objects\Stage">
       <UniqueIdentifier>{7f1cfc50-751d-40d0-bb73-c62e80e33e54}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Stage">
-      <UniqueIdentifier>{c5fccd82-89c1-4a19-89d5-728a4ec34740}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Collision">
       <UniqueIdentifier>{44d46777-fd6a-49a2-a306-e0db986813df}</UniqueIdentifier>
     </Filter>
@@ -69,6 +66,18 @@
     <Filter Include="Headers\Messeng">
       <UniqueIdentifier>{b751c32c-39e7-4139-8677-6c4254f98870}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\Objects\Aim">
+      <UniqueIdentifier>{b9c5c44f-b43c-46e3-8860-52d6e913cca6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object">
+      <UniqueIdentifier>{c7499d5c-47dc-48bb-959d-a629966dd254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\Stage">
+      <UniqueIdentifier>{c5fccd82-89c1-4a19-89d5-728a4ec34740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\Scope">
+      <UniqueIdentifier>{2366ef6f-7695-443f-9e15-98ed91896bdf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -96,7 +105,7 @@
       <Filter>Sources\Blend\AnimationBlending</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\Stage.cpp">
-      <Filter>Sources\Stage</Filter>
+      <Filter>Sources\Object\Stage</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\PartialBlendAnimation.cpp">
       <Filter>Sources\Blend\PartialAnimationsBlending</Filter>
@@ -121,6 +130,9 @@
     </ClCompile>
     <ClCompile Include="GameSource\Collision.cpp">
       <Filter>Sources\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\Scope.cpp">
+      <Filter>Sources\Object\Scope</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +201,9 @@
     </ClInclude>
     <ClInclude Include="GameSource\Collision.h">
       <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Scope.h">
+      <Filter>Headers\Objects\Aim</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

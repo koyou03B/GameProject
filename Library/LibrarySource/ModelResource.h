@@ -21,41 +21,6 @@
 #include<cereal/types/memory.hpp>
 #include<cereal/types/vector.hpp>
 
-
-template<class Archive>
-void serialize(Archive& archive, VECTOR2F& vector)
-{
-	archive(vector.x, vector.y);
-}
-
-template<class Archive>
-void serialize(Archive& archive, VECTOR3F& vector)
-{
-	archive(vector.x, vector.y, vector.z);
-}
-
-template<class Archive>
-void serialize(Archive& archive, UVECTOR4& vector)
-{
-	archive(vector.x, vector.y, vector.z, vector.w);
-}
-
-template<class Archive>
-void serialize(Archive& archive, VECTOR4F& vector)
-{
-	archive(vector.x, vector.y, vector.z, vector.w);
-}
-
-template<class Archive>
-void serialize(Archive& archive, FLOAT4X4& float4x4)
-{
-	archive(
-		float4x4._11, float4x4._12, float4x4._13, float4x4._14,
-		float4x4._21, float4x4._22, float4x4._23, float4x4._24,
-		float4x4._31, float4x4._32, float4x4._33, float4x4._34,
-		float4x4._41, float4x4._42, float4x4._43, float4x4._44);
-}
-
 // FbxDouble4 Å® XMFLOAT4x4
 inline FLOAT4X4 FbxAMatrixToFloat4x4(const FbxAMatrix& fbx_value)
 {

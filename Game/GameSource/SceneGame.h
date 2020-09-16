@@ -36,7 +36,7 @@ class Game : public Scene
 	std::unique_ptr<Source::Fog::Fog> m_fog;
 	std::unique_ptr<Source::ScreenFilter::ScreenFilter> m_screenFilter;
 
-	Stage m_stage;
+	std::unique_ptr<Stage> m_stage;
 public:
 	Game() = default;
 	virtual ~Game() = default;

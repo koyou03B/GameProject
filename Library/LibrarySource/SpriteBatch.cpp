@@ -84,7 +84,7 @@ namespace Source
 			immediateContext->IASetVertexBuffers(0, 2, vbs, strides, offsets);
 			immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ADD), nullptr, 0xFFFFFFFF);
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
 			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_FALSE), 1);
 			immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CULL_BACK));
 

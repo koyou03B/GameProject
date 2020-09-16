@@ -7,12 +7,10 @@ struct AimMode
 {
 	CharacterParameter::Camera	aimCameraParm;
 	CharacterParameter::Move	aimMoveParm;
-	std::shared_ptr<Source::Sprite::SpriteBatch> scopeTexture;
-	VECTOR2F texturePosition;
-	VECTOR2F textureScale;
-	VECTOR2F textureSize;
-	VECTOR4F textureColor;
-	int serialVersion = 0;
+
+	bool isAim = false;
+
+	uint32_t serialVersion = 0;
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -21,11 +19,7 @@ struct AimMode
 			archive
 			(
 				aimCameraParm,
-				aimMoveParm,
-				texturePosition,
-				textureScale,
-				textureSize,
-				textureColor
+				aimMoveParm
 			);
 		}
 		else
@@ -33,15 +27,13 @@ struct AimMode
 			archive
 			(
 				aimCameraParm,
-				aimMoveParm,
-				texturePosition,
-				textureScale,
-				textureSize,
-				textureColor
+				aimMoveParm
 			);
 		}
 	}
 };
+
+CEREAL_CLASS_VERSION(AimMode, 4);
 
 class Archer : public CharacterAI
 {
@@ -61,7 +53,7 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 1)
+		if (version >= 4)
 		{
 			archive
 			(
@@ -71,7 +63,9 @@ public:
 				m_moveParm,
 				m_cameraParm,
 				m_stepParm,
-				m_collision
+				m_collision,
+				m_aimMode
+			
 			);
 		}
 		else
@@ -85,7 +79,6 @@ public:
 				m_cameraParm,
 				m_stepParm,
 				m_collision
-
 			);
 		}
 	}
@@ -97,7 +90,7 @@ private:
 	void Aiming();
 
 	void Move(float& elapsedTime);
-	void AimMove(float& elapsedTime) {};
+	void AimMove(float& elapsedTime);
 
 	void Step(float& elapsedTime);
 	void Stepping(float& elapsedTime);
@@ -113,6 +106,7 @@ private:
 		m_moveParm.serialVersion = version;
 		m_cameraParm.serialVersion = version;
 		m_stepParm.serialVersion = version;
+		m_aimMode.serialVersion = version;
 
 		for (auto& atk : m_attackParm)
 		{

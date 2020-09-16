@@ -22,7 +22,7 @@ public:
 
 	virtual bool Init(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model);
 
-	virtual void Update(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model,float& elapsedTime);
+	virtual void Update(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model, float& elapsedTime);
 
 	void UpdateRuntimeParameters();
 
@@ -37,8 +37,8 @@ public:
 		auto& anim = model->_resource->_animationTakes[animNum];
 		m_samplers.push_back(std::make_pair(animNum, &anim));
 	}
-	
-	void ChangeSampler(int samplerNum,int animNum, std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model)
+
+	void ChangeSampler(int samplerNum, int animNum, std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model)
 	{
 		auto& anim = model->_resource->_animationTakes[animNum];
 		m_samplers[samplerNum] = std::make_pair(animNum, &anim);
@@ -67,7 +67,7 @@ public:
 
 	inline void ResetAnimationSampler(int samplerNum)
 	{
-		if(samplerNum < static_cast<int>(m_samplers.size()))
+		if (samplerNum < static_cast<int>(m_samplers.size()))
 			m_samplers[samplerNum].second->animtion.Reset();
 	}
 
@@ -76,7 +76,7 @@ public:
 		m_samplers[samplerNum].second->animtion.SetIsLoop(false);
 	}
 
-	inline void SetAnimationSpeed(int samplerNum,float speed)
+	inline void SetAnimationSpeed(int samplerNum, float speed)
 	{
 		m_samplers[samplerNum].second->animtion.SetPlayBackSpeed(speed);
 	}
@@ -108,5 +108,3 @@ protected:
 	std::vector<std::vector<std::string>> m_boneNames;
 	std::vector<uint32_t> m_animationFrame;
 };
-
-

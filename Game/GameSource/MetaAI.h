@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "Scope.h"
 #include "CharacterAI.h"
 #include "MessengType.h"
 #include ".\LibrarySource\Vector.h"
@@ -12,7 +13,9 @@ public:
 
 	bool Init();
 
-	//Enemy
+	//******************************************************************************************
+	// Enemy
+	//******************************************************************************************
 	void UpdateOfEnemys(float& elapsedTime);
 
 	void RenderOfEnemy(ID3D11DeviceContext* immediateContext, uint16_t characterNomber);
@@ -22,8 +25,11 @@ public:
 	void AddEnemy(uint16_t& enemyID, std::shared_ptr<CharacterAI> enemy);
 
 	void DeterminationOfEnemy(int id, MessengType type);
+	//******************************************************************************************
 
-	//Player
+	//******************************************************************************************
+	// Player
+	//******************************************************************************************
 	void UpdateOfPlayers(float& elapsedTime);
 
 	void RenderOfPlayer(ID3D11DeviceContext* immediateContext, uint16_t characterNomber);
@@ -33,16 +39,29 @@ public:
 	void AddPlayer(uint16_t& playerID, std::shared_ptr<CharacterAI> player);
 
 	void DeterminationOfPlayer(int id, MessengType type);
-
+	//******************************************************************************************
+	
+	//************
+	// Scope
+	//************
+	void RenderOfScope(ID3D11DeviceContext* immediateContext);
+	void ImGuiOfScope(ID3D11Device* device);
+	//*****************
+	// Collision
+	//*****************
 	bool CollisionPlayerAttack(int id, CharacterParameter::Collision& collision);
-
 	void CollisionPlayerAndEnemy(std::shared_ptr<CharacterAI>& player);
 
+	//****************
+	// Release
+	//****************
 	void Release();
 	void ReleaseCharacter();
 
+	//******************
+	// Gettet
+	//******************
 	inline std::vector<std::shared_ptr<CharacterAI>>& GetEnemys() { return m_enemys; }
-
 	inline std::vector<std::shared_ptr<CharacterAI>>& GetPlayers() { return m_players; }
 	inline CharacterAI* GetPlayCharacter()
 	{
@@ -54,12 +73,15 @@ public:
 		}
 		return &(*m_players[i]);
 	};
+
 private:
+	uint16_t m_enemyID = -1;
+	uint16_t m_playerID = -1;
+
 	std::vector<std::shared_ptr<CharacterAI>> m_enemys;
 	std::vector<std::shared_ptr<CharacterAI>> m_players;
 
-	uint16_t m_enemyID = -1;
-	uint16_t m_playerID = -1;
+	std::unique_ptr<Scope> m_scope;
 };
 
 

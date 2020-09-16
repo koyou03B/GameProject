@@ -1,15 +1,17 @@
 #include <DirectXTex.h>
 #include <wrl.h>
-#include<memory>
-#include<map>
+#include <memory>
+#include <map>
 #include <string>
 #include <locale>
 #include <codecvt>
 #include <Shlwapi.h>
-#include"WICTextureLoader.h"
+#include "WICTextureLoader.h"
 #include "Function.h"
 #include "Shlwapi.h"
-#include"misc.h"
+#include "misc.h"
+#include "Framework.h"
+#include "Camera.h"
 
 namespace Source
 {
@@ -286,6 +288,61 @@ namespace Source
 		{
 			return (b < a) ? a : b;
 		}
+
+		void WorldToScreen(VECTOR3F* screenPosition, const VECTOR3F& worldPosition)
+		{			
+			float viewportX = 0.0f;
+			float viewportY = 0.0f;
+			float viewportW = static_cast<float>(Framework::GetInstance().SCREEN_WIDTH);
+			float viewportH = static_cast<float>(Framework::GetInstance().SCREEN_HEIGHT);
+			float viewportMinZ = 0.0f;
+			float viewportMaxZ = 1.0f;
+
+			DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetInstance()->GetView());
+			DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetInstance()->GetProjection());
+			DirectX::XMMATRIX W = DirectX::XMMatrixIdentity();//単位行列
+		
+			DirectX::XMMATRIX WVP = W * V * P;
+			DirectX::XMVECTOR NDCPosition = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&worldPosition), WVP);
+			DirectX::XMFLOAT3 ndcPosition;
+			DirectX::XMStoreFloat3(&ndcPosition, NDCPosition);
+
+			screenPosition->x = (ndcPosition.x + 1.0f) * viewportW / 2.0f;
+			screenPosition->y = (ndcPosition.y - 1.0f) * viewportH / -2.0f;
+			screenPosition->z = viewportMinZ + ndcPosition.z * (viewportMaxZ - viewportMinZ);
+
+		}
+
+		void ScreenToWorld(VECTOR3F* worldPosition, const VECTOR3F& screenPosition)
+		{
+
+			float viewportX = 0.0f;
+			float viewportY = 0.0f;
+			float viewportW = static_cast<float>(Framework::GetInstance().SCREEN_WIDTH);
+			float viewportH = static_cast<float>(Framework::GetInstance().SCREEN_HEIGHT);
+			float viewportMinZ = 0.0f;
+			float viewportMaxZ = 1.0f;
+
+			DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetView());
+			DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetProjection());
+			DirectX::XMMATRIX W = DirectX::XMMatrixIdentity();//単位行列
+
+
+			DirectX::XMVECTOR ndcPosition = DirectX::XMVectorSet
+			(
+				2.0f * screenPosition.x / viewportW - 1.0f,
+				1.0f - 2.0f * screenPosition.y / viewportH,
+				screenPosition.z / viewportMaxZ,1.0f
+			);
+
+			// NDC座標からワールド座標へ変換
+			DirectX::XMMATRIX WVP = W * V * P;
+			DirectX::XMMATRIX IWVP = DirectX::XMMatrixInverse(NULL, WVP);
+			DirectX::XMVECTOR WPos = DirectX::XMVector3TransformCoord(ndcPosition, IWVP);
+			DirectX::XMStoreFloat3(worldPosition, WPos);
+		}
+
+
 	}
 
 	namespace RayTriangle
