@@ -286,6 +286,18 @@ void MetaAI::Release()
 
 void MetaAI::ReleaseCharacter()
 {
+
+	for (auto& enemy : m_enemys)
+	{
+		enemy->Release();
+	}
+
+	for (auto& player : m_players)
+	{
+		player->Release();
+	}
+
+
 	m_enemys.clear();
 	m_players.clear();
 }

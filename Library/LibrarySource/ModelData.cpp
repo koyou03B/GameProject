@@ -16,7 +16,7 @@ namespace Source
 		LoadStaticModel staticModel[] = {
 
 			{ StaticModel::STAGE,	"../Asset/Model/Static/Stage/Stage.fbx"},
-
+			{ StaticModel::ARROW,	"../Asset/Model/Static/Arrow/Arrow.fbx"},
 		};
 
 		void FbxLoader::SaveActForBinary(ActorModel modelNo)

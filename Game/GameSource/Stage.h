@@ -5,7 +5,7 @@
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\StaticMesh.h"
 #include ".\LibrarySource\InstanceData.h"
-
+#include ".\LibrarySource\ModelData.h"
 class Stage
 {
 public:
@@ -18,6 +18,16 @@ public:
 
 	void Render(ID3D11DeviceContext* immediateContext);
 
+	void Release()
+	{
+		if (m_model)
+		{
+			if (m_model.unique())
+			{
+				m_model.reset();
+			}
+		}
+	}
 	void ImGui();
 
 	void AddInstanceData(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& scale, const VECTOR4F& color)

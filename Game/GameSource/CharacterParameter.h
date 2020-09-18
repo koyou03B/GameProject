@@ -253,13 +253,16 @@ public:
 		AnimationBlend animationBlend;
 		PartialBlendAnimation partialBlend;
 		float animtionSpeed = 1.0f;
+		float blendValueRange[2] = {};
+
 		float attackBlendRtio = 0.0f;
 		float idleBlendRtio = 0.0f;
 		float moveBlendRatio = 0.0f;
-		float blendValueRange[2] = {};
+		float aimMoveBlendRatio = 0.0f;
 
-		const int samplerSize = 2;
-		const float blendRatioMax = 1.0f;
+		 int samplerSize ;
+		 float blendRatioMax ;
+
 		uint32_t serialVersion = 0;
 
 		template<class T>
@@ -272,6 +275,7 @@ public:
 					attackBlendRtio,
 					idleBlendRtio,
 					moveBlendRatio,
+					aimMoveBlendRatio,
 					blendValueRange[0],
 					blendValueRange[1]
 				);
@@ -282,7 +286,9 @@ public:
 				(
 					attackBlendRtio,
 					idleBlendRtio,
-					moveBlendRatio
+					moveBlendRatio,
+					blendValueRange[0],
+					blendValueRange[1]
 				);
 			}
 		}
@@ -361,10 +367,10 @@ public:
 };
 
 
-CEREAL_CLASS_VERSION(CharacterParameter::Status, 4);
-CEREAL_CLASS_VERSION(CharacterParameter::Move, 4);
-CEREAL_CLASS_VERSION(CharacterParameter::Camera, 4);
-CEREAL_CLASS_VERSION(CharacterParameter::Collision, 4);
-CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 4);
-CEREAL_CLASS_VERSION(CharacterParameter::Step, 4);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 4);
+CEREAL_CLASS_VERSION(CharacterParameter::Status, 5);
+CEREAL_CLASS_VERSION(CharacterParameter::Move, 5);
+CEREAL_CLASS_VERSION(CharacterParameter::Camera, 5);
+CEREAL_CLASS_VERSION(CharacterParameter::Collision, 5);
+CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 5);
+CEREAL_CLASS_VERSION(CharacterParameter::Step, 5);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 5);

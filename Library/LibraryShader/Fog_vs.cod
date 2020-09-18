@@ -32,7 +32,7 @@ dcl_temps 3
 //   o1.x <- <main return value>.texcoord.x; o1.y <- <main return value>.texcoord.y; 
 //   o0.x <- <main return value>.sv_position.x; o0.y <- <main return value>.sv_position.y; o0.z <- <main return value>.sv_position.z; o0.w <- <main return value>.sv_position.w
 //
-#line 6 "C:\Users\光優\Desktop\GameProject\Library\LibrarySource\Fog_vs.hlsl"
+#line 6 "D:\Lib関連\GameProject\Library\LibrarySource\Fog_vs.hlsl"
 mov r0.x, l(1)
 ishl r0.x, v0.x, r0.x
 mov r0.y, l(2)

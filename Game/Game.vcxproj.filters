@@ -78,6 +78,9 @@
     <Filter Include="Sources\Object\Scope">
       <UniqueIdentifier>{2366ef6f-7695-443f-9e15-98ed91896bdf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Object\Arrow">
+      <UniqueIdentifier>{6d09ba99-f576-4766-8039-9f04cd6ae608}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -204,6 +207,9 @@
     </ClInclude>
     <ClInclude Include="GameSource\Scope.h">
       <Filter>Headers\Objects\Aim</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Arrow.h">
+      <Filter>Sources\Object\Arrow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -44,7 +44,7 @@ void Fighter::Init()
 	m_changeParm.isPlay = false;
 
 
-	SerialVersionUpdate(4);
+	SerialVersionUpdate(5);
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str()))
 	{
@@ -55,7 +55,8 @@ void Fighter::Init()
 	}
 
 	m_stepParm.maxSpeed = m_stepParm.speed;
-
+	m_blendAnimation.blendRatioMax = 1.0f;
+	m_blendAnimation.samplerSize = 2;
 	for (int i = 1; i < 5; ++i)
 	{
 		int  current = i - 1;

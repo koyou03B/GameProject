@@ -26,6 +26,17 @@ public:
 
 	virtual void Render(ID3D11DeviceContext* immediateContext) = 0;
 
+	virtual void Release()
+	{
+		if (m_model)
+		{
+			if (m_model.unique())
+			{
+				m_model.reset();
+			}
+		}
+	};
+
 	virtual void ImGui(ID3D11Device* device) = 0;
 
 	inline void SetState(State* state) { m_state = state; }

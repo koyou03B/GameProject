@@ -9,7 +9,7 @@ struct AimMode
 	CharacterParameter::Move	aimMoveParm;
 
 	bool isAim = false;
-
+	bool isStep = false;
 	uint32_t serialVersion = 0;
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
@@ -33,7 +33,7 @@ struct AimMode
 	}
 };
 
-CEREAL_CLASS_VERSION(AimMode, 4);
+CEREAL_CLASS_VERSION(AimMode, 5);
 
 class Archer : public CharacterAI
 {
@@ -85,19 +85,19 @@ public:
 private:
 
 	void RestAnimationIdle();
-
-	void Aim();
-	void Aiming();
+	void ChangeCharacter();
 
 	void Move(float& elapsedTime);
-	void AimMove(float& elapsedTime);
-
 	void Step(float& elapsedTime);
 	void Stepping(float& elapsedTime);
 
+	void Aim();
+	void Aiming();
+	void AimMove(float& elapsedTime);
+	void AimStep(float& elapsedTime);
+	void AimStepping(float& elapsedTime);
 	void Shot();
 
-	void ChangeCharacter();
 
 	void SerialVersionUpdate(uint32_t version)
 	{

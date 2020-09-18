@@ -1,5 +1,6 @@
 #include "SceneGame.h"
 #include "MessengTo.h"
+#include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\Framework.h"
 #include ".\LibrarySource\VectorCombo.h"
 #include ".\LibrarySource\GeometricPrimitve.h"
@@ -395,9 +396,9 @@ void Game::ImGui()
 void Game::Uninitialize()
 {
 	//GetEntityManager().Relese();
-	//m_stage.release();
+	m_stage->Release();
 	m_metaAI->Release();
-
+	Source::ModelData::fbxLoader().Release();
 }
 
 VECTOR3F Game::DistancePlayerToEnemy()

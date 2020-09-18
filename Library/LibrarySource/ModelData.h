@@ -21,6 +21,7 @@ namespace Source
 		enum class StaticModel
 		{
 			STAGE,
+			ARROW,
 			END,
 		};
 
@@ -47,6 +48,26 @@ namespace Source
 
 			void SaveActForBinary(ActorModel modelNo);
 			void SaveStaticForBinary(StaticModel modelNo);
+
+			void Release()
+			{
+				for (int i = 0; i < static_cast<int>(ActorModel::END); ++i)
+				{
+					if (m_actorModel[i])
+					{
+						if(m_actorModel[i].unique())
+							m_actorModel[i].reset();
+					}
+				}
+				for (int i = 0; i < static_cast<int>(StaticModel::END); ++i)
+				{
+					if (m_staticModel[i])
+					{
+						if (m_staticModel[i].unique())
+							m_staticModel[i].reset();
+					}
+				}
+			};
 
 			std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& GetActorModel(ActorModel modelNo);
 			std::shared_ptr<Source::StaticMesh::StaticMesh>& GetStaticModel(StaticModel modelNo);

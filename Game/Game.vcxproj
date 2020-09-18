@@ -39,6 +39,7 @@
     <ClCompile Include="GameSource\Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameSource\Arrow.h" />
     <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />
