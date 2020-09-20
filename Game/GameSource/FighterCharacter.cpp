@@ -44,7 +44,7 @@ void Fighter::Init()
 	m_changeParm.isPlay = false;
 
 
-	SerialVersionUpdate(5);
+	SerialVersionUpdate(6);
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str()))
 	{

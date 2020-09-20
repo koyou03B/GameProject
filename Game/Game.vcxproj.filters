@@ -81,6 +81,9 @@
     <Filter Include="Sources\Object\Arrow">
       <UniqueIdentifier>{6d09ba99-f576-4766-8039-9f04cd6ae608}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\Objects\Arrow">
+      <UniqueIdentifier>{606e1fd7-e951-40a0-8257-e4604c7b54b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -136,6 +139,9 @@
     </ClCompile>
     <ClCompile Include="GameSource\Scope.cpp">
       <Filter>Sources\Object\Scope</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\Arrow.cpp">
+      <Filter>Sources\Object\Arrow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -209,7 +215,7 @@
       <Filter>Headers\Objects\Aim</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\Arrow.h">
-      <Filter>Sources\Object\Arrow</Filter>
+      <Filter>Headers\Objects\Arrow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

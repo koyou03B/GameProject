@@ -2,6 +2,7 @@
 #include "MessengTo.h"
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\VectorCombo.h"
+#include "Arrow.h"
 
 #ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
@@ -41,7 +42,12 @@ void Archer::Init()
 	m_blendAnimation.animationBlend.Init(m_model);
 	//m_blendAnimation.partialBlend.Init(m_model);
 
-	SerialVersionUpdate(5);
+	SerialVersionUpdate(6);
+
+	//*********************
+	// Arrow
+	//*********************
+	ArrowInstamce.Init();
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str()))
 	{
@@ -52,7 +58,7 @@ void Archer::Init()
 	}
 
 	m_stepParm.maxSpeed = m_stepParm.speed;
-
+	m_blendAnimation.aimMoveBlendRatio = 0.0f;
 }
 
 void Archer::Update(float& elapsedTime)
@@ -76,9 +82,24 @@ void Archer::Update(float& elapsedTime)
 				Aiming();
 				AimMove(m_elapsedTime);
 				AimStep(m_elapsedTime);
+
+				if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER) >= 1)
+				{
+					VECTOR3F target = MESSENGER.CallScopePosition();
+
+					ArrowInstamce.SetArrow(position, m_aimMode.arrowAngle, target);
+				}
+
+				if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER) == -1)
+				{
+
+					ArrowInstamce.SetShot(true);
+				}
 			}
 
 
+
+			ArrowInstamce.Update(elapsedTime);
 
 			ChangeCharacter();
 
@@ -103,6 +124,9 @@ void Archer::Update(float& elapsedTime)
 
 void Archer::Render(ID3D11DeviceContext* immediateContext)
 {
+	ArrowInstamce.Render(immediateContext);
+
+
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
 	//auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
@@ -1057,6 +1081,19 @@ void Archer::ImGui(ID3D11Device* device)
 
 #else
 	
+static int currentMesh = 2;
+ImGui::BulletText(u8"Mesh%d”Ô–Ú", currentMesh);
+
+
+static int currentBone = 0;
+
+ImGui::Combo("Name_of_BoneName",
+	&currentBone,
+	vectorGetter,
+	static_cast<void*>(&m_blendAnimation.animationBlend.GetBoneName()[currentMesh]),
+	static_cast<int>(m_blendAnimation.animationBlend.GetBoneName()[currentMesh].size())
+);
+
 	//**************************************
 	// Animation
 	//**************************************
@@ -1083,7 +1120,7 @@ void Archer::ImGui(ID3D11Device* device)
 				m_blendAnimation.moveBlendRatio = moveRatio;
 		
 
-			static float aimMoveRatio = 0;
+			static float aimMoveRatio = m_blendAnimation.aimMoveBlendRatio;
 			ImGui::SliderFloat("AimMoveBlendRatio", &aimMoveRatio, 0.0f, 1.0f);
 			if (ImGui::Button("AimMove BlendRatio"))
 				m_blendAnimation.aimMoveBlendRatio = aimMoveRatio;
@@ -1374,6 +1411,39 @@ void Archer::ImGui(ID3D11Device* device)
 		ImGui::Text("AimModeSpeed : %f", &speed);
 
 
+	}
+
+
+	//**************************************
+	// Arrow
+	//**************************************
+	if (ImGui::CollapsingHeader("Arrow"))
+	{
+		{
+			static float  aangle[] = {m_aimMode.arrowAngle.x};
+
+			ImGui::SliderFloat("XYZANGLE", aangle, 0.0f * 0.01745f, 180.0f * 0.01745f);
+
+			m_aimMode.arrowAngle.x = { aangle[0] };
+		}
+
+		{
+			FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
+			FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+			FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+
+			float bonePositions[] = { getBone._41,getBone._42,getBone._43 };
+			VECTOR3F bonePosition = { bonePositions[0],bonePositions[1],bonePositions[2] };
+
+			position = bonePosition;
+
+			if (ImGui::Button("Save Mesh"))
+				m_aimMode.meshNomber = currentMesh;
+
+			if(ImGui::Button("Save Bone"))
+				m_aimMode.boneNomber = currentBone;
+
+		}
 	}
 
 #endif

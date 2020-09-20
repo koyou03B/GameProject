@@ -18,6 +18,11 @@ public:
 		m_metaAI->DeterminationOfPlayer(id, type);
 	}
 
+	VECTOR3F CallScopePosition()
+	{
+		return m_metaAI->GetScope()->GetWorldScreenPosition();
+	}
+
 	bool AttackingMessage(const int id,CharacterParameter::Collision& player)
 	{
 		if (m_metaAI->CollisionPlayerAttack(id, player))

@@ -8,6 +8,9 @@ struct AimMode
 	CharacterParameter::Camera	aimCameraParm;
 	CharacterParameter::Move	aimMoveParm;
 
+	VECTOR3F arrowAngle = {};
+	uint32_t meshNomber = 0;
+	uint32_t boneNomber = 0;
 	bool isAim = false;
 	bool isStep = false;
 	uint32_t serialVersion = 0;
@@ -19,7 +22,10 @@ struct AimMode
 			archive
 			(
 				aimCameraParm,
-				aimMoveParm
+				aimMoveParm,
+				arrowAngle,
+				meshNomber,
+				boneNomber
 			);
 		}
 		else
@@ -33,7 +39,7 @@ struct AimMode
 	}
 };
 
-CEREAL_CLASS_VERSION(AimMode, 5);
+CEREAL_CLASS_VERSION(AimMode, 6);
 
 class Archer : public CharacterAI
 {
@@ -78,7 +84,8 @@ public:
 				m_moveParm,
 				m_cameraParm,
 				m_stepParm,
-				m_collision
+				m_collision,
+				m_aimMode
 			);
 		}
 	}
@@ -155,5 +162,5 @@ private:
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	std::vector<CharacterParameter::Effect> m_effect;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
-
+	VECTOR3F position = {};
 };

@@ -287,6 +287,7 @@ public:
 					attackBlendRtio,
 					idleBlendRtio,
 					moveBlendRatio,
+					aimMoveBlendRatio,
 					blendValueRange[0],
 					blendValueRange[1]
 				);
@@ -337,7 +338,8 @@ public:
 					radius,
 					scale,
 					currentMesh[0], currentMesh[1],
-					currentBone[0], currentBone[1]
+					currentBone[0], currentBone[1],
+					collisionType
 				);
 			}
 		}
@@ -367,10 +369,10 @@ public:
 };
 
 
-CEREAL_CLASS_VERSION(CharacterParameter::Status, 5);
-CEREAL_CLASS_VERSION(CharacterParameter::Move, 5);
-CEREAL_CLASS_VERSION(CharacterParameter::Camera, 5);
-CEREAL_CLASS_VERSION(CharacterParameter::Collision, 5);
-CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 5);
-CEREAL_CLASS_VERSION(CharacterParameter::Step, 5);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 5);
+CEREAL_CLASS_VERSION(CharacterParameter::Status, 6);
+CEREAL_CLASS_VERSION(CharacterParameter::Move, 6);
+CEREAL_CLASS_VERSION(CharacterParameter::Camera, 6);
+CEREAL_CLASS_VERSION(CharacterParameter::Collision, 6);
+CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 6);
+CEREAL_CLASS_VERSION(CharacterParameter::Step, 6);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 6);

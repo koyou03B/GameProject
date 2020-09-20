@@ -1,5 +1,6 @@
 #include "SceneGame.h"
 #include "MessengTo.h"
+#include "Arrow.h"
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\Framework.h"
 #include ".\LibrarySource\VectorCombo.h"
@@ -67,6 +68,8 @@ bool Game::Initialize(ID3D11Device* device)
 		m_screenFilter = std::make_unique<Source::ScreenFilter::ScreenFilter>(device);
 
 	}
+
+
 	return true;
 }
 
@@ -388,6 +391,7 @@ void Game::ImGui()
 	{
 		m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice(), 0);
 		m_stage->ImGui();
+		ArrowInstamce.ImGui(Framework::GetInstance().GetDevice());
 		m_metaAI->ImGuiOfScope(Framework::GetInstance().GetDevice());
 	}
 #endif

@@ -323,8 +323,8 @@ namespace Source
 			float viewportMinZ = 0.0f;
 			float viewportMaxZ = 1.0f;
 
-			DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetView());
-			DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetProjection());
+			DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetInstance()->GetView());
+			DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&Source::CameraControlle::CameraManager().GetInstance()->GetProjection());
 			DirectX::XMMATRIX W = DirectX::XMMatrixIdentity();//単位行列
 
 
@@ -332,7 +332,7 @@ namespace Source
 			(
 				2.0f * screenPosition.x / viewportW - 1.0f,
 				1.0f - 2.0f * screenPosition.y / viewportH,
-				screenPosition.z / viewportMaxZ,1.0f
+				screenPosition.z / viewportMaxZ,screenPosition.z
 			);
 
 			// NDC座標からワールド座標へ変換

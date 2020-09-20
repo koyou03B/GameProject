@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="GameSource\AnimationBlending.cpp" />
     <ClCompile Include="GameSource\ArcherCharacter.cpp" />
+    <ClCompile Include="GameSource\Arrow.cpp" />
     <ClCompile Include="GameSource\Collision.cpp" />
     <ClCompile Include="GameSource\DebugObject.cpp" />
     <ClCompile Include="GameSource\Enemy.cpp" />

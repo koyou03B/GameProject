@@ -166,6 +166,7 @@ public:
 	VECTOR3F& operator=(const VECTOR3F& v) { x = v.x; y = v.y; z = v.z; return *this; }
 	VECTOR3F& operator+=(const VECTOR3F& v) { x += v.x; y += v.y; z += v.z; return *this; }
 	VECTOR3F& operator-=(const VECTOR3F& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+	VECTOR3F& operator*=(const VECTOR3F& v) { x *= v.x; y *= v.y; z *= v.z; return *this; }
 	VECTOR3F& operator*=(const float f) { x *= f; y *= f; z *= f; return *this; }
 	VECTOR3F& operator/=(const float f) { x /= f; y /= f; z /= f; return *this; }
 
@@ -174,6 +175,7 @@ public:
 
 	VECTOR3F operator+(const VECTOR3F& v) const { return VECTOR3F(x + v.x, y + v.y, z + v.z); }
 	VECTOR3F operator-(const VECTOR3F& v) const { return VECTOR3F(x - v.x, y - v.y, z - v.z); }
+	VECTOR3F operator*(const VECTOR3F& v) const { return VECTOR3F(x * v.x, y * v.y, z * v.z); }
 	VECTOR3F operator*(const float f) const { return VECTOR3F(x * f, y * f, z * f); }
 	VECTOR3F operator/(const float f) const { return VECTOR3F(x / f, y / f, z / f); }
 

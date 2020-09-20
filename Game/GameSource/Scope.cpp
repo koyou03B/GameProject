@@ -14,11 +14,14 @@ void Scope::Update(VECTOR3F target)
 	//******************
 	// SystemÅFLockON
 	//******************
+	m_target = target;
+	
 	VECTOR3F screenPosition = {};
 	target.y += m_yAxisValue;
 	Source::Math::WorldToScreen(&screenPosition, target);
 	m_texturePosition.x = screenPosition.x;
 	m_texturePosition.y = screenPosition.y;
+	m_screenPosition = screenPosition;
 }
 
 void Scope::ImGui(ID3D11Device* device)
@@ -41,4 +44,10 @@ void Scope::ImGui(ID3D11Device* device)
 		if (ImGui::Button("Save"))
 			SaveBinary();
 	}
+}
+
+VECTOR3F& Scope::GetWorldScreenPosition()
+{
+	Source::Math::ScreenToWorld(&m_worldPosition, m_screenPosition);
+	return m_worldPosition;
 }

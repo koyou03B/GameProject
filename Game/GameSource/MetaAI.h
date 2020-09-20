@@ -73,7 +73,7 @@ public:
 		}
 		return &(*m_players[i]);
 	};
-
+	inline std::unique_ptr<Scope>& GetScope() { return m_scope; }
 private:
 	uint16_t m_enemyID = -1;
 	uint16_t m_playerID = -1;

@@ -44,6 +44,8 @@ public:
 
 	void ImGui(ID3D11Device* device);
 
+	VECTOR3F& GetWorldScreenPosition();
+
 	bool GetAimMode() { return m_isAimMode; }
 
 	void SetAimMode() { m_isAimMode = !m_isAimMode; }
@@ -78,5 +80,8 @@ private:
 	VECTOR2F m_textureScale = {};
 	VECTOR2F m_textureSize = {};
 	VECTOR4F m_textureColor = { 1.0f,1.0f,1.0f,1.0f };
-
+	
+	VECTOR3F m_target = {};
+	VECTOR3F m_screenPosition = {};
+	VECTOR3F m_worldPosition = {};
 };
