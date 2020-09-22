@@ -10,7 +10,7 @@
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
-CEREAL_CLASS_VERSION(Archer, 4);
+CEREAL_CLASS_VERSION(Archer, 6);
 
 void Archer::Init()
 {
@@ -31,8 +31,6 @@ void Archer::Init()
 	m_padDeadLine = 5000.0f;
 	m_elapsedTime = 0.0f;
 
-
-
 	m_transformParm.position = { 30.0f,0.0f,0.0f };
 	m_transformParm.angle = { 0.0f * 0.01745f, 0.0f * 0.01745f,0.0f * 0.017454f };
 	m_transformParm.scale = { 0.05f,0.05f,0.05f };
@@ -42,7 +40,7 @@ void Archer::Init()
 	m_blendAnimation.animationBlend.Init(m_model);
 	//m_blendAnimation.partialBlend.Init(m_model);
 
-	SerialVersionUpdate(6);
+	SerialVersionUpdate(12);
 
 	//*********************
 	// Arrow
@@ -58,7 +56,6 @@ void Archer::Init()
 	}
 
 	m_stepParm.maxSpeed = m_stepParm.speed;
-	m_blendAnimation.aimMoveBlendRatio = 0.0f;
 }
 
 void Archer::Update(float& elapsedTime)
@@ -70,7 +67,9 @@ void Archer::Update(float& elapsedTime)
 
 		if (m_input != nullptr)
 		{
-
+			//***********************
+			// Movement in each mode
+			//***********************
 			if (m_mode != Mode::Aiming)
 			{
 				Move(m_elapsedTime);
@@ -82,28 +81,16 @@ void Archer::Update(float& elapsedTime)
 				Aiming();
 				AimMove(m_elapsedTime);
 				AimStep(m_elapsedTime);
-
-				if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER) >= 1)
-				{
-					VECTOR3F target = MESSENGER.CallScopePosition();
-
-					ArrowInstamce.SetArrow(position, m_aimMode.arrowAngle, target);
-				}
-
-				if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER) == -1)
-				{
-
-					ArrowInstamce.SetShot(true);
-				}
+				Shot();
 			}
 
-
-
+			//***********************
+			// Common Movements
+			//***********************
 			ArrowInstamce.Update(elapsedTime);
 
 			ChangeCharacter();
 
-			RestAnimationIdle();
 		}
 	}
 	else
@@ -113,13 +100,16 @@ void Archer::Update(float& elapsedTime)
 		//Step(m_elapsedTime);
 
 		//Attack(m_elapsedTime);
-
-		RestAnimationIdle();
-
 	}
 
+	//*********************
+	// Collision Detection
+	//*********************
 	m_blendAnimation.animationBlend.Update(m_model, m_elapsedTime);
-
+	FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
+	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+	FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+	m_collision[0].position[0] = { getBone._41,getBone._42,getBone._43 };
 }
 
 void Archer::Render(ID3D11DeviceContext* immediateContext)
@@ -136,31 +126,6 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 	m_debugObjects.debugObject.Render(immediateContext, scroll, true);
 }
 
-void Archer::RestAnimationIdle()
-{
-	if (m_blendAnimation.animationBlend.GetSampler().size() == m_blendAnimation.samplerSize)
-	{
-		if (m_statusParm.isAttack || m_stepParm.isStep)
-		{
-			if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
-			{
-				m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
-				if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
-				{
-					m_blendAnimation.animationBlend.ReleaseSampler(0);
-					m_statusParm.isAttack = false;
-					m_stepParm.isStep = false;
-					m_moveParm.isMove = false;
-					m_blendAnimation.animationBlend._blendRatio = 0.0f;
-					m_stepParm.speed = m_stepParm.maxSpeed;
-
-				}
-			}
-		}
-	}
-
-}
-
 void Archer::ChangeCharacter()
 {
 	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT) == 1)
@@ -170,6 +135,27 @@ void Archer::ChangeCharacter()
 		MESSENGER.MessageFromPlayer(m_id, MessengType::CHANGE_PLAYER);
 
 		m_input->ResetButton(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT);
+
+		if (m_mode == Mode::Aiming)
+		{
+			MESSENGER.MessageFromPlayer(m_id, MessengType::SHIFT_AIM_MODE);
+			m_mode = Mode::Moving;
+			m_aimMode.isAim = false;
+			int samplerSize = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
+			if (samplerSize >= 2)
+			{
+				for (int i = 0; i < samplerSize; ++i)
+				{
+					m_blendAnimation.animationBlend.ResetAnimationSampler(i);
+					m_blendAnimation.animationBlend.ReleaseSampler(i);
+				}
+			}
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+			m_animationType = Animation::IDLE;
+			m_blendAnimation.animationBlend.ChangeSampler(0, m_animationType,m_model);
+		if(!m_aimMode.isShot)
+			ArrowInstamce.ReleaseArrowParm();
+		}
 	}
 }
 
@@ -469,6 +455,9 @@ void Archer::Stepping(float& elapsedTime)
 
 }
 
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//IDLE AIM or AIMWALK  : animtionBlend
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 void Archer::Aim()
 {
 	if (m_stepParm.isStep) return;
@@ -557,6 +546,10 @@ void Archer::Aiming()
 
 	if (!m_aimMode.isAim)
 	{
+
+		//*************************
+		// Release the LR button.
+		//*************************
 		if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LSHOULDER) == 0)
 		{
 			m_blendAnimation.animationBlend._blendRatio -= m_blendAnimation.idleBlendRtio;
@@ -572,6 +565,10 @@ void Archer::Aiming()
 				MESSENGER.MessageFromPlayer(m_id, MessengType::SHIFT_AIM_MODE);
 
 			}
+			//*********************************
+			// Correcting the camera position 
+			// in not aimMode
+			//*********************************
 			VECTOR3F nowLength = Source::CameraControlle::CameraManager().GetInstance()->GetLength();
 			VECTOR3F length = LerpVec3(m_cameraParm.lenght, nowLength, m_blendAnimation.animationBlend._blendRatio);
 
@@ -579,7 +576,7 @@ void Archer::Aiming()
 		}
 		else
 		{
-			m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+			m_blendAnimation.animationBlend._blendRatio += m_aimMode.aimIdleBlendRatio;
 
 			if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
 			{
@@ -588,16 +585,22 @@ void Archer::Aiming()
 				m_blendAnimation.animationBlend.ReleaseSampler(0);
 				m_aimMode.isAim = true;
 			}
+			//*********************************
+			// Correcting the camera position 
+			// in  aimMode
+			//*********************************
 			VECTOR3F nowLength = Source::CameraControlle::CameraManager().GetInstance()->GetLength();
-
 			VECTOR3F length = LerpVec3(nowLength, m_aimMode.aimCameraParm.lenght, m_blendAnimation.animationBlend._blendRatio);
-
 			Source::CameraControlle::CameraManager().GetInstance()->SetLength(length);
 		}
 	}
 	else
 	{
-		if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LSHOULDER) == -1)
+		//*******************
+		// Not Shot and 
+		// LR is released
+		//*******************
+		if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LSHOULDER) == -1 && !m_aimMode.isShot)
 		{
 			if (m_animationType != Animation::IDLE)
 			{
@@ -609,7 +612,7 @@ void Archer::Aiming()
 		}
 		else if (m_animationType == Animation::IDLE)
 		{
-			m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+			m_blendAnimation.animationBlend._blendRatio += m_aimMode.aimIdleBlendRatio;
 
 			if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
 			{
@@ -624,16 +627,39 @@ void Archer::Aiming()
 			}
 			VECTOR3F nowLength = Source::CameraControlle::CameraManager().GetInstance()->GetLength();
 			VECTOR3F length = LerpVec3(nowLength, m_cameraParm.lenght, m_blendAnimation.animationBlend._blendRatio);
-
 			Source::CameraControlle::CameraManager().GetInstance()->SetLength(length);
 		}
 
+	}
+
+	//*********************
+	// Attack judge
+	//*********************
+	if (ArrowInstamce.GetIsShot())
+	{
+		FLOAT4X4 world = ArrowInstamce.GetInstanceData()[0].world;
+		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+		world = modelAxisTransform * world;
+		VECTOR3F upAxis = { world._21,world._22,world._23 };
+		upAxis = NormalizeVec3(upAxis);
+
+		m_collision[1].position[1] = ArrowInstamce.GetInstanceData()[0].position;
+		m_collision[1].position[0] = ArrowInstamce.GetInstanceData()[0].position + 
+			upAxis*m_aimMode.collsionVector;
+
+		m_statusParm.attackPoint = ArrowInstamce.GetArrow()->GetAttack();
+
+		if (MESSENGER.AttackingMessage(static_cast<int>(m_id), m_collision[1]))
+		{
+			ArrowInstamce.ReleaseArrowParm();
+
+		}
 	}
 }
 
 void Archer::AimMove(float& elapsedTime)
 {
-	if (!m_aimMode.isAim || m_animationType == Animation::DIVE) return;
+	if (!m_aimMode.isAim  || m_aimMode.isShot|| m_animationType == Animation::DIVE) return;
 
 	if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
 	{
@@ -707,10 +733,12 @@ void Archer::AimMove(float& elapsedTime)
 			{
 				m_aimMode.aimMoveParm.velocity -= vector * m_aimMode.aimMoveParm.decleleration;
 			}
-
+			//************************
+			// AnimationBlend
+			//************************
 			if (m_blendAnimation.animationBlend.GetSampler().size() == 2)
 			{
-				m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.aimMoveBlendRatio;
+				m_blendAnimation.animationBlend._blendRatio += m_aimMode.aimMoveBlendRatio;
 				if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendValueRange[1])
 				{
 					m_blendAnimation.animationBlend._blendRatio = 0.0f;
@@ -788,9 +816,12 @@ void Archer::AimMove(float& elapsedTime)
 	}
 }
 
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//AIM or AIMWALK STEP : animtionBlend
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 void Archer::AimStep(float& elapsedTime)
 {
-	if (!m_aimMode.isAim) return;
+	if (!m_aimMode.isAim || m_aimMode.isShot) return;
 	if(m_blendAnimation.animationBlend._blendRatio == 0.0f)
 	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1 && !m_statusParm.isAttack && m_animationType != Animation::DIVE)
 	{
@@ -844,7 +875,7 @@ void Archer::AimStepping(float& elapsedTime)
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-
 	if (!m_aimMode.isStep)
 	{
-		m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+		m_blendAnimation.animationBlend._blendRatio += m_aimMode.aimStepBlendRatio;
 
 		if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
 		{
@@ -933,6 +964,104 @@ void Archer::AimStepping(float& elapsedTime)
 
 }
 
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//AIM or AIMWALK ARROWSHOT : animtionBlend
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+void Archer::Shot()
+{
+	//****************
+	// Bug prevention
+	//****************
+	if (m_animationType == Animation::IDLE || m_aimMode.isStep)
+	{
+		ArrowInstamce.ReleaseArrowParm();
+		return;
+	}
+
+	if (!m_aimMode.isShot && m_aimMode.isAim)
+	{
+		//*************************
+		// Align with your hand.
+		//*************************
+		if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER) >= 1)
+		{
+			if (ArrowInstamce.GetIsShot()) return;
+			FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_aimMode.meshNomber].at(m_aimMode.boneNomber);
+			FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+			FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+			VECTOR3F bonePositions = { getBone._41,getBone._42,getBone._43 };
+			VECTOR3F target = MESSENGER.CallScopePosition();
+			ArrowInstamce.SetArrow(bonePositions, m_aimMode.arrowAngle, target);
+		}
+		//***************************
+		// Animation Set and Shot
+		//***************************
+		if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER) == -1)
+		{
+			if (ArrowInstamce.GetIsShot()) return;
+			if (m_animationType != Animation::ARROWSHOT)
+			{
+				m_animationType = Animation::ARROWSHOT;
+				m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+				m_blendAnimation.animationBlend.ResetAnimationSampler(1);
+				m_blendAnimation.animationBlend.FalseAnimationLoop(1);
+				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+			}
+			m_aimMode.isShot = true;
+			ArrowInstamce.SetShot(true);
+		}
+	}
+	else if (m_aimMode.isShot)
+	{		
+		if (m_blendAnimation.animationBlend.GetSampler().size() == 2)
+		{
+			m_blendAnimation.animationBlend._blendRatio += m_aimMode.aimShotBlendRatio;
+
+			if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
+			{
+				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+				m_blendAnimation.animationBlend.ReleaseSampler(0);
+			}
+		}
+		else
+		{
+			uint32_t currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+			if (currentAnimationFrame == m_aimMode.frameCount)
+			{
+				//*****************************
+				// If it's  AimMode
+				//*****************************
+				if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_LSHOULDER) > 0)
+				{
+					m_mode = Mode::Aiming;
+					if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
+					{
+						m_animationType = Animation::AIMWALK;
+						m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+					}
+					else
+					{
+						m_animationType = Animation::AIM;
+						m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+					}
+					m_aimMode.isAim = false;
+				}
+				else
+				{
+					m_animationType = Animation::IDLE;
+					m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+				}
+
+				m_blendAnimation.animationBlend.ResetAnimationFrame();
+				m_aimMode.isShot = false;
+			}
+		}
+
+
+	}
+
+}
 
 void Archer::ImGui(ID3D11Device* device)
 {
@@ -1120,10 +1249,7 @@ ImGui::Combo("Name_of_BoneName",
 				m_blendAnimation.moveBlendRatio = moveRatio;
 		
 
-			static float aimMoveRatio = m_blendAnimation.aimMoveBlendRatio;
-			ImGui::SliderFloat("AimMoveBlendRatio", &aimMoveRatio, 0.0f, 1.0f);
-			if (ImGui::Button("AimMove BlendRatio"))
-				m_blendAnimation.aimMoveBlendRatio = aimMoveRatio;
+
 		}
 
 		{
@@ -1195,8 +1321,6 @@ ImGui::Combo("Name_of_BoneName",
 	//**************************************
 	if (ImGui::CollapsingHeader("Camera"))
 	{
-
-
 		if(m_aimMode.isAim)
 		{
 			static float aimModeLength = m_aimMode.aimCameraParm.lenght.x;
@@ -1218,14 +1342,15 @@ ImGui::Combo("Name_of_BoneName",
 			//if (rightAxis.z >= 0)
 			//	rightAxis.z *= -1;
 
-			float rigthValue = rightAxis.x * right;
+			VECTOR3F rigthValue = rightAxis * right;
 
+			m_cameraParm.rightValue  = right;
 			m_aimMode.aimCameraParm.lenght.x = aimModeLength;
 			m_aimMode.aimCameraParm.lenght.y = 0.0f;
 			m_aimMode.aimCameraParm.lenght.z = aimModeLength;
 
 			Source::CameraControlle::CameraManager::GetInstance()->SetLength(m_aimMode.aimCameraParm.lenght);
-			Source::CameraControlle::CameraManager::GetInstance()->SetFocalLength(rigthValue);
+			Source::CameraControlle::CameraManager::GetInstance()->SetRigth(rigthValue);
 		}
 		else
 		{
@@ -1435,7 +1560,7 @@ ImGui::Combo("Name_of_BoneName",
 			float bonePositions[] = { getBone._41,getBone._42,getBone._43 };
 			VECTOR3F bonePosition = { bonePositions[0],bonePositions[1],bonePositions[2] };
 
-			position = bonePosition;
+			VECTOR3F position = bonePosition;
 
 			if (ImGui::Button("Save Mesh"))
 				m_aimMode.meshNomber = currentMesh;
@@ -1446,9 +1571,231 @@ ImGui::Combo("Name_of_BoneName",
 		}
 	}
 
+	//**************************************
+	// Collision
+	//**************************************
+	if (ImGui::CollapsingHeader("Collision"))
+	{
+		static int current = 0;
+		ImGui::RadioButton("Body", &current, 0);ImGui::SameLine();
+		ImGui::RadioButton("ArrowC", &current, 1); 
+
+		if (current == 0)
+		{
+			FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
+			FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+			FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+
+			float bonePositions[] = { getBone._41,getBone._42,getBone._43 };
+			VECTOR3F bonePosition = { bonePositions[0],bonePositions[1],bonePositions[2] };
+
+			ImGui::SliderFloat3("BoneTranslate", bonePositions, -10.0f, 10.0f);
+
+			static bool isVisualization = false;
+			if (ImGui::Button("Visible?"))
+				isVisualization = true;
+
+			if (isVisualization)
+			{
+				if (current == 0)
+				{
+					auto primitive = m_debugObjects.GetCapsule(device, "");
+					m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
+				}
+				m_debugObjects.debugObject.AddInstanceData(bonePosition, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
+					VECTOR3F(1.0f, 1.0f, 1.0f), VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+
+				isVisualization = false;
+			}
+
+			if (m_debugObjects.debugObject.IsGeomety())
+			{
+				auto& geomtry = m_debugObjects.debugObject.GetInstanceData(current);
+
+
+				//Position
+				{
+					geomtry.position = bonePosition;
+				}
+
+				//Scale
+				{
+					static float scale = m_collision[current].scale;
+					ImGui::SliderFloat("Scale", &scale, 1.0f, 10.0f);
+					if (ImGui::Button("ScaleChange"))
+					{
+						geomtry.scale = { scale ,scale ,scale };
+						m_collision[current].scale = scale;
+					}
+				}
+
+				//Radius
+				{
+					static float radius = m_collision[current].radius;
+					ImGui::SliderFloat("Radius", &radius, 1, 10);
+					if (ImGui::Button("RadiusChange"))
+					{
+						geomtry.scale *= radius;
+						m_collision[current].radius = radius;
+					}
+				}
+
+				//Mesh & Bone SetNumber
+				{
+					if (ImGui::Button("Mesh 0"))
+						m_collision[current].SetCurrentMesh(currentMesh, 0);
+					ImGui::SameLine();
+					if (ImGui::Button("Mesh 1"))
+						m_collision[current].SetCurrentMesh(currentMesh, 1);
+
+					int mesh0 = m_collision[current].GetCurrentMesh(0);
+					ImGui::BulletText("Mesh Number %d", mesh0);
+					int mesh1 = m_collision[current].GetCurrentMesh(1);
+					ImGui::BulletText("Mesh Number %d", mesh1);
+
+					if (ImGui::Button("Bone 0"))
+						m_collision[current].SetCurrentBone(currentBone, 0);
+					ImGui::SameLine();
+					if (ImGui::Button("Bone 1"))
+						m_collision[current].SetCurrentBone(currentBone, 1);
+
+
+					int bone0 = m_collision[current].GetCurrentBone(0);
+					ImGui::BulletText("Bone Number %d", bone0);
+					int bone1 = m_collision[current].GetCurrentBone(1);
+					ImGui::BulletText("Bone Number %d", bone1);
+				}
+
+				//CollisionType
+				{
+					std::vector<std::string> collisionType = { "Cube","SPHER","CAPSULE","CIRCLE","RECT" };
+					static int currentCollisionType = 0;
+
+					ImGui::Combo("Name_of_CollisionType",
+						&currentCollisionType,
+						vectorGetter,
+						static_cast<void*>(&collisionType),
+						static_cast<int>(collisionType.size())
+					);
+
+					if (ImGui::Button("CollisionType"))
+						m_collision[current].collisionType = static_cast<CharacterParameter::Collision::CollisionType>(currentCollisionType);
+				}
+				geomtry.CreateWorld();
+			}
+		}
+		else if (current == 1)
+		{
+			FLOAT4X4 world = ArrowInstamce.GetInstanceData()[0].world;
+			FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+			world = modelAxisTransform * world;
+
+			float bonePositions[] = { world._41,world._42,world._43 };
+			VECTOR3F position = { world._41,world._42,world._43 };
+			ImGui::SliderFloat3("BoneTranslate", bonePositions, -10.0f, 10.0f);
+
+
+			static bool isVisualization = false;
+			if (ImGui::Button("Visible?"))
+				isVisualization = true;
+
+			if (isVisualization)
+			{
+				if (current != 0)
+				{
+					auto primitive = m_debugObjects.GetSphere(device, "");
+					m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
+				}
+				m_debugObjects.debugObject.AddInstanceData(position, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
+					VECTOR3F(1.0f, 1.0f, 1.0f), VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+
+				isVisualization = false;
+			}
+
+
+			if (m_debugObjects.debugObject.IsGeomety())
+			{
+				auto& geomtry = m_debugObjects.debugObject.GetInstanceData(current-1);
+
+
+				//Position
+				if (current == 1)
+				{
+					VECTOR3F position = ArrowInstamce.GetInstanceData()[0].position;
+					FLOAT4X4 world = ArrowInstamce.GetInstanceData()[0].world;
+					FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+					world = modelAxisTransform * world;
+					VECTOR3F velocity = ArrowInstamce.GetArrow()->GetVelocity();
+
+					VECTOR3F rightAxis = { world._11,world._12,world._13 };
+					VECTOR3F upAxis = { world._21,world._22,world._23 };
+					VECTOR3F frontAxis = { world._31,world._32,world._33 };
+
+					rightAxis = NormalizeVec3(rightAxis);
+					upAxis = NormalizeVec3(upAxis);
+					frontAxis = NormalizeVec3(frontAxis);
+
+					static float rightValue = 0.0f;
+					ImGui::SliderFloat("Right", &rightValue, 0.0, -100.0f);
+					static float upValue = 0.0f;
+					ImGui::SliderFloat("Up", &upValue, 0.0, 100.0f);
+					static float frontValue = 0.0f;
+					ImGui::SliderFloat("Front", &frontValue, 0.0, -100.0f);
+
+					VECTOR3F right = rightAxis * rightValue;
+					VECTOR3F up = upAxis * upValue;
+					VECTOR3F front = frontAxis * frontValue;
+
+					geomtry.position = position + right;
+					geomtry.position = geomtry.position + up;
+					geomtry.position = geomtry.position + front;
+
+					m_aimMode.collsionVector = upValue;
+				}
+
+				//Scale
+				{
+					static float scale = m_collision[current].scale;
+					ImGui::SliderFloat("Scale", &scale, 1.0f, 10.0f);
+					if (ImGui::Button("ScaleChange"))
+					{
+						geomtry.scale = { scale ,scale ,scale };
+						m_collision[current].scale = scale;
+					}
+				}
+
+				//Radius
+				{
+					static float radius = m_collision[current].radius;
+					ImGui::SliderFloat("Radius", &radius, 0, 10);
+					if (ImGui::Button("RadiusChange"))
+					{
+						geomtry.scale *= radius;
+						m_collision[current].radius = radius;
+					}
+				}
+
+				//CollisionType
+				{
+					std::vector<std::string> collisionType = { "Cube","SPHER","CAPSULE","CIRCLE","RECT" };
+					static int currentCollisionType = 0;
+
+					ImGui::Combo("Name_of_CollisionType",
+						&currentCollisionType,
+						vectorGetter,
+						static_cast<void*>(&collisionType),
+						static_cast<int>(collisionType.size())
+					);
+
+					if (ImGui::Button("CollisionType"))
+						m_collision[current].collisionType = static_cast<CharacterParameter::Collision::CollisionType>(currentCollisionType);
+				}
+				geomtry.CreateWorld();
+			}
+		}
+	}
 #endif
 	ImGui::End();
 
 #endif
 }
-

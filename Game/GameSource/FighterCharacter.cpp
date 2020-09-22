@@ -44,7 +44,7 @@ void Fighter::Init()
 	m_changeParm.isPlay = false;
 
 
-	SerialVersionUpdate(6);
+	SerialVersionUpdate(9);
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str()))
 	{
@@ -557,7 +557,7 @@ void Fighter::ImGui(ID3D11Device* device)
 			}
 			else
 			{
-				auto primitive = m_debugObjects.GetCapsule(device, "../Asset/Texture/fire.png");
+				auto primitive = m_debugObjects.GetCapsule(device, "../Asset/Texture/Effect/fire.png");
 				m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
 			}
 			m_debugObjects.debugObject.AddInstanceData(bonePosition, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),

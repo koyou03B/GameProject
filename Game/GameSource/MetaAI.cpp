@@ -156,10 +156,17 @@ void MetaAI::DeterminationOfPlayer(int id, MessengType type)
 
 			VECTOR3F distance = playerPosition - enemyPosition;
 			distance = NormalizeVec3(distance);
+
+			FLOAT4X4 modelAxisTransform = m_players[nextPlay]->GetModel()->_resource->axisSystemTransform;
+			FLOAT4X4 world = modelAxisTransform * m_players[nextPlay]->GetWorldTransform().world;
+			VECTOR3F rightAxis = { world._11,world._12,world._13 };
+			rightAxis = NormalizeVec3(rightAxis);
+			VECTOR3F rigthValue = rightAxis * m_players[nextPlay]->GetCamera().rightValue;
+
+			Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rigthValue);
 			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
 			Source::CameraControlle::CameraManager().GetInstance()->SetObject(playerPosition);
 			Source::CameraControlle::CameraManager().GetInstance()->SetLength(m_players[nextPlay]->GetCamera().lenght);
-			Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(m_players[nextPlay]->GetCamera().focalLength);
 			Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(m_players[nextPlay]->GetCamera().heightAboveGround);
 			Source::CameraControlle::CameraManager().GetInstance()->SetNextEye();
 			Source::CameraControlle::CameraManager().GetInstance()->SetValue(0.f);
@@ -236,7 +243,9 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 			{
 				m_enemys[0]->GetStatus().isExit = false;
 			}
+			return true;
 		}
+
 	}
 	break;
 	}

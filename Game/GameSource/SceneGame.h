@@ -48,5 +48,5 @@ public:
 	void Uninitialize()override;
 
 	VECTOR3F DistancePlayerToEnemy();
-
+	VECTOR3F CameraRightValue();
 };

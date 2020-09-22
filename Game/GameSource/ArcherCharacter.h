@@ -11,8 +11,17 @@ struct AimMode
 	VECTOR3F arrowAngle = {};
 	uint32_t meshNomber = 0;
 	uint32_t boneNomber = 0;
+	uint32_t frameCount = 0;
+
+	float aimIdleBlendRatio = 0.0f;
+	float aimMoveBlendRatio = 0.0f;
+	float aimShotBlendRatio = 0.0f;
+	float aimStepBlendRatio = 0.0f;
+
+	float collsionVector = 0.0f;
 	bool isAim = false;
 	bool isStep = false;
+	bool isShot = false;
 	uint32_t serialVersion = 0;
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
@@ -25,7 +34,13 @@ struct AimMode
 				aimMoveParm,
 				arrowAngle,
 				meshNomber,
-				boneNomber
+				boneNomber,
+				aimIdleBlendRatio,
+				aimMoveBlendRatio,
+				aimShotBlendRatio,
+				aimStepBlendRatio,
+				collsionVector,
+				frameCount
 			);
 		}
 		else
@@ -33,13 +48,22 @@ struct AimMode
 			archive
 			(
 				aimCameraParm,
-				aimMoveParm
+				aimMoveParm,
+				arrowAngle,
+				meshNomber,
+				boneNomber,
+				aimIdleBlendRatio,
+				aimMoveBlendRatio,
+				aimShotBlendRatio,
+				aimStepBlendRatio,
+				collsionVector,
+				frameCount
 			);
 		}
 	}
 };
 
-CEREAL_CLASS_VERSION(AimMode, 6);
+CEREAL_CLASS_VERSION(AimMode, 12);
 
 class Archer : public CharacterAI
 {
@@ -59,7 +83,7 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 4)
+		if (version >= 6)
 		{
 			archive
 			(
@@ -71,7 +95,6 @@ public:
 				m_stepParm,
 				m_collision,
 				m_aimMode
-			
 			);
 		}
 		else
@@ -91,7 +114,6 @@ public:
 	}
 private:
 
-	void RestAnimationIdle();
 	void ChangeCharacter();
 
 	void Move(float& elapsedTime);
@@ -114,7 +136,8 @@ private:
 		m_cameraParm.serialVersion = version;
 		m_stepParm.serialVersion = version;
 		m_aimMode.serialVersion = version;
-
+		m_aimMode.aimCameraParm.serialVersion = version;
+		m_aimMode.aimMoveParm.serialVersion = version;
 		for (auto& atk : m_attackParm)
 		{
 			atk.serialVersion = version;
@@ -162,5 +185,5 @@ private:
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	std::vector<CharacterParameter::Effect> m_effect;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
-	VECTOR3F position = {};
+
 };

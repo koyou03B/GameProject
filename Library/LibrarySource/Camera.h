@@ -81,7 +81,7 @@ namespace Source
 				CHANGE_OBJECT,
 				ORBIT,
 				FREE,
-			} ;
+			};
 		public:
 			CameraManager() = default;
 			~CameraManager() = default;
@@ -109,6 +109,7 @@ namespace Source
 			inline const VECTOR3F GetEye()				const { return m_eye; }
 			inline const VECTOR3F GetDirection()		const { return m_direction; }
 			inline const VECTOR3F GetLength()			const { return m_length; }
+			inline const VECTOR3F GetRight()			const { return m_right; }
 			inline const FLOAT4X4& GetView()			const { return m_constantsBuffer->data.view; }
 			inline const FLOAT4X4& GetProjection()		const { return m_constantsBuffer->data.projection; }
 			inline const FLOAT4X4& GetViewProjection()  const { return m_constantsBuffer->data.viewProjection; }
@@ -118,27 +119,30 @@ namespace Source
 			FLOAT4X4& GetCreateProjection();
 
 
-			inline void SetCameraMode(const CameraMode& mode)		 { this->m_mode = mode; }
+			inline void SetCameraMode(const CameraMode& mode) { this->m_mode = mode; }
 
-			inline void SetDistance(const VECTOR3F& distance)		 { this->m_direction = distance; }
-			inline void SetOldDistance(const VECTOR3F& oldDistance)  { this->m_oldDirection = oldDistance; }
+			inline void SetDistance(const VECTOR3F& distance) { this->m_direction = distance; }
+			inline void SetOldDistance(const VECTOR3F& oldDistance) { this->m_oldDirection = oldDistance; }
 
-			inline void SetObject(const VECTOR3F& object)			 { this->m_object = object; }
-			inline void SetOldObject(const VECTOR3F& object)		 { this->m_oldObject = object; }
-			inline void SetTarget(const VECTOR3F& target)			 { this->m_target = target; }
-			inline void SetOldTarget(const VECTOR3F& oldTarget)		 { this->m_oldTarget = oldTarget; }
-			inline void SetLength(const VECTOR3F& length)			 { this->m_length = length; }
+			inline void SetObject(const VECTOR3F& object) { this->m_object = object; }
+			inline void SetOldObject(const VECTOR3F& object) { this->m_oldObject = object; }
+			inline void SetTarget(const VECTOR3F& target) { this->m_target = target; }
+			inline void SetOldTarget(const VECTOR3F& oldTarget) { this->m_oldTarget = oldTarget; }
+			inline void SetLength(const VECTOR3F& length) { this->m_length = length; }
+			inline void SetRigth(const VECTOR3F& length) { this->m_right = length; }
 
-			inline void SetValue(const float& value)				 { this->m_value = value; }
-			inline void SetFocalLength(const float& focalLength)	 { this->m_focalLength = focalLength; }
-			inline void SetHeightAboveGround(const float& height)	 { this->m_heightAboveGround = height; }
+			inline void SetValue(const float& value) { this->m_value = value; }
+			inline void SetFocalLength(const float& focalLength) { this->m_focalLength = focalLength; }
+			inline void SetHeightAboveGround(const float& height) { this->m_heightAboveGround = height; }
 			inline void SetNowChangeTarget(const bool& changeTarget) { this->m_nowChangeTarget = changeTarget; }
-	
+
 			inline void SetNextEye()
 			{
-				m_nextEye.x = m_object.x + m_direction.x * m_length.x + m_focalLength;
+				m_nextEye.x = m_object.x + m_direction.x * m_length.x ;
 				m_nextEye.y = m_object.y + m_direction.y * m_length.y + m_heightAboveGround;
 				m_nextEye.z = m_object.z + m_direction.z * m_length.z;
+
+				m_nextEye += m_right;
 			}
 
 
@@ -179,6 +183,8 @@ namespace Source
 
 			VECTOR3F m_length = {};
 			VECTOR3F m_angle = {};
+
+			VECTOR3F m_right = {};
 
 			float m_focalLength = 0.0f;
 			float m_heightAboveGround = 0.0f;

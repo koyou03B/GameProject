@@ -220,7 +220,7 @@ public:
 		float value = 0.0f;
 		float focalLength = 0.0f;
 		float heightAboveGround = 0.0f;
-
+		float rightValue = 0.0f;
 		uint32_t serialVersion = 0;
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
@@ -232,7 +232,8 @@ public:
 					lenght,
 					value,
 					focalLength,
-					heightAboveGround
+					heightAboveGround,
+					rightValue
 				);
 			}
 			else
@@ -258,7 +259,6 @@ public:
 		float attackBlendRtio = 0.0f;
 		float idleBlendRtio = 0.0f;
 		float moveBlendRatio = 0.0f;
-		float aimMoveBlendRatio = 0.0f;
 
 		 int samplerSize ;
 		 float blendRatioMax ;
@@ -275,7 +275,6 @@ public:
 					attackBlendRtio,
 					idleBlendRtio,
 					moveBlendRatio,
-					aimMoveBlendRatio,
 					blendValueRange[0],
 					blendValueRange[1]
 				);
@@ -287,7 +286,6 @@ public:
 					attackBlendRtio,
 					idleBlendRtio,
 					moveBlendRatio,
-					aimMoveBlendRatio,
 					blendValueRange[0],
 					blendValueRange[1]
 				);
@@ -369,10 +367,10 @@ public:
 };
 
 
-CEREAL_CLASS_VERSION(CharacterParameter::Status, 6);
-CEREAL_CLASS_VERSION(CharacterParameter::Move, 6);
-CEREAL_CLASS_VERSION(CharacterParameter::Camera, 6);
-CEREAL_CLASS_VERSION(CharacterParameter::Collision, 6);
-CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 6);
-CEREAL_CLASS_VERSION(CharacterParameter::Step, 6);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 6);
+CEREAL_CLASS_VERSION(CharacterParameter::Status, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::Move, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::Camera, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::Collision, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::Step, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 12);

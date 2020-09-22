@@ -83,7 +83,10 @@ void Game::Update(float& elapsedTime)
 
 		VECTOR3F distance = DistancePlayerToEnemy();
 		distance = NormalizeVec3(distance);
+		VECTOR3F rightVaule = CameraRightValue();
 		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+		Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rightVaule);
+
 		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
 		CharacterAI* player = m_metaAI->GetPlayCharacter();
@@ -413,4 +416,20 @@ VECTOR3F Game::DistancePlayerToEnemy()
 	VECTOR3F distance = player->GetWorldTransform().position - enemy->GetWorldTransform().position;
 
 	return distance;
+}
+
+VECTOR3F Game::CameraRightValue()
+{
+	CharacterAI* player = m_metaAI->GetPlayCharacter();
+	//*****************
+	// Camera
+	//*****************
+	FLOAT4X4 modelAxisTransform = player->GetModel()->_resource->axisSystemTransform;
+	FLOAT4X4 world = modelAxisTransform * player->GetWorldTransform().world;
+
+	VECTOR3F rightAxis = { world._11,world._12,world._13 };
+	rightAxis = NormalizeVec3(rightAxis);
+	VECTOR3F rigthValue = rightAxis * player->GetCamera().rightValue;
+	
+	return rigthValue;
 }

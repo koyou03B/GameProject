@@ -103,11 +103,7 @@ public:
 
 	void Render(ID3D11DeviceContext* immediateContext);
 
-	void SetArrow(const VECTOR3F& position,const VECTOR3F& angle,const VECTOR3F& velocity);
-
-	void SetShot(bool isShot) { m_isShot = isShot; }
-
-	void ImGui(ID3D11Device* device) ;
+	void ImGui(ID3D11Device* device);
 
 	void Release()
 	{
@@ -119,6 +115,21 @@ public:
 		if (!m_instanceData.empty())
 			m_instanceData.clear();
 	}
+
+	void ReleaseArrowParm()
+	{
+		if (!m_choisArrow) return;
+		m_choisArrow->Relase();
+		m_isShot = false;
+	}
+
+	std::shared_ptr<Arrow>& GetArrow() { return m_choisArrow; }
+	std::vector<Source::InstanceData::InstanceData>& GetInstanceData() { return m_instanceData; }
+	bool GetIsShot() { return m_isShot; }
+
+	void SetArrow(const VECTOR3F& position,const VECTOR3F& angle,const VECTOR3F& velocity);
+
+	void SetShot(bool isShot) { m_isShot = isShot; }
 
 	inline static ArrowAdominist& GetInstance()
 	{

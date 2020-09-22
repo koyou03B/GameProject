@@ -100,7 +100,7 @@ namespace Source
 			m_geometricPrimitiveVS->Activate(immediateContext);
 			m_geometricPrimitivePS->Activate(immediateContext);
 
-			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ADD), nullptr, 0xFFFFFFFF);
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
 			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_TRUE), 1);
 
 			if (wireframe)

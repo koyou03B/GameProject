@@ -192,10 +192,11 @@ namespace Source
 		void CameraManager::LockON()
 		{
 			VECTOR3F n_Vec = LerpVec3(m_oldDirection, m_direction, m_value);
-			m_eye.x = m_object.x + n_Vec.x * m_length.x + m_focalLength;
+			m_eye.x = m_object.x + n_Vec.x * m_length.x ;
 			m_eye.y = m_object.y + n_Vec.y * m_length.y + m_heightAboveGround;
 			m_eye.z = m_object.z + n_Vec.z * m_length.z;
 
+			m_eye += m_right;
 			m_camera->SetEye(m_eye);
 			
 			m_target = LerpVec3(m_oldTarget, m_target, m_value);
@@ -237,7 +238,7 @@ namespace Source
 			m_camera->SetEye(m_eye);
 
 
-			m_value += 0.003f;
+			m_value += 0.0025f;
 			if (m_value >= 1.0f) m_value = 1.0f;
 #endif
 		}
