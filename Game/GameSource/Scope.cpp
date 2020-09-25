@@ -26,6 +26,7 @@ void Scope::Update(VECTOR3F target)
 
 void Scope::ImGui(ID3D11Device* device)
 {
+#if _DEBUG
 //**************************************
 // Aim
 //**************************************
@@ -44,6 +45,7 @@ void Scope::ImGui(ID3D11Device* device)
 		if (ImGui::Button("Save"))
 			SaveBinary();
 	}
+#endif
 }
 
 VECTOR3F& Scope::GetWorldScreenPosition()

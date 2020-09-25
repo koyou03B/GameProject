@@ -9,22 +9,22 @@ LRESULT CALLBACK fnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	Framework* f = reinterpret_cast<Framework*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
-	int  i;
-	HDROP hDrop;
-	UINT uFileNo;
-	char szFileName[256];
+	//int  i;
+	//HDROP hDrop;
+	//UINT uFileNo;
+	//char szFileName[256];
 
 	switch (msg) {
 	case WM_CREATE:
 		DragAcceptFiles(hwnd, TRUE);
 		break;
 	case WM_DROPFILES:
-		hDrop = (HDROP)wparam;
-		uFileNo = DragQueryFile((HDROP)wparam, 0xFFFFFFFF, NULL, 0);
-		for (i = 0; i < (int)uFileNo; i++) {
-			DragQueryFile(hDrop, i, szFileName, sizeof(szFileName));
-		}
-		DragFinish(hDrop);
+		//hDrop = (HDROP)wparam;
+		//uFileNo = DragQueryFile((HDROP)wparam, 0xFFFFFFFF, NULL, 0);
+		//for (i = 0; i < (int)uFileNo; i++) {
+		//	DragQueryFile(hDrop, i, szFileName, sizeof(szFileName));
+		//}
+		//DragFinish(hDrop);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);

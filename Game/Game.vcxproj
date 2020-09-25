@@ -25,6 +25,18 @@
     <ClCompile Include="GameSource\Collision.cpp" />
     <ClCompile Include="GameSource\DebugObject.cpp" />
     <ClCompile Include="GameSource\Enemy.cpp" />
+    <ClCompile Include="GameSource\EnemyBehaviorNode.cpp" />
+    <ClCompile Include="GameSource\EnemyBehaviorTree.cpp" />
+    <ClCompile Include="GameSource\EnemyChaseTask.cpp" />
+    <ClCompile Include="GameSource\EnemyFarAttack0Task.cpp" />
+    <ClCompile Include="GameSource\EnemyFarAttack1Task.cpp" />
+    <ClCompile Include="GameSource\EnemyFarSpecialAttack0Task.cpp" />
+    <ClCompile Include="GameSource\EnemyIntimidateTask.cpp" />
+    <ClCompile Include="GameSource\EnemyNearAttack0Task.cpp" />
+    <ClCompile Include="GameSource\EnemyNearAttack1Task.cpp" />
+    <ClCompile Include="GameSource\EnemyNearAttack2Task.cpp" />
+    <ClCompile Include="GameSource\EnemyNearSpecialAttack0Task.cpp" />
+    <ClCompile Include="GameSource\EnemyRestTask.cpp" />
     <ClCompile Include="GameSource\FighterCharacter.cpp" />
     <ClCompile Include="GameSource\FighterState.cpp" />
     <ClCompile Include="GameSource\MetaAI.cpp" />
@@ -41,6 +53,26 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Arrow.h" />
+    <ClInclude Include="GameSource\EnemyBattleNode.h" />
+    <ClInclude Include="GameSource\EnemyBehaviorNode.h" />
+    <ClInclude Include="GameSource\EnemyBehaviorTask.h" />
+    <ClInclude Include="GameSource\EnemyBehaviorTree.h" />
+    <ClInclude Include="GameSource\EnemyChaseNode.h" />
+    <ClInclude Include="GameSource\EnemyChaseTask.h" />
+    <ClInclude Include="GameSource\EnemyFarSpecialAttack0Task.h" />
+    <ClInclude Include="GameSource\EnemyFightFarNode.h" />
+    <ClInclude Include="GameSource\EnemyFightNearNode.h" />
+    <ClInclude Include="GameSource\EnemyFightNode.h" />
+    <ClInclude Include="GameSource\EnemyIntimidateTask.h" />
+    <ClInclude Include="GameSource\EnemyNearAttack0Task.h" />
+    <ClInclude Include="GameSource\EnemyNearAttack1Task.h" />
+    <ClInclude Include="GameSource\EnemyNearAttack2Task.h" />
+    <ClInclude Include="GameSource\EnemyFarAttack0Task.h" />
+    <ClInclude Include="GameSource\EnemyFarAttack1Task.h" />
+    <ClInclude Include="GameSource\EnemyNearSpecialAttack0Task.h" />
+    <ClInclude Include="GameSource\EnemyNodeAll.h" />
+    <ClInclude Include="GameSource\EnemyRestTask.h" />
+    <ClInclude Include="GameSource\EnemyWaitNode.h" />
     <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />

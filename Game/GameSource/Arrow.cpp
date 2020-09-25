@@ -133,6 +133,7 @@ void ArrowAdominist::SetArrow(const VECTOR3F& position, const VECTOR3F& angle, c
 
 void ArrowAdominist::ImGui(ID3D11Device* device)
 {
+#if _DEBUG
 	ImGui::Begin("Arrow", nullptr, ImGuiWindowFlags_MenuBar);//メニューバーをつかうならこのBEGIN
 
 	if (ImGui::BeginMenuBar())
@@ -202,6 +203,7 @@ void ArrowAdominist::ImGui(ID3D11Device* device)
 		ImGui::SliderInt("Time", &time, 1, 1000);
 	}
 	ImGui::End();
+#endif
 }
 
 
