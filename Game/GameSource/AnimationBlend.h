@@ -20,9 +20,9 @@ public:
 	AnimationBlend() :_blendRatio(0) {}
 	~AnimationBlend() = default;
 
-	virtual bool Init(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model);
+	 bool Init(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model);
 
-	virtual void Update(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model, float& elapsedTime);
+	 void Update(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model, float& elapsedTime);
 
 	void UpdateRuntimeParameters();
 

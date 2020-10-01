@@ -29,30 +29,29 @@ void EnemyBehaviorNode::Release()
 	}
 }
 
-std::shared_ptr<EnemyBehaviorNode> EnemyBehaviorNode::SelectOfActivedNode()
+std::shared_ptr<EnemyBehaviorNode> EnemyBehaviorNode::SelectOfActivedNode(const int id)
 {
 	switch (m_selectRule)
 	{
 	case NON:
-		if (m_family.childs.size() == 0)
+		if (m_family.childs.size() == 1)
 		{
-			if (!m_task.empty())
-				return m_family.childs[0];
+			return m_family.childs[0];
 		}
 		break;
 	case PRIORITY:
 	{
 		int childNodeCount = static_cast<int>(m_family.childs.size());
-		std::shared_ptr<EnemyBehaviorNode> selectNode;
+		int selectChild = 0;
 		uint32_t priority = 0;
 		for (int i = 0; i < childNodeCount; ++i)
 		{
-			uint32_t nodePriority = m_family.childs.at(i)->JudgePriority();
+			uint32_t nodePriority = m_family.childs.at(i)->JudgePriority(id);
 			if (priority < nodePriority)
-				selectNode = m_family.childs.at(i);
+				selectChild = i;
 		}
 
-		return selectNode;
+		return m_family.childs.at(selectChild);
 	}
 		break;
 	case RANDOM:
@@ -66,20 +65,13 @@ std::shared_ptr<EnemyBehaviorNode> EnemyBehaviorNode::SelectOfActivedNode()
 		return m_family.childs[selectNomber];
 	}
 		break;
-	case SEQUENCE:
-		if (m_family.childs.size() == 0)
-		{
-			if (!m_task.empty())
-				return m_family.childs[0];
-		}
-		break;
 	default:
 		break;
 	}
 	return nullptr;
 }
 
-std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfActiveTask()
+std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfActiveTask(const int id)
 {
 	switch (m_selectRule)
 	{
@@ -94,7 +86,7 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 		uint32_t priority = 0;
 		for (int i = 0; i < childTaskCount; ++i)
 		{
-			uint32_t taskPriority = m_task.at(i)->JudgePriority();
+			uint32_t taskPriority = m_task.at(i)->JudgePriority(id);
 			if (priority < taskPriority)
 				selectTask = m_task.at(i);
 		}
@@ -130,3 +122,4 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 	}
 	return std::make_pair(0, nullptr);
 }
+

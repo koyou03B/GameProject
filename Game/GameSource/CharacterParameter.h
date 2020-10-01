@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "PartialBlendAnimation.h"
+#include "AnimationBlend.h"
 #include "DebugObject.h"
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\GeometricPrimitve.h"
@@ -41,6 +41,7 @@ public:
 		float    attackPoint = 0.0f;
 		float	 damagePoint = 0.0f;
 		float    life = 0.0f;
+		float	 maxLife = 0.0f;
 
 		bool isExit = false;
 		bool isAttack = false;
@@ -154,7 +155,7 @@ public:
 	{
 		uint32_t frameCount = 0;
 		uint32_t inputRange[2] = {};
-		float attackPoint = 0;
+		float attackPoint = 0.0f;
 		std::vector<XINPUT_GAMEPAD_BUTTONS> buttons;
 
 		uint32_t serialVersion = 0;
@@ -252,7 +253,7 @@ public:
 	struct BlendAnimation
 	{
 		AnimationBlend animationBlend;
-		PartialBlendAnimation partialBlend;
+//		PartialBlendAnimation partialBlend;
 		float animtionSpeed = 1.0f;
 		float blendValueRange[2] = {};
 
@@ -365,7 +366,6 @@ public:
 	};
 
 };
-
 
 CEREAL_CLASS_VERSION(CharacterParameter::Status, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Move, 12);

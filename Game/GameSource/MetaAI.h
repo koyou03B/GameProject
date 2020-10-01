@@ -59,7 +59,7 @@ public:
 	void ReleaseCharacter();
 
 	//******************
-	// Gettet
+	// Getter
 	//******************
 	inline std::vector<std::shared_ptr<CharacterAI>>& GetEnemys() { return m_enemys; }
 	inline std::vector<std::shared_ptr<CharacterAI>>& GetPlayers() { return m_players; }

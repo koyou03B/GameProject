@@ -48,7 +48,7 @@
 // COLOR                    0   xyzw        2     NONE   float   xyzw
 //
 vs_5_0
-dcl_globalFlags refactoringAllowed
+dcl_globalFlags refactoringAllowed | skipOptimization
 dcl_constantbuffer CB0[1], immediateIndexed
 dcl_input v0.xyzw
 dcl_input v1.xy
@@ -60,12 +60,52 @@ dcl_input v7.xyzw
 dcl_output_siv o0.xyzw, position
 dcl_output o1.xy
 dcl_output o2.xyzw
-dcl_temps 1
-mul r0.xyzw, v0.yyyy, v5.xyzw
-mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
-mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
-mad o0.xyzw, v0.wwww, v7.xyzw, r0.xyzw
-add o1.xy, v1.xyxx, cb0[0].xyxx
-mov o2.xyzw, v3.xyzw
+dcl_temps 3
+//
+// Initial variable locations:
+//   v0.x <- position.x; v0.y <- position.y; v0.z <- position.z; v0.w <- position.w; 
+//   v1.x <- texcoord.x; v1.y <- texcoord.y; 
+//   v2.x <- normal.x; v2.y <- normal.y; v2.z <- normal.z; v2.w <- normal.w; 
+//   v3.x <- color.x; v3.y <- color.y; v3.z <- color.z; v3.w <- color.w; 
+//   v4.x <- wvp._m00; v4.y <- wvp._m01; v4.z <- wvp._m02; v4.w <- wvp._m03; 
+//   v5.x <- wvp._m10; v5.y <- wvp._m11; v5.z <- wvp._m12; v5.w <- wvp._m13; 
+//   v6.x <- wvp._m20; v6.y <- wvp._m21; v6.z <- wvp._m22; v6.w <- wvp._m23; 
+//   v7.x <- wvp._m30; v7.y <- wvp._m31; v7.z <- wvp._m32; v7.w <- wvp._m33; 
+//   v8.x <- world._m00; v8.y <- world._m01; v8.z <- world._m02; v8.w <- world._m03; 
+//   v9.x <- world._m10; v9.y <- world._m11; v9.z <- world._m12; v9.w <- world._m13; 
+//   v10.x <- world._m20; v10.y <- world._m21; v10.z <- world._m22; v10.w <- world._m23; 
+//   v11.x <- world._m30; v11.y <- world._m31; v11.z <- world._m32; v11.w <- world._m33; 
+//   v12.x <- instID; 
+//   o2.x <- <main return value>.color.x; o2.y <- <main return value>.color.y; o2.z <- <main return value>.color.z; o2.w <- <main return value>.color.w; 
+//   o1.x <- <main return value>.texcoord.x; o1.y <- <main return value>.texcoord.y; 
+//   o0.x <- <main return value>.position.x; o0.y <- <main return value>.position.y; o0.z <- <main return value>.position.z; o0.w <- <main return value>.position.w
+//
+#line 15 "D:\Lib関連\GameProject\Library\LibrarySource\GeometricPrimitive_vs.hlsl"
+mul r0.xyzw, v0.xxxx, v4.xyzw
+mul r1.xyzw, v0.yyyy, v5.xyzw
+add r0.xyzw, r0.xyzw, r1.xyzw
+mul r1.xyzw, v0.zzzz, v6.xyzw
+add r0.xyzw, r0.xyzw, r1.xyzw
+mul r1.xyzw, v0.wwww, v7.xyzw
+add r0.xyzw, r0.xyzw, r1.xyzw  // r0.x <- vout.position.x; r0.y <- vout.position.y; r0.z <- vout.position.z; r0.w <- vout.position.w
+
+#line 21
+mov r1.xyz, v3.xyzx  // r1.x <- vout.color.x; r1.y <- vout.color.y; r1.z <- vout.color.z
+
+#line 22
+mov r1.w, v3.w  // r1.w <- vout.color.w
+
+#line 23
+add r2.x, v1.x, cb0[0].x  // r2.x <- vout.texcoord.x
+
+#line 24
+add r2.y, v1.y, cb0[0].y  // r2.y <- vout.texcoord.y
+
+#line 26
+mov o0.xyzw, r0.xyzw
+mov o2.xyz, r1.xyzx
+mov o2.w, r1.w
+mov o1.x, r2.x
+mov o1.y, r2.y
 ret 
-// Approximately 7 instruction slots used
+// Approximately 17 instruction slots used

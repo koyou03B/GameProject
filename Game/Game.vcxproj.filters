@@ -132,6 +132,21 @@
     <Filter Include="Sources\BehaviorTree\Task\Attack\Far">
       <UniqueIdentifier>{23b94f7e-0ca7-4668-95a0-d5ebbdd2f9ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\BehaviorTree\Node">
+      <UniqueIdentifier>{80bd1b64-47b0-4efe-bd33-96dd2e2b7a77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\BehaviorTree\Node\Enemy">
+      <UniqueIdentifier>{63f47776-d139-4921-a166-21e2bbc1603e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\BehaviorTree\Node\Enemy\Wait">
+      <UniqueIdentifier>{684fb06c-9ca6-4496-9495-e4156fbce118}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\BehaviorTree\Node\Enemy\Chase">
+      <UniqueIdentifier>{44df700d-041b-4c93-bfe4-26325bd0f53f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\BehaviorTree\Node\Enemy\Attack">
+      <UniqueIdentifier>{21ce7bfe-33c2-4711-8616-c9f58bfd2f20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -227,6 +242,21 @@
     <ClCompile Include="GameSource\EnemyFarSpecialAttack0Task.cpp">
       <Filter>Sources\BehaviorTree\Task\Attack\Far</Filter>
     </ClCompile>
+    <ClCompile Include="GameSource\EnemyWaitNode.cpp">
+      <Filter>Sources\BehaviorTree\Node\Enemy\Wait</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyChaseNode.cpp">
+      <Filter>Sources\BehaviorTree\Node\Enemy\Chase</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyFightNode.cpp">
+      <Filter>Sources\BehaviorTree\Node\Enemy\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyFightNearNode.cpp">
+      <Filter>Sources\BehaviorTree\Node\Enemy\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyFightFarNode.cpp">
+      <Filter>Sources\BehaviorTree\Node\Enemy\Attack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -313,9 +343,6 @@
     <ClInclude Include="GameSource\EnemyWaitNode.h">
       <Filter>Headers\BehaviorTree\Enemy\Node</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\EnemyBattleNode.h">
-      <Filter>Headers\BehaviorTree\Enemy\Node</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\EnemyFightNode.h">
       <Filter>Headers\BehaviorTree\Enemy\Node</Filter>
     </ClInclude>
@@ -360,6 +387,15 @@
     </ClInclude>
     <ClInclude Include="GameSource\EnemyFarAttack1Task.h">
       <Filter>Headers\BehaviorTree\Enemy\Task\Attack\Far</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AIParameter.h">
+      <Filter>Headers\Characters\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EnemyRootNode.h">
+      <Filter>Headers\BehaviorTree\Enemy\Node</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EnemyTaskAll.h">
+      <Filter>Headers\BehaviorTree\Enemy\Task</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

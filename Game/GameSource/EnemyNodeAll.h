@@ -1,7 +1,8 @@
 #pragma once
+
+#include "EnemyRootNode.h"
 #include "EnemyWaitNode.h"
-#include "EnemyBattleNode.h"
-#include "EnemyFightNode.h"
 #include "EnemyChaseNode.h"
+#include "EnemyFightNode.h"
 #include "EnemyFightNearNode.h"
 #include "EnemyFightFarNode.h"

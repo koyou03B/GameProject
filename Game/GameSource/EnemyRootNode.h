@@ -1,13 +1,13 @@
 #pragma once
 #include "EnemyBehaviorNode.h"
-#include "MessengTo.h"
 
-class EnemyChaseNode : public EnemyBehaviorNode
+class EnemyRootNode : public EnemyBehaviorNode
 {
 public:
-	EnemyChaseNode() = default;
-	~EnemyChaseNode() = default;
-	uint32_t JudgePriority(const int id);
+	EnemyRootNode() = default;
+	~EnemyRootNode() = default;
+
+	uint32_t JudgePriority(const int id) { return minPriority; }
 
 	void LoadOfBinaryFile(std::string nodeName)
 	{
@@ -39,9 +39,7 @@ public:
 			(
 				m_nodeName,
 				m_selectRule,
-				m_family,
-				m_task,
-				m_priority
+				m_family
 			);
 		}
 		else
@@ -50,12 +48,10 @@ public:
 			(
 				m_nodeName,
 				m_selectRule,
-				m_family,
-				m_task,
-				m_priority
+				m_family
 			);
 		}
 	}
 };
 
-CEREAL_CLASS_VERSION(EnemyChaseNode, 1);
+CEREAL_CLASS_VERSION(EnemyRootNode, 1);

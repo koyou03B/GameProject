@@ -23,6 +23,26 @@ public:
 		return m_metaAI->GetScope()->GetWorldScreenPosition();
 	}
 
+	std::vector<std::shared_ptr<CharacterAI>>& CallEnemysInstance()
+	{
+		return m_metaAI->GetEnemys();
+	}
+
+	std::shared_ptr<CharacterAI>& CallEnemyInstance(const int id)
+	{
+		return m_metaAI->GetEnemys().at(id);
+	}
+
+	std::vector<std::shared_ptr<CharacterAI>>& CallPlayersInstance()
+	{
+		return m_metaAI->GetPlayers();
+	}
+
+	std::shared_ptr<CharacterAI>& CallPlayerInstance(const int id)
+	{
+		return m_metaAI->GetPlayers().at(id);
+	}
+
 	bool AttackingMessage(const int id,CharacterParameter::Collision& player)
 	{
 		if (m_metaAI->CollisionPlayerAttack(id, player))

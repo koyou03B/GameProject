@@ -1,10 +1,11 @@
 #include "Enemy.h"
 #include "MessengTo.h"
+#include "EnemyTaskAll.h"
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\VectorCombo.h"
 
 //CEREAL_CLASS_VERSION(CharacterParameter::Collision, 1);
-CEREAL_CLASS_VERSION(Enemy, 1);
+CEREAL_CLASS_VERSION(Enemy, 3);
 
 void Enemy::Init()
 {
@@ -22,6 +23,7 @@ void Enemy::Init()
 	m_collision.resize(4);
 	//SerialVersionUpdate(1);
 
+	m_behaviorTree.CreateRootNode();
 	if (PathFileExistsA((std::string("../Asset/Binary/Enemy/Parameter") + ".bin").c_str()))
 	{
 		std::ifstream ifs;
@@ -29,8 +31,8 @@ void Enemy::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
-
-
+	
+	m_behaviorTree.SetRootNodeChild();
 }
 
 void Enemy::Update(float& elapsedTime)
@@ -94,7 +96,6 @@ void Enemy::ImGui(ID3D11Device* device)
 	static int currentMesh = 0;
 	ImGui::BulletText(u8"Mesh%d”Ô–Ú", currentMesh);
 
-
 	static int currentBone = 0;
 
 	ImGui::Combo("Name_of_BoneName",
@@ -129,7 +130,7 @@ void Enemy::ImGui(ID3D11Device* device)
 
 		if (isVisualization)
 		{
-			auto primitive = m_debugObjects.GetSphere(device, "../Asset/Texture/n64.png");
+			auto primitive = m_debugObjects.GetSphere(device, "");
 			m_debugObjects.debugObject.AddGeometricPrimitive(std::move(primitive));
 			m_debugObjects.debugObject.AddInstanceData(bonePosition, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
 				VECTOR3F(1.0f, 1.0f, 1.0f), VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
@@ -227,7 +228,205 @@ void Enemy::ImGui(ID3D11Device* device)
 	}
 	
 
+	//*******************************************
+	// Node
+	//*******************************************
+	if (ImGui::CollapsingHeader("Node"))
+	{
+		std::vector<std::string> nodeName = 
+		{
+			"RootNode", 
+			"WaitNode",
+			"ChaseNode",
+			"FightNode",
+			"FightNearNode",
+			"FightFarNode" 
+		};
 
+		static int selectNode = 0;
+		ImGui::Combo("SelectNode",
+			&selectNode,
+			vectorGetter,
+			static_cast<void*>(&nodeName),
+			static_cast<int>(nodeName.size())
+		);
+
+		NodeData& nodeData = m_behaviorTree.GetNodeData();
+		static bool isCreate = false;
+		if (!isCreate)
+		{
+			nodeData.CreateNodeData(ENTRY_NODE::WAIT_NODE);		
+			nodeData.CreateNodeData(ENTRY_NODE::CHASE_NODE);
+			nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NODE);
+			nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NEAR_NODE);
+			nodeData.CreateNodeData(ENTRY_NODE::FIGHT_FAR_NODE);
+
+			isCreate = true;
+		}
+
+		if (ImGui::CollapsingHeader("RootNode"))
+		{
+			auto& rootNode = m_behaviorTree.GetRootNode();
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------NodeName------");
+			{
+				std::string currentNodeName = rootNode->GetNodeName();
+				ImGui::BulletText("NodeName -> %s", currentNodeName.data());
+
+				if (ImGui::Button("SetName"))
+					rootNode->SetNodeName(nodeName[selectNode]);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Rule------");
+			{
+				static int selectRule = 0;
+				static int currentRule = 0;
+				std::vector<std::string> ruleName = { "NON", "PRIORITY","RANDOM","SEQUENCE" };
+
+				ImGui::Combo("SelectRulename",
+					&selectRule,
+					vectorGetter,
+					static_cast<void*>(&ruleName),
+					static_cast<int>(ruleName.size())
+				);
+
+				SELECT_RULE setSelectRule;
+				SELECT_RULE getCurrentRule;
+
+				getCurrentRule = rootNode->GetSelectRule();
+				currentRule = static_cast<int>(getCurrentRule);
+				std::string currentRuleName = ruleName[currentRule];
+				ImGui::BulletText("NodeCurrentRule -> %s", currentRuleName.data());
+
+				setSelectRule = static_cast<SELECT_RULE>(selectRule);
+				if (ImGui::Button("SetRule"))
+					rootNode->SetSelectRule(setSelectRule);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Child------");
+			{
+				if (!rootNode->GetChild().empty())
+				{
+					int childCount = static_cast<int>(rootNode->GetChild().size());
+					ImGui::BulletText("Child -> %d", childCount);
+				}
+				else
+					ImGui::BulletText("Child -> 0");
+
+			}
+
+		}
+
+		static std::shared_ptr<EnemyBehaviorNode> selectBehaviorNode;
+
+		if (ImGui::Button("Wait"))
+			selectBehaviorNode = nodeData.GetWaitNode();
+		ImGui::SameLine();
+		if (ImGui::Button("Chase"))
+			selectBehaviorNode = nodeData.GetChaseNode();
+		ImGui::SameLine();
+		if (ImGui::Button("Fight"))
+			selectBehaviorNode = nodeData.GetFightNode();
+		ImGui::SameLine();
+		if (ImGui::Button("FightNear"))
+			selectBehaviorNode = nodeData.GetFightNearNode();
+		ImGui::SameLine();
+		if (ImGui::Button("FightFar"))
+			selectBehaviorNode = nodeData.GetFightFarNode();
+
+		if (selectBehaviorNode)
+		{
+			if (ImGui::Button("Save"))
+				selectBehaviorNode->SaveOfBinaryFile();
+			ImGui::SameLine();
+			if (ImGui::Button("Load"))
+				selectBehaviorNode->LoadOfBinaryFile(nodeName[selectNode]);
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------NodeName------");
+			{
+				std::string currentNodeName = selectBehaviorNode->GetNodeName();
+				ImGui::BulletText("NodeName -> %s", currentNodeName.data());
+
+				if (ImGui::Button("SetName"))
+					selectBehaviorNode->SetNodeName(nodeName[selectNode]);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Priority------");
+			{
+				static int priority = static_cast<int>(selectBehaviorNode->GetPriority());
+				ImGui::BulletText("NodePriotiry -> %d", static_cast<int>(selectBehaviorNode->GetPriority()));
+				ImGui::SliderInt("Priority", &priority, 1, 4);
+				if (ImGui::Button("SetPriority"))
+					selectBehaviorNode->SetPriority(static_cast<uint32_t>(priority));
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Rule------");
+			{
+				static int selectRule = 0;
+				static int currentRule = 0;
+				std::vector<std::string> ruleName = { "NON", "PRIORITY","RANDOM","SEQUENCE" };
+
+				ImGui::Combo("SelectRulename",
+					&selectRule,
+					vectorGetter,
+					static_cast<void*>(&ruleName),
+					static_cast<int>(ruleName.size())
+				);
+
+				SELECT_RULE setSelectRule;
+				SELECT_RULE getCurrentRule;
+
+				getCurrentRule = selectBehaviorNode->GetSelectRule();
+				currentRule = static_cast<int>(getCurrentRule);
+				std::string currentRuleName = ruleName[currentRule];
+				ImGui::BulletText("NodeCurrentRule -> %s", currentRuleName.data());
+
+				setSelectRule = static_cast<SELECT_RULE>(selectRule);
+				if (ImGui::Button("SetRule"))
+					selectBehaviorNode->SetSelectRule(setSelectRule);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ParentName------");
+			{
+				std::string currentParentNodeName = selectBehaviorNode->GetParentName();
+				ImGui::BulletText("ParentNodeName -> %s", currentParentNodeName.data());
+
+				if (ImGui::Button("SetParentName"))
+					selectBehaviorNode->SetParentName(nodeName[selectNode]);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Child------");
+			{
+				if (!selectBehaviorNode->GetChild().empty())
+				{
+					int childCount = static_cast<int>(selectBehaviorNode->GetChild().size());
+					ImGui::BulletText("Child -> %d", childCount);
+				}
+				else
+					ImGui::BulletText("Child -> 0");
+
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Task------");
+			{
+				if (ImGui::Button("RestTask"))
+				{
+					std::shared_ptr<EnemyRestTask> restTask = std::make_shared<EnemyRestTask>();
+					selectBehaviorNode->SetTask(restTask);
+				}
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Add------");
+			{
+				if (ImGui::Button("AddNode"))
+					m_behaviorTree.AddNode(selectBehaviorNode->GetParentName(), selectBehaviorNode);
+
+			}
+
+		}
+
+
+	}
 	ImGui::End();
 
 #endif

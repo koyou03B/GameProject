@@ -1,10 +1,11 @@
 #include "EnemyNearSpecialAttack0Task.h"
+#include "Enemy.h"
 
-void EnemyNearSpecialAttack0Task::Run()
+void EnemyNearSpecialAttack0Task::Run(Enemy* enemy)
 {
 }
 
-uint32_t EnemyNearSpecialAttack0Task::JudgePriority()
+uint32_t EnemyNearSpecialAttack0Task::JudgePriority(const int id)
 {
-	return uint32_t();
+	return maxPriority;
 }

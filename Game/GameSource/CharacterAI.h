@@ -3,10 +3,12 @@
 #include <memory>
 #include <d3d11.h>
 #include "State.h"
+#include "AIParameter.h"
 #include "CharacterParameter.h"
-#include ".\LibrarySource\SkinnedMesh.h"
-#include ".\LibrarySource\Camera.h"
 #include ".\LibrarySource\Input.h"
+#include ".\LibrarySource\Camera.h"
+#include ".\LibrarySource\SkinnedMesh.h"
+
 #ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
 #include "..\External_libraries\imgui\imgui_impl_dx11.h"
@@ -39,7 +41,6 @@ public:
 
 	virtual void ImGui(ID3D11Device* device) = 0;
 
-	inline void SetState(State* state) { m_state = state; }
 	inline int GetID() { return m_id; }
 	inline std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& GetModel() { return m_model; }
 	inline CharacterParameter::WorldTransform& GetWorldTransform() { return m_transformParm; }
@@ -49,7 +50,11 @@ public:
 	inline CharacterParameter::MessageFlg& GetMessageFlg() { return m_messageParm; }
 	inline CharacterParameter::Camera& GetCamera() { return m_cameraParm; }
 	inline std::vector<CharacterParameter::Collision>& GetCollision() { return m_collision; }
-	void SetID(int id) { m_id = id; }
+	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
+	inline AIParameter::JudgeElement& GetJudgeElement() { return m_judgeElementPram; }
+
+	inline void SetID(int id) { m_id = id; }
+	inline void SetState(State* state) { m_state = state; }
 	inline void SetCharacter(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> model) { m_model = model; }
 
 protected:
@@ -62,6 +67,8 @@ protected:
 	CharacterParameter::Change					m_changeParm;
 	CharacterParameter::MessageFlg				m_messageParm;
 	CharacterParameter::Camera					m_cameraParm;
+	AIParameter::Emotion						m_emotionParm;
+	AIParameter::JudgeElement					m_judgeElementPram;
 	std::vector<CharacterParameter::Collision>	m_collision;
 	State* m_state;
 

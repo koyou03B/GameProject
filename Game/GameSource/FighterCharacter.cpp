@@ -101,9 +101,9 @@ void Fighter::Update(float& elapsedTime)
 	{
 		m_input = PAD.GetPad(0);
 
-		Step(m_elapsedTime);
+		//Step(m_elapsedTime);
 
-		Attack(m_elapsedTime);
+		//Attack(m_elapsedTime);
 
 		RestAnimationIdle();
 
