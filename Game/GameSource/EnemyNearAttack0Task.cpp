@@ -27,11 +27,15 @@ uint32_t EnemyNearAttack0Task::JudgePriority(const int id)
 
 	float cosTheta = acosf(dot);
 
-	if (dot <= m_frontRatio)
+	float frontRatio = enemy->GetJudgeElement().viewFrontRatio;
+
+	if (dot <= frontRatio)
 	{
 		uint32_t attackHitCount = static_cast<uint32_t>(enemy->GetJudgeElement().attackHitCount);
-		if (attackHitCount < m_attackRatio)
-			return maxPriority;
+		uint32_t attackHitCountRatio = static_cast<uint32_t>(enemy->GetJudgeElement().attackHitCountRatio);
+
+		if (attackHitCount < attackHitCountRatio)
+			return m_priority;
 	}
 
 	return minPriority;

@@ -30,6 +30,8 @@ public:
 		o_archive(*this);
 	}
 
+	inline float& GetMaxDirection() { return m_maxDirection; }
+	inline void SetMaxDirection(const float& direction) { m_maxDirection = direction; }
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)

@@ -104,11 +104,11 @@ std::shared_ptr<EnemyBehaviorTask> EnemyBehaviorTree::SearchOfActiveTask(const i
 
 void EnemyBehaviorTree::SetRootNodeChild()
 {
-	std::shared_ptr<EnemyWaitNode>		waitNode		 = m_nodeDatas.GetWaitNode();
-	std::shared_ptr<EnemyChaseNode>		chaseNode		 = m_nodeDatas.GetChaseNode();
-	std::shared_ptr<EnemyFightNode>		fightNode		 = m_nodeDatas.GetFightNode();
-	std::shared_ptr<EnemyFightNearNode>	fightNearNode	 = m_nodeDatas.GetFightNearNode();
-	std::shared_ptr<EnemyFightFarNode>  fightFarNode	 = m_nodeDatas.GetFightFarNode();
+	std::shared_ptr<EnemyWaitNode>		waitNode		 = m_nodeData.waitNode;
+	std::shared_ptr<EnemyChaseNode>		chaseNode		 = m_nodeData.chaseNode;
+	std::shared_ptr<EnemyFightNode>		fightNode		 = m_nodeData.fightNode;
+	std::shared_ptr<EnemyFightNearNode>	fightNearNode	 = m_nodeData.fightNearNode;
+	std::shared_ptr<EnemyFightFarNode>  fightFarNode	 = m_nodeData.fightFarNode;
 
 	AddNode(waitNode->GetParentName(),		waitNode);
 	AddNode(chaseNode->GetParentName(),		chaseNode);

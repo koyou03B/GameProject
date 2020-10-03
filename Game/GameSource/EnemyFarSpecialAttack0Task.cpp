@@ -7,5 +7,5 @@ void EnemyFarSpecialAttack0Task::Run(Enemy* enemy)
 
 uint32_t EnemyFarSpecialAttack0Task::JudgePriority(const int id)
 {
-	return maxPriority;
+	return m_priority;
 }

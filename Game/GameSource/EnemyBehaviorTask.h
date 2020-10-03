@@ -12,6 +12,20 @@
 #include<cereal/types/vector.hpp>
 #include <cereal/types/string.hpp>
 
+enum ENTRY_TASK
+{
+	REST_TASK,
+	INTIMIDATE_TASK,
+	CHASE_TASK,
+	NEAR_ATTACK0_TASK,
+	NEAR_ATTACK1_TASK,
+	NEAR_ATTACK2_TASK,
+	Near_Special_TASK,
+	FAR_ATTACK0_TASK,
+	FAR_ATTACK1_TASK,
+	FAR_SPECIAL_TASK
+};
+
 class Enemy;
 class EnemyBehaviorTask
 {
@@ -40,27 +54,31 @@ public:
 	virtual void LoadOfBinaryFile(std::string taskName) = 0;
 	virtual void SaveOfBinaryFile() = 0;
 
+	inline std::string& GetParentNodeName() { return m_parentNodeName; }
 	inline std::string& GetTaskName() { return m_taskName;}
 	inline TaskState& GetTaskState() { return m_taskState; }
 	inline uint32_t& GetMoveState() { return m_moveState; }
 	inline uint32_t& GetCoolTimer() { return m_coolTimer; }
+	inline uint32_t& GetPriority() { return m_priority; }
 	inline bool& GetIsUsed() { return m_isUsed; }
 
-	inline void SetTaskName(std::string& taskName) { m_taskName = taskName; }
-	inline void SetTaskState(TaskState& taskState) { m_taskState = taskState; }
-	inline void SetMoveState(uint32_t& moveState) { m_moveState = moveState; }
-	inline void SetCoolTimer(uint32_t& coolTime) { m_coolTimer = coolTime; }
+	inline void SetParentNodeName(const std::string& parentNodeName) { m_parentNodeName = parentNodeName; }
+	inline void SetTaskName(const std::string& taskName) { m_taskName = taskName; }
+	inline void SetTaskState(const TaskState& taskState) { m_taskState = taskState; }
+	inline void SetMoveState(const uint32_t& moveState) { m_moveState = moveState; }
+	inline void SetCoolTimer(const uint32_t& coolTime) { m_coolTimer = coolTime; }
+	inline void SetPriority(const uint32_t& priority) { m_priority = priority; }
 	inline void SetIsUsed(bool& isUse) { m_isUsed = isUse; }
 
 protected:
-	const uint32_t maxPriority = 1;
 	const uint32_t minPriority = 0;
 
+	std::string m_parentNodeName;
 	std::string m_taskName;
 	TaskState m_taskState;
 	uint32_t m_moveState;
 	uint32_t m_coolTimer;
 	uint32_t m_priority;
 	bool m_isUsed;
-	uint32_t m_serialVersion;
+	uint32_t m_serialVersion = 2;
 };

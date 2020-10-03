@@ -95,15 +95,14 @@ public:
 	inline std::vector<std::shared_ptr<EnemyBehaviorTask>>& GetTask() { return m_task; }
 	inline uint32_t& GetPriority() { return m_priority; }
 
-	inline void SetNodeName(std::string& nodeName) { m_nodeName = nodeName; }
-	inline void SetSelectRule(SELECT_RULE& rule) { m_selectRule = rule;}
-	inline void SetChildNode(std::shared_ptr<EnemyBehaviorNode> childNode) { m_family.childs.push_back(childNode); }
-	inline void SetParentName(std::string& parentName) { m_family.parentName = parentName; }
-	inline void SetTask(std::shared_ptr<EnemyBehaviorTask> task) { m_task.push_back(task); }
+	inline void SetNodeName(const std::string& nodeName) { m_nodeName = nodeName; }
+	inline void SetSelectRule(const SELECT_RULE& rule) { m_selectRule = rule;}
+	inline void SetChildNode(const std::shared_ptr<EnemyBehaviorNode> childNode) { m_family.childs.push_back(childNode); }
+	inline void SetParentName(const std::string& parentName) { m_family.parentName = parentName; }
+	inline void SetTask(const std::shared_ptr<EnemyBehaviorTask> task) { m_task.push_back(task); }
 	inline void SetPriority(const uint32_t& priority) { m_priority = priority; }
 
 protected:
-	const uint32_t maxPriority = 1;
 	const uint32_t minPriority = 0;
 
 	std::string m_nodeName = "";

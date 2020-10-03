@@ -27,8 +27,10 @@ uint32_t EnemyNearAttack2Task::JudgePriority(const int id)
 
 	float cosTheta = acosf(dot);
 
-	if (dot > m_frontRatio)
-		return maxPriority;
+	float frontRatio = enemy->GetJudgeElement().viewFrontRatio;
+
+	if (dot > frontRatio)
+		return m_priority;
 
 	return minPriority;
 }

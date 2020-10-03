@@ -229,18 +229,18 @@ void Enemy::ImGui(ID3D11Device* device)
 	
 
 	//*******************************************
-	// Node
+	// BehaviorTree
 	//*******************************************
-	if (ImGui::CollapsingHeader("Node"))
+	if (ImGui::CollapsingHeader("BehaviorTree"))
 	{
-		std::vector<std::string> nodeName = 
+		std::vector<std::string> nodeName =
 		{
-			"RootNode", 
+			"RootNode",
 			"WaitNode",
 			"ChaseNode",
 			"FightNode",
 			"FightNearNode",
-			"FightFarNode" 
+			"FightFarNode"
 		};
 
 		static int selectNode = 0;
@@ -251,181 +251,420 @@ void Enemy::ImGui(ID3D11Device* device)
 			static_cast<int>(nodeName.size())
 		);
 
-		NodeData& nodeData = m_behaviorTree.GetNodeData();
-		static bool isCreate = false;
-		if (!isCreate)
+		if (ImGui::CollapsingHeader("NodeData"))
 		{
-			nodeData.CreateNodeData(ENTRY_NODE::WAIT_NODE);		
-			nodeData.CreateNodeData(ENTRY_NODE::CHASE_NODE);
-			nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NODE);
-			nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NEAR_NODE);
-			nodeData.CreateNodeData(ENTRY_NODE::FIGHT_FAR_NODE);
+			NodeData& nodeData = m_behaviorTree.GetNodeData();
+			//static bool isCreate = false;
+			//if (!isCreate)
+			//{
+			//	nodeData.CreateNodeData(ENTRY_NODE::WAIT_NODE);		
+			//	nodeData.CreateNodeData(ENTRY_NODE::CHASE_NODE);
+			//	nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NODE);
+			//	nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NEAR_NODE);
+			//	nodeData.CreateNodeData(ENTRY_NODE::FIGHT_FAR_NODE);
+			//	isCreate = true;
+			//}
 
-			isCreate = true;
-		}
-
-		if (ImGui::CollapsingHeader("RootNode"))
-		{
-			auto& rootNode = m_behaviorTree.GetRootNode();
-
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------NodeName------");
+			if (ImGui::CollapsingHeader("RootNode"))
 			{
-				std::string currentNodeName = rootNode->GetNodeName();
-				ImGui::BulletText("NodeName -> %s", currentNodeName.data());
+				auto& rootNode = m_behaviorTree.GetRootNode();
 
-				if (ImGui::Button("SetName"))
-					rootNode->SetNodeName(nodeName[selectNode]);
-			}
-
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Rule------");
-			{
-				static int selectRule = 0;
-				static int currentRule = 0;
-				std::vector<std::string> ruleName = { "NON", "PRIORITY","RANDOM","SEQUENCE" };
-
-				ImGui::Combo("SelectRulename",
-					&selectRule,
-					vectorGetter,
-					static_cast<void*>(&ruleName),
-					static_cast<int>(ruleName.size())
-				);
-
-				SELECT_RULE setSelectRule;
-				SELECT_RULE getCurrentRule;
-
-				getCurrentRule = rootNode->GetSelectRule();
-				currentRule = static_cast<int>(getCurrentRule);
-				std::string currentRuleName = ruleName[currentRule];
-				ImGui::BulletText("NodeCurrentRule -> %s", currentRuleName.data());
-
-				setSelectRule = static_cast<SELECT_RULE>(selectRule);
-				if (ImGui::Button("SetRule"))
-					rootNode->SetSelectRule(setSelectRule);
-			}
-
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Child------");
-			{
-				if (!rootNode->GetChild().empty())
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------NodeName------");
 				{
-					int childCount = static_cast<int>(rootNode->GetChild().size());
-					ImGui::BulletText("Child -> %d", childCount);
+					std::string currentNodeName = rootNode->GetNodeName();
+					ImGui::BulletText("NodeName -> %s", currentNodeName.data());
+
+					if (ImGui::Button("SetName"))
+						rootNode->SetNodeName(nodeName[selectNode]);
 				}
-				else
-					ImGui::BulletText("Child -> 0");
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Rule------");
+				{
+					static int selectRule = 0;
+					static int currentRule = 0;
+					std::vector<std::string> ruleName = { "NON", "PRIORITY","RANDOM","SEQUENCE" };
+
+					ImGui::Combo("SelectRulename",
+						&selectRule,
+						vectorGetter,
+						static_cast<void*>(&ruleName),
+						static_cast<int>(ruleName.size())
+					);
+
+					SELECT_RULE setSelectRule;
+					SELECT_RULE getCurrentRule;
+
+					getCurrentRule = rootNode->GetSelectRule();
+					currentRule = static_cast<int>(getCurrentRule);
+					std::string currentRuleName = ruleName[currentRule];
+					ImGui::BulletText("NodeCurrentRule -> %s", currentRuleName.data());
+
+					setSelectRule = static_cast<SELECT_RULE>(selectRule);
+					if (ImGui::Button("SetRule"))
+						rootNode->SetSelectRule(setSelectRule);
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Child------");
+				{
+					if (!rootNode->GetChild().empty())
+					{
+						int childCount = static_cast<int>(rootNode->GetChild().size());
+						ImGui::BulletText("Child -> %d", childCount);
+					}
+					else
+						ImGui::BulletText("Child -> 0");
+
+				}
 
 			}
 
+			if (ImGui::CollapsingHeader("FightNearNode"))
+			{
+				std::shared_ptr<EnemyFightNearNode> selectNearNode = nodeData.fightNearNode;
+
+				if (ImGui::Button("Save"))
+					selectNearNode->SaveOfBinaryFile();
+				ImGui::SameLine();
+				if (ImGui::Button("Load"))
+					selectNearNode->LoadOfBinaryFile(nodeName[selectNode]);
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------NodeName------");
+				{
+					std::string currentNodeName = selectNearNode->GetNodeName();
+					ImGui::BulletText("NodeName -> %s", currentNodeName.data());
+
+					if (ImGui::Button("SetName"))
+						selectNearNode->SetNodeName(nodeName[selectNode]);
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Priority------");
+				{
+					static int priority = static_cast<int>(selectNearNode->GetPriority());
+					ImGui::BulletText("NodePriotiry -> %d", static_cast<int>(selectNearNode->GetPriority()));
+					ImGui::SliderInt("Priority", &priority, 1, 4);
+					if (ImGui::Button("SetPriority"))
+						selectNearNode->SetPriority(static_cast<uint32_t>(priority));
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Rule------");
+				{
+					static int selectRule = 0;
+					static int currentRule = 0;
+					std::vector<std::string> ruleName = { "NON", "PRIORITY","RANDOM","SEQUENCE" };
+
+					ImGui::Combo("SelectRulename",
+						&selectRule,
+						vectorGetter,
+						static_cast<void*>(&ruleName),
+						static_cast<int>(ruleName.size())
+					);
+
+					SELECT_RULE setSelectRule;
+					SELECT_RULE getCurrentRule;
+
+					getCurrentRule = selectNearNode->GetSelectRule();
+					currentRule = static_cast<int>(getCurrentRule);
+					std::string currentRuleName = ruleName[currentRule];
+					ImGui::BulletText("NodeCurrentRule -> %s", currentRuleName.data());
+
+					setSelectRule = static_cast<SELECT_RULE>(selectRule);
+					if (ImGui::Button("SetRule"))
+						selectNearNode->SetSelectRule(setSelectRule);
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ParentName------");
+				{
+					std::string currentParentNodeName = selectNearNode->GetParentName();
+					ImGui::BulletText("ParentNodeName -> %s", currentParentNodeName.data());
+
+					if (ImGui::Button("SetParentName"))
+						selectNearNode->SetParentName(nodeName[selectNode]);
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Child------");
+				{
+					if (!selectNearNode->GetChild().empty())
+					{
+						int childCount = static_cast<int>(selectNearNode->GetChild().size());
+						ImGui::BulletText("Child -> %d", childCount);
+					}
+					else
+						ImGui::BulletText("Child -> 0");
+
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------MaxDirection------");
+				{
+					auto& players = MESSENGER.CallPlayersInstance();
+					static int selectPlayer = 0;
+					int playerCount = static_cast<int>(players.size());
+					for (int i = 0; i < playerCount; ++i)
+					{
+						if (players[i]->GetChangeComand().isPlay)
+							selectPlayer = i;
+					}
+					VECTOR3F playerPosition = players[selectPlayer]->GetWorldTransform().position;
+					VECTOR3F directionToPlayer = playerPosition - m_transformParm.position;
+
+					float currentDirection = ToDistVec3(directionToPlayer);
+					ImGui::BulletText("DistanceToPlayer -> %f", currentDirection);
+					float maxDirection = static_cast<float>(selectNearNode->GetMaxDirection());
+					ImGui::BulletText("MaxDirection -> %f", maxDirection);
+					static float direction = 0.0f;
+					ImGui::SliderFloat("MaxDirection", &direction, 0.0f, 100.0f);
+					if (ImGui::Button("SetDirection"))
+						selectNearNode->SetMaxDirection(direction);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("OtherNodes"))
+			{
+				static std::shared_ptr<EnemyBehaviorNode> selectBehaviorNode;
+
+				if (ImGui::Button("Wait"))
+					selectBehaviorNode = nodeData.waitNode;
+				ImGui::SameLine();
+				if (ImGui::Button("Chase"))
+					selectBehaviorNode = nodeData.chaseNode;
+				ImGui::SameLine();
+				if (ImGui::Button("Fight"))
+					selectBehaviorNode = nodeData.fightNode;
+				ImGui::SameLine();
+				if (ImGui::Button("FightFar"))
+					selectBehaviorNode = nodeData.fightFarNode;
+
+				if (selectBehaviorNode)
+				{
+					if (ImGui::Button("Save"))
+						selectBehaviorNode->SaveOfBinaryFile();
+					ImGui::SameLine();
+					if (ImGui::Button("Load"))
+						selectBehaviorNode->LoadOfBinaryFile(nodeName[selectNode]);
+
+					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------NodeName------");
+					{
+						std::string currentNodeName = selectBehaviorNode->GetNodeName();
+						ImGui::BulletText("NodeName -> %s", currentNodeName.data());
+
+						if (ImGui::Button("SetName"))
+							selectBehaviorNode->SetNodeName(nodeName[selectNode]);
+					}
+
+					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Priority------");
+					{
+						static int priority = static_cast<int>(selectBehaviorNode->GetPriority());
+						ImGui::BulletText("NodePriotiry -> %d", static_cast<int>(selectBehaviorNode->GetPriority()));
+						ImGui::SliderInt("Priority", &priority, 1, 4);
+						if (ImGui::Button("SetPriority"))
+							selectBehaviorNode->SetPriority(static_cast<uint32_t>(priority));
+					}
+
+					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Rule------");
+					{
+						static int selectRule = 0;
+						static int currentRule = 0;
+						std::vector<std::string> ruleName = { "NON", "PRIORITY","RANDOM","SEQUENCE" };
+
+						ImGui::Combo("SelectRulename",
+							&selectRule,
+							vectorGetter,
+							static_cast<void*>(&ruleName),
+							static_cast<int>(ruleName.size())
+						);
+
+						SELECT_RULE setSelectRule;
+						SELECT_RULE getCurrentRule;
+
+						getCurrentRule = selectBehaviorNode->GetSelectRule();
+						currentRule = static_cast<int>(getCurrentRule);
+						std::string currentRuleName = ruleName[currentRule];
+						ImGui::BulletText("NodeCurrentRule -> %s", currentRuleName.data());
+
+						setSelectRule = static_cast<SELECT_RULE>(selectRule);
+						if (ImGui::Button("SetRule"))
+							selectBehaviorNode->SetSelectRule(setSelectRule);
+					}
+
+					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ParentName------");
+					{
+						std::string currentParentNodeName = selectBehaviorNode->GetParentName();
+						ImGui::BulletText("ParentNodeName -> %s", currentParentNodeName.data());
+
+						if (ImGui::Button("SetParentName"))
+							selectBehaviorNode->SetParentName(nodeName[selectNode]);
+					}
+
+					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Child------");
+					{
+						if (!selectBehaviorNode->GetChild().empty())
+						{
+							int childCount = static_cast<int>(selectBehaviorNode->GetChild().size());
+							ImGui::BulletText("Child -> %d", childCount);
+						}
+						else
+							ImGui::BulletText("Child -> 0");
+
+					}
+
+					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Task------");
+					{
+						if (ImGui::Button("RestTask"))
+						{
+							std::shared_ptr<EnemyRestTask> restTask = std::make_shared<EnemyRestTask>();
+							selectBehaviorNode->SetTask(restTask);
+						}
+					}
+
+					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Add------");
+					{
+						if (ImGui::Button("AddNode"))
+							m_behaviorTree.AddNode(selectBehaviorNode->GetParentName(), selectBehaviorNode);
+
+					}
+				}
+			}
 		}
 
-		static std::shared_ptr<EnemyBehaviorNode> selectBehaviorNode;
-
-		if (ImGui::Button("Wait"))
-			selectBehaviorNode = nodeData.GetWaitNode();
-		ImGui::SameLine();
-		if (ImGui::Button("Chase"))
-			selectBehaviorNode = nodeData.GetChaseNode();
-		ImGui::SameLine();
-		if (ImGui::Button("Fight"))
-			selectBehaviorNode = nodeData.GetFightNode();
-		ImGui::SameLine();
-		if (ImGui::Button("FightNear"))
-			selectBehaviorNode = nodeData.GetFightNearNode();
-		ImGui::SameLine();
-		if (ImGui::Button("FightFar"))
-			selectBehaviorNode = nodeData.GetFightFarNode();
-
-		if (selectBehaviorNode)
+		//*******************************************
+		// Task
+		//*******************************************
+		std::vector<std::string> taskName =
 		{
-			if (ImGui::Button("Save"))
-				selectBehaviorNode->SaveOfBinaryFile();
+			"RestTask",
+			"IntimidateTask",
+			"ChaseTask",
+			"NearAttack0Task",
+			"NearAttack1Task",
+			"NearAttack2Task",
+			"NearSpecialAttack0Task",
+			"FarAttack0Task",
+			"FarAttack1Task",
+			"FarSpecialAttack0Task",
+		};
+
+		static int selectTask = 0;
+		ImGui::Combo("SelectTask",
+			&selectTask,
+			vectorGetter,
+			static_cast<void*>(&taskName),
+			static_cast<int>(taskName.size())
+		);
+
+		if (ImGui::CollapsingHeader("Task"))
+		{
+			TaskData& taskData = m_behaviorTree.GetTaskData();
+
+			static std::shared_ptr<EnemyBehaviorTask> selectBehaviorTask;
+
+			if (ImGui::Button("RestTask"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::REST_TASK);
+				selectBehaviorTask = taskData.restTask;
+			}
 			ImGui::SameLine();
-			if (ImGui::Button("Load"))
-				selectBehaviorNode->LoadOfBinaryFile(nodeName[selectNode]);
-
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------NodeName------");
+			if (ImGui::Button("IntimidateTask"))
 			{
-				std::string currentNodeName = selectBehaviorNode->GetNodeName();
-				ImGui::BulletText("NodeName -> %s", currentNodeName.data());
+				taskData.CreateTaskData(ENTRY_TASK::INTIMIDATE_TASK);
+				selectBehaviorTask = taskData.intimidateTask;
 
-				if (ImGui::Button("SetName"))
-					selectBehaviorNode->SetNodeName(nodeName[selectNode]);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("ChaseTask"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::CHASE_TASK);
+				selectBehaviorTask = taskData.chaseTask;
 			}
 
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Priority------");
+			if (ImGui::Button("NearAttack0Task"))
 			{
-				static int priority = static_cast<int>(selectBehaviorNode->GetPriority());
-				ImGui::BulletText("NodePriotiry -> %d", static_cast<int>(selectBehaviorNode->GetPriority()));
-				ImGui::SliderInt("Priority", &priority, 1, 4);
-				if (ImGui::Button("SetPriority"))
-					selectBehaviorNode->SetPriority(static_cast<uint32_t>(priority));
+				taskData.CreateTaskData(ENTRY_TASK::NEAR_ATTACK0_TASK);
+				selectBehaviorTask = taskData.fightNearTask0;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("NearAttack1Task"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::NEAR_ATTACK1_TASK);
+				selectBehaviorTask = taskData.fightNearTask1;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("NearAttack2Task"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::NEAR_ATTACK2_TASK);
+				selectBehaviorTask = taskData.fightNearTask2;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("NearSpecialAttack0"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::Near_Special_TASK);
+				selectBehaviorTask = taskData.fightNearSpecialTask0;
+
 			}
 
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Rule------");
+			if (ImGui::Button("FarAttack0Task"))
 			{
-				static int selectRule = 0;
-				static int currentRule = 0;
-				std::vector<std::string> ruleName = { "NON", "PRIORITY","RANDOM","SEQUENCE" };
-
-				ImGui::Combo("SelectRulename",
-					&selectRule,
-					vectorGetter,
-					static_cast<void*>(&ruleName),
-					static_cast<int>(ruleName.size())
-				);
-
-				SELECT_RULE setSelectRule;
-				SELECT_RULE getCurrentRule;
-
-				getCurrentRule = selectBehaviorNode->GetSelectRule();
-				currentRule = static_cast<int>(getCurrentRule);
-				std::string currentRuleName = ruleName[currentRule];
-				ImGui::BulletText("NodeCurrentRule -> %s", currentRuleName.data());
-
-				setSelectRule = static_cast<SELECT_RULE>(selectRule);
-				if (ImGui::Button("SetRule"))
-					selectBehaviorNode->SetSelectRule(setSelectRule);
+				taskData.CreateTaskData(ENTRY_TASK::FAR_ATTACK0_TASK);
+				selectBehaviorTask = taskData.fightFarTask0;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("FarAttack1Task"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::FAR_ATTACK1_TASK);
+				selectBehaviorTask = taskData.fightFarTask1;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("FarSpecialAttack0"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::FAR_SPECIAL_TASK);
+				selectBehaviorTask = taskData.fightFarSpecialTask0;
 			}
 
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ParentName------");
+			if (selectBehaviorTask)
 			{
-				std::string currentParentNodeName = selectBehaviorNode->GetParentName();
-				ImGui::BulletText("ParentNodeName -> %s", currentParentNodeName.data());
+				if (ImGui::Button("SaveTask"))
+					selectBehaviorTask->SaveOfBinaryFile();
+				ImGui::SameLine();
+				if (ImGui::Button("LoadTask"))
+					selectBehaviorTask->LoadOfBinaryFile(taskName[selectTask]);
 
-				if (ImGui::Button("SetParentName"))
-					selectBehaviorNode->SetParentName(nodeName[selectNode]);
-			}
-
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Child------");
-			{
-				if (!selectBehaviorNode->GetChild().empty())
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ParentNodeName------");
 				{
-					int childCount = static_cast<int>(selectBehaviorNode->GetChild().size());
-					ImGui::BulletText("Child -> %d", childCount);
+					std::string currentParentNodeName = selectBehaviorTask->GetParentNodeName();
+					ImGui::BulletText("ParentNodeName -> %s", currentParentNodeName.data());
+
+					if (ImGui::Button("SetParentNodeName"))
+						selectBehaviorTask->SetParentNodeName(nodeName[selectNode]);
 				}
-				else
-					ImGui::BulletText("Child -> 0");
 
-			}
-
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Task------");
-			{
-				if (ImGui::Button("RestTask"))
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------TaskName------");
 				{
-					std::shared_ptr<EnemyRestTask> restTask = std::make_shared<EnemyRestTask>();
-					selectBehaviorNode->SetTask(restTask);
+					std::string currentTaskName = selectBehaviorTask->GetTaskName();
+					ImGui::BulletText("TaskName -> %s", currentTaskName.data());
+
+					if (ImGui::Button("SetTaskName"))
+						selectBehaviorTask->SetTaskName(taskName[selectTask]);
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Priority------");
+				{
+					static int priority = static_cast<int>(selectBehaviorTask->GetPriority());
+					ImGui::BulletText("TaskPriotiry -> %d", static_cast<int>(selectBehaviorTask->GetPriority()));
+					ImGui::SliderInt("SelectTaskPriority", &priority, 1, 4);
+					if (ImGui::Button("SetTaskPriority"))
+						selectBehaviorTask->SetPriority(static_cast<uint32_t>(priority));
+				}
+
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------CoolTime------");
+				{
+					static int  coolTime = static_cast<int>(selectBehaviorTask->GetCoolTimer());
+					ImGui::BulletText("CoolTime -> %d", static_cast<int>(selectBehaviorTask->GetCoolTimer()) / 60);
+					ImGui::SliderInt("CurrentCoolTime", &coolTime, 0, 6000);
+
+					if (ImGui::Button("SetCoolTime"))
+						selectBehaviorTask->SetCoolTimer(static_cast<uint32_t>(coolTime));
+
 				}
 			}
-
-			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Add------");
-			{
-				if (ImGui::Button("AddNode"))
-					m_behaviorTree.AddNode(selectBehaviorNode->GetParentName(), selectBehaviorNode);
-
-			}
-
 		}
-
-
 	}
 	ImGui::End();
 

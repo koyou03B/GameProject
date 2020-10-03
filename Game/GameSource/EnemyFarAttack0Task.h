@@ -25,7 +25,7 @@ public:
 	void SaveOfBinaryFile()
 	{
 		std::ofstream ofs;
-		ofs.open((std::string("../Asset/Binary/Enemy/BehaviorTask") + m_taskName + ".bin").c_str()
+		ofs.open((std::string("../Asset/Binary/Enemy/BehaviorTask/") + m_taskName + ".bin").c_str()
 			, std::ios::binary);
 		cereal::BinaryOutputArchive o_archive(ofs);
 		o_archive(*this);
@@ -41,6 +41,7 @@ public:
 				m_taskName,
 				m_coolTimer,
 				m_priority,
+				m_parentNodeName,
 				m_attackRatio
 			);
 		}
@@ -51,6 +52,7 @@ public:
 				m_taskName,
 				m_coolTimer,
 				m_priority,
+				m_parentNodeName,
 				m_attackRatio
 			);
 		}

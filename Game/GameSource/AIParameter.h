@@ -116,6 +116,9 @@ public:
 		uint32_t moveCount = 0;
 		uint32_t attackCount = 0;
 
+		uint32_t attackCountRatio = 0;
+		uint32_t attackHitCountRatio = 0;
+		float viewFrontRatio = 0.0f;
 		int targetID = 0;
 	};
 };
