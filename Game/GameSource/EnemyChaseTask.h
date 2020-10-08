@@ -1,6 +1,6 @@
 #pragma once
 #include "EnemyBehaviorTask.h"
-
+#include "CharacterParameter.h"
 class Enemy;
 class EnemyChaseTask : public EnemyBehaviorTask
 {
@@ -8,6 +8,8 @@ public:
 	EnemyChaseTask() = default;
 	~EnemyChaseTask() = default;
 	void Run(Enemy* enemy);
+	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
+
 	uint32_t JudgePriority(const int id);
 
 	void LoadOfBinaryFile(std::string taskName)
@@ -55,6 +57,11 @@ public:
 			);
 		}
 	}
+
+private:
+	int m_targetID = 0;
+	bool m_isLockOn = false;
+	const uint32_t m_moveAnimationTime = 70;
 };
 
 CEREAL_CLASS_VERSION(EnemyChaseTask, 2);

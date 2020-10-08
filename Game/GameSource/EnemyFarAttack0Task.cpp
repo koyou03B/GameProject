@@ -222,9 +222,7 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 			{
 				animation.animationBlend.ResetAnimationSampler(0);
 				animation.animationBlend.ReleaseSampler(0);
-		//		animation.animationBlend.FalseAnimationLoop(0);
 			}
-
 
 			animation.animationBlend.AddSampler(5, enemy->GetModel());
 			animation.animationBlend.ResetAnimationFrame();
@@ -289,10 +287,7 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 			{
 				animation.animationBlend.ResetAnimationSampler(0);
 				animation.animationBlend.ReleaseSampler(0);
-			//	animation.animationBlend.FalseAnimationLoop(0);
 			}
-
-
 			animation.animationBlend.AddSampler(5, enemy->GetModel());
 			animation.animationBlend.ResetAnimationFrame();
 			++m_moveState;
