@@ -1463,8 +1463,8 @@ ImGui::Combo("Name_of_BoneName",
 		float speed = m_stepParm.speed.x;
 		ImGui::SliderFloat("StepSpeed", &speed, 0.0f, 100.0f);
 
-		float animationSpeed = m_blendAnimation.animtionSpeed;
-		ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 5.0f);
+		//float animationSpeed = m_blendAnimation.animtionSpeed;
+		//ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 5.0f);
 
 		m_stepParm.deceleration = VECTOR3F(accel, 0.0f, accel);
 

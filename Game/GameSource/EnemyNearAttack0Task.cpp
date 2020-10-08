@@ -3,8 +3,112 @@
 #include "Enemy.h"
 #include ".\LibrarySource\Vector.h"
 
+//magicNumber
 void EnemyNearAttack0Task::Run(Enemy* enemy)
 {
+	auto& animation = enemy->GetBlendAnimation();
+	switch (m_moveState)
+	{
+	case 0:
+	{
+		m_taskState = TASK_STATE::START;
+		animation.animationBlend.AddSampler(14,enemy->GetModel());
+		animation.animationBlend.ResetAnimationFrame();
+		++m_moveState;
+	}
+	break;
+	case 1:
+	{
+		m_taskState = TASK_STATE::RUN;
+		if(JudgeBlendRatio(animation))
+			++m_moveState;
+	}
+	break;
+	case 2:
+	{
+		if (JudgeAnimationRatio(enemy, 0, 15))
+			++m_moveState;
+	}
+	break;
+	case 3:
+	{
+		if (JudgeBlendRatio(animation))
+			++m_moveState;
+	}
+	break;
+	case 4:
+	{
+		if (JudgeAnimationRatio(enemy, 1, 18))
+			++m_moveState;
+	}
+	break;
+	case 5:
+	{
+		if (JudgeBlendRatio(animation))
+			++m_moveState;
+	}
+		break;
+	case 6:
+	{
+		if (JudgeAnimationRatio(enemy, 4, 19))
+			++m_moveState;
+	}
+	break;
+	case 7:
+	{
+		if (JudgeBlendRatio(animation))
+			++m_moveState;
+	}
+	break;
+	case 8:
+	{
+		if (JudgeAnimationRatio(enemy, 5, 0))
+			++m_moveState;
+	}
+	break;
+	case 9:
+	{
+		if (JudgeBlendRatio(animation))
+		{
+			animation.animationBlend.ResetAnimationSampler(0);
+			m_moveState = 0;
+			m_taskState = TASK_STATE::END;
+		}
+	}
+	break;
+	}
+
+}
+
+bool EnemyNearAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
+{
+	m_taskState = TASK_STATE::RUN;
+	animation.animationBlend._blendRatio += 0.045f;//magicNumber
+	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
+	{
+		animation.animationBlend._blendRatio = 0.0f;
+		animation.animationBlend.ResetAnimationSampler(0);
+		animation.animationBlend.ReleaseSampler(0);
+		animation.animationBlend.FalseAnimationLoop(0);
+		return true;
+	}
+
+	return false;
+}
+
+bool EnemyNearAttack0Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo)
+{
+	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
+	uint32_t attackFrameCount = enemy->GetAttack(attackNo).frameCount;
+	if (currentAnimationTime >= attackFrameCount)
+	{
+		enemy->GetBlendAnimation().animationBlend.AddSampler(nextAnimNo, enemy->GetModel());
+
+		//enemy->GetBlendAnimation().animationBlend.ResetAnimationFrame();
+		return true;
+	}
+
+	return false;
 }
 
 uint32_t EnemyNearAttack0Task::JudgePriority(const int id)
@@ -19,7 +123,7 @@ uint32_t EnemyNearAttack0Task::JudgePriority(const int id)
 	float direction = ToDistVec3(playerPosition - enemyPosition);
 	VECTOR3F normalizeDist = NormalizeVec3(playerPosition - enemyPosition);
 
-	VECTOR3F angle = player.at(targetID)->GetWorldTransform().angle;
+	VECTOR3F angle = enemy->GetWorldTransform().angle;
 	VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
 	front = NormalizeVec3(front);
 
@@ -27,14 +131,14 @@ uint32_t EnemyNearAttack0Task::JudgePriority(const int id)
 
 	float cosTheta = acosf(dot);
 
-	float frontRatio = enemy->GetJudgeElement().viewFrontRatio;
+	float frontValue = enemy->GetStandardValue().viewFrontValue;
 
-	if (dot <= frontRatio)
+	if (cosTheta <= frontValue)
 	{
 		uint32_t attackHitCount = static_cast<uint32_t>(enemy->GetJudgeElement().attackHitCount);
-		uint32_t attackHitCountRatio = static_cast<uint32_t>(enemy->GetJudgeElement().attackHitCountRatio);
+		uint32_t attackHitCountValue = static_cast<uint32_t>(enemy->GetStandardValue().attackHitCountValue);
 
-		if (attackHitCount < attackHitCountRatio)
+		if (attackHitCount < attackHitCountValue)
 			return m_priority;
 	}
 

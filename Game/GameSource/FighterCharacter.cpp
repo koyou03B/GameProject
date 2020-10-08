@@ -308,7 +308,7 @@ void Fighter::Move(float& elapsedTime)
 			float dz = cosf(angle.y);
 
 			float dot = (vector.x * dx) + (vector.z * dz);
-			float rot = 1 - dot;
+			float rot = 1.0f - dot;
 
 			float limit = m_moveParm.turnSpeed;
 
@@ -848,8 +848,8 @@ void Fighter::ImGui(ID3D11Device* device)
 		float speed = m_stepParm.speed.x;
 		ImGui::SliderFloat("StepSpeed", &speed, 0.0f, 100.0f);
 
-		float animationSpeed = m_blendAnimation.animtionSpeed;
-		ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 5.0f);
+		//float animationSpeed = m_blendAnimation.animtionSpeed;
+		//ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 5.0f);
 
 		m_stepParm.deceleration = VECTOR3F(accel, 0.0f, accel);
 

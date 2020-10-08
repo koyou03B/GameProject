@@ -85,7 +85,7 @@ void Game::Update(float& elapsedTime)
 		distance = NormalizeVec3(distance);
 		VECTOR3F rightVaule = CameraRightValue();
 		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-		Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rightVaule);
+		//Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rightVaule);
 
 		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 

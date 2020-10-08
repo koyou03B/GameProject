@@ -43,7 +43,6 @@ public:
 				m_nodeName,
 				m_selectRule,
 				m_family,
-				m_task,
 				m_priority,
 				m_maxDirection
 			);
@@ -55,7 +54,6 @@ public:
 				m_nodeName,
 				m_selectRule,
 				m_family,
-				m_task,
 				m_priority,
 				m_maxDirection
 			);
@@ -66,4 +64,4 @@ private:
 	float m_maxDirection = 0.0f;
 };
 
-CEREAL_CLASS_VERSION(EnemyFightNearNode, 1);
+CEREAL_CLASS_VERSION(EnemyFightNearNode, 2);

@@ -40,7 +40,6 @@ public:
 				m_nodeName,
 				m_selectRule,
 				m_family,
-				m_task,
 				m_priority
 			);
 		}
@@ -51,11 +50,10 @@ public:
 				m_nodeName,
 				m_selectRule,
 				m_family,
-				m_task,
 				m_priority
 			);
 		}
 	}
 };
 
-CEREAL_CLASS_VERSION(EnemyChaseNode, 1);
+CEREAL_CLASS_VERSION(EnemyChaseNode, 2);

@@ -47,7 +47,7 @@ std::shared_ptr<EnemyBehaviorTask> EnemyBehaviorTree::SearchOfActiveTask(const i
 {
 	std::shared_ptr<EnemyBehaviorNode> selectNode;
 	selectNode = m_nodes->SelectOfActivedNode(id);
-	while (!selectNode->GetTask().empty())
+	while (selectNode->GetTask().empty())
 	{
 		if (selectNode->GetSelectRule() != SELECT_RULE::SEQUENCE)
 			selectNode = selectNode->SelectOfActivedNode(id);
@@ -115,5 +115,38 @@ void EnemyBehaviorTree::SetRootNodeChild()
 	AddNode(fightNode->GetParentName(),		fightNode);
 	AddNode(fightNearNode->GetParentName(), fightNearNode);
 	AddNode(fightFarNode->GetParentName(),	fightFarNode);
+
+}
+
+void EnemyBehaviorTree::SetTaskToNode()
+{
+	std::shared_ptr<EnemyRestTask>				 restTask = m_taskData.restTask;
+	std::shared_ptr<EnemyIntimidateTask>		 intimidateTask = m_taskData.intimidateTask;
+	std::shared_ptr<EnemyChaseTask>				 chaseTask = m_taskData.chaseTask;
+	std::shared_ptr<EnemyNearAttack0Task>		 fightNearTask0 = m_taskData.fightNearTask0;
+	std::shared_ptr<EnemyNearAttack1Task>		 fightNearTask1 = m_taskData.fightNearTask1;
+	std::shared_ptr<EnemyNearAttack2Task>		 fightNearTask2 = m_taskData.fightNearTask2;
+	std::shared_ptr<EnemyNearSpecialAttack0Task> fightNearSpecialTask0 = m_taskData.fightNearSpecialTask0;
+	std::shared_ptr<EnemyFarAttack0Task>		 fightFarTask0 = m_taskData.fightFarTask0;
+	std::shared_ptr<EnemyFarAttack1Task>		 fightFarTask1 = m_taskData.fightFarTask1;
+	std::shared_ptr<EnemyFarSpecialAttack0Task>	 fightFarSpecialTask0 = m_taskData.fightFarSpecialTask0;
+
+	std::shared_ptr<EnemyBehaviorNode> selectNode = m_nodes->SearchNode(restTask->GetParentNodeName());
+	selectNode->SetTask(restTask);
+	selectNode->SetTask(intimidateTask);
+
+	selectNode = m_nodes->SearchNode(chaseTask->GetParentNodeName());
+	selectNode->SetTask(chaseTask);
+
+	selectNode = m_nodes->SearchNode(fightNearTask0->GetParentNodeName());
+	selectNode->SetTask(fightNearTask0);
+	selectNode->SetTask(fightNearTask1);
+	selectNode->SetTask(fightNearTask2);
+	selectNode->SetTask(fightNearSpecialTask0);
+
+	selectNode = m_nodes->SearchNode(fightFarTask0->GetParentNodeName());
+	selectNode->SetTask(fightFarTask0);
+	selectNode->SetTask(fightFarTask1);
+	selectNode->SetTask(fightFarSpecialTask0);
 
 }

@@ -52,7 +52,7 @@ public:
 	inline std::vector<CharacterParameter::Collision>& GetCollision() { return m_collision; }
 	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
 	inline AIParameter::JudgeElement& GetJudgeElement() { return m_judgeElementPram; }
-
+	inline AIParameter::StandardValue& GetStandardValue() { return m_standardValuePram; }
 	inline void SetID(int id) { m_id = id; }
 	inline void SetState(State* state) { m_state = state; }
 	inline void SetCharacter(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> model) { m_model = model; }
@@ -69,6 +69,7 @@ protected:
 	CharacterParameter::Camera					m_cameraParm;
 	AIParameter::Emotion						m_emotionParm;
 	AIParameter::JudgeElement					m_judgeElementPram;
+	AIParameter::StandardValue					m_standardValuePram;
 	std::vector<CharacterParameter::Collision>	m_collision;
 	State* m_state;
 

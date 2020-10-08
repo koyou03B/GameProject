@@ -7,7 +7,7 @@ void EnemyChaseTask::Run(Enemy* enemy)
 	auto players = MESSENGER.CallPlayersInstance();
 
 	int targetID = enemy->GetJudgeElement().targetID;
-	uint32_t targetAttackCount = players.at(targetID)->GetJudgeElement().attackCount;
+	uint32_t targetAttackHitCount = players.at(targetID)->GetJudgeElement().attackHitCount;
 
 	int selectPlayer = 0;
 	int playerCount = static_cast<int>(players.size());
@@ -15,8 +15,8 @@ void EnemyChaseTask::Run(Enemy* enemy)
 	{
 		if (i != targetID)
 		{
-			uint32_t attackCount = players.at(i)->GetJudgeElement().attackCount;
-			if (targetAttackCount <= attackCount)
+			uint32_t attackHitCount = players.at(i)->GetJudgeElement().attackHitCount;
+			if (targetAttackHitCount < attackHitCount)
 				selectPlayer = i;
 		}
 	}

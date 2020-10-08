@@ -48,7 +48,10 @@ std::shared_ptr<EnemyBehaviorNode> EnemyBehaviorNode::SelectOfActivedNode(const 
 		{
 			uint32_t nodePriority = m_family.childs.at(i)->JudgePriority(id);
 			if (priority < nodePriority)
+			{
 				selectChild = i;
+				priority = nodePriority;
+			}
 		}
 
 		return m_family.childs.at(selectChild);
@@ -88,7 +91,10 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 		{
 			uint32_t taskPriority = m_task.at(i)->JudgePriority(id);
 			if (priority < taskPriority)
+			{
 				selectTask = m_task.at(i);
+				priority = taskPriority;
+			}
 		}
 
 		return  std::make_pair(0,selectTask);

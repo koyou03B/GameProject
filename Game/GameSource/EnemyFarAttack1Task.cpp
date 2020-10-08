@@ -9,10 +9,10 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 uint32_t EnemyFarAttack1Task::JudgePriority(const int id)
 {
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
-	uint32_t attackCount = static_cast<uint32_t>(enemy->GetJudgeElement().attackCount);
-	uint32_t attackCountRatio = static_cast<uint32_t>(enemy->GetJudgeElement().attackCountRatio);
+	uint32_t attackCount = enemy->GetJudgeElement().attackCount;
+	uint32_t attackCountValue = enemy->GetStandardValue().attackCountValue;
 
-	if (attackCount > attackCountRatio)
+	if (attackCount > attackCountValue)
 		return m_priority;
 
 	return minPriority;

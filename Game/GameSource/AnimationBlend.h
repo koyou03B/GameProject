@@ -13,6 +13,7 @@ public:
 	using Sampler = Source::ModelResource::AnimationTake;
 
 	float _blendRatio;
+	float _animationSpeed = 1.0f;
 	std::vector<std::vector<FLOAT4X4>> _blendLocals;
 	std::vector<std::vector<FLOAT4X4>> _blendLocalsToParents;
 
@@ -94,7 +95,6 @@ public:
 			m_animationFrame[i] = 0;
 		}
 	}
-
 
 	void ReleaseAllSampler(int samplerNum)
 	{

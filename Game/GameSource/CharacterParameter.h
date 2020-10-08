@@ -254,7 +254,6 @@ public:
 	{
 		AnimationBlend animationBlend;
 //		PartialBlendAnimation partialBlend;
-		float animtionSpeed = 1.0f;
 		float blendValueRange[2] = {};
 
 		float attackBlendRtio = 0.0f;
@@ -262,7 +261,7 @@ public:
 		float moveBlendRatio = 0.0f;
 
 		 int samplerSize ;
-		 float blendRatioMax ;
+		 float blendRatioMax = 1.0f;
 
 		uint32_t serialVersion = 0;
 

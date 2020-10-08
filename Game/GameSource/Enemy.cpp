@@ -5,7 +5,7 @@
 #include ".\LibrarySource\VectorCombo.h"
 
 //CEREAL_CLASS_VERSION(CharacterParameter::Collision, 1);
-CEREAL_CLASS_VERSION(Enemy, 3);
+CEREAL_CLASS_VERSION(Enemy, 6);
 
 void Enemy::Init()
 {
@@ -21,6 +21,7 @@ void Enemy::Init()
 
 	m_blendAnimation.animationBlend.Init(m_model);
 	m_collision.resize(4);
+	m_attackParm.resize(13);
 	//SerialVersionUpdate(1);
 
 	m_behaviorTree.CreateRootNode();
@@ -33,10 +34,25 @@ void Enemy::Init()
 	}
 	
 	m_behaviorTree.SetRootNodeChild();
+	m_behaviorTree.SetTaskToNode();
+	m_isAction = false;
 }
 
 void Enemy::Update(float& elapsedTime)
 {
+	m_elapsedTime = elapsedTime;
+	if (m_isAction)
+	{
+		if (!m_selectTask)
+			m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
+
+		m_selectTask->Run(this);
+
+		if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
+		{
+			m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
+		}
+	}
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
 
 	m_collision[0].position[0] = m_transformParm.position;
@@ -254,16 +270,16 @@ void Enemy::ImGui(ID3D11Device* device)
 		if (ImGui::CollapsingHeader("NodeData"))
 		{
 			NodeData& nodeData = m_behaviorTree.GetNodeData();
-			//static bool isCreate = false;
-			//if (!isCreate)
-			//{
-			//	nodeData.CreateNodeData(ENTRY_NODE::WAIT_NODE);		
-			//	nodeData.CreateNodeData(ENTRY_NODE::CHASE_NODE);
-			//	nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NODE);
-			//	nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NEAR_NODE);
-			//	nodeData.CreateNodeData(ENTRY_NODE::FIGHT_FAR_NODE);
-			//	isCreate = true;
-			//}
+			static bool isCreate = false;
+			if (!isCreate)
+			{
+				nodeData.CreateNodeData(ENTRY_NODE::WAIT_NODE);		
+				nodeData.CreateNodeData(ENTRY_NODE::CHASE_NODE);
+				nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NODE);
+				nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NEAR_NODE);
+				nodeData.CreateNodeData(ENTRY_NODE::FIGHT_FAR_NODE);
+				isCreate = true;
+			}
 
 			if (ImGui::CollapsingHeader("RootNode"))
 			{
@@ -508,19 +524,15 @@ void Enemy::ImGui(ID3D11Device* device)
 
 					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Task------");
 					{
-						if (ImGui::Button("RestTask"))
+						if (!selectBehaviorNode->GetTask().empty())
 						{
-							std::shared_ptr<EnemyRestTask> restTask = std::make_shared<EnemyRestTask>();
-							selectBehaviorNode->SetTask(restTask);
+							int taskCount = static_cast<int>(selectBehaviorNode->GetTask().size());
+							ImGui::BulletText("Task -> %d", taskCount);
 						}
+						else
+							ImGui::BulletText("Task -> 0");
 					}
 
-					ImGui::TextColored(ImVec4(1, 1, 1, 1), "------Add------");
-					{
-						if (ImGui::Button("AddNode"))
-							m_behaviorTree.AddNode(selectBehaviorNode->GetParentName(), selectBehaviorNode);
-
-					}
 				}
 			}
 		}
@@ -661,12 +673,334 @@ void Enemy::ImGui(ID3D11Device* device)
 
 					if (ImGui::Button("SetCoolTime"))
 						selectBehaviorTask->SetCoolTimer(static_cast<uint32_t>(coolTime));
-
 				}
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------SelectTask------");
+				{
+					if (ImGui::Button("Set ActiveTask"))
+						m_selectTask = selectBehaviorTask;
+
+					if (m_selectTask)
+					{
+						m_selectTask->Run(this);
+						if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
+							m_selectTask.reset();
+
+						if (ImGui::Button("Release"))
+						{
+							m_selectTask->SetMoveState(0);
+							m_selectTask.reset();
+
+						}
+					}
+				}
+				
 			}
 		}
 	}
+
+	//*******************************************
+	// StandardValue
+	//*******************************************
+	if (ImGui::CollapsingHeader("StandardValue"))
+	{
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "------AttackCountValue------");
+		{
+			int attackCountValue = static_cast<int>(m_standardValuePram.attackCountValue);
+			ImGui::SliderInt("AttackCountValue", &attackCountValue, 1, 20);
+			m_standardValuePram.attackCountValue = static_cast<uint32_t>(attackCountValue);
+		}
+
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "------AttackHitCountValue------");
+		{
+			int attackHitCountValue = static_cast<int>(m_standardValuePram.attackHitCountValue);
+			ImGui::SliderInt("AttackHitCountValue", &attackHitCountValue, 1, 20);
+			m_standardValuePram.attackHitCountValue = static_cast<uint32_t>(attackHitCountValue);
+		}
+
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ViewFrontValue------");
+		{
+			auto& players = MESSENGER.CallPlayersInstance();
+			int targetID = m_judgeElementPram.targetID;
+			VECTOR3F playerPosition = players[targetID]->GetWorldTransform().position;
+			FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
+			FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+			FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+			VECTOR3F enemyPosition = VECTOR3F(getBone._41,getBone._42,getBone._43);
+
+			float direction = ToDistVec3(playerPosition - enemyPosition);
+			VECTOR3F normalizeDist = NormalizeVec3(playerPosition - enemyPosition);
+
+			VECTOR3F angle = m_transformParm.angle;
+			VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
+			front = NormalizeVec3(front);
+
+			float dot = DotVec3(front, normalizeDist);
+
+			float cosTheta = acosf(dot);
+			
+			float angleValue = cosTheta * (180 / 3.14f);
+			ImGui::BulletText("RadOfPlayerToEnemy -> %f", cosTheta);
+			ImGui::BulletText("AngleOfPlayerToEnemy -> %f", angleValue);
+
+			float viewFrontValue = m_standardValuePram.viewFrontValue;
+			ImGui::SliderFloat("ViewFrontValue", &viewFrontValue, 0.0f, 3.14f);
+			 angleValue = viewFrontValue * (180 / 3.14f);
+			 ImGui::BulletText("AngleOfViewFrontValue -> %f", angleValue);
+
+			m_standardValuePram.viewFrontValue = viewFrontValue;
+
+			if(cosTheta <= viewFrontValue)
+				ImGui::BulletText(u8"見えてます");
+
+
+		}
+	}
+
+	//*******************************************
+	// Emotion
+	//*******************************************
+	if (ImGui::CollapsingHeader("Emotion"))
+	{
+		if (ImGui::CollapsingHeader("Exhaustion"))
+		{
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------MaxExhaustionCost------");
+			{
+				int maxExhaustionCost = static_cast<uint32_t>(m_emotionParm.exhaustionParm.maxExhaustionCost);
+				ImGui::SliderInt("MaxExhaustionCost", &maxExhaustionCost, 1, 100);
+				m_emotionParm.exhaustionParm.maxExhaustionCost = static_cast<uint32_t>(maxExhaustionCost);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ForgetExhaustionCost------");
+			{
+				int forgetExhaustionCost = static_cast<uint32_t>(m_emotionParm.exhaustionParm.forgetExhaustionCost);
+				ImGui::SliderInt("ForgetExhaustionCost", &forgetExhaustionCost, 1, 100);
+				m_emotionParm.exhaustionParm.forgetExhaustionCost = static_cast<uint32_t>(forgetExhaustionCost);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------MoveExhaustionCost------");
+			{
+				int moveExhaustionCost = static_cast<uint32_t>(m_emotionParm.exhaustionParm.moveExhaustionCost);
+				ImGui::SliderInt("MoveExhaustionCost", &moveExhaustionCost, 1, 100);
+				m_emotionParm.exhaustionParm.moveExhaustionCost = static_cast<uint32_t>(moveExhaustionCost);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------AttackExhaustionCost------");
+			{
+				int attackExhaustionCost = static_cast<uint32_t>(m_emotionParm.exhaustionParm.attackExhaustionCost);
+				ImGui::SliderInt("AttackExhaustionCost", &attackExhaustionCost, 1, 100);
+				m_emotionParm.exhaustionParm.attackExhaustionCost = static_cast<uint32_t>(attackExhaustionCost);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------DamageExhaustionCost------");
+			{
+				int damageExhaustionCost = static_cast<uint32_t>(m_emotionParm.exhaustionParm.damageExhaustionCost);
+				ImGui::SliderInt("DamageExhaustionCost", &damageExhaustionCost, 1, 100);
+				m_emotionParm.exhaustionParm.damageExhaustionCost = static_cast<uint32_t>(damageExhaustionCost);
+			}
+		}
+
+		if (ImGui::CollapsingHeader("Wrath"))
+		{
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------MaxWrathCost------");
+			{
+				int maxWrathCost = static_cast<uint32_t>(m_emotionParm.wrathParm.maxWrathCost);
+				ImGui::SliderInt("MaxWrathCost", &maxWrathCost, 1, 100);
+				m_emotionParm.wrathParm.maxWrathCost = static_cast<uint32_t>(maxWrathCost);
+			}
+		}
+	}
+
+	//**************************************
+	// Animation
+	//**************************************
+	if (ImGui::CollapsingHeader("Animation"))
+	{
+		{
+			static float ratio = 0;
+			ImGui::SliderFloat("BlendRatio", &ratio, 0.0f, 1.0f);
+
+				m_blendAnimation.animationBlend._blendRatio = ratio;
+
+			static float attackRatio = 0;
+			ImGui::SliderFloat("AttackBlendRatio", &attackRatio, 0.0f, 0.5f);
+			if (ImGui::Button("Attack BlendRatio"))
+				m_blendAnimation.attackBlendRtio = attackRatio;
+
+			static float idleRatio = 0;
+			ImGui::SliderFloat("IdleBlendRatio", &idleRatio, 0.0f, 1.0f);
+			if (ImGui::Button("Idle BlendRatio"))
+				m_blendAnimation.idleBlendRtio = idleRatio;
+
+			static float moveRatio = 0;
+			ImGui::SliderFloat("MoveBlendRatio", &moveRatio, 0.0f, 1.0f);
+			if (ImGui::Button("Move BlendRatio"))
+				m_blendAnimation.moveBlendRatio = moveRatio;
+		}
+
+		{
+			static float blendValue0 = 0.7f;
+			ImGui::SliderFloat("WalkBlendValue", &blendValue0, 0.0f, 1.0f);
+			if (ImGui::Button("Set WalkBlendValue"))
+				m_blendAnimation.blendValueRange[0] = blendValue0;
+
+			static float blendValue1 = 1.0f;
+			ImGui::SliderFloat("RunBlendValue", &blendValue1, 0.0f, 1.0f);
+			if (ImGui::Button("Set RunBlendValue"))
+				m_blendAnimation.blendValueRange[1] = blendValue1;
+			
+			float animationSpeed = m_blendAnimation.animationBlend._animationSpeed;
+			ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 2.0f);
+			m_blendAnimation.animationBlend._animationSpeed = animationSpeed;
+		}
+
+		{
+			auto animCount = m_model->_resource->_animationTakes.size();
+
+			static int currentAnim = 0;
+			ImGui::BulletText("%d", currentAnim);
+			ImGui::SameLine();
+			if (ImGui::ArrowButton("Front", ImGuiDir_Left))
+			{
+				if (0 >= currentAnim)
+					currentAnim = 0;
+				else
+					--currentAnim;
+			}
+			ImGui::SameLine();
+			if (ImGui::ArrowButton("Next", ImGuiDir_Right))
+			{
+				if (currentAnim >= static_cast<int>(animCount) - 1)
+					currentAnim = static_cast<int>(animCount) - 1;
+				else
+					++currentAnim;
+			}
+
+
+			{
+				if (ImGui::Button(u8"ChangeAnim"))
+				{
+					m_blendAnimation.animationBlend.ChangeSampler(0, currentAnim, m_model);
+				}
+
+				if (ImGui::Button(u8"AddAnim"))
+				{
+					m_blendAnimation.animationBlend.AddSampler(currentAnim, m_model);
+				}
+
+				if (ImGui::Button(u8"UnLoop"))
+				{
+					m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+				}
+
+				if (ImGui::Button(u8"Reset"))
+				{
+					m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+				}
+				ImGui::BulletText("%d", m_blendAnimation.animationBlend.GetAnimationTime(0));
+			}
+		}
+		if (ImGui::Button(u8"Relaes"))
+		{
+			m_blendAnimation.animationBlend.ReleaseSampler(0);
+		}
+	}
+
+	//**************************************
+	// Attack
+	//**************************************
+	if (ImGui::CollapsingHeader("Attack"))
+	{
+		static int current = 0;
+		ImGui::RadioButton(u8"右なぎ払い前行動", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton(u8"右なぎ払い", &current, 1); ImGui::SameLine();
+		ImGui::RadioButton(u8"右なぎ払い後行動", &current, 2); 
+		ImGui::RadioButton(u8"左なぎ払い前行動", &current, 3); ImGui::SameLine();
+		ImGui::RadioButton(u8"左なぎ払い", &current, 4); ImGui::SameLine();
+		ImGui::RadioButton(u8"左なぎ払い後行動", &current, 5); 
+		ImGui::RadioButton(u8"スタンプ", &current, 6); ImGui::SameLine();
+		ImGui::RadioButton(u8"回転", &current,7); ImGui::SameLine();
+		ImGui::RadioButton(u8"高速回転", &current, 8);
+
+		//FrameCount
+		{
+			 int frameCount = m_attackParm[current].frameCount;
+			ImGui::InputInt("FrameCount", &frameCount, 0, 100); 
+
+				m_attackParm[current].frameCount = frameCount;
+		}
+
+		//attackPoint
+		{
+			 float point = m_attackParm[current].attackPoint;
+			ImGui::InputFloat("AttackPoint", &point, 0, 100);
+
+				m_attackParm[current].attackPoint = point;
+		}
+	}
+
+	//**************************************
+	// Status
+	//**************************************
+	if (ImGui::CollapsingHeader("Move"))
+	{
+		{
+			static float  accel0 = m_moveParm.accle.x;
+
+			ImGui::SliderFloat("Accel0", &accel0, 0.0f, 10.0f);
+
+			m_moveParm.accle = { accel0 ,0.0f,accel0 };
+		}
+
+		{
+			static float  maxSpeed0 = m_moveParm.maxSpeed[0].x;
+			static float  maxSpeed1 = m_moveParm.maxSpeed[1].x;
+			ImGui::SliderFloat("MaxSpeed0", &maxSpeed0, 0.0f, 100.0f);
+			ImGui::SliderFloat("MaxSpeed1", &maxSpeed1, 0.0f, 100.0f);
+
+			m_moveParm.maxSpeed[0] = { maxSpeed0 ,0.0f,maxSpeed0 };
+			m_moveParm.maxSpeed[1] = { maxSpeed1 ,0.0f,maxSpeed1 };
+		}
+
+		{
+			static float decleleration = m_moveParm.decleleration;
+
+			ImGui::SliderFloat("Decleleration", &decleleration, 0.0f, 1.0f);
+
+			m_moveParm.decleleration = decleleration;
+		}
+
+		{
+			 float turnSpeed = m_moveParm.turnSpeed;
+
+			ImGui::SliderFloat("TurnSpeed", &turnSpeed, 0.0f, 0.05f);
+
+			m_moveParm.turnSpeed = turnSpeed;
+		}
+
+		{
+			float velocity[] = { m_moveParm.velocity.x,m_moveParm.velocity.y,m_moveParm.velocity.z };
+			ImGui::SliderFloat3("Velocity", velocity, -100.0f, 100.0f);
+
+		}
+
+		{
+			float dist = ToDistVec3(m_moveParm.velocity);
+			ImGui::SliderFloat("Dist", &dist, 0.0f, 200.0f);
+
+		}
+		static float  speed = m_moveParm.speed.x;
+		ImGui::Text("Speed : %f", &speed);
+
+
+	}
+
+	if (ImGui::Button("ActiveBehaviorTree"))
+		m_isAction = true;
+	if (ImGui::Button("DeActiveBehaviorTree"))
+		m_isAction = false;
 	ImGui::End();
+
+
 
 #endif
 }

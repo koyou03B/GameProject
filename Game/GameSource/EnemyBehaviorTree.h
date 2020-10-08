@@ -224,7 +224,7 @@ public:
 	inline std::unique_ptr<EnemyRootNode>& GetRootNode() { return m_nodes; }
 
 	void SetRootNodeChild();
-
+	void SetTaskToNode();
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)

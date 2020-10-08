@@ -5,7 +5,7 @@ void Stage::Init()
 {
 	VECTOR3F translate = { 0.0f,0.0f,0.0f };
 	VECTOR3F angle = { 0.0f * 0.01745f, 180.0f * 0.01745f,0.0f * 0.017454f };
-	VECTOR3F scale = { 0.008f,0.008f,0.008f };
+	VECTOR3F scale = { 0.01f,0.01f,0.01f };
 	
 	AddInstanceData(translate, angle, scale, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
 	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::STAGE);
@@ -48,7 +48,7 @@ void Stage::ImGui()
 	if (!m_instanceData.empty())
 	{
 		auto& data = m_instanceData[0];
-		static float scale = 0.008f;
+		float scale = data.scale.x;
 		ImGui::SliderFloat("Scale", &scale, 0.001f, 1.0f);
 
 		data.scale = VECTOR3F(scale, scale, scale);

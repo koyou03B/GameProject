@@ -33,7 +33,7 @@ public:
 	EnemyBehaviorTask() = default;
 	~EnemyBehaviorTask() = default;
 
-	enum TaskState
+	enum TASK_STATE
 	{
 		START,
 		RUN,
@@ -56,7 +56,7 @@ public:
 
 	inline std::string& GetParentNodeName() { return m_parentNodeName; }
 	inline std::string& GetTaskName() { return m_taskName;}
-	inline TaskState& GetTaskState() { return m_taskState; }
+	inline TASK_STATE& GetTaskState() { return m_taskState; }
 	inline uint32_t& GetMoveState() { return m_moveState; }
 	inline uint32_t& GetCoolTimer() { return m_coolTimer; }
 	inline uint32_t& GetPriority() { return m_priority; }
@@ -64,7 +64,7 @@ public:
 
 	inline void SetParentNodeName(const std::string& parentNodeName) { m_parentNodeName = parentNodeName; }
 	inline void SetTaskName(const std::string& taskName) { m_taskName = taskName; }
-	inline void SetTaskState(const TaskState& taskState) { m_taskState = taskState; }
+	inline void SetTaskState(const TASK_STATE& taskState) { m_taskState = taskState; }
 	inline void SetMoveState(const uint32_t& moveState) { m_moveState = moveState; }
 	inline void SetCoolTimer(const uint32_t& coolTime) { m_coolTimer = coolTime; }
 	inline void SetPriority(const uint32_t& priority) { m_priority = priority; }
@@ -75,10 +75,10 @@ protected:
 
 	std::string m_parentNodeName;
 	std::string m_taskName;
-	TaskState m_taskState;
-	uint32_t m_moveState;
+	TASK_STATE m_taskState;
+	uint32_t m_moveState = 0;
 	uint32_t m_coolTimer;
 	uint32_t m_priority;
-	bool m_isUsed;
-	uint32_t m_serialVersion = 2;
+	bool m_isUsed = false;
+	uint32_t m_serialVersion = 3;
 };

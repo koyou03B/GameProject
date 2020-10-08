@@ -115,7 +115,7 @@ void AnimationBlend::UpdateRuntimeParameters()
 	if (m_samplers.size() == 1)
 	{
 		m_samplers[0].second->weight = 1.0f;
-		m_samplers[0].second->animtion.SetPlayBackSpeed(1.0);
+		m_samplers[0].second->animtion.SetPlayBackSpeed(1.0f * _animationSpeed);
 	}
 	else
 	{
@@ -143,7 +143,7 @@ void AnimationBlend::UpdateRuntimeParameters()
 		for (int i = 0; i < static_cast<int>(m_samplers.size()); ++i)
 		{
 			Sampler& sampler = *m_samplers[i].second;
-			const float speed = sampler.duration * invLoopDuration;
+			const float speed = sampler.duration * invLoopDuration * _animationSpeed;
 			sampler.animtion.SetPlayBackSpeed(speed);
 		}
 
