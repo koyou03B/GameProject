@@ -10,13 +10,15 @@ namespace Source
 			{ ActorModel::Saber,	"../Asset/Model/Actor/Test/player_motion_tex.fbx", 60},
 			{ ActorModel::Archer,	"../Asset/Model/Actor/Players/Archer/Archer.fbx", 60},
 			{ ActorModel::Fighter,	"../Asset/Model/Actor/Players/Fighter/Fighter.fbx",   60},
-			{ ActorModel::ENEMY,	"../Asset/Model/Actor/Enemy/Hannyabal.fbx", 60},
+			{ ActorModel::ENEMY,	"../Asset/Model/Actor/Enemy/Juggernaut.fbx", 60},
 		};
 
 		LoadStaticModel staticModel[] = {
 
 			{ StaticModel::STAGE,	"../Asset/Model/Static/Stage/Stage.fbx"},
 			{ StaticModel::ARROW,	"../Asset/Model/Static/Arrow/Arrow.fbx"},
+			{ StaticModel::AXE,		"../Asset/Model/Static/Axe/BattleAxe_GEO.fbx"},
+
 		};
 
 		void FbxLoader::SaveActForBinary(ActorModel modelNo)

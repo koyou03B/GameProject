@@ -12,7 +12,7 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 	case 0:
 	{
 		m_taskState = TASK_STATE::START;
-		animation.animationBlend.AddSampler(14,enemy->GetModel());
+		animation.animationBlend.AddSampler(8,enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
 		++m_moveState;
 	}
@@ -26,7 +26,7 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 	break;
 	case 2:
 	{
-		if (JudgeAnimationRatio(enemy, 0, 15))
+		if (JudgeAnimationRatio(enemy, 0, 9))
 			++m_moveState;
 	}
 	break;
@@ -38,35 +38,11 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 	break;
 	case 4:
 	{
-		if (JudgeAnimationRatio(enemy, 1, 18))
+		if (JudgeAnimationRatio(enemy, 1, 1))
 			++m_moveState;
 	}
 	break;
 	case 5:
-	{
-		if (JudgeBlendRatio(animation))
-			++m_moveState;
-	}
-		break;
-	case 6:
-	{
-		if (JudgeAnimationRatio(enemy, 4, 19))
-			++m_moveState;
-	}
-	break;
-	case 7:
-	{
-		if (JudgeBlendRatio(animation))
-			++m_moveState;
-	}
-	break;
-	case 8:
-	{
-		if (JudgeAnimationRatio(enemy, 5, 0))
-			++m_moveState;
-	}
-	break;
-	case 9:
 	{
 		if (JudgeBlendRatio(animation))
 		{
@@ -75,7 +51,7 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 			m_taskState = TASK_STATE::END;
 		}
 	}
-	break;
+		break;
 	}
 
 }

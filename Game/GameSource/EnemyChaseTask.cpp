@@ -101,13 +101,13 @@ void EnemyChaseTask::Run(Enemy* enemy)
 		front = NormalizeVec3(front);
 
 		float dot = DotVec3(front, normalizeDist);
-
-		float cosTheta = acosf(dot);
-
+		float rot = 1.0f - dot;
 		float limit = enemy->GetMove().turnSpeed;
-		if (cosTheta <= limit)
-			limit = cosTheta;
-
+		if (rot > limit)
+		{
+			rot = limit;
+		}
+		float cosTheta = acosf(dot);
 		float frontValue = enemy->GetStandardValue().viewFrontValue;
 		if (cosTheta <= frontValue)
 			m_isLockOn = true;
@@ -117,7 +117,7 @@ void EnemyChaseTask::Run(Enemy* enemy)
 		if (m_moveAnimationTime > currentAnimationTime)
 		{
 			auto& enemyTransform = enemy->GetWorldTransform();
-			enemyTransform.angle.y += limit;
+			enemyTransform.angle.y += rot;
 			enemyTransform.WorldUpdate();
 		}
 
@@ -160,26 +160,23 @@ void EnemyChaseTask::Run(Enemy* enemy)
 		VECTOR3F angle = enemy->GetWorldTransform().angle;
 		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
 		front = NormalizeVec3(front);
-
 		float dot = DotVec3(front, normalizeDist);
-
-		float cosTheta = acosf(dot);
-
+		float rot = 1.0f - dot;
 		float limit = enemy->GetMove().turnSpeed;
-		if (cosTheta <= limit)
-			limit = cosTheta;
-
+		if (rot > limit)
+		{
+			rot = limit;
+		}
+		float cosTheta = acosf(dot);
 		float frontValue = enemy->GetStandardValue().viewFrontValue;
 		if (cosTheta <= frontValue)
-		{
 			m_isLockOn = true;
-		}
 		uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 
 		if (m_moveAnimationTime > currentAnimationTime)
 		{
 			auto& enemyTransform = enemy->GetWorldTransform();
-			enemyTransform.angle.y -= limit;
+			enemyTransform.angle.y -= rot;
 			enemyTransform.WorldUpdate();
 		}
 

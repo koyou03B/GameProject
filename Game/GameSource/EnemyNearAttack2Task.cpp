@@ -10,7 +10,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 	case 0:
 	{
 		m_taskState = TASK_STATE::START;
-		animation.animationBlend.AddSampler(21, enemy->GetModel());
+		animation.animationBlend.AddSampler(10, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
 		++m_moveState;
 	}
@@ -24,7 +24,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 	break;
 	case 2:
 	{
-		if (JudgeAnimationRatio(enemy, 7, 0))
+		if (JudgeAnimationRatio(enemy, 3, 0))
 			++m_moveState;
 	}
 	break;

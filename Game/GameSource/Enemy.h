@@ -1,7 +1,6 @@
 #pragma once
 #include "CharacterAI.h"
 #include "EnemyBehaviorTree.h"
-
 class Enemy : public CharacterAI
 {
 public:
@@ -55,6 +54,7 @@ private:
 	{
 	}
 private:
+
 	EnemyBehaviorTree m_behaviorTree;
 	std::shared_ptr<EnemyBehaviorTask> m_selectTask;
 

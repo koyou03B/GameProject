@@ -95,7 +95,7 @@ namespace Source
 			ID3D11Buffer* vbs[2] = { m_vertexBuffer.Get(), m_instanceBuffer.Get() };
 			immediateContext->IASetVertexBuffers(0, 2, vbs, strides, offsets);
 			immediateContext->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-			immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 			m_geometricPrimitiveVS->Activate(immediateContext);
 			m_geometricPrimitivePS->Activate(immediateContext);

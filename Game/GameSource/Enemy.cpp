@@ -11,10 +11,24 @@ void Enemy::Init()
 {
 	m_transformParm.position = { -10.0f,0.0f,80.0f };
 	m_transformParm.angle = { 0.0f * 0.01745f, 180.0f * 0.01745f,0.0f * 0.017454f };
-	m_transformParm.scale = { 1.25f,1.25f,1.25f };
+	m_transformParm.scale = { 0.08f,0.08f,0.08f };
 	m_transformParm.WorldUpdate();
 
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::ENEMY);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Run.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/LeftTurn.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightTurn.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Wrath.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Die.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Damage.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/LeftPunch.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightPunch.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightPunchLower.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightUpper.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/IdleTurnAttack.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RunTurnAttack.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/JumpAttack.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/WrathAttack.fbx", 60);
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
 	m_statusParm.life = 12000.0f;
@@ -23,6 +37,7 @@ void Enemy::Init()
 	m_collision.resize(4);
 	m_attackParm.resize(13);
 	//SerialVersionUpdate(1);
+;
 
 	m_behaviorTree.CreateRootNode();
 	if (PathFileExistsA((std::string("../Asset/Binary/Enemy/Parameter") + ".bin").c_str()))
@@ -63,8 +78,10 @@ void Enemy::Render(ID3D11DeviceContext* immediateContext)
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
 	//	auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
+	
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
-	//m_debugObjects.debugObject.Render(immediateContext, m_debugObjects.scrollValue,false);
+
+	m_debugObjects.debugObject.Render(immediateContext, VECTOR4F(0, 0, 0, 0),true);
 }
 
 void Enemy::ImGui(ID3D11Device* device)
@@ -163,11 +180,8 @@ void Enemy::ImGui(ID3D11Device* device)
 				//Position
 				{
 					if (current == 0)
-					{
-						geomtry.position = m_transformParm.position;
-					}
-					else
-					geomtry.position = bonePosition;
+						geomtry.position = bonePosition;
+				
 				}
 				//Scale
 				{
@@ -849,7 +863,7 @@ void Enemy::ImGui(ID3D11Device* device)
 				m_blendAnimation.blendValueRange[1] = blendValue1;
 			
 			float animationSpeed = m_blendAnimation.animationBlend._animationSpeed;
-			ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 1.0f, 2.0f);
+			ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 0.0f, 2.0f);
 			m_blendAnimation.animationBlend._animationSpeed = animationSpeed;
 		}
 
@@ -911,15 +925,14 @@ void Enemy::ImGui(ID3D11Device* device)
 	if (ImGui::CollapsingHeader("Attack"))
 	{
 		static int current = 0;
-		ImGui::RadioButton(u8"右なぎ払い前行動", &current, 0); ImGui::SameLine();
-		ImGui::RadioButton(u8"右なぎ払い", &current, 1); ImGui::SameLine();
-		ImGui::RadioButton(u8"右なぎ払い後行動", &current, 2); 
-		ImGui::RadioButton(u8"左なぎ払い前行動", &current, 3); ImGui::SameLine();
-		ImGui::RadioButton(u8"左なぎ払い", &current, 4); ImGui::SameLine();
-		ImGui::RadioButton(u8"左なぎ払い後行動", &current, 5); 
-		ImGui::RadioButton(u8"スタンプ", &current, 6); ImGui::SameLine();
-		ImGui::RadioButton(u8"回転", &current,7); ImGui::SameLine();
-		ImGui::RadioButton(u8"高速回転", &current, 8);
+		ImGui::RadioButton("RightPunch", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton("LeftPunch", &current, 1); ImGui::SameLine();
+		ImGui::RadioButton("RightPunchUpper", &current, 2); 
+		ImGui::RadioButton("RightPunchLower", &current, 3); ImGui::SameLine();
+		ImGui::RadioButton("TurnPunchUp", &current, 4); ImGui::SameLine();
+		ImGui::RadioButton("TurnPunchDown", &current, 5); 
+		ImGui::RadioButton("JumpAttack", &current, 6); ImGui::SameLine();
+		ImGui::RadioButton("WrathAttack", &current,7); 
 
 		//FrameCount
 		{

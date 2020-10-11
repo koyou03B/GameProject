@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include "AnimationBlend.h"
+#include "PartialBlendAnimation.h"
 #include "DebugObject.h"
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\GeometricPrimitve.h"
@@ -253,7 +254,7 @@ public:
 	struct BlendAnimation
 	{
 		AnimationBlend animationBlend;
-//		PartialBlendAnimation partialBlend;
+		PartialBlendAnimation partialBlend;
 		float blendValueRange[2] = {};
 
 		float attackBlendRtio = 0.0f;

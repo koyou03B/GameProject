@@ -138,37 +138,13 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 	case 0:
 	{
 		m_taskState = TASK_STATE::START;
-		int targetID = enemy->GetJudgeElement().targetID;
-		std::shared_ptr<CharacterAI> player = MESSENGER.CallPlayerInstance(targetID);
-		auto& playerTransform = player->GetWorldTransform();
-		//後で頭のボーンに変更
-		auto& enemyTransform = enemy->GetWorldTransform();
-		VECTOR3F distance = playerTransform.position - enemyTransform.position;
-		float dist = ToDistVec3(distance);
-		VECTOR3F velocity = NormalizeVec3(distance);
-		VECTOR3F enemyAngle = VECTOR3F(sinf(enemyTransform.angle.y), 0.0f, cosf(enemyTransform.angle.y));
-		enemyAngle = NormalizeVec3(enemyAngle);
-
-		VECTOR3F cross = CrossVec3(enemyAngle, velocity);
-		if (cross.y > 0.0f)
-		{
-			m_moveState = 1;
-			animation.animationBlend.AddSampler(1, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-		}
-		else
-		{
-			m_moveState = 2;
-			animation.animationBlend.AddSampler(2, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-		}
-
-		m_isView = false;
+		animation.animationBlend.AddSampler(5, enemy->GetModel());
+		animation.animationBlend.ResetAnimationFrame();
+		++m_moveState;
 	}
 	break;
 	case 1:
 	{
-		m_taskState = TASK_STATE::RUN;
 		if (animation.animationBlend.GetSampler().size() == 2)
 		{
 			animation.animationBlend._blendRatio += 0.045f;//magicNumber
@@ -180,118 +156,16 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 			}
 		}
 
-		auto player = MESSENGER.CallPlayersInstance();
-		int targetID = enemy->GetJudgeElement().targetID;
-
-		VECTOR3F playerPosition = player.at(targetID)->GetWorldTransform().position;
-		VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-
-		float direction = ToDistVec3(playerPosition - enemyPosition);
-		VECTOR3F normalizeDist = NormalizeVec3(playerPosition - enemyPosition);
-
-		VECTOR3F angle = enemy->GetWorldTransform().angle;
-		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
-		front = NormalizeVec3(front);
-
-		float dot = DotVec3(front, normalizeDist);
-
-		float cosTheta = acosf(dot);
-
-		float limit = enemy->GetMove().turnSpeed;
-		if (cosTheta <= limit)
-			limit = cosTheta;
-
-		float frontValue = enemy->GetStandardValue().viewFrontValue;
-		if (cosTheta <= frontValue)
-		{
-			m_isView = true;
-		}
-		uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
-
-		if (70 > currentAnimationTime)
-		{
-			auto& enemyTransform = enemy->GetWorldTransform();
-			enemyTransform.angle.y += limit;
-			enemyTransform.WorldUpdate();
-		}
+		m_taskState = TASK_STATE::RUN;
+		Chase(enemy);
 
 
-		if (m_isView && currentAnimationTime == 0)
-		{
-			if (animation.animationBlend.GetSampler().size() == 2)
-			{
-				animation.animationBlend.ResetAnimationSampler(0);
-				animation.animationBlend.ReleaseSampler(0);
-			}
 
-			animation.animationBlend.AddSampler(5, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-			++m_moveState;
-		}
 	}
 	break;
 	case 2:
 	{
-		m_taskState = TASK_STATE::RUN;
-		if (animation.animationBlend.GetSampler().size() == 2)
-		{
-			animation.animationBlend._blendRatio += 0.045f;//magicNumber
-			if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
-			{
-				animation.animationBlend._blendRatio = 0.0f;
-				animation.animationBlend.ResetAnimationSampler(0);
-				animation.animationBlend.ReleaseSampler(0);
-			}
-		}
 
-		auto player = MESSENGER.CallPlayersInstance();
-		int targetID = enemy->GetJudgeElement().targetID;
-
-		VECTOR3F playerPosition = player.at(targetID)->GetWorldTransform().position;
-		VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-
-		float direction = ToDistVec3(playerPosition - enemyPosition);
-		VECTOR3F normalizeDist = NormalizeVec3(playerPosition - enemyPosition);
-
-		VECTOR3F angle = enemy->GetWorldTransform().angle;
-		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
-		front = NormalizeVec3(front);
-
-		float dot = DotVec3(front, normalizeDist);
-
-		float cosTheta = acosf(dot);
-
-		float limit = enemy->GetMove().turnSpeed;
-		if (cosTheta <= limit)
-			limit = cosTheta;
-
-
-		float frontValue = enemy->GetStandardValue().viewFrontValue;
-		if (cosTheta <= frontValue)
-		{
-			m_isView = true;
-		}
-		uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
-
-		if (70 > currentAnimationTime)
-		{
-			auto& enemyTransform = enemy->GetWorldTransform();
-			enemyTransform.angle.y -= limit;
-			enemyTransform.WorldUpdate();
-		}
-
-
-		if (m_isView && currentAnimationTime == 0)
-		{
-			if (animation.animationBlend.GetSampler().size() == 2)
-			{
-				animation.animationBlend.ResetAnimationSampler(0);
-				animation.animationBlend.ReleaseSampler(0);
-			}
-			animation.animationBlend.AddSampler(5, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-			++m_moveState;
-		}
 	}
 	break;
 	case 3:
@@ -308,7 +182,7 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 	case 4:
 	{
 		//プレイヤーの方向に走る
-//距離が近づくと変更
+		//距離が近づくと変更
 		int targetID = enemy->GetJudgeElement().targetID;
 		std::shared_ptr<CharacterAI> player = MESSENGER.CallPlayerInstance(targetID);
 		auto& playerTransform = player->GetWorldTransform();
@@ -413,6 +287,46 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 
 #endif
 
+}
+
+void EnemyFarAttack0Task::Chase(Enemy* enemy)
+{
+	auto player = MESSENGER.CallPlayerInstance(m_targetID);
+	auto playerTransform = player->GetWorldTransform();
+	auto& enemyTransform = enemy->GetWorldTransform();
+
+	VECTOR3F distance = playerTransform.position - enemyTransform.position;
+
+	VECTOR3F nDistance = NormalizeVec3(distance);
+	VECTOR3F enemyFront = VECTOR3F(sinf(enemyTransform.angle.y), 0.0f, cosf(enemyTransform.angle.y));
+	enemyFront = NormalizeVec3(enemyFront);
+
+	float dot = DotVec3(enemyFront, nDistance);
+	float rot = 1.0f - dot;
+	float limit = enemy->GetMove().turnSpeed;
+	if (rot > limit)
+	{
+		rot = limit;
+	}
+
+	VECTOR3F cross = CrossVec3(enemyFront, nDistance);
+
+	if (cross.y > 0.0f)
+		enemyTransform.angle.y += rot;
+	else
+		enemyTransform.angle.y -= rot;
+
+	float speed = ToDistVec3(distance);
+	if (speed <= 20.0f)
+		speed = 0.0f;
+
+	VECTOR3F velocity = nDistance * speed;
+
+	enemy->GetMove().accle = velocity - enemy->GetMove().velocity;
+	enemy->GetMove().velocity += enemy->GetMove().accle;
+	enemyTransform.position += enemy->GetMove().velocity * enemy->GetElapsedTime();
+
+	enemyTransform.WorldUpdate();
 }
 
 bool EnemyFarAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
