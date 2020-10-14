@@ -35,14 +35,14 @@ bool PartialBlendAnimation::Init(std::shared_ptr<Source::SkinnedMesh::SkinnedMes
 
 	if (m_samplers.size() <= 0)
 	{
-		auto& lowerBodySampler = model->_resource->_animationTakes[0];
-		auto& upBodySampler = model->_resource->_animationTakes[1];
+		auto& lowerBodySampler = model->_resource->_animationTakes[2];
+		auto& upBodySampler = model->_resource->_animationTakes[8];
 
 		lowerBodySampler.weight = 1.0f;
 		upBodySampler.weight = 1.0f;
 
-		m_samplers.push_back(std::make_pair(0, &lowerBodySampler));
-		m_samplers.push_back(std::make_pair(1, &upBodySampler));
+		m_samplers.push_back(std::make_pair(2, &lowerBodySampler));
+		m_samplers.push_back(std::make_pair(8, &upBodySampler));
 	}
 
 	{

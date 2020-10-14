@@ -62,13 +62,13 @@ void EnemyChaseTask::Run(Enemy* enemy)
 			if (cross.y > 0.0f)
 			{
 				m_moveState = 2;
-				animation.animationBlend.AddSampler(1, enemy->GetModel());
+				animation.animationBlend.AddSampler(4, enemy->GetModel());
 				animation.animationBlend.ResetAnimationFrame();
 			}
 			else
 			{
 				m_moveState = 3;
-				animation.animationBlend.AddSampler(2, enemy->GetModel());
+				animation.animationBlend.AddSampler(3, enemy->GetModel());
 				animation.animationBlend.ResetAnimationFrame();
 			}
 		}
@@ -129,7 +129,7 @@ void EnemyChaseTask::Run(Enemy* enemy)
 				animation.animationBlend.ReleaseSampler(0);
 			}
 
-			animation.animationBlend.AddSampler(0, enemy->GetModel());
+			animation.animationBlend.AddSampler(1, enemy->GetModel());
 			animation.animationBlend.ResetAnimationFrame();
 			m_moveState = 4;
 		}
@@ -188,7 +188,7 @@ void EnemyChaseTask::Run(Enemy* enemy)
 				animation.animationBlend.ReleaseSampler(0);
 			}
 
-			animation.animationBlend.AddSampler(0, enemy->GetModel());
+			animation.animationBlend.AddSampler(1, enemy->GetModel());
 			animation.animationBlend.ResetAnimationFrame();
 			++m_moveState;
 		}

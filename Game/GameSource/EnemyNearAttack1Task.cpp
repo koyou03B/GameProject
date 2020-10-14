@@ -6,6 +6,7 @@
 void EnemyNearAttack1Task::Run(Enemy* enemy)
 {
 	auto& animation = enemy->GetBlendAnimation();
+
 	switch (m_moveState)
 	{
 	case 0:
@@ -25,7 +26,7 @@ void EnemyNearAttack1Task::Run(Enemy* enemy)
 	break;
 	case 2:
 	{
-		if (JudgeAnimationRatio(enemy, 5, 0))
+		if (JudgeAnimationRatio(enemy, 5, 1))
 			++m_moveState;
 	}
 	break;

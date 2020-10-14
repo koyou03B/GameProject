@@ -8,7 +8,6 @@ public:
 	EnemyFarAttack0Task() = default;
 	~EnemyFarAttack0Task() = default;
 	void Run(Enemy* enemy);
-	void Chase(Enemy* enemy);
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
 	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
 	uint32_t JudgePriority(const int id);
@@ -60,6 +59,11 @@ public:
 	}
 private:
 	int m_targetID = 0;
+	float m_chaseTimer = 0.0f;
+	bool m_isNear = false;
+	bool m_isSampler = false;
+	float m_targetSpeed = {};
+	VECTOR3F m_targetNormal = {};
 	VECTOR3F m_targetPosition = {};
 };
 

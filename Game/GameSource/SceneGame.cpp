@@ -80,16 +80,20 @@ void Game::Update(float& elapsedTime)
 	if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() != 
 		Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
 	{
+		CharacterAI* player = m_metaAI->GetPlayCharacter();
 
 		VECTOR3F distance = DistancePlayerToEnemy();
 		distance = NormalizeVec3(distance);
 		VECTOR3F rightVaule = CameraRightValue();
 		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
 		//Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rightVaule);
+		//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
+		//Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
+		//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
+		//Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
 
 		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
-		CharacterAI* player = m_metaAI->GetPlayCharacter();
 		VECTOR3F pos = player->GetWorldTransform().position;
 		Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
 		CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);

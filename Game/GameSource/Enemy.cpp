@@ -29,6 +29,7 @@ void Enemy::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RunTurnAttack.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/JumpAttack.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/WrathAttack.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RunSignal.fbx", 60);
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
 	m_statusParm.life = 12000.0f;
@@ -70,7 +71,12 @@ void Enemy::Update(float& elapsedTime)
 	}
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
 
-	m_collision[0].position[0] = m_transformParm.position;
+	int currentMesh = m_collision[0].GetCurrentMesh(0);
+	int currentBone = m_collision[0].GetCurrentBone(0);
+	FLOAT4X4 boneTransform = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
+	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+	FLOAT4X4 getBoneTransform = boneTransform * modelAxisTransform * m_transformParm.world;
+	m_collision[0].position[0] = { getBoneTransform._41,getBoneTransform._42,getBoneTransform._43 };
 }
 
 void Enemy::Render(ID3D11DeviceContext* immediateContext)
@@ -173,21 +179,20 @@ void Enemy::ImGui(ID3D11Device* device)
 
 		if (m_debugObjects.debugObject.IsGeomety())
 		{
+
+
 			if (m_debugObjects.debugObject.GetInstance().size() > current)
 			{
 				auto& geomtry = m_debugObjects.debugObject.GetInstanceData(current);
 
 				//Position
 				{
-					if (current == 0)
-						geomtry.position = bonePosition;
-				
+					geomtry.position = bonePosition;
 				}
 				//Scale
 				{
 					static float scale = m_collision[current].scale;
-					if (scale <= 0.0f) scale = 1.0f;
-					ImGui::SliderFloat("Scale", &scale, 0.1f, 100.0f);
+					ImGui::SliderFloat("Scale", &scale, 1.0f, 10.0f);
 					geomtry.scale = { scale ,scale ,scale };
 					m_collision[current].scale = scale;
 				}
@@ -195,9 +200,7 @@ void Enemy::ImGui(ID3D11Device* device)
 				//Radius
 				{
 					static float radius = m_collision[current].radius;
-					if (radius <= 0.0f) radius = 1.0f;
-					ImGui::SliderFloat("Radius", &radius, 1.0f, 20.0f);
-
+					ImGui::SliderFloat("Radius", &radius, 1, 10);
 					geomtry.scale *= radius;
 					m_collision[current].radius = radius;
 				}
@@ -696,6 +699,10 @@ void Enemy::ImGui(ID3D11Device* device)
 					if (m_selectTask)
 					{
 						m_selectTask->Run(this);
+						int state = m_selectTask->GetMoveState();
+						ImGui::SliderInt("MoveState", &state, 0, 10);
+
+
 						if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
 							m_selectTask.reset();
 
@@ -919,6 +926,52 @@ void Enemy::ImGui(ID3D11Device* device)
 		}
 	}
 
+# if 0
+	//**************************************
+	// PartialAnimation
+	//**************************************
+	if (ImGui::CollapsingHeader("PartialAnimation"))
+	{
+
+		std::vector<std::string> nodes;
+		for (auto& n : m_blendAnimation.partialBlend.GetNodes())
+		{
+			nodes.push_back(n.name);
+		}
+		static int curringNode = 0;
+		auto nodeName = nodes;
+		ImGui::Combo("Name_of_NodeName",
+			&curringNode,
+			vectorGetter,
+			static_cast<void*>(&nodeName),
+			static_cast<int>(nodeName.size())
+		);
+
+		auto& lowerBodyBone = m_blendAnimation.partialBlend.GetPartialBoens().at(0);
+		auto& upBodyBone = m_blendAnimation.partialBlend.GetPartialBoens().at(1);
+
+		static float raito = 1.0f;
+		ImGui::SliderFloat("BlendRatio", &raito, 0.0f, 1.0f);
+
+		float& lowerWeight = lowerBodyBone.weight;
+		float& upWeight = upBodyBone.weight;
+
+		lowerWeight = 1.0f - raito;
+		upWeight = raito;
+
+		m_blendAnimation.partialBlend.SetupHalfBody(m_model);
+
+		if (ImGui::Button("UpperBodyRoot?"))
+		{
+			m_blendAnimation.partialBlend._upperBodyRoot = curringNode;
+			m_blendAnimation.partialBlend.SetupHalfBody(m_model);
+
+		}
+
+
+	}
+
+#endif
 	//**************************************
 	// Attack
 	//**************************************

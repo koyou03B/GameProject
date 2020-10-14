@@ -22,21 +22,6 @@
 
 class Game : public Scene
 {
-
-	std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>> m_sceneConstantBuffer;
-
-	VECTOR3F scale = { 1.0f, 1.0f, 1.0f };
-	VECTOR3F angle = { 0.0f, 180.0f * 0.01745f, 0.0f };
-	VECTOR3F translate = { 0.0f, 0.0f, .0f };
-	VECTOR4F direction = { sinf(angle.y * 0.01745f), 0.0f, cosf(angle.y * 0.01745f),1.0f };
-	float focalLength = 5.0f;
-
-	std::shared_ptr<MetaAI> m_metaAI;
-	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer;
-	std::unique_ptr<Source::Fog::Fog> m_fog;
-	std::unique_ptr<Source::ScreenFilter::ScreenFilter> m_screenFilter;
-
-	std::unique_ptr<Stage> m_stage;
 public:
 	Game() = default;
 	virtual ~Game() = default;
@@ -49,4 +34,20 @@ public:
 
 	VECTOR3F DistancePlayerToEnemy();
 	VECTOR3F CameraRightValue();
+
+private:
+	std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>> m_sceneConstantBuffer;
+
+	VECTOR3F scale = { 1.0f, 1.0f, 1.0f };
+	VECTOR3F angle = { 0.0f, 180.0f * 0.01745f, 0.0f };
+	VECTOR3F translate = { 0.0f, 0.0f, .0f };
+	VECTOR4F direction = { sinf(angle.y * 0.01745f), 0.0f, cosf(angle.y * 0.01745f),1.0f };
+	float focalLength = 5.0f;
+	
+	std::unique_ptr<Stage> m_stage;
+	std::shared_ptr<MetaAI> m_metaAI;
+	std::unique_ptr<Source::Fog::Fog> m_fog;
+	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer;
+	std::unique_ptr<Source::ScreenFilter::ScreenFilter> m_screenFilter;
+
 };

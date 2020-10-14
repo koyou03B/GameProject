@@ -24,7 +24,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 	break;
 	case 2:
 	{
-		if (JudgeAnimationRatio(enemy, 3, 0))
+		if (JudgeAnimationRatio(enemy, 3, 1))
 			++m_moveState;
 	}
 	break;
