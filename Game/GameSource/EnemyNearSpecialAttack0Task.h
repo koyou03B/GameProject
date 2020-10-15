@@ -1,6 +1,6 @@
 #pragma once
 #include "EnemyBehaviorTask.h"
-
+#include "CharacterParameter.h"
 class Enemy;
 class EnemyNearSpecialAttack0Task : public EnemyBehaviorTask
 {
@@ -8,6 +8,8 @@ public:
 	EnemyNearSpecialAttack0Task() = default;
 	~EnemyNearSpecialAttack0Task() = default;
 	void Run(Enemy* enemy);
+	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
+	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
 	uint32_t JudgePriority(const int id);
 
 	void LoadOfBinaryFile(std::string taskName)

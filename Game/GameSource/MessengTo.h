@@ -51,6 +51,14 @@ public:
 		return false;
 	}
 
+	bool EnemyAttackingMessage(const int id, CharacterParameter::Collision& enemy)
+	{
+		if (m_metaAI->CollisionEnemyAttack(id, enemy))
+			return true;
+
+		return false;
+	}
+
 	inline void SetMetaAI(const std::shared_ptr<MetaAI>& metaAI)
 	{
 		m_metaAI = metaAI;

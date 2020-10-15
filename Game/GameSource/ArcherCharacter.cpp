@@ -39,7 +39,6 @@ void Archer::Init()
 	m_changeParm.isPlay = true;
 	m_blendAnimation.animationBlend.Init(m_model);
 	//m_blendAnimation.partialBlend.Init(m_model);
-
 	SerialVersionUpdate(12);
 
 	//*********************
@@ -54,6 +53,7 @@ void Archer::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
+	m_statusParm.life = 12000;
 
 	m_stepParm.maxSpeed = m_stepParm.speed;
 }
@@ -1793,6 +1793,14 @@ ImGui::Combo("Name_of_BoneName",
 				geomtry.CreateWorld();
 			}
 		}
+	}
+
+	//*******************************************
+	// Status
+	//*******************************************
+	if (ImGui::CollapsingHeader("Status"))
+	{
+		ImGui::BulletText("LIFE : %f", m_statusParm.life);
 	}
 #endif
 	ImGui::End();

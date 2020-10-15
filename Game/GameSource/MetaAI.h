@@ -50,6 +50,7 @@ public:
 	// Collision
 	//*****************
 	bool CollisionPlayerAttack(int id, CharacterParameter::Collision& collision);
+	bool CollisionEnemyAttack(int id, CharacterParameter::Collision& collision);
 	void CollisionPlayerAndEnemy(std::shared_ptr<CharacterAI>& player);
 
 	//****************

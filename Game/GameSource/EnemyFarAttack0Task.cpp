@@ -50,7 +50,7 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 		VECTOR3F targetDistance = targetPosition - enemyTransform.position;
 		m_targetNormal = NormalizeVec3(targetDistance);
 		float targetDist = ToDistVec3(targetDistance);
-		m_targetSpeed = targetDist / 180.0f;
+		m_targetSpeed = targetDist / 240.0f;
 		VECTOR3F angle = enemy->GetWorldTransform().angle;
 		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
 		front = NormalizeVec3(front);
@@ -99,7 +99,7 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 		{
 			auto& enemyTransform = enemy->GetWorldTransform();
 
-			if (m_chaseTimer <= 180.0f)
+			if (m_chaseTimer <= 240.0f)
 			{
 
 				enemy->GetMove().velocity = m_targetNormal * m_targetSpeed;
@@ -112,6 +112,28 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 			{
 				m_isNear = true;
 				m_chaseTimer = 0;
+			}
+
+			if (m_chaseTimer < 180.0f)
+			{
+
+				bool isHitAttack = enemy->GetStatus().isAttack;
+				if (!isHitAttack)
+				{
+					auto& runAttack = enemy->GetCollision().at(4);
+					int runAttackMesh = runAttack.GetCurrentMesh(0);
+					int runAttackBone = runAttack.GetCurrentBone(0);
+					FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[runAttackMesh].at(runAttackBone);
+					FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+					FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+					FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+					runAttack.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
+					enemy->GetStatus().attackPoint = enemy->GetAttack(8).attackPoint;
+
+					MESSENGER.EnemyAttackingMessage(enemy->GetID(), runAttack);
+
+				}
 			}
 			++m_chaseTimer;
 		}

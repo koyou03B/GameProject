@@ -27,7 +27,10 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 	case 2:
 	{
 		if (JudgeAnimationRatio(enemy, 0, 9))
+		{
 			++m_moveState;
+			enemy->GetStatus().isAttack = false;
+		}
 	}
 	break;
 	case 3:
@@ -39,7 +42,10 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 	case 4:
 	{
 		if (JudgeAnimationRatio(enemy, 1, 1))
+		{
 			++m_moveState;
+			enemy->GetStatus().isAttack = false;
+		}
 	}
 	break;
 	case 5:
@@ -54,6 +60,37 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 		break;
 	}
 
+	if (m_moveState == 2)
+	{
+		auto& leftPunch = enemy->GetCollision().at(2);
+		int leftPunchMesh = leftPunch.GetCurrentMesh(0);
+		int leftPunchBone = leftPunch.GetCurrentBone(0);
+		FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[leftPunchMesh].at(leftPunchBone);
+		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+		FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+		leftPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
+		enemy->GetStatus().attackPoint = enemy->GetAttack(1).attackPoint;
+
+		MESSENGER.EnemyAttackingMessage(enemy->GetID(), leftPunch);
+
+	}
+	else if (m_moveState == 4)
+	{
+		auto& rightPunch = enemy->GetCollision().at(1);
+		int rightPunchMesh = rightPunch.GetCurrentMesh(0);
+		int rightPunchBone = rightPunch.GetCurrentBone(0);
+		FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[rightPunchMesh].at(rightPunchBone);
+		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+		FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+		rightPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
+		enemy->GetStatus().attackPoint = enemy->GetAttack(0).attackPoint;
+
+		MESSENGER.EnemyAttackingMessage(enemy->GetID(), rightPunch);
+	}
 }
 
 bool EnemyNearAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)

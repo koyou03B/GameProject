@@ -253,6 +253,42 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 	return false;
 }
 
+bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collision)
+{
+	if (m_enemys[id]->GetStatus().isAttack)
+		return false;
+
+	switch (collision.collisionType)
+	{
+	case CharacterParameter::Collision::SPHER:
+	{
+		Collision::Sphere mySelf, target;
+		mySelf.position = collision.position[0];
+		mySelf.radius = collision.radius;
+		mySelf.scale = collision.scale;
+		int targetID = m_enemys[id]->GetJudgeElement().targetID;
+		auto& player = m_players[targetID]->GetCollision().at(0);
+		target.position = player.position[0];
+		target.radius = player.radius;
+		target.scale = player.scale;
+		Collision collision;
+		if (collision.JudgeSphereAndSphere(mySelf, target))
+		{
+			m_players[targetID]->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
+			m_enemys[id]->GetStatus().isAttack = true;
+			if (m_players[targetID]->GetStatus().life <= 0)
+			{
+				m_players[targetID]->GetStatus().isExit = false;
+			}
+			return true;
+		}
+	}
+	break;
+	}
+
+	return false;
+}
+
 void MetaAI::CollisionPlayerAndEnemy(std::shared_ptr<CharacterAI>& player)
 {
 	Collision::Circle mySelf, target;

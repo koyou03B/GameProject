@@ -13,6 +13,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 		animation.animationBlend.AddSampler(10, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
 		++m_moveState;
+		enemy->GetStatus().isAttack = false;
 	}
 	break;
 	case 1:
@@ -26,6 +27,22 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 	{
 		if (JudgeAnimationRatio(enemy, 3, 1))
 			++m_moveState;
+		bool isHitAttack = enemy->GetStatus().isAttack;
+		if (!isHitAttack)
+		{
+			auto& rightPunch = enemy->GetCollision().at(1);
+			int rightPunchMesh = rightPunch.GetCurrentMesh(0);
+			int rightPunchBone = rightPunch.GetCurrentBone(0);
+			FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[rightPunchMesh].at(rightPunchBone);
+			FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+			FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+			FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+			rightPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
+			enemy->GetStatus().attackPoint = enemy->GetAttack(5).attackPoint;
+
+			MESSENGER.EnemyAttackingMessage(enemy->GetID(), rightPunch);
+		}
 	}
 	break;
 	case 3:
@@ -39,6 +56,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 	}
 	break;
 	}
+
 }
 
 bool EnemyNearAttack2Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
@@ -74,7 +92,6 @@ uint32_t EnemyNearAttack2Task::JudgePriority(const int id)
 {
 	auto player = MESSENGER.CallPlayersInstance();
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
-
 	int targetID = enemy->GetJudgeElement().targetID;
 
 	VECTOR3F playerPosition = player.at(targetID)->GetWorldTransform().position;
@@ -93,8 +110,15 @@ uint32_t EnemyNearAttack2Task::JudgePriority(const int id)
 
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 
-	if (dot > frontValue)
-		return m_priority;
+	if (dot <= frontValue)
+	{
+		uint32_t attackHitCount = static_cast<uint32_t>(enemy->GetJudgeElement().attackHitCount);
+		uint32_t attackHitCountValue = static_cast<uint32_t>(enemy->GetStandardValue().attackHitCountValue);
+
+		if (attackHitCount > attackHitCountValue)
+			return m_priority;
+	}
 
 	return minPriority;
 }
+

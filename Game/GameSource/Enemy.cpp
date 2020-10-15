@@ -35,7 +35,7 @@ void Enemy::Init()
 	m_statusParm.life = 12000.0f;
 
 	m_blendAnimation.animationBlend.Init(m_model);
-	m_collision.resize(4);
+	m_collision.resize(5);
 	m_attackParm.resize(13);
 	//SerialVersionUpdate(1);
 ;
@@ -48,7 +48,7 @@ void Enemy::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
-	
+
 	m_behaviorTree.SetRootNodeChild();
 	m_behaviorTree.SetTaskToNode();
 	m_isAction = false;
@@ -152,7 +152,9 @@ void Enemy::ImGui(ID3D11Device* device)
 		static int current = 0;
 		ImGui::RadioButton("Body", &current, 0);
 		ImGui::RadioButton("RightPunch", &current, 1); ImGui::SameLine();
-		ImGui::RadioButton("LeftPunch", &current, 2);
+		ImGui::RadioButton("LeftPunch", &current, 2); 
+		ImGui::RadioButton("RangeAttack", &current, 3); ImGui::SameLine();
+		ImGui::RadioButton("RunAttack", &current, 4);
 
 		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
 		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
@@ -179,8 +181,6 @@ void Enemy::ImGui(ID3D11Device* device)
 
 		if (m_debugObjects.debugObject.IsGeomety())
 		{
-
-
 			if (m_debugObjects.debugObject.GetInstance().size() > current)
 			{
 				auto& geomtry = m_debugObjects.debugObject.GetInstanceData(current);
@@ -200,7 +200,7 @@ void Enemy::ImGui(ID3D11Device* device)
 				//Radius
 				{
 					static float radius = m_collision[current].radius;
-					ImGui::SliderFloat("Radius", &radius, 1, 10);
+					ImGui::SliderFloat("Radius", &radius, 1, 50);
 					geomtry.scale *= radius;
 					m_collision[current].radius = radius;
 				}
@@ -985,8 +985,8 @@ void Enemy::ImGui(ID3D11Device* device)
 		ImGui::RadioButton("TurnPunchUp", &current, 4); ImGui::SameLine();
 		ImGui::RadioButton("TurnPunchDown", &current, 5); 
 		ImGui::RadioButton("JumpAttack", &current, 6); ImGui::SameLine();
-		ImGui::RadioButton("WrathAttack", &current,7); 
-
+		ImGui::RadioButton("WrathAttack", &current,7); ImGui::SameLine();
+		ImGui::RadioButton("Run", &current, 8);
 		//FrameCount
 		{
 			 int frameCount = m_attackParm[current].frameCount;

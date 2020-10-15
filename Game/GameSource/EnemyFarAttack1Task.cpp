@@ -13,6 +13,7 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 		m_taskState = TASK_STATE::START;
 		animation.animationBlend.AddSampler(16, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
+		enemy->GetStatus().isAttack = false;
 		auto player = MESSENGER.CallPlayerInstance(m_targetID);
 		m_targetPosition = player->GetWorldTransform().position;
 		m_targetNormal = {};
@@ -99,7 +100,7 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 		{
 			auto& enemyTransform = enemy->GetWorldTransform();
 
-			if (m_chaseTimer <= 240.0f)
+			if (m_chaseTimer < 210.0f)
 			{
 
 				enemy->GetMove().velocity = m_targetNormal * m_targetSpeed;
@@ -113,11 +114,32 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 				m_isNear = true;
 				m_chaseTimer = 0;
 			}
+
+			if (m_chaseTimer < 180.0f)
+			{
+
+				bool isHitAttack = enemy->GetStatus().isAttack;
+				if (!isHitAttack)
+				{
+					auto& runAttack = enemy->GetCollision().at(4);
+					int runAttackMesh = runAttack.GetCurrentMesh(0);
+					int runAttackBone = runAttack.GetCurrentBone(0);
+					FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[runAttackMesh].at(runAttackBone);
+					FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+					FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+					FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+					runAttack.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
+					enemy->GetStatus().attackPoint = enemy->GetAttack(8).attackPoint;
+
+					MESSENGER.EnemyAttackingMessage(enemy->GetID(), runAttack);
+
+				}
+			}
 			++m_chaseTimer;
 		}
 
-		//if(JudgeBlendRatio(animation))
-		//	++m_moveState;
+
 	}
 	break;
 	case 3:
@@ -135,6 +157,22 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 		{
 			//		animation.animationBlend.AddSampler(1, enemy->GetModel());
 			++m_moveState;
+		}
+		bool isHitAttack = enemy->GetStatus().isAttack;
+		if (!isHitAttack)
+		{
+			auto& rightPunch = enemy->GetCollision().at(1);
+			int rightPunchMesh = rightPunch.GetCurrentMesh(0);
+			int rightPunchBone = rightPunch.GetCurrentBone(0);
+			FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[rightPunchMesh].at(rightPunchBone);
+			FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+			FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+			FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+			rightPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
+			enemy->GetStatus().attackPoint = enemy->GetAttack(5).attackPoint;
+
+			MESSENGER.EnemyAttackingMessage(enemy->GetID(), rightPunch);
 		}
 	}
 	break;
