@@ -80,6 +80,10 @@ public:
 
 	void ImGui(ID3D11Device* device) override;
 
+	void Impact() override;
+
+	void RestAnimationIdle();
+
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -119,6 +123,7 @@ private:
 	void Move(float& elapsedTime);
 	void Step(float& elapsedTime);
 	void Stepping(float& elapsedTime);
+	bool KnockBack();
 
 	void Aim();
 	void Aiming();

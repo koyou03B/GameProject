@@ -3,100 +3,67 @@
 #include "Enemy.h"
 #include ".\LibrarySource\Vector.h"
 
-//magicNumber
+
 void EnemyNearAttack0Task::Run(Enemy* enemy)
 {
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
-	case 0:
-	{
-		m_taskState = TASK_STATE::START;
-		animation.animationBlend.AddSampler(8,enemy->GetModel());
-		animation.animationBlend.ResetAnimationFrame();
-		++m_moveState;
-	}
-	break;
-	case 1:
-	{
+	case Action::START:
 		m_taskState = TASK_STATE::RUN;
-		if(JudgeBlendRatio(animation))
-			++m_moveState;
-	}
-	break;
-	case 2:
-	{
-		if (JudgeAnimationRatio(enemy, 0, 9))
+		if (animation.animationBlend.GetSampler().size() != 2)
 		{
-			++m_moveState;
-			enemy->GetStatus().isAttack = false;
+			animation.animationBlend.AddSampler(Enemy::Animation::LEFT_PUNCH, enemy->GetModel());
+			animation.animationBlend.ResetAnimationFrame();
 		}
-	}
-	break;
-	case 3:
-	{
+		else
+		{
+			if (JudgeBlendRatio(animation))
+			{
+				++m_moveState;
+				AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
+				++judgeElement.attackCount;
+			}
+		}
+
+		break;
+	case Action::LEFT_PUNCH:
+		m_attackNo = static_cast<int>(Enemy::AttackType::LEFT_PUNCH);
+		if (JudgeAnimationRatio(enemy, m_attackNo, Enemy::Animation::RIGHT_PUNCH))
+			++m_moveState;
+
+		JudgeAttack(enemy, m_attackNo);
+		break;
+	case Action::ANIM_CHANGE:
 		if (JudgeBlendRatio(animation))
-			++m_moveState;
-	}
-	break;
-	case 4:
-	{
-		if (JudgeAnimationRatio(enemy, 1, 1))
 		{
 			++m_moveState;
-			enemy->GetStatus().isAttack = false;
+			AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
+			++judgeElement.attackCount;
 		}
-	}
-	break;
-	case 5:
-	{
+		break;
+	case Action::RIGHT_PUNCH:
+		m_attackNo = static_cast<int>(Enemy::AttackType::RIGHT_PUNCH);
+		if (JudgeAnimationRatio(enemy, m_attackNo, Enemy::Animation::IDLE))
+			++m_moveState;
+
+		JudgeAttack(enemy, m_attackNo);
+		break;
+	case Action::END:
 		if (JudgeBlendRatio(animation))
 		{
 			animation.animationBlend.ResetAnimationSampler(0);
 			m_moveState = 0;
+
 			m_taskState = TASK_STATE::END;
 		}
-	}
 		break;
-	}
-
-	if (m_moveState == 2)
-	{
-		auto& leftPunch = enemy->GetCollision().at(2);
-		int leftPunchMesh = leftPunch.GetCurrentMesh(0);
-		int leftPunchBone = leftPunch.GetCurrentBone(0);
-		FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[leftPunchMesh].at(leftPunchBone);
-		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
-		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
-		FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
-
-		leftPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
-		enemy->GetStatus().attackPoint = enemy->GetAttack(1).attackPoint;
-
-		MESSENGER.EnemyAttackingMessage(enemy->GetID(), leftPunch);
-
-	}
-	else if (m_moveState == 4)
-	{
-		auto& rightPunch = enemy->GetCollision().at(1);
-		int rightPunchMesh = rightPunch.GetCurrentMesh(0);
-		int rightPunchBone = rightPunch.GetCurrentBone(0);
-		FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[rightPunchMesh].at(rightPunchBone);
-		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
-		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
-		FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
-
-		rightPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
-		enemy->GetStatus().attackPoint = enemy->GetAttack(0).attackPoint;
-
-		MESSENGER.EnemyAttackingMessage(enemy->GetID(), rightPunch);
 	}
 }
 
 bool EnemyNearAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
 {
-	m_taskState = TASK_STATE::RUN;
-	animation.animationBlend._blendRatio += 0.045f;//magicNumber
+	animation.animationBlend._blendRatio += kBlendValue;//magicNumber
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
@@ -116,12 +83,32 @@ bool EnemyNearAttack0Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo,
 	if (currentAnimationTime >= attackFrameCount)
 	{
 		enemy->GetBlendAnimation().animationBlend.AddSampler(nextAnimNo, enemy->GetModel());
-
-		//enemy->GetBlendAnimation().animationBlend.ResetAnimationFrame();
 		return true;
 	}
 
 	return false;
+}
+
+void EnemyNearAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
+{
+	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
+
+	if (currentAnimationTime < kAttackTimer)
+	{
+		int collisionNo = attackNo + kCollisionNo;
+		auto& attackParm = enemy->GetCollision().at(collisionNo);
+		int attackMesh = attackParm.GetCurrentMesh(0);
+		int attackBone = attackParm.GetCurrentBone(0);
+		FLOAT4X4 getAttackBone = enemy->GetBlendAnimation().animationBlend._blendLocals[attackMesh].at(attackBone);
+		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+		FLOAT4X4 attackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
+		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
+
+		MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm);
+	}
 }
 
 uint32_t EnemyNearAttack0Task::JudgePriority(const int id)
@@ -148,11 +135,16 @@ uint32_t EnemyNearAttack0Task::JudgePriority(const int id)
 
 	if (cosTheta <= frontValue)
 	{
-		uint32_t attackHitCount = static_cast<uint32_t>(enemy->GetJudgeElement().attackHitCount);
-		uint32_t attackHitCountValue = static_cast<uint32_t>(enemy->GetStandardValue().attackHitCountValue);
-
-		if (attackHitCount < attackHitCountValue)
+# if 1
+		uint32_t attackHitCount = enemy->GetJudgeElement().attackHitCount;
+		uint32_t attackCount = enemy->GetJudgeElement().attackCount;
+		float attackRatio = enemy->GetStandardValue().attackRatio;
+		float ratio = static_cast<float>(attackHitCount / attackCount);
+		if (ratio <= attackRatio)
 			return m_priority;
+#else
+		return m_priority;
+#endif
 	}
 
 	return minPriority;

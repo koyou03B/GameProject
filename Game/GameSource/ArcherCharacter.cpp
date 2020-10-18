@@ -56,6 +56,7 @@ void Archer::Init()
 	m_statusParm.life = 12000;
 
 	m_stepParm.maxSpeed = m_stepParm.speed;
+	m_blendAnimation.samplerSize = 2;
 }
 
 void Archer::Update(float& elapsedTime)
@@ -67,30 +68,32 @@ void Archer::Update(float& elapsedTime)
 
 		if (m_input != nullptr)
 		{
-			//***********************
-			// Movement in each mode
-			//***********************
-			if (m_mode != Mode::Aiming)
+			if (!KnockBack())
 			{
-				Move(m_elapsedTime);
-				Aim();
-				Step(m_elapsedTime);
+				//***********************
+				// Movement in each mode
+				//***********************
+				if (m_mode != Mode::Aiming)
+				{
+					Move(m_elapsedTime);
+					Aim();
+					Step(m_elapsedTime);
+				}
+				else
+				{
+					Aiming();
+					AimMove(m_elapsedTime);
+					AimStep(m_elapsedTime);
+					Shot();
+				}
 			}
-			else
-			{
-				Aiming();
-				AimMove(m_elapsedTime);
-				AimStep(m_elapsedTime);
-				Shot();
-			}
-
 			//***********************
 			// Common Movements
 			//***********************
 			ArrowInstamce.Update(elapsedTime);
 
 			ChangeCharacter();
-
+			RestAnimationIdle();
 		}
 	}
 	else
@@ -159,6 +162,26 @@ void Archer::ChangeCharacter()
 	}
 }
 
+void Archer::RestAnimationIdle()
+{
+	if (m_blendAnimation.animationBlend.GetSampler().size() == m_blendAnimation.samplerSize)
+	{
+		if (m_statusParm.isDamage)
+		{
+			if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
+			{
+				m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+				if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
+				{
+					m_blendAnimation.animationBlend.ReleaseSampler(0);
+					m_statusParm.isDamage = false;
+					m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				}
+			}
+		}
+	}
+
+}
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //IDLE WALK RUN : animtionBlend
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -449,9 +472,67 @@ void Archer::Stepping(float& elapsedTime)
 		m_animationType = Animation::IDLE;
 		m_blendAnimation.animationBlend.ChangeSampler(0, m_animationType, m_model);
 		m_stepParm.isStep = false;
-		m_blendAnimation.animationBlend._blendRatio = 0.0f;
 		m_stepParm.speed = m_stepParm.maxSpeed;
 	}
+
+}
+
+void Archer::Impact()
+{
+	if (m_blendAnimation.animationBlend.SearchSampler(Animation::IMPACT)) return;
+	m_blendAnimation.animationBlend.AddSampler(Animation::IMPACT, m_model);
+	m_statusParm.isDamage = true;
+	Source::CameraControlle::CameraManager().GetInstance()->SetLength(m_cameraParm.lenght);
+
+}
+
+
+
+bool Archer::KnockBack()
+{
+	if (!m_statusParm.isDamage)
+		return false;
+
+	int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
+	if (samplerCount != 1)
+	{
+		m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+		if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
+		{
+			m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendRatioMax;
+
+			for (int i = 0; i < samplerCount - 1; ++i)
+			{
+				m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+				m_blendAnimation.animationBlend.ReleaseSampler(0);
+			}
+
+			m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+		}
+
+		m_mode = Mode::Moving;
+		m_aimMode.isAim = false;
+		m_moveParm.isMove = false;
+		m_moveParm.isWalk = false;
+		m_moveParm.isRun = false;
+		m_stepParm.isStep = false;
+	}
+	else
+	{
+		uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+		if (currentAnimationFrame == 58)
+		{
+			m_blendAnimation.animationBlend._blendRatio = 0.0f;
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+			m_blendAnimation.animationBlend.ResetAnimationFrame();
+			m_animationType = Animation::IDLE;
+			m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+
+		}
+		else
+			return true;
+	}
+	return true;
 
 }
 
@@ -1801,6 +1882,10 @@ ImGui::Combo("Name_of_BoneName",
 	if (ImGui::CollapsingHeader("Status"))
 	{
 		ImGui::BulletText("LIFE : %f", m_statusParm.life);
+		ImGui::BulletText("Damage : %d", m_statusParm.isDamage);
+		if (ImGui::Button("No Damge"))
+			m_statusParm.isDamage = false;
+
 	}
 #endif
 	ImGui::End();

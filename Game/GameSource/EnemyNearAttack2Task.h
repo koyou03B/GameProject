@@ -5,11 +5,13 @@ class Enemy;
 class EnemyNearAttack2Task : public EnemyBehaviorTask
 {
 public:
-	EnemyNearAttack2Task() = default;
+	EnemyNearAttack2Task() { m_moveState = Action::START; };
 	~EnemyNearAttack2Task() = default;
 	void Run(Enemy* enemy);
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
 	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
+	void JudgeAttack(Enemy* enemy, const int attackNo);
+
 	uint32_t JudgePriority(const int id);
 
 	void LoadOfBinaryFile(std::string taskName)
@@ -57,6 +59,17 @@ public:
 			);
 		}
 	}
+private:
+	enum Action
+	{
+		START,
+		RIGHT_PUNCH_LOWER,
+		END
+	};
+	const uint32_t kAttackTimer[2] = { 50,90 };
+	const int kCollisionNo = 1;
+	const float    kBlendValue = 0.055f;
+	int m_attackNo = 0;
 };
 
 CEREAL_CLASS_VERSION(EnemyNearAttack2Task, 2);

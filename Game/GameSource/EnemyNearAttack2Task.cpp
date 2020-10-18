@@ -7,54 +7,42 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
-	case 0:
-	{
-		m_taskState = TASK_STATE::START;
-		animation.animationBlend.AddSampler(10, enemy->GetModel());
-		animation.animationBlend.ResetAnimationFrame();
-		++m_moveState;
-		enemy->GetStatus().isAttack = false;
-	}
-	break;
-	case 1:
+	case Action::START:
 	{
 		m_taskState = TASK_STATE::RUN;
-		if (JudgeBlendRatio(animation))
-			++m_moveState;
-	}
-	break;
-	case 2:
-	{
-		if (JudgeAnimationRatio(enemy, 3, 1))
-			++m_moveState;
-		bool isHitAttack = enemy->GetStatus().isAttack;
-		if (!isHitAttack)
+		if (animation.animationBlend.GetSampler().size() != 2)
 		{
-			auto& rightPunch = enemy->GetCollision().at(1);
-			int rightPunchMesh = rightPunch.GetCurrentMesh(0);
-			int rightPunchBone = rightPunch.GetCurrentBone(0);
-			FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[rightPunchMesh].at(rightPunchBone);
-			FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
-			FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
-			FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
-
-			rightPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
-			enemy->GetStatus().attackPoint = enemy->GetAttack(5).attackPoint;
-
-			MESSENGER.EnemyAttackingMessage(enemy->GetID(), rightPunch);
+			animation.animationBlend.AddSampler(Enemy::Animation::RIGHT_LOWER, enemy->GetModel());
+			animation.animationBlend.ResetAnimationFrame();
 		}
+		else
+		{
+			if (JudgeBlendRatio(animation))
+			{
+				++m_moveState;
+				AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
+				++judgeElement.attackCount;
+			}
+		}
+
 	}
 	break;
-	case 3:
+	case Action::RIGHT_PUNCH_LOWER:
 	{
+		m_attackNo = static_cast<int>(Enemy::AttackType::RIGHT_LOWER);
+		if (JudgeAnimationRatio(enemy, m_attackNo, Enemy::Animation::IDLE))
+			++m_moveState;
+
+		JudgeAttack(enemy, m_attackNo);
+	}break;
+	case Action::END:
 		if (JudgeBlendRatio(animation))
 		{
 			animation.animationBlend.ResetAnimationSampler(0);
 			m_moveState = 0;
 			m_taskState = TASK_STATE::END;
 		}
-	}
-	break;
+		break;
 	}
 
 }
@@ -62,7 +50,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 bool EnemyNearAttack2Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
 {
 	m_taskState = TASK_STATE::RUN;
-	animation.animationBlend._blendRatio += 0.045f;//magicNumber
+	animation.animationBlend._blendRatio += kBlendValue;//magicNumber
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
@@ -88,6 +76,27 @@ bool EnemyNearAttack2Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo,
 	return false;
 }
 
+void EnemyNearAttack2Task::JudgeAttack(Enemy* enemy, const int attackNo)
+{
+	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
+
+	if (currentAnimationTime > kAttackTimer[0] && currentAnimationTime < kAttackTimer[1])
+	{
+		auto& attackParm = enemy->GetCollision().at(kCollisionNo);
+		int attackMesh = attackParm.GetCurrentMesh(0);
+		int attackBone = attackParm.GetCurrentBone(0);
+		FLOAT4X4 getAttackBone = enemy->GetBlendAnimation().animationBlend._blendLocals[attackMesh].at(attackBone);
+		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+		FLOAT4X4 attackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
+		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
+
+		MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm);
+	}
+}
+
 uint32_t EnemyNearAttack2Task::JudgePriority(const int id)
 {
 	auto player = MESSENGER.CallPlayersInstance();
@@ -110,14 +119,9 @@ uint32_t EnemyNearAttack2Task::JudgePriority(const int id)
 
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 
-	if (dot <= frontValue)
-	{
-		uint32_t attackHitCount = static_cast<uint32_t>(enemy->GetJudgeElement().attackHitCount);
-		uint32_t attackHitCountValue = static_cast<uint32_t>(enemy->GetStandardValue().attackHitCountValue);
-
-		if (attackHitCount > attackHitCountValue)
-			return m_priority;
-	}
+	if (cosTheta <= frontValue)
+		return m_priority;
+	
 
 	return minPriority;
 }

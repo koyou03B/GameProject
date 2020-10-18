@@ -46,7 +46,7 @@ public:
 
 	VECTOR3F& GetWorldScreenPosition();
 
-	bool GetAimMode() { return m_isAimMode; }
+	bool& GetAimMode() { return m_isAimMode; }
 
 	void SetAimMode() { m_isAimMode = !m_isAimMode; }
 		

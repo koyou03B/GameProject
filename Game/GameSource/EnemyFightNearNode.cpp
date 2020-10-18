@@ -11,7 +11,7 @@ uint32_t EnemyFightNearNode::JudgePriority(const int id)
 
 	float direction = ToDistVec3(playerPosition - enemyPosition);
 
-	if (direction > m_maxDirection)
+	if (direction < m_maxDirection)
 		return m_priority;
 
 	return minPriority;

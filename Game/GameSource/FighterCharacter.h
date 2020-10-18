@@ -19,6 +19,8 @@ public:
 
 	void ImGui(ID3D11Device* device) override;
 
+	void Impact() override;
+
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -73,6 +75,8 @@ private:
 	void Move(float& elapsedTime);
 
 	void Step(float& elapsedTime);
+
+	bool KnockBack();
 
 	void Attack(float& elapsedTime);
 

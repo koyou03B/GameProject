@@ -122,10 +122,10 @@ public:
 	struct StandardValue
 	{
 		uint32_t attackCountValue = 0;
-		uint32_t attackHitCountValue = 0;
+		float attackRatio = 0;
 		float viewFrontValue = 0.0f;
 
-		uint32_t serialVersion = 1;
+		uint32_t serialVersion = 2;
 
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
@@ -135,7 +135,7 @@ public:
 				archive
 				(
 					attackCountValue,
-					attackHitCountValue,
+					attackRatio,
 					viewFrontValue
 				);
 			}
@@ -144,7 +144,7 @@ public:
 				archive
 				(
 					attackCountValue,
-					attackHitCountValue,
+					attackRatio,
 					viewFrontValue
 				);
 			}
@@ -156,4 +156,4 @@ public:
 CEREAL_CLASS_VERSION(AIParameter::Wrath, 1);
 CEREAL_CLASS_VERSION(AIParameter::Exhaustion, 1);
 CEREAL_CLASS_VERSION(AIParameter::Emotion, 1);
-CEREAL_CLASS_VERSION(AIParameter::StandardValue, 1);
+CEREAL_CLASS_VERSION(AIParameter::StandardValue, 2);

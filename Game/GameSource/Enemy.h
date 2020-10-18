@@ -15,6 +15,8 @@ public:
 
 	void ImGui(ID3D11Device* device) override;
 
+	void Impact() override {};
+
 	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
 	inline CharacterParameter::Attack& GetAttack(const int num) { return m_attackParm.at(num); }
 	inline CharacterParameter::BlendAnimation& GetBlendAnimation() { return m_blendAnimation; }
@@ -49,6 +51,42 @@ public:
 			);
 		}
 	}
+
+public:
+	enum  Animation
+	{
+		TPOSE,
+		IDLE,
+		RUN,
+		LEFT_TURN,
+		RIGHT_TURN,
+		WRATH,
+		DIE,
+		IMPACT,
+		LEFT_PUNCH,
+		RIGHT_PUNCH,
+		RIGHT_LOWER,
+		RIGHT_UPPER,
+		TURN_ATTACK_KARI,
+		TURN_ATTACK,
+		JUMP_ATTACK,
+		WRATH_ATTACK,
+		RUN_SIGNAL,
+	};
+
+	enum class AttackType
+	{
+		RIGHT_PUNCH,
+		LEFT_PUNCH,
+		RIGHT_UPPER,
+		RIGHT_LOWER,
+		TURN_ATTACK_KARI,
+		TURN_ATTACK,
+		JUMP_ATTACK,
+		WRATH_ATTACK,
+		RUN_ATTACK,
+	};
+	
 private:
 	void SerialVersionUpdate(uint32_t version)
 	{

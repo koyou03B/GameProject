@@ -51,6 +51,8 @@ void Enemy::Init()
 
 	m_behaviorTree.SetRootNodeChild();
 	m_behaviorTree.SetTaskToNode();
+	TaskData& taskData = m_behaviorTree.GetTaskData();
+//	m_selectTask = taskData.intimidateTask;
 	m_isAction = false;
 }
 
@@ -59,8 +61,6 @@ void Enemy::Update(float& elapsedTime)
 	m_elapsedTime = elapsedTime;
 	if (m_isAction)
 	{
-		if (!m_selectTask)
-			m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
 
 		m_selectTask->Run(this);
 
@@ -731,13 +731,13 @@ void Enemy::ImGui(ID3D11Device* device)
 			m_standardValuePram.attackCountValue = static_cast<uint32_t>(attackCountValue);
 		}
 
-		ImGui::TextColored(ImVec4(1, 1, 1, 1), "------AttackHitCountValue------");
-		{
-			int attackHitCountValue = static_cast<int>(m_standardValuePram.attackHitCountValue);
-			ImGui::SliderInt("AttackHitCountValue", &attackHitCountValue, 1, 20);
-			m_standardValuePram.attackHitCountValue = static_cast<uint32_t>(attackHitCountValue);
-		}
 
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "------AttackRatio------");
+		{
+			float attackRatio = m_standardValuePram.attackRatio;
+			ImGui::SliderFloat("AttackRatio", &attackRatio, 0.0f, 1.0f);
+			m_standardValuePram.attackRatio = attackRatio;
+		}
 		ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ViewFrontValue------");
 		{
 			auto& players = MESSENGER.CallPlayersInstance();

@@ -53,7 +53,7 @@ void Fighter::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
-
+	m_statusParm.life = 12000;
 	m_stepParm.maxSpeed = m_stepParm.speed;
 	m_blendAnimation.blendRatioMax = 1.0f;
 	m_blendAnimation.samplerSize = 2;
@@ -86,15 +86,20 @@ void Fighter::Update(float& elapsedTime)
 
 		if (m_input != nullptr)
 		{
-			Move(m_elapsedTime);
+			if (!KnockBack())
+			{
 
-			Step(m_elapsedTime);
+				Move(m_elapsedTime);
 
-			Attack(m_elapsedTime);
+				Step(m_elapsedTime);
+
+				Attack(m_elapsedTime);
+
+			}
+			RestAnimationIdle();
 
 			ChangeCharacter();
-			
-			RestAnimationIdle();
+
 		}
 	}
 	else
@@ -444,7 +449,7 @@ void Fighter::RestAnimationIdle()
 {
 	if (m_blendAnimation.animationBlend.GetSampler().size() == m_blendAnimation.samplerSize)
 	{
-		if (m_statusParm.isAttack || m_stepParm.isStep)
+		if (m_statusParm.isAttack || m_stepParm.isStep || m_statusParm.isDamage)
 		{
 			if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
 			{
@@ -455,6 +460,8 @@ void Fighter::RestAnimationIdle()
 					m_statusParm.isAttack = false;
 					m_stepParm.isStep = false;
 					m_moveParm.isMove = false;
+					m_statusParm.isDamage = false;
+
 					m_blendAnimation.animationBlend._blendRatio = 0.0f;
 					m_stepParm.speed = m_stepParm.maxSpeed;
 
@@ -462,6 +469,59 @@ void Fighter::RestAnimationIdle()
 			}
 		}
 	}
+
+}
+
+void Fighter::Impact()
+{
+	if (m_blendAnimation.animationBlend.SearchSampler(Animation::IMPACT)) return;
+	m_blendAnimation.animationBlend.AddSampler(Animation::IMPACT, m_model);
+	m_statusParm.isDamage = true;
+}
+
+bool Fighter::KnockBack()
+{
+	if (!m_statusParm.isDamage)
+		return false;
+
+	int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
+	if (samplerCount != 1)
+	{
+		m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
+		if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
+		{
+			m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendRatioMax;
+
+			for (int i = 0; i < samplerCount - 1; ++i)
+			{
+				m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+				m_blendAnimation.animationBlend.ReleaseSampler(0);
+			}
+
+			m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+		}
+
+		m_moveParm.isMove = false;
+		m_moveParm.isWalk = false;
+		m_moveParm.isRun = false;
+		m_stepParm.isStep = false;
+	}
+	else
+	{
+		uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+		if (currentAnimationFrame == 72)
+		{
+			m_blendAnimation.animationBlend._blendRatio = 0.0f;
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+			m_blendAnimation.animationBlend.ResetAnimationFrame();
+			m_animationType = Animation::IDLE;
+			m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+
+		}
+		else
+			return true;
+	}
+	return true;
 
 }
 
@@ -998,7 +1058,16 @@ void Fighter::ImGui(ID3D11Device* device)
 
 	}
 
-
+	//**************************************
+	// Life
+	//**************************************
+	if (ImGui::CollapsingHeader("Life"))
+	{
+		ImGui::BulletText("LIFE : %f", m_statusParm.life);
+		ImGui::BulletText("Damage : %d", m_statusParm.isDamage);
+		if (ImGui::Button("No Damge"))
+			m_statusParm.isDamage = false;
+	}
 
 
 	ImGui::End();

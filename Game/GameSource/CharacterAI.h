@@ -20,13 +20,16 @@ class CharacterAI
 {
 public:
 	CharacterAI() = default;
-	~CharacterAI() = default;
+
+	virtual ~CharacterAI() = default;
 
 	virtual void Init() = 0;
 
 	virtual void Update(float& elapsedTime) = 0;
 
 	virtual void Render(ID3D11DeviceContext* immediateContext) = 0;
+
+	virtual void Impact() = 0;
 
 	virtual void Release()
 	{

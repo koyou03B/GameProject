@@ -27,6 +27,17 @@ public:
 
 	void UpdateRuntimeParameters();
 
+	bool SearchSampler(int animNo)
+	{
+		int count = static_cast<int>(m_samplers.size());
+		for (int i = 0; i < count; ++i)
+		{
+			if (m_samplers[i].first == animNo)
+				return true;
+		}
+		return false;
+	}
+
 	void AddSampler(int animNum, std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& model)
 	{
 		int count = static_cast<int>(m_samplers.size());
@@ -51,16 +62,6 @@ public:
 		if (samplerCount >= 2)
 		{
 			m_samplers.erase(m_samplers.begin() + samplerNum);
-			//for (auto& sampler = *m_samplers.begin(); sampler != *m_samplers.end();)
-			//{
-			//	if (sampler.first == samplerNum)
-			//	{
-			//		sampler = m_samplers.erase(&(sampler));
-			//		break;
-			//	}
-			//	else
-			//		++sampler;
-			//}
 		}
 	}
 

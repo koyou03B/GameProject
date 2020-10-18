@@ -179,6 +179,9 @@ void PartialBlendAnimation::SetupHalfBody(std::shared_ptr<Source::SkinnedMesh::S
 		SearchSelectBone(lowerBodyBone, i);
 		SearchSelectBone(upperBodyBone, i);
 
+		//lowerBodyBone.halfBodyBone[0].at(64) = 0.0f;
+		//upperBodyBone.halfBodyBone[0].at(64) = 1.0f;
+
 	}
 }
 
