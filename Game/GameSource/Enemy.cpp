@@ -51,8 +51,8 @@ void Enemy::Init()
 
 	m_behaviorTree.SetRootNodeChild();
 	m_behaviorTree.SetTaskToNode();
-	TaskData& taskData = m_behaviorTree.GetTaskData();
-//	m_selectTask = taskData.intimidateTask;
+	//TaskData& taskData = m_behaviorTree.GetTaskData();
+	//m_selectTask = taskData.intimidateTask;
 	m_isAction = false;
 }
 
@@ -61,7 +61,6 @@ void Enemy::Update(float& elapsedTime)
 	m_elapsedTime = elapsedTime;
 	if (m_isAction)
 	{
-
 		m_selectTask->Run(this);
 
 		if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
@@ -1061,7 +1060,11 @@ void Enemy::ImGui(ID3D11Device* device)
 	}
 
 	if (ImGui::Button("ActiveBehaviorTree"))
+	{
+		TaskData& taskData = m_behaviorTree.GetTaskData();
+		m_selectTask = taskData.intimidateTask;	
 		m_isAction = true;
+	}
 	if (ImGui::Button("DeActiveBehaviorTree"))
 		m_isAction = false;
 	ImGui::End();

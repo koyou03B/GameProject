@@ -53,8 +53,7 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 		if (JudgeBlendRatio(animation))
 		{
 			animation.animationBlend.ResetAnimationSampler(0);
-			m_moveState = 0;
-
+			m_moveState = Action::START;
 			m_taskState = TASK_STATE::END;
 		}
 		break;
@@ -139,7 +138,7 @@ uint32_t EnemyNearAttack0Task::JudgePriority(const int id)
 		uint32_t attackHitCount = enemy->GetJudgeElement().attackHitCount;
 		uint32_t attackCount = enemy->GetJudgeElement().attackCount;
 		float attackRatio = enemy->GetStandardValue().attackRatio;
-		float ratio = static_cast<float>(attackHitCount / attackCount);
+		float ratio = static_cast<float>(attackHitCount) / static_cast<float>(attackCount);
 		if (ratio <= attackRatio)
 			return m_priority;
 #else

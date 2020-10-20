@@ -14,7 +14,10 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 		{
 			uint32_t attackHitCount = players.at(i)->GetJudgeElement().attackHitCount;
 			if (targetAttackHitCount < attackHitCount)
+			{
 				return m_priority;
+		
+			}
 		}
 	}
 

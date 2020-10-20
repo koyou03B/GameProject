@@ -9,12 +9,23 @@ void EnemyIntimidateTask::Run(Enemy* enemy)
 	switch (m_moveState)
 	{
 	case 0:
+	{
 		m_taskState = TASK_STATE::START;
 		animation.animationBlend.AddSampler(5, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
-		++m_moveState;
+		AIParameter::Emotion emotion = enemy->GetEmotion();
+		AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
+		judgeElement.moveCount = 0;
+		judgeElement.attackCount = 0;
+		judgeElement.damageCount = 0;
+		judgeElement.attackHitCount = 0;
+		emotion.exhaustionParm.exhaustionCost = 0;
+		emotion.wrathParm.wrathCost = 0;
+		emotion.wrathParm.isWrath = true;
 
-		break;
+		++m_moveState;
+	}
+	break;
 	case 1:
 	{
 		m_taskState = TASK_STATE::RUN;
@@ -28,9 +39,6 @@ void EnemyIntimidateTask::Run(Enemy* enemy)
 		uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 		if (currentAnimationTime >= 170)
 		{
-			AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
-			judgeElement.attackHitCount = 0;
-			judgeElement.damageCount = 0;
 			m_taskState = TASK_STATE::END;
 		}
 	}
@@ -83,9 +91,9 @@ uint32_t EnemyIntimidateTask::JudgePriority(const int id)
 	uint32_t attackHitCost = judgeElement.attackHitCount * emotion.wrathParm.attackWrathCost;
 	uint32_t damageCost = judgeElement.damageCount * emotion.wrathParm.damageWrathCost;
 
-	uint32_t wrathCost = damageCost - attackHitCost;
+	emotion.wrathParm.wrathCost = damageCost - attackHitCost;
 
-	if (wrathCost >= emotion.wrathParm.maxWrathCost)
+	if (emotion.wrathParm.wrathCost >= emotion.wrathParm.maxWrathCost)
 		return m_priority;
 
 	return minPriority;

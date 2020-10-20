@@ -202,6 +202,12 @@ void EnemyChaseTask::Run(Enemy* enemy)
 			m_moveState = 0;
 			m_isLockOn = false;
 			m_taskState = TASK_STATE::END;
+
+			auto& players = MESSENGER.CallPlayersInstance();
+			for (auto& player : players)
+			{
+				player->GetJudgeElement().attackHitCount = 0;
+			}
 		}
 	}
 	break;

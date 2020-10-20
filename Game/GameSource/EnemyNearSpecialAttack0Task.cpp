@@ -35,7 +35,7 @@ void EnemyNearSpecialAttack0Task::Run(Enemy* enemy)
 		if (JudgeBlendRatio(animation))
 		{
 			animation.animationBlend.ResetAnimationSampler(0);
-			m_moveState = 0;
+			m_moveState = Action::START;
 			m_taskState = TASK_STATE::END;
 		}
 		break;

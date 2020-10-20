@@ -213,6 +213,8 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 		Collision collision;
 		if (collision.JudgeSphereAndSphere(mySelf, target))
 		{
+			++m_players[id]->GetJudgeElement().attackHitCount;
+			++m_enemys[0]->GetJudgeElement().damageCount;
 			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;
 
 			if (m_enemys[0]->GetStatus().life <= 0)
@@ -238,6 +240,8 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 		Collision collision;
 		if (collision.JudgeCapsuleAndSphere(mySelf, target))
 		{
+			++m_players[id]->GetJudgeElement().attackHitCount;
+			++m_enemys[0]->GetJudgeElement().damageCount;
 			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;
 			if (m_enemys[0]->GetStatus().life <= 0)
 			{
@@ -255,8 +259,6 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 
 bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collision)
 {
-
-
 	switch (collision.collisionType)
 	{
 	case CharacterParameter::Collision::SPHER:
@@ -278,6 +280,7 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 			Collision collision;
 			if (collision.JudgeSphereAndSphere(mySelf, target))
 			{
+				++m_enemys[id]->GetJudgeElement().attackHitCount;
 				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
 				m_enemys[id]->GetStatus().isAttack = true;
 				if (m_scope->GetAimMode()) m_scope->GetAimMode() = false;

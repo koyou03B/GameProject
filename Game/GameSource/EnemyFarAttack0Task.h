@@ -5,11 +5,14 @@ class Enemy;
 class EnemyFarAttack0Task : public EnemyBehaviorTask
 {
 public:
-	EnemyFarAttack0Task() = default;
+	EnemyFarAttack0Task() { m_moveState = Action::START; };
 	~EnemyFarAttack0Task() = default;
 	void Run(Enemy* enemy);
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
 	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
+	void TurningChase(Enemy* enemy);
+	void JudgeAttack(Enemy* enemy, const int attackNo);
+	void AttackMove(Enemy* enemy);
 	uint32_t JudgePriority(const int id);
 
 	void LoadOfBinaryFile(std::string taskName)
@@ -58,12 +61,31 @@ public:
 		}
 	}
 private:
+	enum Action
+	{
+		START,
+		TURNING,
+		RUN,
+		BLNEDNOW,
+		TURN_ATTACK,
+		END
+	};
+	const uint32_t	kTurningTimer = 130;
+	const uint32_t	kRowlingTimer[2] = { 30,120 };
+	const uint32_t	kAttackTimer[2] = { 50,80 };
+	const uint32_t	kMoveTimer[2] = { 10,40 };
+	const int		kCollisionNo[2] = { 1,4 };
+	const float		kOneSecond = 60.0f;
+	const float		kFourSecond = 240.0f;
+	const float		kChaseTimer = 180.0f;
+	const float		kBlendValue = 0.045f;
+	int m_attackNo = 0;
 	int m_targetID = 0;
 	float m_chaseTimer = 0.0f;
+	float m_speedToTarget = {};
 	bool m_isNear = false;
-	bool m_isSampler = false;
-	float m_targetSpeed = {};
-	VECTOR3F m_targetNormal = {};
+	bool m_isTurning = false;
+	VECTOR3F m_nVecToTarget = {};
 	VECTOR3F m_targetPosition = {};
 };
 

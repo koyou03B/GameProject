@@ -8,82 +8,49 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 
 	switch (m_moveState)
 	{
-	case 0:
-	{
-		m_taskState = TASK_STATE::START;
-		animation.animationBlend.AddSampler(16, enemy->GetModel());
-		animation.animationBlend.ResetAnimationFrame();
-		enemy->GetStatus().isAttack = false;
-		auto player = MESSENGER.CallPlayerInstance(m_targetID);
-		m_targetPosition = player->GetWorldTransform().position;
-		m_targetNormal = {};
-		m_targetSpeed = {};
-		m_chaseTimer = 0;
-		++m_moveState;
-		m_isNear = false;
-		m_isSampler = false;
-	}
-	break;
-	case 1:
-	{
+	case Action::START:
 		m_taskState = TASK_STATE::RUN;
-
-		if (JudgeBlendRatio(animation))
+		if (animation.animationBlend.GetSampler().size() != 2)
 		{
-			m_isSampler = true;
-		}
-
-		if (m_isSampler)
-		{
-			uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
-			if (currentAnimationTime >= 150)
-			{
-				enemy->GetBlendAnimation().animationBlend.AddSampler(2, enemy->GetModel());
-				++m_moveState;
-				m_isSampler = false;
-			}
-		}
-
-		auto& enemyTransform = enemy->GetWorldTransform();
-
-		auto& player = MESSENGER.CallPlayerInstance(m_targetID);
-		VECTOR3F targetPosition = player->GetWorldTransform().position;
-		VECTOR3F targetDistance = targetPosition - enemyTransform.position;
-		m_targetNormal = NormalizeVec3(targetDistance);
-		float targetDist = ToDistVec3(targetDistance);
-		m_targetSpeed = targetDist / 240.0f;
-		VECTOR3F angle = enemy->GetWorldTransform().angle;
-		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
-		front = NormalizeVec3(front);
-
-		float dot = DotVec3(front, m_targetNormal);
-		float rot = 1.0f - dot;
-		float limit = enemy->GetMove().turnSpeed;
-		if (rot > limit)
-		{
-			rot = limit;
-		}
-
-		VECTOR3F cross = CrossVec3(front, m_targetNormal);
-		if (cross.y > 0.0f)
-		{
-			enemyTransform.angle.y += rot;
+			animation.animationBlend.AddSampler(Enemy::Animation::RUN_SIGNAL, enemy->GetModel());
+			animation.animationBlend.ResetAnimationFrame();
 		}
 		else
 		{
-			enemyTransform.angle.y -= rot;
+			auto player = MESSENGER.CallPlayerInstance(m_targetID);
+			m_targetPosition = player->GetWorldTransform().position;
+			++m_moveState;
 		}
+		m_nVecToTarget = {};
+		m_speedToTarget = {};
+		m_chaseTimer = 0;
 
-		enemyTransform.WorldUpdate();
+		m_isNear = false;
+		m_isTurning = false;
+	
+		break;
+	case Action::TURNING:
+	
+		if (JudgeBlendRatio(animation))
+			m_isTurning = true;
 
-	}
-	break;
-	case 2:
-	{
+		if (m_isTurning)
+		{
+			uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
+			if (currentAnimationTime >= kTurningTimer)
+			{
+				enemy->GetBlendAnimation().animationBlend.AddSampler(Enemy::Animation::RUN, enemy->GetModel());
+				++m_moveState;
+			}
+		}
+		TurningChase(enemy);
+
+		break;
+	case Action::RUN:
 		if (animation.animationBlend.GetSampler().size() == 2)
 		{
-			animation.animationBlend._blendRatio += 0.045f;//magicNumber
-			if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
+			animation.animationBlend._blendRatio += kBlendValue;
+			if (animation.animationBlend._blendRatio >= animation.blendRatioMax)
 			{
 				animation.animationBlend._blendRatio = 0.0f;
 				animation.animationBlend.ResetAnimationSampler(0);
@@ -93,89 +60,57 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 
 		if (m_isNear)
 		{
-			animation.animationBlend.AddSampler(11, enemy->GetModel());
+			animation.animationBlend.AddSampler(Enemy::Animation::RIGHT_UPPER, enemy->GetModel());
 			++m_moveState;
+			AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
+			++judgeElement.attackCount;
+			++judgeElement.moveCount;
 		}
 		else
 		{
 			auto& enemyTransform = enemy->GetWorldTransform();
 
-			if (m_chaseTimer < 210.0f)
+			if (m_chaseTimer <= kChaseMaxTimer)
 			{
-
-				enemy->GetMove().velocity = m_targetNormal * m_targetSpeed;
+				enemy->GetMove().velocity = m_nVecToTarget * m_speedToTarget;
 				enemyTransform.position += enemy->GetMove().velocity;
-
 				enemyTransform.WorldUpdate();
-
+				++m_chaseTimer;
+				m_attackNo = static_cast<int>(Enemy::AttackType::RUN_ATTACK);
+				JudgeAttack(enemy, m_attackNo);
 			}
 			else
 			{
 				m_isNear = true;
 				m_chaseTimer = 0;
 			}
-
-			if (m_chaseTimer < 180.0f)
-			{
-				auto& runAttack = enemy->GetCollision().at(4);
-				int runAttackMesh = runAttack.GetCurrentMesh(0);
-				int runAttackBone = runAttack.GetCurrentBone(0);
-				FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[runAttackMesh].at(runAttackBone);
-				FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
-				FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
-				FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
-
-				runAttack.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
-				enemy->GetStatus().attackPoint = enemy->GetAttack(8).attackPoint;
-
-				MESSENGER.EnemyAttackingMessage(enemy->GetID(), runAttack);
-			}
-			++m_chaseTimer;
 		}
-
-
-	}
-	break;
-	case 3:
-	{
+		break;
+	case Action::BLNEDNOW:
 		if (JudgeBlendRatio(animation))
 		{
 			++m_moveState;
+			AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
+			++judgeElement.attackCount;
 		}
-
-	}
-	break;
-	case 4:
-	{
-		if (JudgeAnimationRatio(enemy, 3, 1))
-		{
-			//		animation.animationBlend.AddSampler(1, enemy->GetModel());
+		break;
+	case Action::RIGTH_UPPER:
+		m_attackNo = static_cast<int>(Enemy::AttackType::RIGHT_UPPER);
+		if (JudgeAnimationRatio(enemy, m_attackNo, Enemy::Animation::IDLE))
 			++m_moveState;
-		}
-		auto& rightPunch = enemy->GetCollision().at(1);
-		int rightPunchMesh = rightPunch.GetCurrentMesh(0);
-		int rightPunchBone = rightPunch.GetCurrentBone(0);
-		FLOAT4X4 getAttackBone = animation.animationBlend._blendLocals[rightPunchMesh].at(rightPunchBone);
-		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
-		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
-		FLOAT4X4 AttackTransform = getAttackBone * modelAxisTransform * worldTransform;
 
-		rightPunch.position[0] = { AttackTransform._41,AttackTransform._42,AttackTransform._43 };
-		enemy->GetStatus().attackPoint = enemy->GetAttack(5).attackPoint;
-
-		MESSENGER.EnemyAttackingMessage(enemy->GetID(), rightPunch);
-	}
-	break;
-	case 5:
-	{
+		JudgeAttack(enemy, m_attackNo);
+		break;
+	case Action::END:
 		if (JudgeBlendRatio(animation))
 		{
 			animation.animationBlend.ResetAnimationSampler(0);
-			m_moveState = 0;
+			animation.animationBlend._blendRatio = 0.0f;
+			m_moveState = Action::START;
 			m_taskState = TASK_STATE::END;
 		}
-	}
-	break;
+
+		break;
 	}
 
 
@@ -213,6 +148,79 @@ bool EnemyFarAttack1Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo, 
 	}
 
 	return false;
+}
+
+void EnemyFarAttack1Task::JudgeAttack(Enemy* enemy, const int attackNo)
+{
+	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
+
+	if (attackNo == static_cast<int>(Enemy::AttackType::RIGHT_UPPER))
+	{
+		if (currentAnimationTime > kAttackTimer[0] && currentAnimationTime < kAttackTimer[1])
+		{
+			auto& attackParm = enemy->GetCollision().at(kCollisionNo[0]);
+			int attackMesh = attackParm.GetCurrentMesh(0);
+			int attackBone = attackParm.GetCurrentBone(0);
+			FLOAT4X4 getAttackBone = enemy->GetBlendAnimation().animationBlend._blendLocals[attackMesh].at(attackBone);
+			FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+			FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+			FLOAT4X4 attackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+			attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
+			enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
+
+			MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm);
+		}
+	}
+	else
+	{
+		auto& attackParm = enemy->GetCollision().at(kCollisionNo[1]);
+		int attackMesh = attackParm.GetCurrentMesh(0);
+		int attackBone = attackParm.GetCurrentBone(0);
+		FLOAT4X4 getAttackBone = enemy->GetBlendAnimation().animationBlend._blendLocals[attackMesh].at(attackBone);
+		FLOAT4X4 modelAxisTransform = enemy->GetModel()->_resource->axisSystemTransform;
+		FLOAT4X4 worldTransform = enemy->GetWorldTransform().world;
+		FLOAT4X4 attackTransform = getAttackBone * modelAxisTransform * worldTransform;
+
+		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
+		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
+		MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm);
+	}
+}
+
+void EnemyFarAttack1Task::TurningChase(Enemy* enemy)
+{
+	auto& enemyTransform = enemy->GetWorldTransform();
+
+	auto& player = MESSENGER.CallPlayerInstance(m_targetID);
+	VECTOR3F targetPosition = player->GetWorldTransform().position;
+	VECTOR3F targetDistance = targetPosition - enemyTransform.position;
+	m_nVecToTarget = NormalizeVec3(targetDistance);
+	float targetDist = ToDistVec3(targetDistance);
+	m_speedToTarget = targetDist / kFourSecond;
+	VECTOR3F angle = enemy->GetWorldTransform().angle;
+	VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
+	front = NormalizeVec3(front);
+
+	float dot = DotVec3(front, m_nVecToTarget);
+	float rot = 1.0f - dot;
+	float limit = enemy->GetMove().turnSpeed;
+	if (rot > limit)
+	{
+		rot = limit;
+	}
+
+	VECTOR3F cross = CrossVec3(front, m_nVecToTarget);
+	if (cross.y > 0.0f)
+	{
+		enemyTransform.angle.y += rot;
+	}
+	else
+	{
+		enemyTransform.angle.y -= rot;
+	}
+
+	enemyTransform.WorldUpdate();
 }
 
 uint32_t EnemyFarAttack1Task::JudgePriority(const int id)

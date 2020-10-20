@@ -9,11 +9,18 @@ void EnemyRestTask::Run(Enemy* enemy)
 	switch (m_moveState)
 	{
 	case 0:
+	{
 		m_taskState = TASK_STATE::START;
 		animation.animationBlend.AddSampler(1, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
+		AIParameter::Emotion emotion = enemy->GetEmotion();
+		AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
+		judgeElement.moveCount = 0;
+		judgeElement.attackCount = 0;
+		judgeElement.damageCount = 0;
+		emotion.exhaustionParm.exhaustionCost = 0;
 		++m_moveState;
-
+	}
 		break;
 	case 1:
 		m_taskState = TASK_STATE::RUN;
@@ -25,12 +32,7 @@ void EnemyRestTask::Run(Enemy* enemy)
 		++m_restTime;
 		if (m_restTime >= 300)
 		{
-			AIParameter::Emotion emotion = enemy->GetEmotion();
-			AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
-			judgeElement.moveCount = 0;
-			judgeElement.attackCount = 0;
-			judgeElement.damageCount = 0;
-			emotion.exhaustionParm.exhaustionCost = 0;
+
 
 			m_taskState = TASK_STATE::END;
 		}
