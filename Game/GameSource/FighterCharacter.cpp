@@ -43,7 +43,7 @@ void Fighter::Init()
 	m_padDeadLine = 5000.0f;
 	m_changeParm.isPlay = false;
 
-
+	m_changeParm.isPlay = true;
 	SerialVersionUpdate(9);
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str()))
@@ -98,7 +98,8 @@ void Fighter::Update(float& elapsedTime)
 			}
 			RestAnimationIdle();
 
-			ChangeCharacter();
+			//Archer
+			//ChangeCharacter();
 
 		}
 	}

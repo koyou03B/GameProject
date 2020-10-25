@@ -78,9 +78,9 @@ public:
 		m_samplers[samplerNum].second->animtion.SetIsLoop(false);
 	}
 
-	inline void SetAnimationSpeed(int samplerNum, float speed)
+	inline void SetAnimationSpeed(float speed)
 	{
-		m_samplers[samplerNum].second->animtion.SetPlayBackSpeed(speed);
+		_animationSpeed = speed;
 	}
 
 	inline uint32_t GetAnimationTime(int samplerNum)

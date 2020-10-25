@@ -198,10 +198,10 @@ void ArrowAdominist::ImGui(ID3D11Device* device)
 	//************
 	// timer
 	//************
-	{
-		 int time = m_normalArrow->GetTimer();
-		ImGui::SliderInt("Time", &time, 1, 1000);
-	}
+	//{
+	//	 int time = m_normalArrow->GetTimer();
+	//	ImGui::SliderInt("Time", &time, 1, 1000);
+	//}
 	ImGui::End();
 #endif
 }

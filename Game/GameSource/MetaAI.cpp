@@ -12,12 +12,13 @@ bool MetaAI::Init()
 	AddEnemy(m_enemyID,std::make_shared<Enemy>());
 
 	//AddPlayer(m_playerID, std::make_shared<Saber>());
-	AddPlayer(m_playerID, std::make_shared<Archer>());
+	//Archer
+	//AddPlayer(m_playerID, std::make_shared<Archer>());
 	AddPlayer(m_playerID, std::make_shared<Fighter>());
 
-
-	m_scope = std::make_unique<Scope>();
-	m_scope->Init();
+	//Archer
+	//m_scope = std::make_unique<Scope>();
+	//m_scope->Init();
 	return true;
 }
 
@@ -100,11 +101,12 @@ void MetaAI::UpdateOfPlayers(float& elapsedTime)
 		}
 	}
 
-	if (m_scope->GetAimMode())
-	{
-		VECTOR3F target = m_enemys[0]->GetWorldTransform().position;
-		m_scope->Update(target);
-	}
+	//Archer
+	//if (m_scope->GetAimMode())
+	//{
+	//	VECTOR3F target = m_enemys[0]->GetWorldTransform().position;
+	//	m_scope->Update(target);
+	//}
 }
 
 void MetaAI::RenderOfPlayer(ID3D11DeviceContext* immediateContext, uint16_t characterNomber)
@@ -283,7 +285,7 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 				++m_enemys[id]->GetJudgeElement().attackHitCount;
 				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
 				m_enemys[id]->GetStatus().isAttack = true;
-				if (m_scope->GetAimMode()) m_scope->GetAimMode() = false;
+				//if (m_scope->GetAimMode()) m_scope->GetAimMode() = false;
 				if (m_players[targetID]->GetStatus().life <= 0)
 				{
 					m_players[targetID]->GetStatus().isExit = false;

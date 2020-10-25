@@ -13,12 +13,11 @@ void EnemyRestTask::Run(Enemy* enemy)
 		m_taskState = TASK_STATE::START;
 		animation.animationBlend.AddSampler(1, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
-		AIParameter::Emotion emotion = enemy->GetEmotion();
-		AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
-		judgeElement.moveCount = 0;
-		judgeElement.attackCount = 0;
-		judgeElement.damageCount = 0;
-		emotion.exhaustionParm.exhaustionCost = 0;
+		enemy->GetJudgeElement().moveCount = 0;
+		enemy->GetJudgeElement().attackCount = 0;
+		enemy->GetJudgeElement().damageCount = 0;
+		enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
+		m_restTime = 0;
 		++m_moveState;
 	}
 		break;
@@ -29,11 +28,9 @@ void EnemyRestTask::Run(Enemy* enemy)
 		break;
 	case 2:
 	{
-		++m_restTime;
-		if (m_restTime >= 300)
+		m_restTime += enemy->GetElapsedTime();
+		if (m_restTime >= 6)
 		{
-
-
 			m_taskState = TASK_STATE::END;
 		}
 	}
@@ -58,11 +55,10 @@ bool EnemyRestTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animatio
 uint32_t EnemyRestTask::JudgePriority(const int id)
 {
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
-	AIParameter::Emotion emotion = enemy->GetEmotion();
 
-	uint32_t exhaustionCost = emotion.exhaustionParm.exhaustionCost;
+	uint32_t exhaustionCost = enemy->GetEmotion().exhaustionParm.exhaustionCost;
 	
-	if (exhaustionCost >= emotion.exhaustionParm.maxExhaustionCost)
+	if (exhaustionCost >= enemy->GetEmotion().exhaustionParm.maxExhaustionCost)
 		return m_priority;
 	
 	return minPriority;

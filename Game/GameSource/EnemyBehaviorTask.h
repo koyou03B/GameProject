@@ -16,6 +16,7 @@ enum ENTRY_TASK
 {
 	REST_TASK,
 	INTIMIDATE_TASK,
+	WALK_TASK,
 	CHASE_TASK,
 	NEAR_ATTACK0_TASK,
 	NEAR_ATTACK1_TASK,
@@ -79,6 +80,7 @@ protected:
 	uint32_t m_moveState = 0;
 	uint32_t m_coolTimer;
 	uint32_t m_priority;
+	int m_animNo;
 	bool m_isUsed = false;
 	uint32_t m_serialVersion = 3;
 };

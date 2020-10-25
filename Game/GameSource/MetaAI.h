@@ -72,7 +72,8 @@ public:
 			if (m_players[i]->GetChangeComand().isPlay)
 				break;
 		}
-		return &(*m_players[i]);
+		//Archer
+		return &(*m_players[0]);
 	};
 	inline std::unique_ptr<Scope>& GetScope() { return m_scope; }
 private:

@@ -13,15 +13,14 @@ void EnemyIntimidateTask::Run(Enemy* enemy)
 		m_taskState = TASK_STATE::START;
 		animation.animationBlend.AddSampler(5, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
-		AIParameter::Emotion emotion = enemy->GetEmotion();
-		AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
-		judgeElement.moveCount = 0;
-		judgeElement.attackCount = 0;
-		judgeElement.damageCount = 0;
-		judgeElement.attackHitCount = 0;
-		emotion.exhaustionParm.exhaustionCost = 0;
-		emotion.wrathParm.wrathCost = 0;
-		emotion.wrathParm.isWrath = true;
+		enemy->GetJudgeElement().moveCount = 0;
+		enemy->GetJudgeElement().attackCount = 0;
+		enemy->GetJudgeElement().damageCount= 0;
+		enemy->GetJudgeElement().attackHitCount = 0;
+
+		 enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
+		 enemy->GetEmotion().wrathParm.wrathCost = 0;
+		 enemy->GetEmotion().wrathParm.isWrath = true;
 
 		++m_moveState;
 	}
@@ -82,18 +81,16 @@ uint32_t EnemyIntimidateTask::JudgePriority(const int id)
 	//**************************
 	// MoveCost,AttackCost
 	//**************************
-	AIParameter::Emotion emotion = enemy->GetEmotion();
-	AIParameter::JudgeElement judgeElement = enemy->GetJudgeElement();
 
-	if (emotion.wrathParm.isWrath)
+	if (enemy->GetEmotion().wrathParm.isWrath)
 		return minPriority;
 
-	uint32_t attackHitCost = judgeElement.attackHitCount * emotion.wrathParm.attackWrathCost;
-	uint32_t damageCost = judgeElement.damageCount * emotion.wrathParm.damageWrathCost;
+	uint32_t attackHitCost = enemy->GetJudgeElement().attackHitCount * enemy->GetEmotion().wrathParm.attackWrathCost;
+	uint32_t damageCost = enemy->GetJudgeElement().damageCount * enemy->GetEmotion().wrathParm.damageWrathCost;
 
-	emotion.wrathParm.wrathCost = damageCost - attackHitCost;
+	enemy->GetEmotion().wrathParm.wrathCost = damageCost - attackHitCost;
 
-	if (emotion.wrathParm.wrathCost >= emotion.wrathParm.maxWrathCost)
+	if (enemy->GetEmotion().wrathParm.wrathCost >= enemy->GetEmotion().wrathParm.maxWrathCost)
 		return m_priority;
 
 	return minPriority;

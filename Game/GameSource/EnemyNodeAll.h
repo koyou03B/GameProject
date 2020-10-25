@@ -6,3 +6,5 @@
 #include "EnemyFightNode.h"
 #include "EnemyFightNearNode.h"
 #include "EnemyFightFarNode.h"
+#include "EnemySpecialAttackNode.h"
+#include "EnemyUnSpecialAttackNode.h"

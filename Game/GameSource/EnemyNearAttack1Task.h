@@ -1,6 +1,7 @@
 #pragma once
 #include "EnemyBehaviorTask.h"
 #include "CharacterParameter.h"
+#include ".\LibrarySource\Vector.h"
 
 class Enemy;
 class EnemyNearAttack1Task : public EnemyBehaviorTask
@@ -8,11 +9,14 @@ class EnemyNearAttack1Task : public EnemyBehaviorTask
 public:
 	EnemyNearAttack1Task() { m_moveState = Action::START; };
 	~EnemyNearAttack1Task() = default;
-	void Run(Enemy* enemy);
+	void Run(Enemy* enemy);	
+	void AttackMove(Enemy* enemy);
+	void JudgeAttack(Enemy* enemy, const int attackNo);
+
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
 	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
-	void JudgeAttack(Enemy* enemy, const int attackNo);
-	void AttackMove(Enemy* enemy);
+	bool IsTurnChase(Enemy* enemy);
+	int  JudgeTurnChace(Enemy* enemy);
 
 	uint32_t JudgePriority(const int id);
 
@@ -66,16 +70,22 @@ private:
 	{
 		START,
 		TURN_ATTACK,
+		TURN_CHACE,
 		END
 	};
 	const uint32_t	kAttackTimer[2] = { 50,80 };
 	const uint32_t	kRowlingTimer[2] = { 30,120 };
-	const uint32_t	kMoveTimer[2] = { 10,40 };
+	const uint32_t	kMoveTimer[2] = { 10,40 };	
+	const uint32_t  kTurnChanseTimer = 70;
 	const int		kCollisionNo = 1;
+	const int		kRestValue = 4;
 	const float		kBlendValue[2] = { 0.045f,0.015f };
 	const float		kOneSecond = 60.0f;
 	const float		kMinDirection = 20.0f;
-	int m_attackNo = 0;
+
+	int				m_attackNo = 0;
+	uint32_t		m_attackCount = 0;
+	VECTOR3F		m_targetPosition = {};
 
 };
 

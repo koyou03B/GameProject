@@ -7,11 +7,13 @@ class EnemyNearAttack2Task : public EnemyBehaviorTask
 public:
 	EnemyNearAttack2Task() { m_moveState = Action::START; };
 	~EnemyNearAttack2Task() = default;
-	void Run(Enemy* enemy);
-	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
-	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
+	void Run(Enemy* enemy);	
 	void JudgeAttack(Enemy* enemy, const int attackNo);
 
+	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
+	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
+	bool IsTurnChase(Enemy* enemy);
+	int  JudgeTurnChace(Enemy* enemy);
 	uint32_t JudgePriority(const int id);
 
 	void LoadOfBinaryFile(std::string taskName)
@@ -64,12 +66,19 @@ private:
 	{
 		START,
 		RIGHT_PUNCH_LOWER,
+		TURN_CHACE,
 		END
 	};
-	const uint32_t kAttackTimer[2] = { 50,90 };
-	const int kCollisionNo = 1;
-	const float    kBlendValue = 0.055f;
-	int m_attackNo = 0;
+	const uint32_t		kAttackTimer[2] = { 65,90 };
+	const uint32_t		kTurnChanseTimer = 70;
+	const uint32_t		kAttackSlowTimer = 60;
+	const int			kCollisionNo = 1;
+	const int			kRestValue = 4;
+	const float			kBlendValue = 0.055f;	
+	const float			kMinDirection = 20.0f;
+
+	int					m_attackNo = 0;
+	VECTOR3F			m_targetPosition = {};
 };
 
 CEREAL_CLASS_VERSION(EnemyNearAttack2Task, 2);

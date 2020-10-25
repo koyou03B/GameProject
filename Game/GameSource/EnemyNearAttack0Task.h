@@ -11,7 +11,9 @@ public:
 	void Run(Enemy* enemy);
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
 	bool JudgeAnimationRatio(Enemy* enemy,const int attackNo,const int nextAnimNo);
+	int  JudgeTurnChace(Enemy* enemy);
 	void JudgeAttack(Enemy* enemy, const int attackNo);
+	bool IsTurnChase(Enemy* enemy);
 	uint32_t JudgePriority(const int id);
 
 	void LoadOfBinaryFile(std::string taskName)
@@ -66,12 +68,15 @@ private:
 		LEFT_PUNCH,
 		ANIM_CHANGE,
 		RIGHT_PUNCH,
+		TURN_CHACE,
 		END
 	};
-	const uint32_t kAttackTimer = 70;
-	const int kCollisionNo = 1;
-	const float    kBlendValue = 0.45f;
-	int m_attackNo = 0;
+	const uint32_t	kAttackTimer = 70;
+	const uint32_t  kTurnChanseTimer = 70;
+	const int		kCollisionNo = 1;
+	const float		kBlendValue = 0.045f;
+	int				m_attackNo = 0;
+	VECTOR3F		m_targetPosition = {};
 };
 
 CEREAL_CLASS_VERSION(EnemyNearAttack0Task, 2);

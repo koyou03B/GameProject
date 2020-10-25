@@ -40,7 +40,8 @@ public:
 	struct Exhaustion
 	{
 		uint32_t exhaustionCost;
-		uint32_t maxExhaustionCost; 
+		uint32_t maxExhaustionCost;
+		uint32_t maxWakExhaustionCost;
 		uint32_t forgetExhaustionCost;
 
 		uint32_t moveExhaustionCost;
@@ -48,7 +49,7 @@ public:
 		uint32_t damageExhaustionCost;
 
 		bool isExhaustion;
-		uint32_t serialVersion = 1;
+		uint32_t serialVersion = 2;
 
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)
@@ -62,7 +63,8 @@ public:
 					forgetExhaustionCost,
 					moveExhaustionCost,
 					attackExhaustionCost,
-					damageExhaustionCost
+					damageExhaustionCost,
+					maxWakExhaustionCost
 				);
 			}
 			else
@@ -154,6 +156,6 @@ public:
 };
 
 CEREAL_CLASS_VERSION(AIParameter::Wrath, 1);
-CEREAL_CLASS_VERSION(AIParameter::Exhaustion, 1);
+CEREAL_CLASS_VERSION(AIParameter::Exhaustion, 2);
 CEREAL_CLASS_VERSION(AIParameter::Emotion, 1);
 CEREAL_CLASS_VERSION(AIParameter::StandardValue, 2);

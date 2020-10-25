@@ -2,6 +2,7 @@
 
 #include "EnemyRestTask.h"
 #include "EnemyIntimidateTask.h"
+#include "EnemyWalkTask.h"
 #include "EnemyChaseTask.h"
 #include "EnemyNearAttack0Task.h"
 #include "EnemyNearAttack1Task.h"

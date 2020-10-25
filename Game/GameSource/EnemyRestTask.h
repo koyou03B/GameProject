@@ -57,7 +57,7 @@ public:
 		}
 	}
 private:
-	uint32_t m_restTime = 0;
+	float m_restTime = 0;
 };
 
 CEREAL_CLASS_VERSION(EnemyRestTask, 2);

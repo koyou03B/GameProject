@@ -27,6 +27,9 @@ void EnemyChaseTask::Run(Enemy* enemy)
 		enemy->GetJudgeElement().targetID = m_targetID;
 		m_taskState = TASK_STATE::START;
 		m_isLockOn = false;
+		enemy->GetJudgeElement().attackCount = 0;
+		enemy->GetJudgeElement().attackHitCount = 0;
+
 		++m_moveState;
 
 	}

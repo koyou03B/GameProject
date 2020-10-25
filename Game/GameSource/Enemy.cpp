@@ -30,11 +30,14 @@ void Enemy::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/JumpAttack.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/WrathAttack.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RunSignal.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightWalking.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/LeftWalking.fbx", 60);
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
-	m_statusParm.life = 12000.0f;
+	m_statusParm.life = 1200.0f;
 
 	m_blendAnimation.animationBlend.Init(m_model);
+	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::IDLE, m_model);
 	m_collision.resize(5);
 	m_attackParm.resize(13);
 	//SerialVersionUpdate(1);
@@ -49,11 +52,13 @@ void Enemy::Init()
 		i_archive(*this);
 	}
 
-	m_behaviorTree.SetRootNodeChild();
-	m_behaviorTree.SetTaskToNode();
+	//m_behaviorTree.SetRootNodeChild();
+	//m_behaviorTree.SetTaskToNode();
 	//TaskData& taskData = m_behaviorTree.GetTaskData();
 	//m_selectTask = taskData.intimidateTask;
 	m_isAction = false;
+	m_moveState = 0;
+	//m_judgeElementPram.targetID
 }
 
 void Enemy::Update(float& elapsedTime)
@@ -61,12 +66,28 @@ void Enemy::Update(float& elapsedTime)
 	m_elapsedTime = elapsedTime;
 	if (m_isAction)
 	{
-		m_selectTask->Run(this);
-
-		if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
+		switch (m_moveState)
 		{
-			m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
+		case 0:
+		{
+			uint32_t currentAnimationTime = m_blendAnimation.animationBlend.GetAnimationTime(0);
+			if (currentAnimationTime >= 169)
+			{
+				++m_moveState;
+				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
+			}
 		}
+		break;
+		case 1:
+			m_selectTask->Run(this);
+
+			if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
+			{
+				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
+			}
+			break;
+		}
+
 	}
 	m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
 
@@ -250,7 +271,6 @@ void Enemy::ImGui(ID3D11Device* device)
 		}
 	}
 
-
 	//*******************************************
 	// Status
 	//*******************************************
@@ -258,7 +278,6 @@ void Enemy::ImGui(ID3D11Device* device)
 	{
 		ImGui::BulletText("LIFE : %f", m_statusParm.life);
 	}
-	
 
 	//*******************************************
 	// BehaviorTree
@@ -272,7 +291,9 @@ void Enemy::ImGui(ID3D11Device* device)
 			"ChaseNode",
 			"FightNode",
 			"FightNearNode",
-			"FightFarNode"
+			"FightFarNode",
+			"SpecialAttack",
+			"UnSpecialAttack"
 		};
 
 		static int selectNode = 0;
@@ -294,6 +315,8 @@ void Enemy::ImGui(ID3D11Device* device)
 				nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NODE);
 				nodeData.CreateNodeData(ENTRY_NODE::FIGHT_NEAR_NODE);
 				nodeData.CreateNodeData(ENTRY_NODE::FIGHT_FAR_NODE);
+				nodeData.CreateNodeData(ENTRY_NODE::SPECIAL_ATTACK);
+				nodeData.CreateNodeData(ENTRY_NODE::UNSPECIAL_ATTACK);
 				isCreate = true;
 			}
 
@@ -560,6 +583,7 @@ void Enemy::ImGui(ID3D11Device* device)
 		{
 			"RestTask",
 			"IntimidateTask",
+			"walkTask",
 			"ChaseTask",
 			"NearAttack0Task",
 			"NearAttack1Task",
@@ -594,7 +618,12 @@ void Enemy::ImGui(ID3D11Device* device)
 			{
 				taskData.CreateTaskData(ENTRY_TASK::INTIMIDATE_TASK);
 				selectBehaviorTask = taskData.intimidateTask;
+			}
 
+			if (ImGui::Button("WalkTask"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::WALK_TASK);
+				selectBehaviorTask = taskData.walkTask;
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("ChaseTask"))
@@ -602,6 +631,7 @@ void Enemy::ImGui(ID3D11Device* device)
 				taskData.CreateTaskData(ENTRY_TASK::CHASE_TASK);
 				selectBehaviorTask = taskData.chaseTask;
 			}
+
 
 			if (ImGui::Button("NearAttack0Task"))
 			{
@@ -755,7 +785,7 @@ void Enemy::ImGui(ID3D11Device* device)
 			front = NormalizeVec3(front);
 
 			float dot = DotVec3(front, normalizeDist);
-
+			//ÉAÉTÅ\Ç∆
 			float cosTheta = acosf(dot);
 			
 			float angleValue = cosTheta * (180 / 3.14f);
@@ -788,6 +818,13 @@ void Enemy::ImGui(ID3D11Device* device)
 				int maxExhaustionCost = static_cast<uint32_t>(m_emotionParm.exhaustionParm.maxExhaustionCost);
 				ImGui::SliderInt("MaxExhaustionCost", &maxExhaustionCost, 1, 100);
 				m_emotionParm.exhaustionParm.maxExhaustionCost = static_cast<uint32_t>(maxExhaustionCost);
+			}
+
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------MaxWalkExhaustionCost------");
+			{
+				int maxWakExhaustionCost = static_cast<uint32_t>(m_emotionParm.exhaustionParm.maxWakExhaustionCost);
+				ImGui::SliderInt("MaxWalkExhaustionCost", &maxWakExhaustionCost, 1, 100);
+				m_emotionParm.exhaustionParm.maxWakExhaustionCost = static_cast<uint32_t>(maxWakExhaustionCost);
 			}
 
 			ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ForgetExhaustionCost------");
@@ -1059,10 +1096,51 @@ void Enemy::ImGui(ID3D11Device* device)
 
 	}
 
+	//**************************************
+	// SelectTask
+	//**************************************
+	if (ImGui::CollapsingHeader("SelectTask"))
+	{
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "-----ParentNodeName-----");
+		{
+			std::string currentParentNodeName = m_selectTask->GetParentNodeName();
+			ImGui::BulletText("ParentNodeName => %s", currentParentNodeName.data());
+		}
+
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "-----TaskName-----");
+		{
+			std::string currentTaskName = m_selectTask->GetTaskName();
+			ImGui::BulletText("TaskName => %s", currentTaskName.data());
+		}
+
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "-----Priority-----");
+		{
+			ImGui::BulletText("TaskPriotiry => %d", static_cast<int>(m_selectTask->GetPriority()));
+		}
+
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "-----MoveState-----");
+		{
+			int state = static_cast<int>(m_selectTask->GetMoveState());
+			ImGui::SliderInt("MoveState => %d", &state,0,15);
+		}
+
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "-----JudgeElement-----");
+		{
+			ImGui::BulletText("AttackCount => %d", static_cast<int>(m_judgeElementPram.attackCount));
+			ImGui::BulletText("MoveCount => %d", static_cast<int>(m_judgeElementPram.moveCount));
+			ImGui::BulletText("DamageCount => %d", static_cast<int>(m_judgeElementPram.damageCount));
+			ImGui::BulletText("AttackHitCount => %d", static_cast<int>(m_judgeElementPram.attackHitCount));
+			float ratio = static_cast<float>(m_judgeElementPram.attackHitCount) / static_cast<float>(m_judgeElementPram.attackCount);
+			ImGui::BulletText("AttackRatio => %f", ratio);
+			ImGui::BulletText("TargetID => %d", static_cast<int>(m_judgeElementPram.targetID));
+		}
+
+
+	}
+
 	if (ImGui::Button("ActiveBehaviorTree"))
 	{
-		TaskData& taskData = m_behaviorTree.GetTaskData();
-		m_selectTask = taskData.intimidateTask;	
+		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
 		m_isAction = true;
 	}
 	if (ImGui::Button("DeActiveBehaviorTree"))

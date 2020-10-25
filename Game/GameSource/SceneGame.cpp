@@ -180,13 +180,15 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 		m_metaAI->RenderOfEnemy(immediateContext, 0);
 
 		m_metaAI->RenderOfPlayer(immediateContext, 0);
-		m_metaAI->RenderOfPlayer(immediateContext, 1);
+		//Archer
+		//m_metaAI->RenderOfPlayer(immediateContext, 1);
 		//m_metaAI->RenderOfPlayer(immediateContext, 2);
 		
 		m_frameBuffer->Deactivate(immediateContext);
 		m_fog->Blit(immediateContext, m_frameBuffer->GetRenderTargetShaderResourceView().Get(), m_frameBuffer->GetDepthStencilShaderResourceView().Get());
 
-		m_metaAI->RenderOfScope(immediateContext);
+		//Archer
+		//m_metaAI->RenderOfScope(immediateContext);
 
 		Source::CameraControlle::CameraManager().GetInstance()->Deactivate(immediateContext);
 		m_sceneConstantBuffer->Deactivate(immediateContext);

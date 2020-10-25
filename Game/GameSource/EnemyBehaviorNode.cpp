@@ -96,7 +96,7 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 				priority = taskPriority;
 			}
 		}
-
+		assert(selectTask);
 		return  std::make_pair(0,selectTask);
 	}
 	break;

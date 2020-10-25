@@ -72,6 +72,9 @@ public:
 		JUMP_ATTACK,
 		WRATH_ATTACK,
 		RUN_SIGNAL,
+		LEFT_WALK, 
+		RIGHT_WALK,
+
 	};
 
 	enum class AttackType
@@ -99,6 +102,7 @@ private:
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
+	int m_moveState;
 	float m_elapsedTime;
 	bool m_isAction;
 };

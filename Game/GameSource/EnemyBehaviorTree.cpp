@@ -104,18 +104,21 @@ std::shared_ptr<EnemyBehaviorTask> EnemyBehaviorTree::SearchOfActiveTask(const i
 
 void EnemyBehaviorTree::SetRootNodeChild()
 {
-	std::shared_ptr<EnemyWaitNode>		waitNode		 = m_nodeData.waitNode;
-	std::shared_ptr<EnemyChaseNode>		chaseNode		 = m_nodeData.chaseNode;
-	std::shared_ptr<EnemyFightNode>		fightNode		 = m_nodeData.fightNode;
-	std::shared_ptr<EnemyFightNearNode>	fightNearNode	 = m_nodeData.fightNearNode;
-	std::shared_ptr<EnemyFightFarNode>  fightFarNode	 = m_nodeData.fightFarNode;
+	std::shared_ptr<EnemyWaitNode>				waitNode	 = m_nodeData.waitNode;
+	std::shared_ptr<EnemyChaseNode>				chaseNode	 = m_nodeData.chaseNode;
+	std::shared_ptr<EnemyFightNode>				fightNode	 = m_nodeData.fightNode;
+	std::shared_ptr<EnemyFightNearNode>			fightNearNode = m_nodeData.fightNearNode;
+	std::shared_ptr<EnemyFightFarNode>			fightFarNode = m_nodeData.fightFarNode;
+	std::shared_ptr<EnemySpecialAttackNode>		specialAttackNode = m_nodeData.specialAttackNode;
+	std::shared_ptr<EnemyUnSpecialAttackNode>	unSpecialAttackNode = m_nodeData.unSpecialAttackNode;
 
 	AddNode(waitNode->GetParentName(),		waitNode);
 	AddNode(chaseNode->GetParentName(),		chaseNode);
 	AddNode(fightNode->GetParentName(),		fightNode);
 	AddNode(fightNearNode->GetParentName(), fightNearNode);
 	AddNode(fightFarNode->GetParentName(),	fightFarNode);
-
+	AddNode(specialAttackNode->GetParentName(), specialAttackNode);
+	AddNode(unSpecialAttackNode->GetParentName(), unSpecialAttackNode);
 }
 
 void EnemyBehaviorTree::SetTaskToNode()

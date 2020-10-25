@@ -26,6 +26,7 @@
     <ClCompile Include="GameSource\DebugObject.cpp" />
     <ClCompile Include="GameSource\Enemy.cpp" />
     <ClCompile Include="GameSource\EnemyBehaviorNode.cpp" />
+    <ClCompile Include="GameSource\EnemyBehaviorTask.cpp" />
     <ClCompile Include="GameSource\EnemyBehaviorTree.cpp" />
     <ClCompile Include="GameSource\EnemyChaseNode.cpp" />
     <ClCompile Include="GameSource\EnemyChaseTask.cpp" />
@@ -41,7 +42,10 @@
     <ClCompile Include="GameSource\EnemyNearAttack2Task.cpp" />
     <ClCompile Include="GameSource\EnemyNearSpecialAttack0Task.cpp" />
     <ClCompile Include="GameSource\EnemyRestTask.cpp" />
+    <ClCompile Include="GameSource\EnemySpecialAttackNode.cpp" />
+    <ClCompile Include="GameSource\EnemyUnSpecialAttackNode.cpp" />
     <ClCompile Include="GameSource\EnemyWaitNode.cpp" />
+    <ClCompile Include="GameSource\EnemyWalkTask.cpp" />
     <ClCompile Include="GameSource\FighterCharacter.cpp" />
     <ClCompile Include="GameSource\FighterState.cpp" />
     <ClCompile Include="GameSource\MetaAI.cpp" />
@@ -78,8 +82,11 @@
     <ClInclude Include="GameSource\EnemyNodeAll.h" />
     <ClInclude Include="GameSource\EnemyRestTask.h" />
     <ClInclude Include="GameSource\EnemyRootNode.h" />
+    <ClInclude Include="GameSource\EnemySpecialAttackNode.h" />
     <ClInclude Include="GameSource\EnemyTaskAll.h" />
+    <ClInclude Include="GameSource\EnemyUnSpecialAttackNode.h" />
     <ClInclude Include="GameSource\EnemyWaitNode.h" />
+    <ClInclude Include="GameSource\EnemyWalkTask.h" />
     <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />

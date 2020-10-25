@@ -103,6 +103,8 @@ void Archer::Update(float& elapsedTime)
 		//Step(m_elapsedTime);
 
 		//Attack(m_elapsedTime);
+		KnockBack();
+		RestAnimationIdle();
 	}
 
 	//*********************

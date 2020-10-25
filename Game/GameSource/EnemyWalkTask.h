@@ -1,17 +1,17 @@
 #pragma once
 #include "EnemyBehaviorTask.h"
 #include "CharacterParameter.h"
+
 class Enemy;
-class EnemyNearSpecialAttack0Task : public EnemyBehaviorTask
+class EnemyWalkTask : public EnemyBehaviorTask
 {
 public:
-	EnemyNearSpecialAttack0Task() { m_moveState = Action::START; };
-	~EnemyNearSpecialAttack0Task() = default;
-	void Run(Enemy* enemy);	
-	void JudgeAttack(Enemy* enemy, const int attackNo);
+	EnemyWalkTask() { m_moveState = Action::START; };
+	~EnemyWalkTask() = default;
+	void Run(Enemy* enemy);
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
-	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
 	bool IsTurnChase(Enemy* enemy);
+
 	int  JudgeTurnChace(Enemy* enemy);
 	uint32_t JudgePriority(const int id);
 
@@ -64,21 +64,14 @@ private:
 	enum Action
 	{
 		START,
-		WRATH_ATTACK,
-		ANIM_CHANGE,
-		REST,
-		TURN_CHACE,
+		WALK,
 		END
 	};
-	const uint32_t		kAttackTimer[2] = { 140,160 };
-	const uint32_t		kTurnChanseTimer = 70;
-	const int			kCollisionNo = 3;
-	const float			kBlendValue = 0.025f;
-	const float			kRestTimer = 3.0f;
-
-	int					m_attackNo = 0;
-	float				m_restTimer = 0.0f;
-	VECTOR3F			m_targetPosition = {};
+	const float kWalkTimer = 5.0f;
+	const float		kFIveSecond = 300.0f;
+	const float	kBlendValue = 0.055f;
+	const float kTurnValue = 0.01f;
+	float m_walkTime = 0;
 };
 
-CEREAL_CLASS_VERSION(EnemyNearSpecialAttack0Task, 2);
+CEREAL_CLASS_VERSION(EnemyWalkTask, 2);
