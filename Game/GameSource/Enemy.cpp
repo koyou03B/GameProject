@@ -15,33 +15,42 @@ void Enemy::Init()
 	m_transformParm.WorldUpdate();
 
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::ENEMY);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Run.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/LeftTurn.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightTurn.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Wrath.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Die.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Damage.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/LeftPunch.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightPunch.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightPunchLower.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightUpper.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/IdleTurnAttack.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RunTurnAttack.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/JumpAttack.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/WrathAttack.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RunSignal.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/RightWalking.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/LeftWalking.fbx", 60);
-	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/Damage.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/Knockdown.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/Die.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/Wrath.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/LeftTurn.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/RightTurn.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/Run.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/BackFlip.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/StandUp.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/SignalAnim/MuscleSignal.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/SignalAnim/RelaxSignal.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/SignalAnim/RoaringSignal.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/SignalAnim/RunSignal.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/CrossPunch.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/TurnAttackLower.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/Hook.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/RightPunchLower.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/TurnAttackHeight.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/FallFlat_edit.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/RightPunchUpper.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/WrathAttack.fbx", 60);
+
+	Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
 	m_statusParm.life = 1200.0f;
 
 	m_blendAnimation.animationBlend.Init(m_model);
-	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::IDLE, m_model);
+	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::Idle, m_model);
 	m_collision.resize(5);
 	m_attackParm.resize(13);
 	//SerialVersionUpdate(1);
 ;
+for (auto& atk : m_attackParm)
+{
+	atk.serialVersion = 13;
+}
 
 	m_behaviorTree.CreateRootNode();
 	if (PathFileExistsA((std::string("../Asset/Binary/Enemy/Parameter") + ".bin").c_str()))
@@ -52,8 +61,8 @@ void Enemy::Init()
 		i_archive(*this);
 	}
 
-	//m_behaviorTree.SetRootNodeChild();
-	//m_behaviorTree.SetTaskToNode();
+	m_behaviorTree.SetRootNodeChild();
+	m_behaviorTree.SetTaskToNode();
 	//TaskData& taskData = m_behaviorTree.GetTaskData();
 	//m_selectTask = taskData.intimidateTask;
 	m_isAction = false;
@@ -373,9 +382,9 @@ void Enemy::ImGui(ID3D11Device* device)
 
 			}
 
-			if (ImGui::CollapsingHeader("FightNearNode"))
+			if (ImGui::CollapsingHeader("ChaseNode"))
 			{
-				std::shared_ptr<EnemyFightNearNode> selectNearNode = nodeData.fightNearNode;
+				std::shared_ptr<EnemyChaseNode> selectNearNode = nodeData.chaseNode;
 
 				if (ImGui::Button("Save"))
 					selectNearNode->SaveOfBinaryFile();
@@ -475,18 +484,17 @@ void Enemy::ImGui(ID3D11Device* device)
 			if (ImGui::CollapsingHeader("OtherNodes"))
 			{
 				static std::shared_ptr<EnemyBehaviorNode> selectBehaviorNode;
-
 				if (ImGui::Button("Wait"))
 					selectBehaviorNode = nodeData.waitNode;
-				ImGui::SameLine();
-				if (ImGui::Button("Chase"))
-					selectBehaviorNode = nodeData.chaseNode;
 				ImGui::SameLine();
 				if (ImGui::Button("Fight"))
 					selectBehaviorNode = nodeData.fightNode;
 				ImGui::SameLine();
-				if (ImGui::Button("FightFar"))
-					selectBehaviorNode = nodeData.fightFarNode;
+				if (ImGui::Button("Special"))
+					selectBehaviorNode = nodeData.specialAttackNode;
+				ImGui::SameLine();
+				if (ImGui::Button("UnSpecial"))
+					selectBehaviorNode = nodeData.unSpecialAttackNode;
 
 				if (selectBehaviorNode)
 				{
@@ -583,14 +591,16 @@ void Enemy::ImGui(ID3D11Device* device)
 		{
 			"RestTask",
 			"IntimidateTask",
-			"walkTask",
-			"ChaseTask",
+			"WalkTask",
+			"TargetTurnTask",
 			"NearAttack0Task",
 			"NearAttack1Task",
 			"NearAttack2Task",
+			"NearAttack3Task",
 			"NearSpecialAttack0Task",
 			"FarAttack0Task",
 			"FarAttack1Task",
+			"FarAttack2Task",
 			"FarSpecialAttack0Task",
 		};
 
@@ -626,10 +636,10 @@ void Enemy::ImGui(ID3D11Device* device)
 				selectBehaviorTask = taskData.walkTask;
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("ChaseTask"))
+			if (ImGui::Button("TargetTurnTask"))
 			{
-				taskData.CreateTaskData(ENTRY_TASK::CHASE_TASK);
-				selectBehaviorTask = taskData.chaseTask;
+				taskData.CreateTaskData(ENTRY_TASK::TARGET_TURN_TASK);
+				selectBehaviorTask = taskData.targetTurnTask;
 			}
 
 
@@ -644,18 +654,17 @@ void Enemy::ImGui(ID3D11Device* device)
 				taskData.CreateTaskData(ENTRY_TASK::NEAR_ATTACK1_TASK);
 				selectBehaviorTask = taskData.fightNearTask1;
 			}
-			ImGui::SameLine();
+			
 			if (ImGui::Button("NearAttack2Task"))
 			{
 				taskData.CreateTaskData(ENTRY_TASK::NEAR_ATTACK2_TASK);
 				selectBehaviorTask = taskData.fightNearTask2;
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("NearSpecialAttack0"))
+			if (ImGui::Button("NearAttack3Task"))
 			{
-				taskData.CreateTaskData(ENTRY_TASK::Near_Special_TASK);
-				selectBehaviorTask = taskData.fightNearSpecialTask0;
-
+				taskData.CreateTaskData(ENTRY_TASK::NEAR_ATTACK3_TASK);
+				selectBehaviorTask = taskData.fightNearTask3;
 			}
 
 			if (ImGui::Button("FarAttack0Task"))
@@ -668,6 +677,19 @@ void Enemy::ImGui(ID3D11Device* device)
 			{
 				taskData.CreateTaskData(ENTRY_TASK::FAR_ATTACK1_TASK);
 				selectBehaviorTask = taskData.fightFarTask1;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("FarAttack2Task"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::FAR_ATTACK2_TASK);
+				selectBehaviorTask = taskData.fightFarTask2;
+			}
+
+			if (ImGui::Button("NearSpecialAttack0"))
+			{
+				taskData.CreateTaskData(ENTRY_TASK::NEAR_SPECIAL_TASK);
+				selectBehaviorTask = taskData.fightNearSpecialTask0;
+
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("FarSpecialAttack0"))
@@ -706,7 +728,7 @@ void Enemy::ImGui(ID3D11Device* device)
 				{
 					static int priority = static_cast<int>(selectBehaviorTask->GetPriority());
 					ImGui::BulletText("TaskPriotiry -> %d", static_cast<int>(selectBehaviorTask->GetPriority()));
-					ImGui::SliderInt("SelectTaskPriority", &priority, 1, 4);
+					ImGui::SliderInt("SelectTaskPriority", &priority, 1, 7);
 					if (ImGui::Button("SetTaskPriority"))
 						selectBehaviorTask->SetPriority(static_cast<uint32_t>(priority));
 				}
@@ -714,8 +736,8 @@ void Enemy::ImGui(ID3D11Device* device)
 				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------CoolTime------");
 				{
 					static int  coolTime = static_cast<int>(selectBehaviorTask->GetCoolTimer());
-					ImGui::BulletText("CoolTime -> %d", static_cast<int>(selectBehaviorTask->GetCoolTimer()) / 60);
-					ImGui::SliderInt("CurrentCoolTime", &coolTime, 0, 6000);
+					ImGui::BulletText("CoolTime -> %d", static_cast<int>(selectBehaviorTask->GetCoolTimer()));
+					ImGui::SliderInt("CurrentCoolTime", &coolTime, 0, 10);
 
 					if (ImGui::Button("SetCoolTime"))
 						selectBehaviorTask->SetCoolTimer(static_cast<uint32_t>(coolTime));
@@ -906,7 +928,7 @@ void Enemy::ImGui(ID3D11Device* device)
 				m_blendAnimation.blendValueRange[1] = blendValue1;
 			
 			float animationSpeed = m_blendAnimation.animationBlend._animationSpeed;
-			ImGui::SliderFloat("AnimationSpeed", &animationSpeed, 0.0f, 2.0f);
+			ImGui::SliderFloat("AnimationSpeed", &animationSpeed, -1.0f, 2.0f);
 			m_blendAnimation.animationBlend._animationSpeed = animationSpeed;
 		}
 
@@ -1140,7 +1162,7 @@ void Enemy::ImGui(ID3D11Device* device)
 
 	if (ImGui::Button("ActiveBehaviorTree"))
 	{
-		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
+		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::Wrath, m_model);
 		m_isAction = true;
 	}
 	if (ImGui::Button("DeActiveBehaviorTree"))

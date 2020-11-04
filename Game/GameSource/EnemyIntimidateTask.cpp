@@ -75,7 +75,7 @@ bool EnemyIntimidateTask::JudgeAnimationRatio(Enemy* enemy, const int attackNo, 
 	return false;
 }
 
-uint32_t EnemyIntimidateTask::JudgePriority(const int id)
+uint32_t EnemyIntimidateTask::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
 	//**************************
@@ -83,14 +83,6 @@ uint32_t EnemyIntimidateTask::JudgePriority(const int id)
 	//**************************
 
 	if (enemy->GetEmotion().wrathParm.isWrath)
-		return minPriority;
-
-	uint32_t attackHitCost = enemy->GetJudgeElement().attackHitCount * enemy->GetEmotion().wrathParm.attackWrathCost;
-	uint32_t damageCost = enemy->GetJudgeElement().damageCount * enemy->GetEmotion().wrathParm.damageWrathCost;
-
-	enemy->GetEmotion().wrathParm.wrathCost = damageCost - attackHitCost;
-
-	if (enemy->GetEmotion().wrathParm.wrathCost >= enemy->GetEmotion().wrathParm.maxWrathCost)
 		return m_priority;
 
 	return minPriority;

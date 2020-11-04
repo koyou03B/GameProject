@@ -9,7 +9,7 @@ public:
 	~EnemyRestTask() = default;
 	void Run(Enemy* enemy);
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
-	uint32_t JudgePriority(const int id);
+	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
 	{

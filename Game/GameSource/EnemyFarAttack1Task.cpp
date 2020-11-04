@@ -4,6 +4,7 @@
 
 void EnemyFarAttack1Task::Run(Enemy* enemy)
 {
+#if 0
 	auto& animation = enemy->GetBlendAnimation();
 
 	switch (m_moveState)
@@ -136,7 +137,7 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 		}
 		break;
 	}
-
+#endif
 
 }
 
@@ -212,7 +213,7 @@ bool EnemyFarAttack1Task::IsTurnChase(Enemy* enemy)
 	if (kTurnChanseTimer > currentAnimationTime)
 	{
 		auto& enemyTransform = enemy->GetWorldTransform();
-		if (m_animNo == Enemy::Animation::LEFT_TURN)
+		if (m_animNo == Enemy::Animation::LeftTurn)
 			rot *= -1;
 
 		enemyTransform.angle.y += rot;
@@ -242,14 +243,14 @@ int EnemyFarAttack1Task::JudgeTurnChace(Enemy* enemy)
 	float cosTheta = acosf(dot);
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 	if (cosTheta <= frontValue)
-		return Enemy::Animation::IDLE;
+		return Enemy::Animation::Idle;
 	else
 	{
 		VECTOR3F cross = CrossVec3(front, normalizeDist);
 		if (cross.y > 0.0f)
-			return Enemy::Animation::RIGHT_TURN;
+			return Enemy::Animation::RightTurn;
 		else
-			return Enemy::Animation::LEFT_TURN;
+			return Enemy::Animation::LeftTurn;
 	}
 
 	return 0;
@@ -259,7 +260,7 @@ void EnemyFarAttack1Task::JudgeAttack(Enemy* enemy, const int attackNo)
 {
 	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 
-	if (attackNo == static_cast<int>(Enemy::AttackType::RIGHT_UPPER))
+	if (attackNo == static_cast<int>(Enemy::AttackType::RightPunchUpper))
 	{
 		if (currentAnimationTime > kAttackTimer[0] && currentAnimationTime < kAttackTimer[1])
 		{
@@ -328,7 +329,20 @@ void EnemyFarAttack1Task::TurningChase(Enemy* enemy)
 	enemyTransform.WorldUpdate();
 }
 
-uint32_t EnemyFarAttack1Task::JudgePriority(const int id)
+uint32_t EnemyFarAttack1Task::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
+	auto players = MESSENGER.CallPlayersInstance();
+	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	int targetID = enemy->GetJudgeElement().targetID;
+
+	VECTOR3F playerPosition = players.at(targetID)->GetWorldTransform().position;
+	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
+
+	float direction = ToDistVec3(playerPosition - enemyPosition);
+
+	if (direction < m_maxDirection)
+		return minPriority;
+
 	return m_priority;
+
 }

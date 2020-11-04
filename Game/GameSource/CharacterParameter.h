@@ -156,7 +156,10 @@ public:
 	{
 		uint32_t frameCount = 0;
 		uint32_t inputRange[2] = {};
+		uint32_t slowTimeFrameCount = 0;
 		float attackPoint = 0.0f;
+		float attackSpeed[2] = {};
+
 		std::vector<XINPUT_GAMEPAD_BUTTONS> buttons;
 
 		uint32_t serialVersion = 0;
@@ -171,7 +174,8 @@ public:
 				(
 					frameCount,
 					inputRange[0], inputRange[1],
-					attackPoint,buttons
+					attackPoint,buttons, slowTimeFrameCount,
+					attackSpeed[0], attackSpeed[1]
 				);
 			}
 			else
@@ -373,4 +377,4 @@ CEREAL_CLASS_VERSION(CharacterParameter::Camera, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Collision, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Step, 12);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 13);

@@ -112,6 +112,6 @@ protected:
 	FamilyNode m_family;
 	std::vector<std::shared_ptr<EnemyBehaviorTask>> m_task;
 	uint32_t m_priority =0;
-	uint32_t m_serialVersion = 2;
+	uint32_t m_serialVersion = 3;
 
 };

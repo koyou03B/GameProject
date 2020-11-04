@@ -689,7 +689,7 @@ void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 //	ImGui::End();
 //	SOUND.Stop(SoundLabel::BGM_Title);
 
-	ActivateScene.Initialize(m_device.Get());
+	//ActivateScene.Initialize(m_device.Get());
 	ActivateScene.Update(elapsedTime);
 
 }

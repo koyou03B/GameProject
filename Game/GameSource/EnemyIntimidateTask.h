@@ -12,7 +12,7 @@ public:
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
 	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
 
-	uint32_t JudgePriority(const int id);
+	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
 	{

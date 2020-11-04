@@ -1,6 +1,7 @@
 #include "SceneTitle.h"
 #include ".\LibrarySource\vectorCombo.h"
 #include ".\LibrarySource\Framework.h"
+#include ".\LibrarySource\Input.h"
 
 bool Title::Initialize(ID3D11Device* device)
 {
@@ -21,6 +22,11 @@ bool Title::Initialize(ID3D11Device* device)
 
 void Title::Update(float& elapsedTime)
 {
+	if (KEYBOARD._keys[DIK_0] == 1)
+	{
+		SceneLabel label = SceneLabel::GAME;
+		ActivateScene.ChangeScene(label);
+	}
 }
 
 void Title::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)

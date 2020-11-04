@@ -136,9 +136,8 @@ namespace Source
 			m_heightAboveGround = 15.0f;
 			m_value = 1.0f;
 			m_nowFreeMode = false;
-
+			m_vibrateTimer = 0.0f;
 			m_mode = CameraMode::LOCK_ON;
-
 			m_camera = std::make_unique<Camera>();
 			m_camera->Initialize();
 		}
@@ -173,7 +172,8 @@ namespace Source
 			switch (m_mode)
 			{
 			case CameraManager::LOCK_ON:
-				LockON();
+				LockON();	
+				Vibrate(elapsedTime);
 				break;
 			case CameraManager::CHANGE_OBJECT:
 				ChangeObject();
@@ -186,6 +186,8 @@ namespace Source
 			default:
 				break;
 			}
+
+
 #endif
 		}
 
@@ -241,6 +243,28 @@ namespace Source
 			m_value += 0.0025f;
 			if (m_value >= 1.0f) m_value = 1.0f;
 #endif
+		}
+
+		void CameraManager::Vibrate(float elapsedTime)
+		{
+			if (m_vibrateTimer > 0)
+			{
+				m_vibrateTimer -= elapsedTime;
+
+				DirectX::XMFLOAT3 focus;
+
+				float dx = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
+				float dy = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
+				float dz = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
+
+				m_target.x+= dx;
+				m_target.y+= dy;
+				m_target.z+= dz;
+
+				m_camera->SetFocus(m_target);
+			}
+
+
 		}
 
 		void CameraManager::Activate(ID3D11DeviceContext* immediateContext)
@@ -359,7 +383,16 @@ namespace Source
 					m_camera->SetFarZ(farZ);
 					ImGui::TreePop();
 				};
-
+				if (ImGui::TreeNode(u8"カメラシェイク"))
+				{
+					static float timer = 0;
+					static float range = 0;
+					ImGui::InputFloat(u8"timer", &timer, 1.0f, 5.0f);
+					ImGui::InputFloat(u8"range", &range, 1.0f, 10.0f);
+					if (ImGui::Button("Set"))
+						SetVibration(range, timer);
+					ImGui::TreePop();
+				}
 			}
 			ImGuiStyle& style = ImGui::GetStyle();
 			style.Colors[ImGuiCol_Separator] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);

@@ -4,6 +4,7 @@
 
 void EnemyNearAttack2Task::Run(Enemy* enemy)
 {
+#if 0
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
@@ -31,6 +32,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 		m_attackNo = static_cast<int>(Enemy::AttackType::RIGHT_LOWER);
 		if (JudgeAnimationRatio(enemy, m_attackNo, m_animNo))
 		{
+			enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.0f);
 			m_animNo = JudgeTurnChace(enemy);
 			if (m_animNo <= 1)
 			{
@@ -66,7 +68,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 		}
 		break;
 	}
-
+#endif
 }
 
 bool EnemyNearAttack2Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
@@ -87,6 +89,7 @@ bool EnemyNearAttack2Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& a
 
 bool EnemyNearAttack2Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo)
 {
+	
 	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 	uint32_t attackFrameCount = enemy->GetAttack(attackNo).frameCount;
 	if (currentAnimationTime >= attackFrameCount)
@@ -136,7 +139,7 @@ bool EnemyNearAttack2Task::IsTurnChase(Enemy* enemy)
 	if (kTurnChanseTimer > currentAnimationTime)
 	{
 		auto& enemyTransform = enemy->GetWorldTransform();
-		if (m_animNo == Enemy::Animation::LEFT_TURN)
+		if (m_animNo == Enemy::Animation::LeftTurn)
 			rot *= -1;
 
 		enemyTransform.angle.y += rot;
@@ -166,14 +169,14 @@ int EnemyNearAttack2Task::JudgeTurnChace(Enemy* enemy)
 	float cosTheta = acosf(dot);
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 	if (cosTheta <= frontValue)
-		return Enemy::Animation::IDLE;
+		return Enemy::Animation::Idle;
 	else
 	{
 		VECTOR3F cross = CrossVec3(front, normalizeDist);
 		if (cross.y > 0.0f)
-			return Enemy::Animation::RIGHT_TURN;
+			return Enemy::Animation::RightTurn;
 		else
-			return Enemy::Animation::LEFT_TURN;
+			return Enemy::Animation::LeftTurn;
 	}
 
 	return 0;
@@ -190,7 +193,7 @@ void EnemyNearAttack2Task::JudgeAttack(Enemy* enemy, const int attackNo)
 
 	if (currentAnimationTime > kAttackTimer[0] && currentAnimationTime < kAttackTimer[1])
 	{
-		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.0f);
+		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.1f);
 		auto& attackParm = enemy->GetCollision().at(kCollisionNo);
 		int attackMesh = attackParm.GetCurrentMesh(0);
 		int attackBone = attackParm.GetCurrentBone(0);
@@ -206,7 +209,7 @@ void EnemyNearAttack2Task::JudgeAttack(Enemy* enemy, const int attackNo)
 	}
 }
 
-uint32_t EnemyNearAttack2Task::JudgePriority(const int id)
+uint32_t EnemyNearAttack2Task::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
 	auto player = MESSENGER.CallPlayersInstance();
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
@@ -218,7 +221,7 @@ uint32_t EnemyNearAttack2Task::JudgePriority(const int id)
 	float direction = ToDistVec3(playerPosition - enemyPosition);
 	VECTOR3F normalizeDist = NormalizeVec3(playerPosition - enemyPosition);
 
-	VECTOR3F angle = player.at(targetID)->GetWorldTransform().angle;
+	VECTOR3F angle = enemy->GetWorldTransform().angle;
 	VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
 	front = NormalizeVec3(front);
 

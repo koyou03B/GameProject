@@ -13,7 +13,7 @@ public:
 	bool IsTurnChase(Enemy* enemy);
 
 	int  JudgeTurnChace(Enemy* enemy);
-	uint32_t JudgePriority(const int id);
+	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
 	{
@@ -35,6 +35,9 @@ public:
 		cereal::BinaryOutputArchive o_archive(ofs);
 		o_archive(*this);
 	}
+
+	inline float& GetMaxDirection() { return m_maxDirection; }
+	inline void SetMaxDirection(const float& direction) { m_maxDirection = direction; }
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
@@ -67,11 +70,14 @@ private:
 		WALK,
 		END
 	};
-	const float kWalkTimer = 5.0f;
+	const float		kWalkTimer = 3.0f;
 	const float		kFIveSecond = 300.0f;
-	const float	kBlendValue = 0.055f;
-	const float kTurnValue = 0.01f;
+	const float		kBlendValue = 0.015f;
+	const float		kTurnValue = 0.01f;
 	float m_walkTime = 0;
+	float m_accel = 32.0f;
+	float m_maxDirection = 0.0f;
+
 };
 
 CEREAL_CLASS_VERSION(EnemyWalkTask, 2);

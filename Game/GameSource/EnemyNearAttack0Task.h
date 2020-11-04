@@ -14,7 +14,7 @@ public:
 	int  JudgeTurnChace(Enemy* enemy);
 	void JudgeAttack(Enemy* enemy, const int attackNo);
 	bool IsTurnChase(Enemy* enemy);
-	uint32_t JudgePriority(const int id);
+	uint32_t JudgePriority(const int id,const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
 	{

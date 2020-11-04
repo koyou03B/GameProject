@@ -89,13 +89,15 @@ struct TaskData
 	std::shared_ptr<EnemyRestTask>					restTask;
 	std::shared_ptr<EnemyIntimidateTask>			intimidateTask;
 	std::shared_ptr<EnemyWalkTask>					walkTask;
-	std::shared_ptr<EnemyChaseTask>					chaseTask;
+	std::shared_ptr<EnemyTargetTurnTask>			targetTurnTask;
 	std::shared_ptr<EnemyNearAttack0Task>			fightNearTask0;
 	std::shared_ptr<EnemyNearAttack1Task>			fightNearTask1;
 	std::shared_ptr<EnemyNearAttack2Task>			fightNearTask2;
+	std::shared_ptr<EnemyNearAttack3Task>			fightNearTask3;
 	std::shared_ptr<EnemyNearSpecialAttack0Task>	fightNearSpecialTask0;
 	std::shared_ptr<EnemyFarAttack0Task>			fightFarTask0;
 	std::shared_ptr<EnemyFarAttack1Task>			fightFarTask1;
+	std::shared_ptr<EnemyFarAttack2Task>			fightFarTask2;
 	std::shared_ptr<EnemyFarSpecialAttack0Task>		fightFarSpecialTask0;
 
 	const int MAX_TASK_COUNT = 10;
@@ -116,9 +118,9 @@ struct TaskData
 			if (walkTask == nullptr)
 				walkTask = std::make_shared<EnemyWalkTask>();
 			break;
-		case CHASE_TASK:
-			if (chaseTask == nullptr)
-				chaseTask = std::make_shared<EnemyChaseTask>();
+		case TARGET_TURN_TASK:
+			if (targetTurnTask == nullptr)
+				targetTurnTask = std::make_shared<EnemyTargetTurnTask>();
 			break;
 		case NEAR_ATTACK0_TASK:
 			if (fightNearTask0 == nullptr)
@@ -132,7 +134,11 @@ struct TaskData
 			if (fightNearTask2 == nullptr)
 				fightNearTask2 = std::make_shared<EnemyNearAttack2Task>();
 			break;
-		case Near_Special_TASK:
+		case NEAR_ATTACK3_TASK:
+			if (fightNearTask3 == nullptr)
+				fightNearTask3 = std::make_shared<EnemyNearAttack3Task>();
+			break;
+		case NEAR_SPECIAL_TASK:
 			if (fightNearSpecialTask0 == nullptr)
 				fightNearSpecialTask0 = std::make_shared<EnemyNearSpecialAttack0Task>();
 			break;
@@ -141,8 +147,12 @@ struct TaskData
 				fightFarTask0 = std::make_shared<EnemyFarAttack0Task>();
 			break;
 		case FAR_ATTACK1_TASK:
-			if (fightFarTask0 == nullptr)
+			if (fightFarTask1 == nullptr)
 				fightFarTask1 = std::make_shared<EnemyFarAttack1Task>();
+			break;
+		case FAR_ATTACK2_TASK:
+			if (fightFarTask2 == nullptr)
+				fightFarTask2 = std::make_shared<EnemyFarAttack2Task>();
 			break;
 		case FAR_SPECIAL_TASK:
 			if (fightFarSpecialTask0 == nullptr)
@@ -162,7 +172,26 @@ struct TaskData
 			(
 				restTask,
 				intimidateTask,
-				chaseTask,
+				targetTurnTask,
+				fightNearTask0,
+				fightNearTask1,
+				fightNearTask2,
+				fightNearSpecialTask0,
+				fightFarTask0,
+				fightFarTask1,
+				fightFarSpecialTask0,
+				walkTask,
+				fightNearTask3,
+				fightFarTask2
+			);
+		}
+		else
+		{
+			archive
+			(
+				restTask,
+				intimidateTask,
+				targetTurnTask,
 				fightNearTask0,
 				fightNearTask1,
 				fightNearTask2,
@@ -173,26 +202,10 @@ struct TaskData
 				walkTask
 			);
 		}
-		else
-		{
-			archive
-			(
-				restTask,
-				intimidateTask,
-				chaseTask,
-				fightNearTask0,
-				fightNearTask1,
-				fightNearTask2,
-				fightNearSpecialTask0,
-				fightFarTask0,
-				fightFarTask1,
-				fightFarSpecialTask0
-			);
-		}
 	}
 
 private:
-	uint32_t serialVersion = 3;
+	uint32_t serialVersion = 4;
 };
 
 class OperatCoolTime
@@ -277,4 +290,4 @@ private:
 
 CEREAL_CLASS_VERSION(EnemyBehaviorTree, 2);
 CEREAL_CLASS_VERSION(NodeData, 3);
-CEREAL_CLASS_VERSION(TaskData, 3);
+CEREAL_CLASS_VERSION(TaskData, 4);

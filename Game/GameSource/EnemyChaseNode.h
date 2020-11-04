@@ -30,6 +30,9 @@ public:
 		o_archive(*this);
 	}
 
+	inline float& GetMaxDirection() { return m_maxDirection; }
+	inline void SetMaxDirection(const float& direction) { m_maxDirection = direction; }
+
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -40,7 +43,8 @@ public:
 				m_nodeName,
 				m_selectRule,
 				m_family,
-				m_priority
+				m_priority,
+				m_maxDirection
 			);
 		}
 		else
@@ -54,6 +58,8 @@ public:
 			);
 		}
 	}
+private:
+	float m_maxDirection = 0.0f;
 };
 
-CEREAL_CLASS_VERSION(EnemyChaseNode, 2);
+CEREAL_CLASS_VERSION(EnemyChaseNode, 3);

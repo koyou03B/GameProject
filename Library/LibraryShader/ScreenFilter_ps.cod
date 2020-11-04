@@ -42,51 +42,25 @@
 // SV_TARGET                0   xyzw        0   TARGET   float   xyzw
 //
 ps_5_0
-dcl_globalFlags refactoringAllowed | skipOptimization
+dcl_globalFlags refactoringAllowed
 dcl_constantbuffer CB0[2], immediateIndexed
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
 dcl_input_ps linear v1.xy
 dcl_input_ps linear v2.xyzw
 dcl_output o0.xyzw
-dcl_temps 2
-//
-// Initial variable locations:
-//   v0.x <- pin.sv_position.x; v0.y <- pin.sv_position.y; v0.z <- pin.sv_position.z; v0.w <- pin.sv_position.w; 
-//   v1.x <- pin.texcoord.x; v1.y <- pin.texcoord.y; 
-//   v2.x <- pin.color.x; v2.y <- pin.color.y; v2.z <- pin.color.z; v2.w <- pin.color.w; 
-//   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
-//
-#line 9 "D:\Lib関連\GameProject\Library\LibrarySource\ScreenFilter_ps.hlsl"
+dcl_temps 1
 sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v1.xyxx, t0.xyzw, s0
-mul r0.xyzw, r0.xyzw, v2.xyzw  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z; r0.w <- color.w
-
-#line 11
-add r0.xyz, r0.xyzx, cb0[0].xxxx
-
-#line 13
-mov r1.xyz, l(-0.500000,-0.500000,-0.500000,-0.000000)
-add r0.xyz, r0.xyzx, r1.xyzx
-mul r0.xyz, r0.xyzx, cb0[0].yyyy
-add r0.xyz, r0.xyzx, l(0.500000, 0.500000, 0.500000, 0.000000)  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
-
-#line 15
-add r1.x, r0.y, r0.x
-add r1.x, r0.z, r1.x
-itof r1.y, l(3)
-div r1.x, r1.x, r1.y  // r1.x <- average
-
-#line 16
-mov r1.yzw, -r1.xxxx
-add r0.xyz, r0.xyzx, r1.yzwy
-mul r0.xyz, r0.xyzx, cb0[0].zzzz
-add r0.xyz, r1.xxxx, r0.xyzx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
-
-#line 18
-mul r0.xyz, r0.xyzx, cb0[1].xyzx
-
-#line 20
-mov o0.xyz, r0.xyzx
+mad r0.xyz, r0.xyzx, v2.xyzx, cb0[0].xxxx
+mul r0.w, r0.w, v2.w
 mov o0.w, r0.w
+add r0.xyz, r0.xyzx, l(-0.500000, -0.500000, -0.500000, 0.000000)
+mad r0.xyz, r0.xyzx, cb0[0].yyyy, l(0.500000, 0.500000, 0.500000, 0.000000)
+add r0.w, r0.y, r0.x
+add r0.w, r0.z, r0.w
+mad r0.xyz, -r0.wwww, l(0.333333, 0.333333, 0.333333, 0.000000), r0.xyzx
+mul r0.w, r0.w, l(0.333333)
+mad r0.xyz, r0.xyzx, cb0[0].zzzz, r0.wwww
+mul o0.xyz, r0.xyzx, cb0[1].xyzx
 ret 
-// Approximately 19 instruction slots used
+// Approximately 13 instruction slots used

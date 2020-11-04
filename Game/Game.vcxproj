@@ -29,7 +29,9 @@
     <ClCompile Include="GameSource\EnemyBehaviorTask.cpp" />
     <ClCompile Include="GameSource\EnemyBehaviorTree.cpp" />
     <ClCompile Include="GameSource\EnemyChaseNode.cpp" />
-    <ClCompile Include="GameSource\EnemyChaseTask.cpp" />
+    <ClCompile Include="GameSource\EnemyFarAttack2Task.cpp" />
+    <ClCompile Include="GameSource\EnemyNearAttack3Task.cpp" />
+    <ClCompile Include="GameSource\EnemyTargetTurnTask.cpp" />
     <ClCompile Include="GameSource\EnemyFarAttack0Task.cpp" />
     <ClCompile Include="GameSource\EnemyFarAttack1Task.cpp" />
     <ClCompile Include="GameSource\EnemyFarSpecialAttack0Task.cpp" />
@@ -67,7 +69,9 @@
     <ClInclude Include="GameSource\EnemyBehaviorTask.h" />
     <ClInclude Include="GameSource\EnemyBehaviorTree.h" />
     <ClInclude Include="GameSource\EnemyChaseNode.h" />
-    <ClInclude Include="GameSource\EnemyChaseTask.h" />
+    <ClInclude Include="GameSource\EnemyFarAttack2Task.h" />
+    <ClInclude Include="GameSource\EnemyNearAttack3Task.h" />
+    <ClInclude Include="GameSource\EnemyTargetTurnTask.h" />
     <ClInclude Include="GameSource\EnemyFarSpecialAttack0Task.h" />
     <ClInclude Include="GameSource\EnemyFightFarNode.h" />
     <ClInclude Include="GameSource\EnemyFightNearNode.h" />

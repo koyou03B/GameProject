@@ -52,13 +52,10 @@ bool EnemyRestTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animatio
 	return false;
 }
 
-uint32_t EnemyRestTask::JudgePriority(const int id)
+uint32_t EnemyRestTask::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
-
-	uint32_t exhaustionCost = enemy->GetEmotion().exhaustionParm.exhaustionCost;
-	
-	if (exhaustionCost >= enemy->GetEmotion().exhaustionParm.maxExhaustionCost)
+	if(enemy->GetEmotion().exhaustionParm.isExhaustion)
 		return m_priority;
 	
 	return minPriority;

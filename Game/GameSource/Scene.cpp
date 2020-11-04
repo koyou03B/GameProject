@@ -36,6 +36,7 @@ void SceneManager::ChangeScene(Scene::SceneLabel scene)
 		break;
 	}
 
+	Initialize(Framework::GetInstance().GetDevice());
 }
 
 void SceneManager::Initialize(ID3D11Device* device)

@@ -1,37 +1,20 @@
-#include "EnemyChaseTask.h"
+#include "EnemyTargetTurnTask.h"
 #include "MessengTo.h"
 #include "Enemy.h"
 
-void EnemyChaseTask::Run(Enemy* enemy)
+void EnemyTargetTurnTask::Run(Enemy* enemy)
 {
+#if 0
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
 	case 0:
 	{
-		auto& players = MESSENGER.CallPlayersInstance();
-		int targetID = enemy->GetJudgeElement().targetID;
-		uint32_t targetAttackHitCount = players.at(targetID)->GetJudgeElement().attackHitCount;
-
-		int playerCount = static_cast<int>(players.size());
-		for (int i = 0; i < playerCount; ++i)
-		{
-			if (i != targetID)
-			{
-				uint32_t attackHitCount = players.at(i)->GetJudgeElement().attackHitCount;
-				if (targetAttackHitCount < attackHitCount)
-					m_targetID = i;
-			}
-		}
-
-		enemy->GetJudgeElement().targetID = m_targetID;
 		m_taskState = TASK_STATE::START;
 		m_isLockOn = false;
 		enemy->GetJudgeElement().attackCount = 0;
 		enemy->GetJudgeElement().attackHitCount = 0;
-
 		++m_moveState;
-
 	}
 	break;
 	case 1:
@@ -215,11 +198,11 @@ void EnemyChaseTask::Run(Enemy* enemy)
 	}
 	break;
 	}
-
+#endif
 
 }
 
-bool EnemyChaseTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
+bool EnemyTargetTurnTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
 {
 	animation.animationBlend._blendRatio += 0.045f;//magicNumber
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
@@ -233,7 +216,12 @@ bool EnemyChaseTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animati
 	return false;
 }
 
-uint32_t EnemyChaseTask::JudgePriority(const int id)
+uint32_t EnemyTargetTurnTask::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
-	return m_priority;
+	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	int targetID = enemy->GetJudgeElement().targetID;
+	if(targetID != m_targetID)
+		return m_priority;
+
+	return minPriority;
 }

@@ -57,7 +57,7 @@ public:
 		}
 	}
 private:
-	uint32_t m_maxAttackCount = 0.0f;
+	uint32_t m_maxAttackCount = 0;
 };
 
 CEREAL_CLASS_VERSION(EnemySpecialAttackNode, 1);

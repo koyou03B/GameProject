@@ -65,7 +65,7 @@
 // TEXCOORD                 0   xy          4     NONE   float   xy  
 //
 vs_5_0
-dcl_globalFlags refactoringAllowed | skipOptimization
+dcl_globalFlags refactoringAllowed
 dcl_constantbuffer CB0[1], immediateIndexed
 dcl_constantbuffer CB1[14], immediateIndexed
 dcl_input v0.xyzw
@@ -80,87 +80,39 @@ dcl_output o1.xyzw
 dcl_output o2.xyzw
 dcl_output o3.xyzw
 dcl_output o4.xy
-dcl_temps 5
-//
-// Initial variable locations:
-//   v0.x <- position.x; v0.y <- position.y; v0.z <- position.z; v0.w <- position.w; 
-//   v1.x <- normal.x; v1.y <- normal.y; v1.z <- normal.z; v1.w <- normal.w; 
-//   v2.x <- texcoord.x; v2.y <- texcoord.y; 
-//   v3.x <- world._m00; v3.y <- world._m10; v3.z <- world._m20; v3.w <- world._m30; 
-//   v4.x <- world._m01; v4.y <- world._m11; v4.z <- world._m21; v4.w <- world._m31; 
-//   v5.x <- world._m02; v5.y <- world._m12; v5.z <- world._m22; v5.w <- world._m32; 
-//   v6.x <- world._m03; v6.y <- world._m13; v6.z <- world._m23; v6.w <- world._m33; 
-//   v7.x <- instID; 
-//   o4.x <- <main return value>.texcoord.x; o4.y <- <main return value>.texcoord.y; 
-//   o3.x <- <main return value>.color.x; o3.y <- <main return value>.color.y; o3.z <- <main return value>.color.z; o3.w <- <main return value>.color.w; 
-//   o2.x <- <main return value>.normal.x; o2.y <- <main return value>.normal.y; o2.z <- <main return value>.normal.z; o2.w <- <main return value>.normal.w; 
-//   o1.x <- <main return value>.position.x; o1.y <- <main return value>.position.y; o1.z <- <main return value>.position.z; o1.w <- <main return value>.position.w; 
-//   o0.x <- <main return value>.sv_position.x; o0.y <- <main return value>.sv_position.y; o0.z <- <main return value>.sv_position.z; o0.w <- <main return value>.sv_position.w
-//
-#line 8 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_vs.hlsl"
-mul r0.xyzw, v3.xyzw, cb1[10].xxxx
-mul r1.xyzw, v4.xyzw, cb1[11].xxxx
-add r0.xyzw, r0.xyzw, r1.xyzw
-mul r1.xyzw, v5.xyzw, cb1[12].xxxx
-add r0.xyzw, r0.xyzw, r1.xyzw
-mul r1.xyzw, v6.xyzw, cb1[13].xxxx
-add r0.xyzw, r0.xyzw, r1.xyzw
-mul r1.xyzw, v3.xyzw, cb1[10].yyyy
-mul r2.xyzw, v4.xyzw, cb1[11].yyyy
-add r1.xyzw, r1.xyzw, r2.xyzw
-mul r2.xyzw, v5.xyzw, cb1[12].yyyy
-add r1.xyzw, r1.xyzw, r2.xyzw
-mul r2.xyzw, v6.xyzw, cb1[13].yyyy
-add r1.xyzw, r1.xyzw, r2.xyzw
-mul r2.xyzw, v3.xyzw, cb1[10].zzzz
-mul r3.xyzw, v4.xyzw, cb1[11].zzzz
-add r2.xyzw, r2.xyzw, r3.xyzw
-mul r3.xyzw, v5.xyzw, cb1[12].zzzz
-add r2.xyzw, r2.xyzw, r3.xyzw
-mul r3.xyzw, v6.xyzw, cb1[13].zzzz
-add r2.xyzw, r2.xyzw, r3.xyzw
-mul r3.xyzw, v3.xyzw, cb1[10].wwww
-mul r4.xyzw, v4.xyzw, cb1[11].wwww
-add r3.xyzw, r3.xyzw, r4.xyzw
-mul r4.xyzw, v5.xyzw, cb1[12].wwww
-add r3.xyzw, r3.xyzw, r4.xyzw
-mul r4.xyzw, v6.xyzw, cb1[13].wwww
-add r3.xyzw, r3.xyzw, r4.xyzw
-dp4 r0.x, v0.xyzw, r0.xyzw  // r0.x <- vout.sv_position.x
-dp4 r0.y, v0.xyzw, r1.xyzw  // r0.y <- vout.sv_position.y
-dp4 r0.z, v0.xyzw, r2.xyzw  // r0.z <- vout.sv_position.z
-dp4 r0.w, v0.xyzw, r3.xyzw  // r0.w <- vout.sv_position.w
-
-#line 9
-dp4 r1.x, v0.xyzw, v3.xyzw  // r1.x <- vout.position.x
-dp4 r1.y, v0.xyzw, v4.xyzw  // r1.y <- vout.position.y
-dp4 r1.z, v0.xyzw, v5.xyzw  // r1.z <- vout.position.z
-dp4 r1.w, v0.xyzw, v6.xyzw  // r1.w <- vout.position.w
-
-#line 10
-itof r2.w, l(0)  // r2.w <- normal.w
-
-#line 11
-mov r2.xyz, v1.xyzx
-dp4 r3.x, r2.xyzw, v3.xyzw
-dp4 r3.y, r2.xyzw, v4.xyzw
-dp4 r3.z, r2.xyzw, v5.xyzw
-dp4 r3.w, r2.xyzw, v6.xyzw
-dp4 r2.x, r3.xyzw, r3.xyzw
-rsq r2.x, r2.x
-mul r2.xyzw, r2.xxxx, r3.xyzw  // r2.x <- vout.normal.x; r2.y <- vout.normal.y; r2.z <- vout.normal.z; r2.w <- vout.normal.w
-
-#line 13
-mov r3.xyzw, cb0[0].xyzw  // r3.x <- vout.color.x; r3.y <- vout.color.y; r3.z <- vout.color.z; r3.w <- vout.color.w
-
-#line 15
-mov r4.xy, v2.xyxx  // r4.x <- vout.texcoord.x; r4.y <- vout.texcoord.y
-
-#line 17
-mov o0.xyzw, r0.xyzw
-mov o1.xyzw, r1.xyzw
-mov o2.xyzw, r2.xyzw
-mov o3.xyzw, r3.xyzw
-mov o4.xy, r4.xyxx
+dcl_temps 2
+mul r0.xyzw, v4.xyzw, cb1[11].xxxx
+mad r0.xyzw, v3.xyzw, cb1[10].xxxx, r0.xyzw
+mad r0.xyzw, v5.xyzw, cb1[12].xxxx, r0.xyzw
+mad r0.xyzw, v6.xyzw, cb1[13].xxxx, r0.xyzw
+dp4 o0.x, v0.xyzw, r0.xyzw
+mul r0.xyzw, v4.xyzw, cb1[11].yyyy
+mad r0.xyzw, v3.xyzw, cb1[10].yyyy, r0.xyzw
+mad r0.xyzw, v5.xyzw, cb1[12].yyyy, r0.xyzw
+mad r0.xyzw, v6.xyzw, cb1[13].yyyy, r0.xyzw
+dp4 o0.y, v0.xyzw, r0.xyzw
+mul r0.xyzw, v4.xyzw, cb1[11].zzzz
+mad r0.xyzw, v3.xyzw, cb1[10].zzzz, r0.xyzw
+mad r0.xyzw, v5.xyzw, cb1[12].zzzz, r0.xyzw
+mad r0.xyzw, v6.xyzw, cb1[13].zzzz, r0.xyzw
+dp4 o0.z, v0.xyzw, r0.xyzw
+mul r0.xyzw, v4.xyzw, cb1[11].wwww
+mad r0.xyzw, v3.xyzw, cb1[10].wwww, r0.xyzw
+mad r0.xyzw, v5.xyzw, cb1[12].wwww, r0.xyzw
+mad r0.xyzw, v6.xyzw, cb1[13].wwww, r0.xyzw
+dp4 o0.w, v0.xyzw, r0.xyzw
+dp4 o1.x, v0.xyzw, v3.xyzw
+dp4 o1.y, v0.xyzw, v4.xyzw
+dp4 o1.z, v0.xyzw, v5.xyzw
+dp4 o1.w, v0.xyzw, v6.xyzw
+dp3 r0.x, v1.xyzx, v3.xyzx
+dp3 r0.y, v1.xyzx, v4.xyzx
+dp3 r0.z, v1.xyzx, v5.xyzx
+dp3 r0.w, v1.xyzx, v6.xyzx
+dp4 r1.x, r0.xyzw, r0.xyzw
+rsq r1.x, r1.x
+mul o2.xyzw, r0.xyzw, r1.xxxx
+mov o3.xyzw, cb0[0].xyzw
+mov o4.xy, v2.xyxx
 ret 
-// Approximately 53 instruction slots used
+// Approximately 34 instruction slots used

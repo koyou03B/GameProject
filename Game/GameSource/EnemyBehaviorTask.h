@@ -12,18 +12,22 @@
 #include<cereal/types/vector.hpp>
 #include <cereal/types/string.hpp>
 
+
+#include ".\LibrarySource\Vector.h"
 enum ENTRY_TASK
 {
 	REST_TASK,
 	INTIMIDATE_TASK,
 	WALK_TASK,
-	CHASE_TASK,
+	TARGET_TURN_TASK,
 	NEAR_ATTACK0_TASK,
 	NEAR_ATTACK1_TASK,
 	NEAR_ATTACK2_TASK,
-	Near_Special_TASK,
+	NEAR_ATTACK3_TASK,
+	NEAR_SPECIAL_TASK,
 	FAR_ATTACK0_TASK,
 	FAR_ATTACK1_TASK,
+	FAR_ATTACK2_TASK,
 	FAR_SPECIAL_TASK
 };
 
@@ -50,7 +54,7 @@ public:
 
 	virtual void Run(Enemy* enemy) = 0;
 
-	virtual uint32_t JudgePriority(const int id) = 0;
+	virtual uint32_t JudgePriority(const int id, const VECTOR3F playerPos = {}) = 0;
 
 	virtual void LoadOfBinaryFile(std::string taskName) = 0;
 	virtual void SaveOfBinaryFile() = 0;

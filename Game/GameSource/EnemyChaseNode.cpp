@@ -1,5 +1,10 @@
 #include "EnemyChaseNode.h"
 
+//**************************************************
+// JudgePriorityRule
+//	1.The player with more hit attacks
+//	2.Distance to the player
+//**************************************************
 uint32_t EnemyChaseNode::JudgePriority(const int id)
 {
 	auto players = MESSENGER.CallPlayersInstance();
@@ -15,11 +20,19 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 			uint32_t attackHitCount = players.at(i)->GetJudgeElement().attackHitCount;
 			if (targetAttackHitCount < attackHitCount)
 			{
+				enemy->GetJudgeElement().targetID = i;
 				return m_priority;
-		
 			}
 		}
 	}
+
+	VECTOR3F playerPosition = players.at(targetID)->GetWorldTransform().position;
+	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
+
+	float distance = ToDistVec3(playerPosition - enemyPosition);
+
+	if (distance >= m_maxDirection)
+		return m_priority;
 
 	return minPriority;
 }

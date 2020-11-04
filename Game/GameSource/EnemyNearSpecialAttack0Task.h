@@ -13,7 +13,7 @@ public:
 	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
 	bool IsTurnChase(Enemy* enemy);
 	int  JudgeTurnChace(Enemy* enemy);
-	uint32_t JudgePriority(const int id);
+	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
 	{

@@ -19,40 +19,18 @@
 // COLOR                    0   xyzw        2     NONE   float   xyzw
 //
 vs_5_0
-dcl_globalFlags refactoringAllowed | skipOptimization
+dcl_globalFlags refactoringAllowed
 dcl_input_sgv v0.x, vertex_id
 dcl_output_siv o0.xyzw, position
 dcl_output o1.xy
 dcl_output o2.xyzw
-dcl_temps 3
-//
-// Initial variable locations:
-//   v0.x <- vertex_id; 
-//   o2.x <- <main return value>.color.x; o2.y <- <main return value>.color.y; o2.z <- <main return value>.color.z; o2.w <- <main return value>.color.w; 
-//   o1.x <- <main return value>.texcoord.x; o1.y <- <main return value>.texcoord.y; 
-//   o0.x <- <main return value>.sv_position.x; o0.y <- <main return value>.sv_position.y; o0.z <- <main return value>.sv_position.z; o0.w <- <main return value>.sv_position.w
-//
-#line 6 "D:\Lib関連\GameProject\Library\LibrarySource\FullScreen_vs.hlsl"
-mov r0.x, l(1)
-ishl r0.x, v0.x, r0.x
-mov r0.y, l(2)
-and r0.x, r0.y, r0.x
-mov r0.y, l(2)
-and r0.y, r0.y, v0.x
-utof r1.x, r0.x  // r1.x <- vout.texcoord.x
-utof r1.y, r0.y  // r1.y <- vout.texcoord.y
-
-#line 7
-mul r0.xy, r1.xyxx, l(2.000000, -2.000000, 0.000000, 0.000000)
-add r0.xy, r0.xyxx, l(-1.000000, 1.000000, 0.000000, 0.000000)  // r0.x <- vout.sv_position.x; r0.y <- vout.sv_position.y
-mov r0.zw, l(0,0,0,1.000000)  // r0.z <- vout.sv_position.z; r0.w <- vout.sv_position.w
-
-#line 8
-mov r2.xyzw, l(1.000000,1.000000,1.000000,1.000000)  // r2.x <- vout.color.x; r2.y <- vout.color.y; r2.z <- vout.color.z; r2.w <- vout.color.w
-
-#line 9
-mov o0.xyzw, r0.xyzw
-mov o2.xyzw, r2.xyzw
-mov o1.xy, r1.xyxx
+dcl_temps 1
+bfi r0.x, l(1), l(1), v0.x, l(0)
+and r0.z, v0.x, l(2)
+utof r0.xy, r0.xzxx
+mad o0.xy, r0.xyxx, l(2.000000, -2.000000, 0.000000, 0.000000), l(-1.000000, 1.000000, 0.000000, 0.000000)
+mov o1.xy, r0.xyxx
+mov o0.zw, l(0,0,0,1.000000)
+mov o2.xyzw, l(1.000000,1.000000,1.000000,1.000000)
 ret 
-// Approximately 16 instruction slots used
+// Approximately 8 instruction slots used

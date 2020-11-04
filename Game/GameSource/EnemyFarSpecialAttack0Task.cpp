@@ -5,7 +5,7 @@ void EnemyFarSpecialAttack0Task::Run(Enemy* enemy)
 {
 }
 
-uint32_t EnemyFarSpecialAttack0Task::JudgePriority(const int id)
+uint32_t EnemyFarSpecialAttack0Task::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
 	bool isWrath = enemy->GetEmotion().wrathParm.isWrath;

@@ -1,4 +1,5 @@
 #include "SceneClear.h"
+#include ".\LibrarySource\Input.h"
 //#include"vectorCombo.h"
 bool Clear::Initialize(ID3D11Device* device)
 {
@@ -7,7 +8,11 @@ bool Clear::Initialize(ID3D11Device* device)
 
 void Clear::Update(float& elapsedTime)
 {
-
+	if (KEYBOARD._keys[DIK_3] == 1)
+	{
+		SceneLabel label = SceneLabel::TITLE;
+		ActivateScene.ChangeScene(label);
+	}
 }
 
 void Clear::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)

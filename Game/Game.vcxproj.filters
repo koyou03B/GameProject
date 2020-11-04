@@ -236,9 +236,6 @@
     <ClCompile Include="GameSource\EnemyRestTask.cpp">
       <Filter>Sources\BehaviorTree\Task\Wait</Filter>
     </ClCompile>
-    <ClCompile Include="GameSource\EnemyChaseTask.cpp">
-      <Filter>Sources\BehaviorTree\Task\Chase</Filter>
-    </ClCompile>
     <ClCompile Include="GameSource\EnemyNearAttack0Task.cpp">
       <Filter>Sources\BehaviorTree\Task\Attack\UnSpecial\Near</Filter>
     </ClCompile>
@@ -269,9 +266,6 @@
     <ClCompile Include="GameSource\EnemyBehaviorNode.cpp">
       <Filter>Sources\BehaviorTree\Node</Filter>
     </ClCompile>
-    <ClCompile Include="GameSource\EnemyWalkTask.cpp">
-      <Filter>Sources\BehaviorTree\Task\Wait</Filter>
-    </ClCompile>
     <ClCompile Include="GameSource\EnemyNearSpecialAttack0Task.cpp">
       <Filter>Sources\BehaviorTree\Task\Attack\Special</Filter>
     </ClCompile>
@@ -289,6 +283,18 @@
     </ClCompile>
     <ClCompile Include="GameSource\EnemyUnSpecialAttackNode.cpp">
       <Filter>Sources\BehaviorTree\Node\Enemy\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyWalkTask.cpp">
+      <Filter>Sources\BehaviorTree\Task\Chase</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyTargetTurnTask.cpp">
+      <Filter>Sources\BehaviorTree\Task\Chase</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyNearAttack3Task.cpp">
+      <Filter>Sources\BehaviorTree\Task\Attack\UnSpecial\Near</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyFarAttack2Task.cpp">
+      <Filter>Sources\BehaviorTree\Task\Attack\UnSpecial\Far</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -382,9 +388,6 @@
     <ClInclude Include="GameSource\EnemyIntimidateTask.h">
       <Filter>Headers\BehaviorTree\Enemy\Task\Wait</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\EnemyChaseTask.h">
-      <Filter>Headers\BehaviorTree\Enemy\Task\Chase</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\EnemyNearAttack0Task.h">
       <Filter>Headers\BehaviorTree\Enemy\Task\Attack\Near</Filter>
     </ClInclude>
@@ -415,9 +418,6 @@
     <ClInclude Include="GameSource\EnemyTaskAll.h">
       <Filter>Headers\BehaviorTree\Enemy\Task</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\EnemyWalkTask.h">
-      <Filter>Headers\BehaviorTree\Enemy\Task\Wait</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\EnemyChaseNode.h">
       <Filter>Headers\BehaviorTree\Enemy\Node\Chase</Filter>
     </ClInclude>
@@ -438,6 +438,18 @@
     </ClInclude>
     <ClInclude Include="GameSource\EnemySpecialAttackNode.h">
       <Filter>Headers\BehaviorTree\Enemy\Node\Fight</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EnemyWalkTask.h">
+      <Filter>Headers\BehaviorTree\Enemy\Task\Chase</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EnemyTargetTurnTask.h">
+      <Filter>Headers\BehaviorTree\Enemy\Task\Chase</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EnemyNearAttack3Task.h">
+      <Filter>Headers\BehaviorTree\Enemy\Task\Attack\Near</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EnemyFarAttack2Task.h">
+      <Filter>Headers\BehaviorTree\Enemy\Task\Attack\Far</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

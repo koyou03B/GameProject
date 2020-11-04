@@ -90,6 +90,7 @@ namespace Source
 			void Update(float& elapsedTime);
 			void LockON();
 			void ChangeObject();
+			void Vibrate(float elapsedTime);
 			void Activate(ID3D11DeviceContext* immediateContext);
 			void Deactivate(ID3D11DeviceContext* immediateContext) { m_constantsBuffer->Deactivate(immediateContext); }
 			void Editor();
@@ -145,7 +146,7 @@ namespace Source
 				m_nextEye += m_right;
 			}
 
-
+			inline void SetVibration(float range, float timer) { m_vibrateRange = range; m_vibrateTimer = timer; }
 			inline static CameraManager* GetInstance()
 			{
 				static CameraManager instance;
@@ -189,6 +190,8 @@ namespace Source
 			float m_focalLength = 0.0f;
 			float m_heightAboveGround = 0.0f;
 			float m_value = 0.0f;
+			float m_vibrateTimer = 0.0f;
+			float m_vibrateRange = 0.0f;
 			bool m_nowFreeMode = false;
 			bool m_nowChangeTarget = false;
 		};

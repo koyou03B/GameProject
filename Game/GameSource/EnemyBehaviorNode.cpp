@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <random>
 #include "EnemyBehaviorNode.h"
-
+#include "MessengTo.h"
 void EnemyBehaviorNode::Release()
 {
 	if (!m_task.empty())
@@ -87,9 +87,13 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 		int childTaskCount = static_cast<int>(m_task.size());
 		std::shared_ptr<EnemyBehaviorTask> selectTask;
 		uint32_t priority = 0;
+		auto player = MESSENGER.CallPlayersInstance();
+		std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+		int targetID = enemy->GetJudgeElement().targetID;
+		VECTOR3F playerPosition = player.at(targetID)->GetWorldTransform().position;
 		for (int i = 0; i < childTaskCount; ++i)
 		{
-			uint32_t taskPriority = m_task.at(i)->JudgePriority(id);
+			uint32_t taskPriority = m_task.at(i)->JudgePriority(id, playerPosition);
 			if (priority < taskPriority)
 			{
 				selectTask = m_task.at(i);
@@ -102,11 +106,11 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 	break;
 	case RANDOM:
 	{
-		int childCount = static_cast<int>(m_family.childs.size()) - 1;
+		int taskCount = static_cast<int>(m_task.size()) - 1;
 		std::random_device rnd;
 		std::mt19937 mt(rnd());
-		std::uniform_int_distribution<> randChildCount(0, childCount);
-		int selectNomber = randChildCount(mt);
+		std::uniform_int_distribution<> randTaskCount(0, taskCount);
+		int selectNomber = randTaskCount(mt);
 
 		return  std::make_pair(0,m_task[selectNomber]);
 	}

@@ -62,6 +62,7 @@ private:
 		RIGHTPUNCHING,
 		LEFTPUNCHING,
 		LASTTPUNCHING,
+		LEFTFIRSTKICK,
 		RIGHTKICK,
 		LEFTKICKING,
 		IMPACT,
@@ -116,4 +117,5 @@ private:
 	Source::Input::Input* m_input;
 	float m_padDeadLine;
 	float m_elapsedTime;
+	bool m_adjustAnimation;
 };

@@ -1,16 +1,21 @@
 #pragma once
 #include "EnemyBehaviorTask.h"
 #include "CharacterParameter.h"
+
 class Enemy;
-class EnemyChaseTask : public EnemyBehaviorTask
+class EnemyNearAttack3Task : public EnemyBehaviorTask
 {
 public:
-	EnemyChaseTask() = default;
-	~EnemyChaseTask() = default;
+	EnemyNearAttack3Task() { m_moveState = Action::START; };
+	~EnemyNearAttack3Task() = default;
 	void Run(Enemy* enemy);
-	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
+	void JudgeAttack(Enemy* enemy, const int attackNo);
 
-	uint32_t JudgePriority(const int id);
+	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
+	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
+	bool IsTurnChase(Enemy* enemy);
+	int  JudgeTurnChace(Enemy* enemy);
+	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
 	{
@@ -57,11 +62,24 @@ public:
 			);
 		}
 	}
-
 private:
-	int m_targetID = 0;
-	bool m_isLockOn = false;
-	const uint32_t m_moveAnimationTime = 70;
+	enum Action
+	{
+		START,
+		RIGHT_PUNCH_LOWER,
+		TURN_CHACE,
+		END
+	};
+	const uint32_t		kAttackTimer[2] = { 65,90 };
+	const uint32_t		kTurnChanseTimer = 70;
+	const uint32_t		kAttackSlowTimer = 60;
+	const int			kCollisionNo = 1;
+	const int			kRestValue = 4;
+	const float			kBlendValue = 0.055f;
+	const float			kMinDirection = 20.0f;
+
+	int					m_attackNo = 0;
+	VECTOR3F			m_targetPosition = {};
 };
 
-CEREAL_CLASS_VERSION(EnemyChaseTask, 2);
+CEREAL_CLASS_VERSION(EnemyNearAttack3Task, 2);

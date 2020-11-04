@@ -4,6 +4,7 @@
 
 void EnemyWalkTask::Run(Enemy* enemy)
 {
+#if 0
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
@@ -11,7 +12,8 @@ void EnemyWalkTask::Run(Enemy* enemy)
 		m_taskState = TASK_STATE::RUN;
 		if (animation.animationBlend.GetSampler().size() != 2)
 		{
-			m_animNo = JudgeTurnChace(enemy);
+			//m_animNo = JudgeTurnChace(enemy);
+			m_animNo = static_cast<int>(Enemy::Animation::RUN);
 			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
 			animation.animationBlend.ResetAnimationFrame();
 		}
@@ -20,7 +22,7 @@ void EnemyWalkTask::Run(Enemy* enemy)
 			if (JudgeBlendRatio(animation))
 			{
 				++m_moveState;
-				++enemy->GetJudgeElement().attackCount;
+				++enemy->GetJudgeElement().moveCount;
 				m_animNo = Enemy::Animation::IDLE;
 			}
 		}
@@ -35,8 +37,22 @@ void EnemyWalkTask::Run(Enemy* enemy)
 			++m_moveState;
 		}
 		break;
-		break;
+	case Action::END:
+		if (JudgeBlendRatio(animation))
+		{
+			animation.animationBlend.ResetAnimationSampler(0);
+			m_moveState = 0;
+			m_taskState = TASK_STATE::END;
+
+			auto& players = MESSENGER.CallPlayersInstance();
+			for (auto& player : players)
+			{
+				player->GetJudgeElement().attackHitCount = 0;
+			}
+		}
 	}
+
+#endif
 }
 
 bool EnemyWalkTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
@@ -130,7 +146,7 @@ bool EnemyWalkTask::IsTurnChase(Enemy* enemy)
 		return true;
 	//else
 	//	m_walkTime += enemy->GetElapsedTime();
-#else
+#elif 0
 	auto playerTransform = player->GetWorldTransform();
 	auto& enemyTransform = enemy->GetWorldTransform();
 
@@ -161,7 +177,54 @@ bool EnemyWalkTask::IsTurnChase(Enemy* enemy)
 	enemyTransform.angle.y = dot;
 	enemyTransform.WorldUpdate();
 
-#endif
+#elif 1
+	//^‚Á‚·‚®‚Å‚¢‚¢‚æ
+	if (m_walkTime > kWalkTimer)
+		return true;
+	else
+	{
+		m_walkTime += enemy->GetElapsedTime();
+		auto playerTransform = player->GetWorldTransform();
+		auto& enemyTransform = enemy->GetWorldTransform();
+
+		VECTOR3F enemyPosition = enemyTransform.position;
+		VECTOR3F playerPosition = playerTransform.position;
+		VECTOR3F nDistance = NormalizeVec3(playerPosition - enemyPosition);
+		VECTOR3F velocity = nDistance * m_accel;
+		enemy->GetWorldTransform().position += velocity * enemy->GetElapsedTime();
+
+		VECTOR3F angle = enemy->GetWorldTransform().angle;
+		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
+		front = NormalizeVec3(front);
+
+		float dot = DotVec3(front, nDistance);
+		if (!std::isfinite(dot))
+			dot = 0.0f;
+		float rot = 1.0f - dot;
+		float limit = enemy->GetMove().turnSpeed;
+		if (rot > limit)
+		{
+			rot = limit;
+		}
+		VECTOR3F cross = CrossVec3(front, nDistance);
+		if (cross.y > 0.0f)
+		{
+			enemyTransform.angle.y += rot;
+		}
+		else
+		{
+			enemyTransform.angle.y -= rot;
+		}
+		enemyTransform.WorldUpdate();
+
+		enemy->GetWorldTransform().WorldUpdate();
+
+		float distance = ToDistVec3(playerPosition - enemyPosition);
+
+		if (distance < m_maxDirection)
+			return true;
+	}
+#endif 
 	return false;
 }
 
@@ -182,22 +245,14 @@ int EnemyWalkTask::JudgeTurnChace(Enemy* enemy)
 
 	VECTOR3F cross = CrossVec3(front, normalizeDist);
 	if (cross.y > 0.0f)
-		return Enemy::Animation::RIGHT_WALK;
+		return Enemy::Animation::RightTurn;
 	else
-		return Enemy::Animation::LEFT_WALK;
+		return Enemy::Animation::LeftTurn;
 
 	return 0;
 }
 
-uint32_t EnemyWalkTask::JudgePriority(const int id)
+uint32_t EnemyWalkTask::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
-	//std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
-
-	//uint32_t exhaustionCost = enemy->GetEmotion().exhaustionParm.exhaustionCost;
-
-	//if (exhaustionCost >= enemy->GetEmotion().exhaustionParm.maxExhaustionCost)
-	//	return m_priority;
-
-	return minPriority;
-
+	return m_priority;
 }

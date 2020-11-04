@@ -3,6 +3,7 @@
 
 void EnemyNearSpecialAttack0Task::Run(Enemy* enemy)
 {
+#if 0
 	auto& animation = enemy->GetBlendAnimation();
 
 	switch (m_moveState)
@@ -83,6 +84,7 @@ void EnemyNearSpecialAttack0Task::Run(Enemy* enemy)
 		}
 		break;
 	}
+#endif
 }
 
 bool EnemyNearSpecialAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
@@ -152,7 +154,7 @@ bool EnemyNearSpecialAttack0Task::IsTurnChase(Enemy* enemy)
 	if (kTurnChanseTimer > currentAnimationTime)
 	{
 		auto& enemyTransform = enemy->GetWorldTransform();
-		if (m_animNo == Enemy::Animation::LEFT_TURN)
+		if (m_animNo == Enemy::Animation::LeftTurn)
 			rot *= -1;
 
 		enemyTransform.angle.y += rot;
@@ -182,14 +184,14 @@ int EnemyNearSpecialAttack0Task::JudgeTurnChace(Enemy* enemy)
 	float cosTheta = acosf(dot);
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 	if (cosTheta <= frontValue)
-		return Enemy::Animation::IDLE;
+		return Enemy::Animation::Idle;
 	else
 	{
 		VECTOR3F cross = CrossVec3(front, normalizeDist);
 		if (cross.y > 0.0f)
-			return Enemy::Animation::RIGHT_TURN;
+			return Enemy::Animation::RightTurn;
 		else
-			return Enemy::Animation::LEFT_TURN;
+			return Enemy::Animation::LeftTurn;
 	}
 
 	return 0;
@@ -216,7 +218,7 @@ void EnemyNearSpecialAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
 	}
 }
 
-uint32_t EnemyNearSpecialAttack0Task::JudgePriority(const int id)
+uint32_t EnemyNearSpecialAttack0Task::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
 	bool isWrath = enemy->GetEmotion().wrathParm.isWrath;

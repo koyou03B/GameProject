@@ -215,6 +215,7 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 		Collision collision;
 		if (collision.JudgeSphereAndSphere(mySelf, target))
 		{
+			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.2f,0.5f);
 			++m_players[id]->GetJudgeElement().attackHitCount;
 			++m_enemys[0]->GetJudgeElement().damageCount;
 			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;

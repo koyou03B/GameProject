@@ -1,14 +1,16 @@
 #pragma once
 #include "EnemyBehaviorTask.h"
-
+#include "CharacterParameter.h"
 class Enemy;
-class EnemyFarSpecialAttack0Task : public EnemyBehaviorTask
+class EnemyTargetTurnTask : public EnemyBehaviorTask
 {
 public:
-	EnemyFarSpecialAttack0Task() = default;
-	~EnemyFarSpecialAttack0Task() = default;
+	EnemyTargetTurnTask() = default;
+	~EnemyTargetTurnTask() = default;
 	void Run(Enemy* enemy);
-	uint32_t JudgePriority(const int id,const VECTOR3F playerPos) override;
+	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
+
+	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
 	{
@@ -55,6 +57,11 @@ public:
 			);
 		}
 	}
+
+private:
+	int m_targetID = 0;
+	bool m_isLockOn = false;
+	const uint32_t m_moveAnimationTime = 70;
 };
 
-CEREAL_CLASS_VERSION(EnemyFarSpecialAttack0Task, 2);
+CEREAL_CLASS_VERSION(EnemyTargetTurnTask, 2);

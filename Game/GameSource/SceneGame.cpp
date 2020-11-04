@@ -106,7 +106,17 @@ void Game::Update(float& elapsedTime)
 	else
 		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 	
+	if (KEYBOARD._keys[DIK_1] == 1)
+	{
+		SceneLabel label = SceneLabel::CLEAR;
+		ActivateScene.ChangeScene(label);
+	}
 
+	if (KEYBOARD._keys[DIK_2] == 1)
+	{
+		SceneLabel label = SceneLabel::OVER;
+		ActivateScene.ChangeScene(label);
+	}
 //	if (GetEntityManager().FindEntity(2).HasComponent<StaticModel>())
 //	{
 //#if 0
