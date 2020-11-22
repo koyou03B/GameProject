@@ -22,7 +22,7 @@ namespace Source
 		{
 			STAGE,
 			ARROW,
-			AXE,
+			STONE,
 			END,
 		};
 

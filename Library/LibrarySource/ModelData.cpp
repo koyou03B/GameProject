@@ -17,7 +17,7 @@ namespace Source
 
 			{ StaticModel::STAGE,	"../Asset/Model/Static/Stage/Stage.fbx"},
 			{ StaticModel::ARROW,	"../Asset/Model/Static/Arrow/Arrow.fbx"},
-			{ StaticModel::AXE,		"../Asset/Model/Static/Axe/BattleAxe_GEO.fbx"},
+			{ StaticModel::STONE,	"../Asset/Model/Static/Stone/untitled.fbx"},
 
 		};
 

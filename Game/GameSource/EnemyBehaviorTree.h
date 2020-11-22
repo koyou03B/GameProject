@@ -213,8 +213,8 @@ class OperatCoolTime
 public:
 	bool operator() (std::shared_ptr<EnemyBehaviorTask> taskFirst, std::shared_ptr<EnemyBehaviorTask> taskSecond)
 	{
-		int coolTime1 = taskFirst->GetCoolTimer();
-		int coolTime2 = taskSecond->GetCoolTimer();
+		float coolTime1 = taskFirst->GetCoolTimer();
+		float coolTime2 = taskSecond->GetCoolTimer();
 
 		return (coolTime1 < coolTime2) ? true : false;
 	}
@@ -228,7 +228,7 @@ public:
 
 	void Release();
 
-	void UpdateUseTasks();
+	void UpdateUseTasks(const float elapsedTime);
 
 	void AddNode(std::string parentName, std::shared_ptr<EnemyBehaviorNode> node);
 
@@ -252,7 +252,7 @@ public:
 	inline NodeData& GetNodeData() { return m_nodeData; }
 	inline TaskData& GetTaskData() { return m_taskData; }
 	inline std::unique_ptr<EnemyRootNode>& GetRootNode() { return m_nodes; }
-
+	inline std::vector<std::shared_ptr<EnemyBehaviorTask>>& GetUseTask() { return m_useTasks; }
 	void SetRootNodeChild();
 	void SetTaskToNode();
 

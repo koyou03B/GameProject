@@ -7,5 +7,6 @@ enum class MessengType
 	CALL_FRIEND,	//’‡ŠÔ‚ðŒÄ‚ñ‚Å‚­‚¾‚³‚¢
 	CALL_HELP,		//•‚¯‚Ä‚­‚¾‚³‚¢
 	CHANGE_PLAYER,	//PLAYER•ÏX‚µ‚Ü‚·
-	SHIFT_AIM_MODE
+	SHIFT_AIM_MODE,
+	TELL_DEAD
 };

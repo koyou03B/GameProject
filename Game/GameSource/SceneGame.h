@@ -12,6 +12,7 @@
 #include ".\LibrarySource\ConstantBuffer.h"
 #include ".\LibrarySource\EntityComponentSystem.h"
 #include ".\LibrarySource\ScreenFilter.h"
+#include ".\LibrarySource\Vignette.h"
 #ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
 #include "..\External_libraries\imgui\imgui_impl_dx11.h"
@@ -47,7 +48,11 @@ private:
 	std::unique_ptr<Stage> m_stage;
 	std::shared_ptr<MetaAI> m_metaAI;
 	std::unique_ptr<Source::Fog::Fog> m_fog;
-	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer;
+	std::unique_ptr<Source::Vignette::Vignette> m_vignette;
+	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer[3];
 	std::unique_ptr<Source::ScreenFilter::ScreenFilter> m_screenFilter;
 
+	int m_eventState = 0;
+	float m_vignetteTimer = 0.0f;
+	bool m_isAct = 0;
 };

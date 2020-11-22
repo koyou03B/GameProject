@@ -148,6 +148,15 @@
     <Filter Include="Headers\Shaders\Fog">
       <UniqueIdentifier>{c7cf5ca8-6dc4-4dc6-aa21-cf8de4510642}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Vignette">
+      <UniqueIdentifier>{502383e2-7130-4524-ab25-313b5c7f53bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Shaders\Vignette">
+      <UniqueIdentifier>{decdf975-f74e-4270-9069-c8e36feaa77d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Shaders\Vignette">
+      <UniqueIdentifier>{cf495f99-741a-44e6-bfbf-3bc6d23230cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imconfig.h">
@@ -273,6 +282,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Function.h">
       <Filter>Headers\Necessary\Comon</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.h">
+      <Filter>Headers\Shaders\Vignette</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui.cpp">
@@ -371,6 +383,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Function.cpp">
       <Filter>Sources\Necessary\Comon</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.cpp">
+      <Filter>Sources\Shaders\Vignette</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad.hlsli">
@@ -408,6 +423,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.hlsli">
       <Filter>Shaders\Fog</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.hlsli">
+      <Filter>Shaders\Vignette</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -467,6 +485,12 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog_vs.hlsl">
       <Filter>Shaders\Fog</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette_ps.hlsl">
+      <Filter>Shaders\Vignette</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette_vs.hlsl">
+      <Filter>Shaders\Vignette</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

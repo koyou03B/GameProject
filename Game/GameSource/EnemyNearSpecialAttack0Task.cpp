@@ -154,7 +154,7 @@ bool EnemyNearSpecialAttack0Task::IsTurnChase(Enemy* enemy)
 	if (kTurnChanseTimer > currentAnimationTime)
 	{
 		auto& enemyTransform = enemy->GetWorldTransform();
-		if (m_animNo == Enemy::Animation::LeftTurn)
+		if (m_animNo == Enemy::Animation::LEFT_TURN)
 			rot *= -1;
 
 		enemyTransform.angle.y += rot;
@@ -184,14 +184,14 @@ int EnemyNearSpecialAttack0Task::JudgeTurnChace(Enemy* enemy)
 	float cosTheta = acosf(dot);
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 	if (cosTheta <= frontValue)
-		return Enemy::Animation::Idle;
+		return Enemy::Animation::IDLE;
 	else
 	{
 		VECTOR3F cross = CrossVec3(front, normalizeDist);
 		if (cross.y > 0.0f)
-			return Enemy::Animation::RightTurn;
+			return Enemy::Animation::RIGHT_TURN;
 		else
-			return Enemy::Animation::LeftTurn;
+			return Enemy::Animation::LEFT_TURN;
 	}
 
 	return 0;

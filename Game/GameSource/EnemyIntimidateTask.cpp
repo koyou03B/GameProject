@@ -47,7 +47,7 @@ void EnemyIntimidateTask::Run(Enemy* enemy)
 
 bool EnemyIntimidateTask::JudgeBlendRatio(CharacterParameter::BlendAnimation & animation)
 {
-	animation.animationBlend._blendRatio += 0.045f;//magicNumber
+	animation.animationBlend._blendRatio += 0.08f;//magicNumber
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;

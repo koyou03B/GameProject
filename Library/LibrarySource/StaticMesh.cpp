@@ -111,6 +111,68 @@ namespace Source
 
 		}
 
+		void StaticMesh::Render(ID3D11DeviceContext* immediateContext, FLOAT4X4 world, const VECTOR4F& materialColor)
+		{
+			m_staticMeshVS->Activate(immediateContext);
+			m_staticMeshPS->Activate(immediateContext);
+			for (ModelResource::Substance<Vertex>::Mesh& mesh : _resource->_meshes)
+			{
+				UINT strides[2] = { sizeof(Vertex), sizeof(Instance) };
+				UINT offsets[2] = { 0, 0 };
+				ID3D11Buffer* vertexBuffers[2] = { mesh.vertexBuffer.Get(), m_instanceBuffer.Get() };
+				immediateContext->IASetVertexBuffers(0, 2, vertexBuffers, strides, offsets);
+				immediateContext->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+				immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+				immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
+				immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_TRUE), 1);
+				immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CLOCK_TRUE));
+
+				D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
+				D3D11_MAPPED_SUBRESOURCE mappedBuffer;
+				HRESULT hr = immediateContext->Map(m_instanceBuffer.Get(), 0, map, 0, &mappedBuffer);
+				if (FAILED(hr))
+					assert(!"Map miss");
+				Instance* instances = nullptr;
+				instances = static_cast<Instance*>(mappedBuffer.pData);
+					DirectX::XMStoreFloat4x4
+					(
+						&instances[0].world,
+						DirectX::XMMatrixTranspose
+						(
+							DirectX::XMLoadFloat4x4(&mesh.globalTransform) *
+							DirectX::XMLoadFloat4x4(&_resource->axisSystemTransform) *
+							DirectX::XMLoadFloat4x4(&world)
+						)
+					);
+				immediateContext->Unmap(m_instanceBuffer.Get(), 0);
+
+				for (ModelResource::Material& material : mesh.materials)
+				{
+					m_constantBuffer->data.materialColor = material.diffuse.color * materialColor;
+					m_constantBuffer->Activate(immediateContext, SLOT0, true, false);
+
+					if (_shaderON.diffuse)
+						immediateContext->PSSetShaderResources(0, 1, material.diffuse.shaderResourceView.GetAddressOf());
+					if (_shaderON.ambient)
+						immediateContext->PSSetShaderResources(1, 1, material.ambient.shaderResourceView.GetAddressOf());
+					if (_shaderON.specular)
+						immediateContext->PSSetShaderResources(2, 1, material.specular.shaderResourceView.GetAddressOf());
+					if (_shaderON.normalMap)
+						immediateContext->PSSetShaderResources(3, 1, material.normalMap.shaderResourceView.GetAddressOf());
+
+					immediateContext->PSSetSamplers(0, 1, Framework::GetSamplerState(Framework::SS_WRAP));
+					immediateContext->DrawIndexedInstanced(material.indexCount, 1, material.indexStart, 0, 0);
+
+				}
+				m_constantBuffer->Deactivate(immediateContext);
+
+			}
+			m_staticMeshPS->Deactivate(immediateContext);
+			m_staticMeshVS->Deactivate(immediateContext);
+
+		}
+
 		int StaticMesh::RayPick(const DirectX::XMFLOAT3& startPosition,
 			const DirectX::XMFLOAT3& endPosition,
 			DirectX::XMFLOAT3* outPosition,

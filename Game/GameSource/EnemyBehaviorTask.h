@@ -45,10 +45,10 @@ public:
 		END
 	};
 
-	void UpdateCoolTimer()
+	void UpdateCoolTimer(const float elapsedTime)
 	{
-		--m_coolTimer;
-		if (m_coolTimer == 0)
+		m_coolTimer-=elapsedTime;
+		if (m_coolTimer <= 0)
 			m_isUsed = false;
 	}
 
@@ -63,15 +63,16 @@ public:
 	inline std::string& GetTaskName() { return m_taskName;}
 	inline TASK_STATE& GetTaskState() { return m_taskState; }
 	inline uint32_t& GetMoveState() { return m_moveState; }
-	inline uint32_t& GetCoolTimer() { return m_coolTimer; }
 	inline uint32_t& GetPriority() { return m_priority; }
+	inline float& GetCoolTimer() { return m_coolTimer; }
 	inline bool& GetIsUsed() { return m_isUsed; }
+
 
 	inline void SetParentNodeName(const std::string& parentNodeName) { m_parentNodeName = parentNodeName; }
 	inline void SetTaskName(const std::string& taskName) { m_taskName = taskName; }
 	inline void SetTaskState(const TASK_STATE& taskState) { m_taskState = taskState; }
 	inline void SetMoveState(const uint32_t& moveState) { m_moveState = moveState; }
-	inline void SetCoolTimer(const uint32_t& coolTime) { m_coolTimer = coolTime; }
+	//inline void SetCoolTimer(const float& coolTime) { m_coolTimer = coolTime; }
 	inline void SetPriority(const uint32_t& priority) { m_priority = priority; }
 	inline void SetIsUsed(bool& isUse) { m_isUsed = isUse; }
 
@@ -82,7 +83,7 @@ protected:
 	std::string m_taskName;
 	TASK_STATE m_taskState;
 	uint32_t m_moveState = 0;
-	uint32_t m_coolTimer;
+	float m_coolTimer;
 	uint32_t m_priority;
 	int m_animNo;
 	bool m_isUsed = false;

@@ -22,7 +22,9 @@ public:
 		DirectX::XMFLOAT3 min;
 
 	};
-	bool JudgePointAndAABB(const VECTOR2F& myself, const AABB& target);
+	VECTOR3F JudgePointAndAABB(const VECTOR3F& myself, const AABB& target);
+	bool	 JudgePointAndAABB(const VECTOR2F& myself, const AABB& target);
+
 	bool JudgeAABBAndAABB(const AABB& myself, const AABB& target);
 	bool JudgeAABB3DAndAABB3D(const AABB3D& myself, const AABB3D& target);
 

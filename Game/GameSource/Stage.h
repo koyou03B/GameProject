@@ -6,6 +6,7 @@
 #include ".\LibrarySource\StaticMesh.h"
 #include ".\LibrarySource\InstanceData.h"
 #include ".\LibrarySource\ModelData.h"
+#include "Collision.h"
 class Stage
 {
 public:
@@ -14,7 +15,7 @@ public:
 
 	void Init();
 
-	void Update(float& elapsedTime) {};
+	void Update(float& elapsedTime);
 
 	void Render(ID3D11DeviceContext* immediateContext);
 
@@ -50,5 +51,5 @@ public:
 private:
 	std::shared_ptr<Source::StaticMesh::StaticMesh> m_model;
 	std::vector<Source::InstanceData::InstanceData> m_instanceData;
-
+	Collision::AABB m_range;
 };

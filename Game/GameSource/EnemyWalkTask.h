@@ -72,10 +72,10 @@ private:
 	};
 	const float		kWalkTimer = 3.0f;
 	const float		kFIveSecond = 300.0f;
-	const float		kBlendValue = 0.015f;
+	const float		kBlendValue = 0.05f;
 	const float		kTurnValue = 0.01f;
 	float m_walkTime = 0;
-	float m_accel = 32.0f;
+	float m_accel = 52.0f;
 	float m_maxDirection = 0.0f;
 
 };

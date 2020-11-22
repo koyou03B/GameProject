@@ -4,7 +4,7 @@
 
 void EnemyWalkTask::Run(Enemy* enemy)
 {
-#if 0
+#if 1
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
@@ -245,9 +245,9 @@ int EnemyWalkTask::JudgeTurnChace(Enemy* enemy)
 
 	VECTOR3F cross = CrossVec3(front, normalizeDist);
 	if (cross.y > 0.0f)
-		return Enemy::Animation::RightTurn;
+		return Enemy::Animation::RIGHT_TURN;
 	else
-		return Enemy::Animation::LeftTurn;
+		return Enemy::Animation::LEFT_TURN;
 
 	return 0;
 }

@@ -54,7 +54,10 @@ public:
 	bool EnemyAttackingMessage(const int id, CharacterParameter::Collision& enemy)
 	{
 		if (m_metaAI->CollisionEnemyAttack(id, enemy))
+		{
+			isVignette = true;
 			return true;
+		}
 
 		return false;
 	}
@@ -70,6 +73,7 @@ public:
 		return messegeTo;
 	};
 
+	bool isVignette = false;
 private:
 	std::shared_ptr<MetaAI> m_metaAI;
 };

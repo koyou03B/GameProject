@@ -24,7 +24,7 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 11)
+		if (version >= 12)
 		{
 			archive
 			(
@@ -34,7 +34,8 @@ public:
 				m_moveParm,
 				m_cameraParm,
 				m_stepParm,
-				m_collision
+				m_collision,
+				m_damageParm
 			);
 		}
 		else
@@ -56,22 +57,31 @@ private:
 	enum Animation
 	{
 		IDLE=1,
-		WALK,
 		RUN,
 		DIVE,
-		RIGHTPUNCHING,
-		LEFTPUNCHING,
-		LASTTPUNCHING,
-		LEFTFIRSTKICK,
-		RIGHTKICK,
-		LEFTKICKING,
-		IMPACT,
-		DEATH,
-		IDLE2,
-		ARMSET,
-		FIGHTIDLE,
-		HEAL
+		LEFT_KICK,
+		LEFT_DUSH_KICK,
+		RIGHT_KICK,
+		LEFT_ROLL_KICK,
+		RIGHT_ROLL_KICK,
+		RIGHT_PUNCH,
+		RIGHT_FLY_KICK,
+		HIT_REACTION,
+		HIT_BIG_REACTION,
+		DEATH
 	} m_animationType = IDLE;
+
+	enum AttackType
+	{
+		LeftKick,
+		LeftDushKick,
+		RightKick,
+		LeftRollKick,
+		RightRollKick,
+		RightPunch,
+		RightFlyKick,
+		NON
+	} m_attackType = NON;
 
 	void Move(float& elapsedTime);
 
@@ -85,7 +95,7 @@ private:
 
 	void ChangeCharacter();
 
-	void Attacking(Animation currentAnimation, Animation nextAnimations[2],
+	void Attacking(Animation currentAnimation, Animation nextAnimations,
 		CharacterParameter::Attack& attack,CharacterParameter::Collision& collision);
 
 	void Stepping(float& elapsedTime);
@@ -97,7 +107,7 @@ private:
 		m_moveParm.serialVersion = version;
 		m_cameraParm.serialVersion = version;
 		m_stepParm.serialVersion = version;
-
+		m_damageParm.serialVersion = version;
 		for (auto& atk : m_attackParm)
 		{
 			atk.serialVersion= version;

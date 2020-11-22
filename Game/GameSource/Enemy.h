@@ -1,11 +1,20 @@
 #pragma once
+#include "Stone.h"
 #include "CharacterAI.h"
 #include "EnemyBehaviorTree.h"
+
 class Enemy : public CharacterAI
 {
 public:
 	Enemy() = default;
-	~Enemy() { m_behaviorTree.Release(); };
+	~Enemy()
+	{ 
+		m_behaviorTree.Release();
+		if (m_selectTask)
+		{
+			m_selectTask.reset();
+		}
+	}
 
 	void Init() override;
 
@@ -20,13 +29,14 @@ public:
 	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
 	inline CharacterParameter::Attack& GetAttack(const int num) { return m_attackParm.at(num); }
 	inline CharacterParameter::BlendAnimation& GetBlendAnimation() { return m_blendAnimation; }
+	inline StoneParameter& GetStoneParameter() { return m_stoneParm; }
 
-
+	inline uint32_t& GetSignalAnimFrame(const int animNo) { return m_signalFrame[animNo]; }
 	inline float& GetElapsedTime() { return m_elapsedTime; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 6)
+		if (version >= 8)
 		{
 			archive
 			(
@@ -35,7 +45,10 @@ public:
 				m_emotionParm,
 				m_standardValuePram,
 				m_attackParm,
-				m_moveParm
+				m_moveParm,
+				m_signalFrame[0], m_signalFrame[1],
+				m_signalFrame[2], m_signalFrame[3],
+				m_stoneParm
 			);
 		}
 		else
@@ -46,8 +59,11 @@ public:
 				m_behaviorTree,
 				m_emotionParm,
 				m_standardValuePram,
-				m_attackParm
-
+				m_attackParm,
+				m_moveParm,
+				m_signalFrame[0], m_signalFrame[1],
+				m_signalFrame[2], m_signalFrame[3],
+				m_stoneParm
 			);
 		}
 	}
@@ -56,35 +72,34 @@ public:
 	enum  Animation
 	{
 		TPOSE0,
-		Idle,
-		Damage,
+		IDLE,
+		DAMAGE,
 		TPOSE1,
-		Knockdown,
-		Die,
-		Wrath,
-		LeftTurn,
-		RightTurn,
-		Run,
-		BackFlip,
-		StandUp,
-		MuscleSignal,
-		RelaxSignal,
-		RoaringSignal,
-		RunSignal,
-		CrossPunch,
-		TurnAttackLower,
-		Hook,
-		RightPunchLower,
-		TurnAttackHeight,
-		FallFlat_edit,
-		RightPunchUpper,
-		WrathNearAttack,
-		WrathFarAttack,
-
-
+		KNOCKDOWN,
+		DIE,
+		WRATH,
+		LEFT_TURN,
+		RIGHT_TURN,
+		RUN,
+		BACK_FLIP,
+		STAND_UP,
+		MUSCLE_SIGNAL,
+		RELAX_SIGNAL,
+		ROARING_SIGNAL,
+		RUN_SIGNAL,
+		CROSS_PUNCH,
+		TURN_ATTACK_LOWER,
+		TPOSE2,
+		HOOK,
+		RIGHT_PUNCH_LOWER,
+		TURN_ATTACK_HEIGHT,
+		FALL_FLAT_EDIT,
+		RIGHT_PUNCH_UPPER,
+		WRATH_NEAR_ATTACK,
+		WRATH_FAR_ATTACK,
 	};
 
-	enum class AttackType
+	enum  AttackType
 	{
 		CrossPunch,
 		TurnAttackLower,
@@ -106,9 +121,11 @@ private:
 	EnemyBehaviorTree m_behaviorTree;
 	std::shared_ptr<EnemyBehaviorTask> m_selectTask;
 
+	StoneParameter							m_stoneParm;
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
+	uint32_t m_signalFrame[4] = {};
 	int m_moveState;
 	float m_elapsedTime;
 	bool m_isAction;

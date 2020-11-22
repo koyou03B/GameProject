@@ -156,10 +156,12 @@ public:
 	{
 		uint32_t frameCount = 0;
 		uint32_t inputRange[2] = {};
-		uint32_t slowTimeFrameCount = 0;
+		uint32_t slowTimeFrameCount[2] = {};
 		float attackPoint = 0.0f;
 		float attackSpeed[2] = {};
-
+		VECTOR3F speed = {};
+		VECTOR3F maxSpeed = {};
+		VECTOR3F deceleration = {};
 		std::vector<XINPUT_GAMEPAD_BUTTONS> buttons;
 
 		uint32_t serialVersion = 0;
@@ -174,8 +176,9 @@ public:
 				(
 					frameCount,
 					inputRange[0], inputRange[1],
-					attackPoint,buttons, slowTimeFrameCount,
-					attackSpeed[0], attackSpeed[1]
+					attackPoint,buttons, slowTimeFrameCount[0],
+					attackSpeed[0], attackSpeed[1], slowTimeFrameCount[1],
+					speed, deceleration
 				);
 			}
 			else
@@ -184,12 +187,15 @@ public:
 				(
 					frameCount,
 					inputRange[0], inputRange[1],
-					attackPoint, buttons
+					attackPoint, buttons, slowTimeFrameCount[0],
+					attackSpeed[0], attackSpeed[1], slowTimeFrameCount[1]
+
 				);
 			}
 
 		}
 	};
+
 
 	struct Effect
 	{
@@ -352,6 +358,44 @@ public:
 		uint32_t currentBone[2] = {};
 	};
 
+	struct Damage
+	{
+		VECTOR3F vector;
+		VECTOR3F speed;
+		VECTOR3F deceleration;
+		VECTOR3F maxSpeed;
+		float hitComparison;
+		bool hasBigDamaged;
+
+		uint32_t serialVersion = 0;
+
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version)
+		{
+
+			if (serialVersion <= version)
+			{
+				archive
+				(
+					speed,
+					hitComparison,
+					deceleration
+				);
+			}
+			else
+			{
+				archive
+				(
+					speed,
+					hitComparison,
+					deceleration
+				);
+			}
+
+		}
+	};
+
+
 	struct DebugObjects
 	{
 		DebugObject debugObject;
@@ -377,4 +421,5 @@ CEREAL_CLASS_VERSION(CharacterParameter::Camera, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Collision, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Step, 12);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 13);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 15);
+CEREAL_CLASS_VERSION(CharacterParameter::Damage, 0);

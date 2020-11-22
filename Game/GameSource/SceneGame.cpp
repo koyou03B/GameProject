@@ -59,13 +59,24 @@ bool Game::Initialize(ID3D11Device* device)
 	// Shader
 	//*********************
 	{
-		m_frameBuffer = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
+		m_frameBuffer[0] = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
 			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
+	
+		m_frameBuffer[1] = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
+			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
+
+		m_frameBuffer[2] = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
+			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
+
 		m_fog = std::make_unique<Source::Fog::Fog>(device);
 
 		m_fog->ReadBinary();
 
 		m_screenFilter = std::make_unique<Source::ScreenFilter::ScreenFilter>(device);
+		m_screenFilter->_screenBuffer->data.screenColor = { 0.0f,0.0f,0.0f,1.0f };
+
+		m_vignette = std::make_unique<Source::Vignette::Vignette>(device);
+		m_vignette->ReadBinary();
 
 	}
 
@@ -76,36 +87,125 @@ bool Game::Initialize(ID3D11Device* device)
 void Game::Update(float& elapsedTime)
 {	
 
-
-	if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() != 
-		Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
+	switch (m_eventState)
 	{
-		CharacterAI* player = m_metaAI->GetPlayCharacter();
+	case 0:
+		m_screenFilter->_screenBuffer->data.screenColor.x += 0.01f;
+		m_screenFilter->_screenBuffer->data.screenColor.y += 0.01f;
+		m_screenFilter->_screenBuffer->data.screenColor.z += 0.01f;
+		if (m_screenFilter->_screenBuffer->data.screenColor.x >= 1.0f)
+			++m_eventState;
 
-		VECTOR3F distance = DistancePlayerToEnemy();
-		distance = NormalizeVec3(distance);
-		VECTOR3F rightVaule = CameraRightValue();
-		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-		//Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rightVaule);
-		//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-		//Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
-		//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
-		//Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
+		{
+			CharacterAI* player = m_metaAI->GetPlayCharacter();
 
-		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+			VECTOR3F distance = DistancePlayerToEnemy();
+		//	distance = NormalizeVec3(distance);
+			VECTOR3F rightVaule = CameraRightValue();
+			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
-		VECTOR3F pos = player->GetWorldTransform().position;
-		Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
-		CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
-		pos = enemy->GetWorldTransform().position;
-		Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
-		
-		m_metaAI->UpdateOfEnemys(elapsedTime);
-		m_metaAI->UpdateOfPlayers(elapsedTime);
+			VECTOR3F pos = player->GetWorldTransform().position;
+			Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
+			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
+			pos = enemy->GetWorldTransform().position;
+			Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
+
+			float time = 0.0f;
+			m_metaAI->UpdateOfEnemys(time);
+			m_metaAI->UpdateOfPlayers(time);
+
+		}
+		break;
+	case 1:
+		if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() !=
+			Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
+		{
+			CharacterAI* player = m_metaAI->GetPlayCharacter();
+
+			VECTOR3F distance = DistancePlayerToEnemy();
+			//distance = NormalizeVec3(distance);
+			VECTOR3F rightVaule = CameraRightValue();
+			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rightVaule);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
+
+			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+
+			VECTOR3F pos = player->GetWorldTransform().position;
+			Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
+			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
+			pos = enemy->GetWorldTransform().position;
+			Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
+
+			m_metaAI->UpdateOfEnemys(elapsedTime);
+			m_metaAI->UpdateOfPlayers(elapsedTime);
+
+			
+			if (MESSENGER.isVignette)
+			{
+				m_vignetteTimer += elapsedTime;
+				if (m_vignetteTimer >= 0.15f)
+				{
+					m_vignetteTimer = 0.0f;
+					MESSENGER.isVignette = false;
+				}
+				else
+					m_vignette->_vignetteBuffer->data.darkness = 7.0f;
+			}
+			else
+			{
+				if (m_vignette->_vignetteBuffer->data.darkness > 0.0f)
+					m_vignette->_vignetteBuffer->data.darkness -= 0.5f;
+
+				if (m_vignette->_vignetteBuffer->data.darkness < 0.0f)
+					m_vignette->_vignetteBuffer->data.darkness = 0.0f;
+			}
+
+			if (m_metaAI->GetIsFinish(0))
+			{
+				++m_eventState;
+			}
+			else if (m_metaAI->GetIsFinish(1))
+			{
+				++m_eventState;
+			}
+		}
+		else
+			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+
+		m_stage->Update(elapsedTime);
+		break;
+	case 2:
+		m_screenFilter->_screenBuffer->data.screenColor.x -= 0.01f;
+		m_screenFilter->_screenBuffer->data.screenColor.y -= 0.01f;
+		m_screenFilter->_screenBuffer->data.screenColor.z -= 0.01f;
+		if (m_screenFilter->_screenBuffer->data.screenColor.x <= 0.0f)
+		{
+			if (m_metaAI->GetIsFinish(0))
+			{
+				SceneLabel label = SceneLabel::OVER;
+				ActivateScene.ChangeScene(label);
+			}
+			else if (m_metaAI->GetIsFinish(1))
+			{
+				SceneLabel label = SceneLabel::CLEAR;
+				ActivateScene.ChangeScene(label);
+			}
+		}
+
+		break;
 	}
-	else
-		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
-	
+
+
+
+
+
+
+#if _DEBUG
 	if (KEYBOARD._keys[DIK_1] == 1)
 	{
 		SceneLabel label = SceneLabel::CLEAR;
@@ -117,6 +217,7 @@ void Game::Update(float& elapsedTime)
 		SceneLabel label = SceneLabel::OVER;
 		ActivateScene.ChangeScene(label);
 	}
+#endif
 //	if (GetEntityManager().FindEntity(2).HasComponent<StaticModel>())
 //	{
 //#if 0
@@ -172,15 +273,19 @@ void Game::Update(float& elapsedTime)
 
 }
 
-
-
 void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 {
 	VECTOR4F lightDirection(0, -1, 1, 0);
 
 	{
-		m_frameBuffer->Clear(immediateContext);
-		m_frameBuffer->Activate(immediateContext);
+		m_frameBuffer[0]->Clear(immediateContext);
+		m_frameBuffer[0]->Activate(immediateContext);
+
+		m_frameBuffer[1]->Clear(immediateContext);
+		m_frameBuffer[1]->Activate(immediateContext);
+
+		m_frameBuffer[2]->Clear(immediateContext);
+		m_frameBuffer[2]->Activate(immediateContext);
 
 		m_sceneConstantBuffer->Activate(immediateContext, SLOT2, true, true);
 		Source::CameraControlle::CameraManager().GetInstance()->Activate(immediateContext);
@@ -194,8 +299,14 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 		//m_metaAI->RenderOfPlayer(immediateContext, 1);
 		//m_metaAI->RenderOfPlayer(immediateContext, 2);
 		
-		m_frameBuffer->Deactivate(immediateContext);
-		m_fog->Blit(immediateContext, m_frameBuffer->GetRenderTargetShaderResourceView().Get(), m_frameBuffer->GetDepthStencilShaderResourceView().Get());
+		m_frameBuffer[2]->Deactivate(immediateContext);
+		m_fog->Blit(immediateContext, m_frameBuffer[2]->GetRenderTargetShaderResourceView().Get(), m_frameBuffer[2]->GetDepthStencilShaderResourceView().Get());
+
+		m_frameBuffer[1]->Deactivate(immediateContext);
+		m_vignette->Blit(immediateContext, m_frameBuffer[1]->GetRenderTargetShaderResourceView().Get(), nullptr);
+
+		m_frameBuffer[0]->Deactivate(immediateContext);
+		m_screenFilter->Blit(immediateContext, m_frameBuffer[0]->GetRenderTargetShaderResourceView().Get());
 
 		//Archer
 		//m_metaAI->RenderOfScope(immediateContext);
@@ -356,6 +467,40 @@ void Game::ImGui()
 
 		}
 
+		if (ImGui::CollapsingHeader("Vignette"))
+		{
+			//--------------
+			// Radius(半径)
+			//--------------
+			ImGui::SliderFloat("Radius", &m_vignette->_vignetteBuffer->data.radius, 0.0f, 10.0f);
+			
+
+			//--------------
+			// Smoothness
+			//--------------
+			ImGui::SliderFloat("Smoothness", &m_vignette->_vignetteBuffer->data.smoothness, 0.0f, 10.0f);
+
+
+			//-----------------
+			// Darkness
+			//-----------------
+			ImGui::SliderFloat("Darkness", &m_vignette->_vignetteBuffer->data.darkness, 0.0f, 10.0f);
+
+
+			//--------------
+			// AroundColor
+			//-------------
+			static float color[4] = { 1.f, 1.f, 1.f, 1.f };
+			ImGuiColorEditFlags flag = ImGuiColorEditFlags_Float; // 0 ~ 255表記ではなく、0.0 ~ 1.0表記にします。
+			ImGui::ColorEdit4("AroundColor", color, flag);
+			m_vignette->_vignetteBuffer->data.aroundColor = VECTOR4F(color[0], color[1], color[2], color[3]);
+
+
+			if (ImGui::Button("Save"))
+				m_vignette->SaveBinary();
+		}
+
+
 		if (ImGui::CollapsingHeader("Camera"))
 		{
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ
@@ -364,8 +509,6 @@ void Game::ImGui()
 			Source::CameraControlle::CameraManager().GetInstance()->Editor();
 			ImGui::End();
 		}
-
-
 
 		{
 			CharacterAI* player = m_metaAI->GetPlayCharacter();

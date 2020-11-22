@@ -5,7 +5,7 @@
 #include ".\LibrarySource\VectorCombo.h"
 
 //CEREAL_CLASS_VERSION(CharacterParameter::Collision, 1);
-CEREAL_CLASS_VERSION(Enemy, 6);
+CEREAL_CLASS_VERSION(Enemy, 8);
 
 void Enemy::Init()
 {
@@ -37,20 +37,20 @@ void Enemy::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/RightPunchUpper.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/WrathAttack.fbx", 60);
 
-	Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
+	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
-	m_statusParm.life = 1200.0f;
+	m_statusParm.isExit = true;
+	m_statusParm.life = 700.0f;
 
 	m_blendAnimation.animationBlend.Init(m_model);
-	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::Idle, m_model);
-	m_collision.resize(5);
+	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::IDLE, m_model);
 	m_attackParm.resize(13);
 	//SerialVersionUpdate(1);
 ;
-for (auto& atk : m_attackParm)
-{
-	atk.serialVersion = 13;
-}
+	for (auto& atk : m_attackParm)
+	{
+		atk.serialVersion = 15;
+	}
 
 	m_behaviorTree.CreateRootNode();
 	if (PathFileExistsA((std::string("../Asset/Binary/Enemy/Parameter") + ".bin").c_str()))
@@ -60,7 +60,7 @@ for (auto& atk : m_attackParm)
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
-
+	m_collision.resize(6);
 	m_behaviorTree.SetRootNodeChild();
 	m_behaviorTree.SetTaskToNode();
 	//TaskData& taskData = m_behaviorTree.GetTaskData();
@@ -68,6 +68,9 @@ for (auto& atk : m_attackParm)
 	m_isAction = false;
 	m_moveState = 0;
 	//m_judgeElementPram.targetID
+
+	m_stoneParm.m_stoneAdom = std::make_unique<StoneAdominist>();
+
 }
 
 void Enemy::Update(float& elapsedTime)
@@ -89,9 +92,33 @@ void Enemy::Update(float& elapsedTime)
 		break;
 		case 1:
 			m_selectTask->Run(this);
-
-			if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
+			m_behaviorTree.UpdateUseTasks(elapsedTime);
+			if (m_stoneParm.m_stoneAdom->GetStone()->GetExit())
 			{
+				m_stoneParm.m_stoneAdom->Update(m_elapsedTime);
+				VECTOR3F stonePos = m_stoneParm.m_stoneAdom->GetInstanceData()[0].position;
+				m_collision[5].position[0] = stonePos;
+
+				VECTOR3F velocity = m_stoneParm.m_stoneAdom->GetStone()->GetVelocity();
+				//	VECTOR3F speed = m_stoneParm.m_stoneAdom->GetStone()->GetSpeed();
+
+				//	velocity *= speed;
+				//	velocity.y = m_stoneParm.m_stoneAdom->GetPower();
+				stonePos -= velocity * m_elapsedTime;
+				m_collision[5].position[1] = stonePos;
+				m_statusParm.attackPoint = 12.0f;
+				if (MESSENGER.EnemyAttackingMessage(static_cast<int>(m_id), m_collision[5]))
+				{
+					m_stoneParm.m_stoneAdom->Reset();
+
+				}
+			}
+			if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
+			{					
+				if(m_selectTask->GetParentNodeName() == "SpecialAttack" || 
+					m_selectTask->GetParentNodeName() == "UnSpecialAttack")
+				m_behaviorTree.AddUseTask(m_selectTask);
+				m_selectTask.reset();
 				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
 			}
 			break;
@@ -106,6 +133,18 @@ void Enemy::Update(float& elapsedTime)
 	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 	FLOAT4X4 getBoneTransform = boneTransform * modelAxisTransform * m_transformParm.world;
 	m_collision[0].position[0] = { getBoneTransform._41,getBoneTransform._42,getBoneTransform._43 };
+
+	if (m_statusParm.isExit == false)
+		MESSENGER.MessageFromEnemy(m_id, MessengType::TELL_DEAD);
+
+	if (KEYBOARD._keys[DIK_5] == 1)
+	{
+		m_blendAnimation.animationBlend.ResetAnimationFrame();
+		m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
+		m_isAction = true;
+
+	}
 }
 
 void Enemy::Render(ID3D11DeviceContext* immediateContext)
@@ -114,6 +153,9 @@ void Enemy::Render(ID3D11DeviceContext* immediateContext)
 	//	auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	
+	if (m_stoneParm.m_stoneAdom->GetStone()->GetExit())
+		m_stoneParm.m_stoneAdom->Render(immediateContext);
+
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
 
 	m_debugObjects.debugObject.Render(immediateContext, VECTOR4F(0, 0, 0, 0),true);
@@ -183,8 +225,8 @@ void Enemy::ImGui(ID3D11Device* device)
 		ImGui::RadioButton("RightPunch", &current, 1); ImGui::SameLine();
 		ImGui::RadioButton("LeftPunch", &current, 2); 
 		ImGui::RadioButton("RangeAttack", &current, 3); ImGui::SameLine();
-		ImGui::RadioButton("RunAttack", &current, 4);
-
+		ImGui::RadioButton("RunAttack", &current, 4); ImGui::SameLine();
+		ImGui::RadioButton("Stone", &current, 5);
 		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
 		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 		FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
@@ -286,8 +328,38 @@ void Enemy::ImGui(ID3D11Device* device)
 	if (ImGui::CollapsingHeader("Status"))
 	{
 		ImGui::BulletText("LIFE : %f", m_statusParm.life);
+
+		static float positionX = m_transformParm.position.x;
+		//float positionY = m_transformParm.position.y;
+		static float positionZ = m_transformParm.position.z;
+		ImGui::SliderFloat("PositionX", &positionX, -1000.0f, 1000.0f);
+		//ImGui::SliderFloat("PositionY", &positionY, 0.0f, 100.0f);
+		ImGui::SliderFloat("PositionZ", &positionZ, -1000.0f, 1000.0f);
+
+		m_transformParm.position.x = positionX;
+	//	m_transformParm.position.y += positionY;
+		m_transformParm.position.z = positionZ;
+
+		m_transformParm.WorldUpdate();
 	}
 
+	//*******************************************
+	// SignalAnim
+	//*******************************************
+	if (ImGui::CollapsingHeader("SignalAnim"))
+	{
+		static int current = 0;		
+		ImGui::RadioButton("MUSCLE_SIGNAL", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton("RELAX_SIGNAL", &current, 1); 
+		ImGui::RadioButton("ROARING_SIGNAL", &current, 2);ImGui::SameLine();
+		ImGui::RadioButton("RUN_SIGNAL", &current, 3); 
+
+		int frameCount = static_cast<int>(m_signalFrame[current]);
+		ImGui::InputInt("FrameCount", &frameCount, 0, 100);
+
+		m_signalFrame[current] = static_cast<uint32_t>(frameCount);
+
+	}
 	//*******************************************
 	// BehaviorTree
 	//*******************************************
@@ -739,8 +811,8 @@ void Enemy::ImGui(ID3D11Device* device)
 					ImGui::BulletText("CoolTime -> %d", static_cast<int>(selectBehaviorTask->GetCoolTimer()));
 					ImGui::SliderInt("CurrentCoolTime", &coolTime, 0, 10);
 
-					if (ImGui::Button("SetCoolTime"))
-						selectBehaviorTask->SetCoolTimer(static_cast<uint32_t>(coolTime));
+					//if (ImGui::Button("SetCoolTime"))
+					//	selectBehaviorTask->SetCoolTimer(static_cast<uint32_t>(coolTime));
 				}
 				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------SelectTask------");
 				{
@@ -750,13 +822,35 @@ void Enemy::ImGui(ID3D11Device* device)
 					if (m_selectTask)
 					{
 						m_selectTask->Run(this);
+						if (m_stoneParm.m_stoneAdom->GetStone()->GetExit())
+						{
+							m_stoneParm.m_stoneAdom->Update(m_elapsedTime);
+							VECTOR3F stonePos = m_stoneParm.m_stoneAdom->GetInstanceData()[0].position;
+							m_collision[5].position[0] = stonePos;
+
+							VECTOR3F velocity = m_stoneParm.m_stoneAdom->GetStone()->GetVelocity();
+						//	VECTOR3F speed = m_stoneParm.m_stoneAdom->GetStone()->GetSpeed();
+
+						//	velocity *= speed;
+						//	velocity.y = m_stoneParm.m_stoneAdom->GetPower();
+							stonePos -= velocity * m_elapsedTime;
+							m_collision[5].position[1] = stonePos;
+							m_statusParm.attackPoint = 12.0f;
+							if (MESSENGER.EnemyAttackingMessage(static_cast<int>(m_id), m_collision[5]))
+							{
+								m_stoneParm.m_stoneAdom->Reset();
+
+							}
+						}
 						int state = m_selectTask->GetMoveState();
 						ImGui::SliderInt("MoveState", &state, 0, 10);
 
 
 						if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
+						{
+							//m_behaviorTree.AddUseTask(m_selectTask);
 							m_selectTask.reset();
-
+						}
 						if (ImGui::Button("Release"))
 						{
 							m_selectTask->SetMoveState(0);
@@ -984,67 +1078,22 @@ void Enemy::ImGui(ID3D11Device* device)
 		}
 	}
 
-# if 0
-	//**************************************
-	// PartialAnimation
-	//**************************************
-	if (ImGui::CollapsingHeader("PartialAnimation"))
-	{
-
-		std::vector<std::string> nodes;
-		for (auto& n : m_blendAnimation.partialBlend.GetNodes())
-		{
-			nodes.push_back(n.name);
-		}
-		static int curringNode = 0;
-		auto nodeName = nodes;
-		ImGui::Combo("Name_of_NodeName",
-			&curringNode,
-			vectorGetter,
-			static_cast<void*>(&nodeName),
-			static_cast<int>(nodeName.size())
-		);
-
-		auto& lowerBodyBone = m_blendAnimation.partialBlend.GetPartialBoens().at(0);
-		auto& upBodyBone = m_blendAnimation.partialBlend.GetPartialBoens().at(1);
-
-		static float raito = 1.0f;
-		ImGui::SliderFloat("BlendRatio", &raito, 0.0f, 1.0f);
-
-		float& lowerWeight = lowerBodyBone.weight;
-		float& upWeight = upBodyBone.weight;
-
-		lowerWeight = 1.0f - raito;
-		upWeight = raito;
-
-		m_blendAnimation.partialBlend.SetupHalfBody(m_model);
-
-		if (ImGui::Button("UpperBodyRoot?"))
-		{
-			m_blendAnimation.partialBlend._upperBodyRoot = curringNode;
-			m_blendAnimation.partialBlend.SetupHalfBody(m_model);
-
-		}
-
-
-	}
-
-#endif
 	//**************************************
 	// Attack
 	//**************************************
 	if (ImGui::CollapsingHeader("Attack"))
 	{
 		static int current = 0;
-		ImGui::RadioButton("RightPunch", &current, 0); ImGui::SameLine();
-		ImGui::RadioButton("LeftPunch", &current, 1); ImGui::SameLine();
-		ImGui::RadioButton("RightPunchUpper", &current, 2); 
+		ImGui::RadioButton("CrossPunch", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton("TurnAttackLower", &current, 1); ImGui::SameLine();
+		ImGui::RadioButton("Hook", &current, 2); 
 		ImGui::RadioButton("RightPunchLower", &current, 3); ImGui::SameLine();
-		ImGui::RadioButton("TurnPunchUp", &current, 4); ImGui::SameLine();
-		ImGui::RadioButton("TurnPunchDown", &current, 5); 
-		ImGui::RadioButton("JumpAttack", &current, 6); ImGui::SameLine();
-		ImGui::RadioButton("WrathAttack", &current,7); ImGui::SameLine();
-		ImGui::RadioButton("Run", &current, 8);
+		ImGui::RadioButton("TurnAttackHeight", &current, 4); ImGui::SameLine();
+		ImGui::RadioButton("FallFlat_edit", &current, 5); 
+		ImGui::RadioButton("RightPunchUpper", &current, 6); ImGui::SameLine();
+		ImGui::RadioButton("WrathNearAttack", &current,7); ImGui::SameLine();
+		ImGui::RadioButton("WrathFarAttack", &current, 8); ImGui::SameLine();
+		ImGui::RadioButton("RUN", &current, 9);
 		//FrameCount
 		{
 			 int frameCount = m_attackParm[current].frameCount;
@@ -1121,7 +1170,7 @@ void Enemy::ImGui(ID3D11Device* device)
 	//**************************************
 	// SelectTask
 	//**************************************
-	if (ImGui::CollapsingHeader("SelectTask"))
+	if (ImGui::CollapsingHeader("SelectTask") && m_selectTask)
 	{
 		ImGui::TextColored(ImVec4(1, 1, 1, 1), "-----ParentNodeName-----");
 		{
@@ -1157,12 +1206,126 @@ void Enemy::ImGui(ID3D11Device* device)
 			ImGui::BulletText("TargetID => %d", static_cast<int>(m_judgeElementPram.targetID));
 		}
 
+		if (!m_behaviorTree.GetUseTask().empty())
+		{
+			auto& useTask = m_behaviorTree.GetUseTask();
+			std::pair<std::string, float> useTaskData[7];
+			for (int i = 0; i < useTask.size(); ++i)
+			{
+				useTaskData[i].first = useTask.at(i)->GetTaskName();
+				useTaskData[i].second = useTask.at(i)->GetCoolTimer();
 
+			}
+
+			ImGui::BulletText(u8"1”Ô–Ú taskName -> %s :coolTime -> %f",
+				useTaskData[0].first.data(), useTaskData[0].second);
+			ImGui::BulletText(u8"2”Ô–Ú taskName -> %s :coolTime -> %f",
+				useTaskData[1].first.data(), useTaskData[1].second);
+			ImGui::BulletText(u8"3”Ô–Ú taskName -> %s :coolTime -> %f",
+				useTaskData[2].first.data(), useTaskData[2].second);
+			ImGui::BulletText(u8"4”Ô–Ú taskName -> %s :coolTime -> %f",
+				useTaskData[3].first.data(), useTaskData[3].second);
+			ImGui::BulletText(u8"5”Ô–Ú taskName -> %s :coolTime -> %f",
+				useTaskData[4].first.data(), useTaskData[4].second);
+			ImGui::BulletText(u8"6”Ô–Ú taskName -> %s :coolTime -> %f",
+				useTaskData[5].first.data(), useTaskData[5].second);
+			ImGui::BulletText(u8"7”Ô–Ú taskName -> %s :coolTime -> %f",
+				useTaskData[6].first.data(), useTaskData[6].second);
+
+		}
 	}
+
+	//**************************************
+	// Stone
+	//**************************************
+	if (ImGui::CollapsingHeader("Stone"))
+	{
+		FLOAT4X4 world = m_transformParm.world;
+		VECTOR3F zAxis = { world._31,world._32,world._33 };
+		VECTOR3F xAxis = { world._11,world._12,world._13 };
+		zAxis = NormalizeVec3(zAxis);
+		xAxis = NormalizeVec3(xAxis);
+		if (ImGui::Button("Create"))
+		{
+			if (!m_stoneParm.m_stoneAdom->GetStone()->GetExit())
+			{
+				m_stoneParm.m_stoneAdom->SetStone(m_transformParm.position,
+					VECTOR3F(0.0f, 0.0f, 0.0f), zAxis);
+			}
+		}
+
+		{
+			static int current = 0;
+			ImGui::RadioButton("Z-Axis", &current, 0); ImGui::SameLine();
+			ImGui::RadioButton("X-Axis", &current, 1);
+
+			if (current == 0)
+			{
+				VECTOR3F offset = m_stoneParm.offsetZ;
+				float offsetZ[] = { offset.x,offset.y,offset.z };
+				ImGui::SliderFloat3("Z-offset", offsetZ, -15.0f, 15.0f);
+				offset = { offsetZ[0],offsetZ[1],offsetZ[2] };
+				m_stoneParm.offsetZ = offset;
+			}
+			else
+			{
+				VECTOR3F offset = m_stoneParm.offsetX;
+				float offsetX[] = { offset.x,offset.y,offset.z };
+				ImGui::SliderFloat3("X-offset", offsetX, -5.0f, 5.0f);
+				offset = { offsetX[0],offsetX[1],offsetX[2] };
+				m_stoneParm.offsetX = offset;
+
+			}
+
+			if (ImGui::ArrowButton("Z", ImGuiDir_Left))
+			{
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += zAxis * m_stoneParm.offsetZ;
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
+			}
+			ImGui::SameLine();
+			if (ImGui::ArrowButton("X", ImGuiDir_Right))
+			{
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += xAxis * m_stoneParm.offsetX;
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
+			}
+
+			if (ImGui::Button("Set"))
+			{
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += zAxis * m_stoneParm.offsetZ;
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += xAxis * m_stoneParm.offsetX;
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
+			}
+
+
+			if (ImGui::Button("Reset"))
+			{
+				m_stoneParm.offsetX = m_stoneParm.offsetZ = {};
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position = m_transformParm.position;
+				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
+
+			}
+
+			static bool isUpdate = false;
+			if (ImGui::Button("Update"))
+			{
+				isUpdate = !isUpdate;
+			}
+
+			if (isUpdate)
+			{
+				if(m_stoneParm.m_stoneAdom->GetStone()->GetExit())
+					m_stoneParm.m_stoneAdom->Update(m_elapsedTime);
+
+			}
+		}
+
+		m_stoneParm.m_stoneAdom->ImGui(device);
+	}
+
 
 	if (ImGui::Button("ActiveBehaviorTree"))
 	{
-		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::Wrath, m_model);
+		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
 		m_isAction = true;
 	}
 	if (ImGui::Button("DeActiveBehaviorTree"))

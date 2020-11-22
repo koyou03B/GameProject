@@ -61,6 +61,8 @@
     <ClCompile Include="GameSource\SceneTutorial.cpp" />
     <ClCompile Include="GameSource\Scope.cpp" />
     <ClCompile Include="GameSource\Stage.cpp" />
+    <ClCompile Include="GameSource\Stone.cpp" />
+    <ClCompile Include="GameSource\TitleObjectAdominist.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\AIParameter.h" />
@@ -114,6 +116,8 @@
     <ClInclude Include="GameSource\SceneTutorial.h" />
     <ClInclude Include="GameSource\Stage.h" />
     <ClInclude Include="GameSource\State.h" />
+    <ClInclude Include="GameSource\Stone.h" />
+    <ClInclude Include="GameSource\TitleObjectAdominist.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

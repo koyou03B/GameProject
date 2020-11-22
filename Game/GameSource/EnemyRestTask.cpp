@@ -17,6 +17,7 @@ void EnemyRestTask::Run(Enemy* enemy)
 		enemy->GetJudgeElement().attackCount = 0;
 		enemy->GetJudgeElement().damageCount = 0;
 		enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
+		animation.animationBlend.SetAnimationSpeed(1.5f);
 		m_restTime = 0;
 		++m_moveState;
 	}
@@ -29,10 +30,11 @@ void EnemyRestTask::Run(Enemy* enemy)
 	case 2:
 	{
 		m_restTime += enemy->GetElapsedTime();
-		if (m_restTime >= 6)
+		if (m_restTime >= 5)
 		{
 			m_taskState = TASK_STATE::END;
 		}
+		animation.animationBlend.SetAnimationSpeed(1.0f);
 	}
 	break;
 	}
@@ -40,7 +42,7 @@ void EnemyRestTask::Run(Enemy* enemy)
 
 bool EnemyRestTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animation)
 {
-	animation.animationBlend._blendRatio += 0.045f;//magicNumber
+	animation.animationBlend._blendRatio += 0.08f;//magicNumber
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;

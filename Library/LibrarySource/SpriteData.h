@@ -13,6 +13,8 @@ namespace Source
 		enum class TextureLabel
 		{
 			TITLE,
+			CLEAR,
+			OVER,
 			EFFECT0,
 			SCOPE,
 			END,

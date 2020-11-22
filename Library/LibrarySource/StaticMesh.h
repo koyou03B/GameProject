@@ -22,6 +22,9 @@ namespace Source
 
 			void  Render(ID3D11DeviceContext * immediateContext, std::vector<Source::InstanceData::InstanceData> instanceData, const VECTOR4F & materialColor);
 
+			void  Render(ID3D11DeviceContext* immediateContext, FLOAT4X4 world, const VECTOR4F& materialColor);
+
+
 			int RayPick(
 				const DirectX::XMFLOAT3 & startPosition,			//Start coordinates for flying a ray
 				const DirectX::XMFLOAT3 & endPosition,			//End coordinates for flying a ray

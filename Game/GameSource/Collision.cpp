@@ -1,5 +1,20 @@
 #include "Collision.h"
 
+VECTOR3F Collision::JudgePointAndAABB(const VECTOR3F& mySelf, const AABB& target)
+{
+	VECTOR3F returnValue = { mySelf.x , mySelf.y,mySelf.z};
+	if (mySelf.x <= target.left)
+		returnValue.x = target.left;
+	if(mySelf.x >= target.right)
+		returnValue.x = target.right;
+	if (mySelf.z <= target.down)
+		returnValue.z = target.down;
+	if(mySelf.z >= target.top)
+		returnValue.z = target.top;
+
+	return returnValue;
+}
+
 bool Collision::JudgePointAndAABB(const VECTOR2F& mySelf, const AABB& target)
 {
 	if (mySelf.x >= target.left && mySelf.x <= target.right &&

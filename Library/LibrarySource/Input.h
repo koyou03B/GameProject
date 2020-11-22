@@ -143,11 +143,23 @@ namespace Source
 
 			int GetButtons(XINPUT_GAMEPAD_BUTTONS command) { return m_buttons[command]; }
 			void ResetButton(XINPUT_GAMEPAD_BUTTONS command) { m_buttons[command] = -1; }
+			bool GetButtons()
+			{
+				for (int i = 0; i < GAMEPAD_MAX_BUTTON; ++i)
+				{
+					if (m_buttons[i] == 1)
+						return true;
+				}
+
+				return false;
+			}
+
 		protected:
 			int m_buttons[GAMEPAD_MAX_BUTTON] = {};
 			int m_userIndex = -1;
 			float m_stickLeftXValue;
 			float m_stickLeftYValue;
+			VECTOR2F m_vibration;
 		};
 
 		class XInput : public Input
@@ -179,13 +191,12 @@ namespace Source
 				return m_xPad.Gamepad.sThumbRY > deadZone || m_xPad.Gamepad.sThumbRY < -deadZone ? true : false;
 			}
 
-
-
 			VECTOR2F StickVectorLeft() override;
 			VECTOR2F StickVectorRight() override;
 
 		private:
 			XINPUT_STATE m_xPad = {};
+			XINPUT_VIBRATION m_vibration;
 		};
 
 		class WInput : public Input

@@ -61,6 +61,7 @@ public:
 		int samplerCount = static_cast<int>(m_samplers.size());
 		if (samplerCount >= 2)
 		{
+			ResetAnimationSampler(samplerNum);
 			m_samplers.erase(m_samplers.begin() + samplerNum);
 		}
 	}
@@ -76,6 +77,11 @@ public:
 	inline void FalseAnimationLoop(int samplerNum)
 	{
 		m_samplers[samplerNum].second->animtion.SetIsLoop(false);
+	}
+
+	inline void TrueAnimationLoop(int samplerNum)
+	{
+		m_samplers[samplerNum].second->animtion.SetIsLoop(true);
 	}
 
 	inline void SetAnimationSpeed(float speed)

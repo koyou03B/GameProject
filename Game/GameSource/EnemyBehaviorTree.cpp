@@ -15,11 +15,12 @@ void EnemyBehaviorTree::Release()
 	//m_nodes->Release();
 }
 
-void EnemyBehaviorTree::UpdateUseTasks()
+void EnemyBehaviorTree::UpdateUseTasks(const float elapsedTime)
 {
+	if (m_useTasks.empty()) return;
 	for (auto& task : m_useTasks)
 	{
-		task->UpdateCoolTimer();
+		task->UpdateCoolTimer(elapsedTime);
 	}
 
 	bool isUsed = m_useTasks[0]->GetIsUsed();

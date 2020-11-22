@@ -27,8 +27,6 @@ namespace Source
 			return true;
 		}
 
-
-
 		bool KeyBoard::InitDInputKeyboard(HWND hwnd)
 		{
 			HRESULT hr = S_FALSE;
@@ -115,8 +113,6 @@ namespace Source
 			}
 			return true;
 		}
-
-
 
 		bool Mouse::InitDInputMouse(HWND hWnd)
 		{
@@ -271,18 +267,17 @@ namespace Source
 			return true;
 		}
 
-
-
 		void XInput::InputState()
 		{
 			if (CheckConnect())
 			{
 				PadButtonState();
 
-				m_stickLeftXValue =  m_xPad.Gamepad.sThumbLX;
-														   
+				m_stickLeftXValue =  m_xPad.Gamepad.sThumbLX;														   
 				m_stickLeftYValue =  m_xPad.Gamepad.sThumbLY;
 
+				//XInputEnable(TRUE);
+				//m_vibration.wLeftMotorSpeed = m_vibration.wRightMotorSpeed = 65000;
 			}
 		}
 
@@ -717,8 +712,6 @@ namespace Source
 			return true;
 		}
 
-
-
 		void WInput::InputState()
 		{
 			if (CheckConnect())
@@ -1081,7 +1074,7 @@ namespace Source
 
 		void Pads::SetUpPads()
 		{
-			for (int i = 0; i < 2; ++i)
+			for (int i = 0; i < 1; ++i)
 			{
 				std::shared_ptr<XInput> xinput = std::make_shared<XInput>();
 				xinput->SetUserIndex(i);
@@ -1104,10 +1097,12 @@ namespace Source
 
 		void Pads::Update()
 		{
-			for (int i = 0; i < 2; ++i)
+			for (int i = 0; i < 1; ++i)
 			{
 				if (m_pad[i])
 					m_pad[i]->InputState();
+				else
+					SetUpPads();
 			}
 		}
 

@@ -76,7 +76,9 @@ public:
 		return &(*m_players[0]);
 	};
 	inline std::unique_ptr<Scope>& GetScope() { return m_scope; }
+	inline bool GetIsFinish(const int charaID) { return m_isFinish[charaID]; }
 private:
+	bool m_isFinish[2] = {false,false};
 	uint16_t m_enemyID = -1;
 	uint16_t m_playerID = -1;
 

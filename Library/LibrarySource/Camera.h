@@ -105,6 +105,7 @@ namespace Source
 				m_camera->Reset(target, direction, focalLength, heightAboveGround);
 			}
 
+			inline const std::unique_ptr<Camera>& GetCamera() const { return m_camera; }
 			inline const CameraMode GetCameraMode()		const { return m_mode; }
 			inline const VECTOR3F GetTarget()			const { return m_target; }
 			inline const VECTOR3F GetEye()				const { return m_eye; }

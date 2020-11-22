@@ -100,7 +100,15 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 				priority = taskPriority;
 			}
 		}
-		assert(selectTask);
+		//if (!selectTask)
+		//{
+		//	int taskCount = static_cast<int>(m_task.size()) - 1;
+		//	std::random_device rnd;
+		//	std::mt19937 mt(rnd());
+		//	std::uniform_int_distribution<> randTaskCount(0, taskCount);
+		//	int selectNomber = randTaskCount(mt);
+		//	return  std::make_pair(0, m_task[selectNomber]);
+		//}
 		return  std::make_pair(0,selectTask);
 	}
 	break;

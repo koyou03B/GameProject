@@ -9,7 +9,9 @@ namespace Source
 //	{ TEXNO::,"Data/Texture/.png","../Asset/Texture/Noise.png",1U },
 		LoadTexture loadTexture[] =
 		{
-			{ TextureLabel::TITLE,	"../Asset/Texture/Screen/title.png","../Asset/Texture/Noize/noize11.png",1U },
+			{ TextureLabel::TITLE,	"../Asset/Texture/Title/TITLE.png","../Asset/Texture/Noize/TitleLog.png",1U },
+			{ TextureLabel::TITLE,	"../Asset/Texture/Clear/CLEAR_LOG.png","",1U },
+			{ TextureLabel::TITLE,	"../Asset/Texture/Over/OVER_LOG.png","",1U },
 			{ TextureLabel::EFFECT0,"../Asset/Texture/Effect/fire.png","",1U },
 			{ TextureLabel::SCOPE,	"../Asset/Texture/Scope/Scope.png" ,"",1U },
 		};

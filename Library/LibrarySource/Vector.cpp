@@ -144,5 +144,9 @@ VECTOR3F CrossVec3(const VECTOR3F v1, const VECTOR3F v2)
 
 float DotVec3(const VECTOR3F v1, const VECTOR3F v2)
 {
-	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	float dot =  v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	if (!std::isfinite(dot))
+		dot = 0.0f;
+
+	return dot;
 }

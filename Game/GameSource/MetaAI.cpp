@@ -81,6 +81,9 @@ void MetaAI::DeterminationOfEnemy(int id, MessengType type)
 		break;
 	case MessengType::CALL_HELP:
 		break;
+	case MessengType::TELL_DEAD:
+		m_isFinish[1] = true;
+		break;
 	default:
 		break;
 	}
@@ -179,6 +182,9 @@ void MetaAI::DeterminationOfPlayer(int id, MessengType type)
 	case MessengType::SHIFT_AIM_MODE:
 		m_scope->SetAimMode();
 		break;
+	case MessengType::TELL_DEAD:
+		m_isFinish[0] = true;
+		break;
 	}
 }
 
@@ -215,7 +221,7 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 		Collision collision;
 		if (collision.JudgeSphereAndSphere(mySelf, target))
 		{
-			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.2f,0.5f);
+			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f,0.5f);
 			++m_players[id]->GetJudgeElement().attackHitCount;
 			++m_enemys[0]->GetJudgeElement().damageCount;
 			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;
@@ -284,6 +290,54 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 			if (collision.JudgeSphereAndSphere(mySelf, target))
 			{
 				++m_enemys[id]->GetJudgeElement().attackHitCount;
+				float attackPoint = m_enemys[id]->GetStatus().attackPoint;
+				float hitComparison = player->GetDamage().hitComparison;
+				if (hitComparison < attackPoint)
+					player->GetDamage().hasBigDamaged = true;
+
+				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
+				m_enemys[id]->GetStatus().isAttack = true;
+
+				VECTOR3F vector = m_enemys[id]->GetWorldTransform().position - player->GetWorldTransform().position;
+
+				player->GetDamage().vector = vector;
+
+				//if (m_scope->GetAimMode()) m_scope->GetAimMode() = false;
+				if (player->GetStatus().life <= 0)
+				{
+					player->GetStatus().isExit = false;
+				}
+				else
+					player->Impact();
+				return true;
+			}
+		}
+
+
+	}
+	break;
+	case CharacterParameter::Collision::CAPSULE:
+	{
+		Collision::Capsule mySelf;
+		mySelf.startPos = collision.position[0];
+		mySelf.endPos = collision.position[1];
+		mySelf.radius = collision.radius;
+		mySelf.scale = collision.scale;
+		Collision::Sphere target;
+
+		for (auto& player : m_players)
+		{
+			if (player->GetStatus().isDamage) continue;
+			int targetID = m_enemys[id]->GetJudgeElement().targetID;
+			auto& playerColl = player->GetCollision().at(0);
+			target.position = playerColl.position[0];
+			target.radius = playerColl.radius;
+			target.scale = playerColl.scale;
+
+			Collision collision;
+			if (collision.JudgeCapsuleAndSphere(mySelf, target))
+			{
+				++m_enemys[id]->GetJudgeElement().attackHitCount;
 				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
 				m_enemys[id]->GetStatus().isAttack = true;
 				//if (m_scope->GetAimMode()) m_scope->GetAimMode() = false;
@@ -296,8 +350,6 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 				return true;
 			}
 		}
-
-
 	}
 	break;
 	}

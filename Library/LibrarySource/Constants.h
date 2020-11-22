@@ -1,6 +1,14 @@
 #pragma once
 #include<DirectXMath.h>
+#include <iostream>
+#include <fstream>
+#include <shlwapi.h>
 #include "Vector.h"
+
+#undef max
+#undef min
+#include<cereal/cereal.hpp>
+#include<cereal/archives/binary.hpp>
 
 namespace Source
 {
@@ -41,6 +49,39 @@ namespace Source
             float    dissolveDummy;
             VECTOR4F dissolveGlowColor;
             VECTOR4F dissolveEmission;
+
+            template<class T>
+            void serialize(T& archive)
+            {
+                archive
+                (
+                    dissolveGlowAmoument,
+                    dissolveGlowRange,
+                    dissolveGlowFalloff,
+                    dissolveGlowColor,
+                    dissolveEmission
+                );
+            };
+
+            void ReadBinary()
+            {
+                if (PathFileExistsA((std::string("../Asset/Binary/Shader/Dissolve/Parameter") + ".bin").c_str()))
+                {
+                    std::ifstream ifs;
+                    ifs.open((std::string("../Asset/Binary/Shader/Dissolve/Parameter") + ".bin").c_str(), std::ios::binary);
+                    cereal::BinaryInputArchive i_archive(ifs);
+                    i_archive(*this);
+                }
+            }
+
+            void SaveBinary()
+            {
+                std::ofstream ofs;
+                ofs.open((std::string("../Asset/Binary/Shader/Fog/Parameter") + ".bin").c_str(), std::ios::binary);
+                cereal::BinaryOutputArchive o_archive(ofs);
+                o_archive(*this);
+            }
+
         };
     }
 }

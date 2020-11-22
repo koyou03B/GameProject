@@ -52,6 +52,7 @@ public:
 	inline CharacterParameter::Change& GetChangeComand() { return m_changeParm; }
 	inline CharacterParameter::MessageFlg& GetMessageFlg() { return m_messageParm; }
 	inline CharacterParameter::Camera& GetCamera() { return m_cameraParm; }
+	inline CharacterParameter::Damage& GetDamage() { return m_damageParm; }
 	inline std::vector<CharacterParameter::Collision>& GetCollision() { return m_collision; }
 	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
 	inline AIParameter::JudgeElement& GetJudgeElement() { return m_judgeElementPram; }
@@ -69,11 +70,14 @@ protected:
 	CharacterParameter::Move					m_moveParm;
 	CharacterParameter::Change					m_changeParm;
 	CharacterParameter::MessageFlg				m_messageParm;
-	CharacterParameter::Camera					m_cameraParm;
+	CharacterParameter::Camera					m_cameraParm;	
+	CharacterParameter::Damage					m_damageParm;
+	std::vector<CharacterParameter::Collision>	m_collision;
 	AIParameter::Emotion						m_emotionParm;
 	AIParameter::JudgeElement					m_judgeElementPram;
 	AIParameter::StandardValue					m_standardValuePram;
-	std::vector<CharacterParameter::Collision>	m_collision;
+
+
 	State* m_state;
 
 };

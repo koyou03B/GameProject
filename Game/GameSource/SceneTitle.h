@@ -10,21 +10,19 @@
 #include ".\LibrarySource\FrameBuffer.h"
 #include ".\LibrarySource\Rasterizer.h"
 #include ".\LibrarySource\ScreenFilter.h"
-
+#include ".\LibrarySource\SkinnedMesh.h"
+#include ".\LibrarySource\StaticMesh.h"
+#include ".\LibrarySource\Fog.h"
 #ifdef _DEBUG
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 #include "imgui_internal.h"
 #endif
+
+#include "TitleObjectAdominist.h"
 class Title : public Scene
 {
-private:
-	std::shared_ptr<Source::Sprite::SpriteBatch> m_sprite;
-	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer;
-	std::unique_ptr<Source::ScreenFilter::ScreenFilter> m_screenFilter;
-	std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<Source::Constants::Dissolve>> m_dissolve;
-
 public:
 	Title() = default;
 	virtual ~Title() = default;
@@ -34,4 +32,17 @@ public:
 	void Render(ID3D11DeviceContext* immediateContext, float elapsedTime)override;
 	void ImGui()override;
 	void Uninitialize()override;
+
+private:
+	std::shared_ptr<Source::Sprite::SpriteBatch> m_sprite;
+	std::unique_ptr<Source::FrameBuffer::FrameBuffer> m_frameBuffer[2];
+	std::unique_ptr<Source::ScreenFilter::ScreenFilter> m_screenFilter;
+
+	std::unique_ptr<TitleObjctAdominist> m_tObjectAdominist;
+	std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>> m_sceneConstantBuffer;
+	std::unique_ptr<Source::Fog::Fog> m_fog;
+	Source::Input::Input* m_input;
+
+	int m_eventState = 0;
+	bool isEvent = false;
 };

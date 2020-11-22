@@ -4,64 +4,43 @@
 
 bool Over::Initialize(ID3D11Device* device)
 {
-	//{
-	//	m_board = std::make_unique<Source::BillBoard::BillBoard>(device, Source::SpriteLoad::loadTexture[static_cast<int>(Source::SpriteLoad::TextureLabel::SCOPE)].fileName, true);
-
-	//}
-
-	//{
-	//	m_sceneConstantBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>>(device);
-	//	m_sceneConstantBuffer->data.directionalLight.direction = { 0.0f, -1.0f, 1.0f, 0.0f };
-	//}
-
-	//{
-	//	Source::CameraControlle::CameraManager().GetInstance()->Initialize(device);
-	//	Source::CameraControlle::CameraManager().GetInstance()->SetTarget(VECTOR3F(0.0f, 0.0f, 10.0f));
-	//	float tmp = 0;
-	//	Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
-	//}
-
+	m_sprite = TEXTURELOADER.GetTexture(Source::SpriteLoad::TextureLabel::OVER);
+	position = VECTOR2F(640.0f, 450.0f);
 
 	return true;
 }
 
 void Over::Update(float& elapsedTime)
 {
+#ifdef _DEBUG
 	if (KEYBOARD._keys[DIK_3] == 1)
 	{
 		SceneLabel label = SceneLabel::TITLE;
 		ActivateScene.ChangeScene(label);
 	}
+#endif
+	m_input = PAD.GetPad(0);
+	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_X) == 1)
+	{
+		SceneLabel label = SceneLabel::TITLE;
+		ActivateScene.ChangeScene(label);
+		return;
+
+	}
+	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1)
+	{
+		SceneLabel label = SceneLabel::GAME;
+		ActivateScene.ChangeScene(label);
+		return;
+
+	}
 }
 
 void Over::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 {
-	//{
-	//	VECTOR4F lightDirection(0, -1, 1, 0);
-	//	VECTOR4F materialColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-	//	DirectX::XMMATRIX S, R, T;
-	//	FLOAT4X4 world;
-	//	S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-	//	R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
-	//	T = DirectX::XMMatrixTranslation(translate.x, translate.y, translate.z);
-	//	DirectX::XMStoreFloat4x4(&world, S * R * T);
-
-	//	Source::CameraControlle::CameraManager().GetInstance()->Activate(immediateContext);
-
-	//	m_board->Begin(immediateContext);
-	//	m_board->Render(immediateContext, Source::CameraControlle::CameraManager().GetInstance()->GetProjection(),
-	//		Source::CameraControlle::CameraManager().GetInstance()->GetView(),
-	//		VECTOR3F(0, 0, 0), 1, VECTOR3F(0, 0, 0), materialColor);
-	//	m_board->End(immediateContext);
-
-
-
-	//	GetEntityManager().Render();
-	//	m_sceneConstantBuffer->Deactivate(immediateContext);
-
-	//	Source::CameraControlle::CameraManager().GetInstance()->Deactivate(immediateContext);
-	//}
+	m_sprite->Begin(immediateContext);
+	m_sprite->RenderCenter(position, scale, texPos, texSize, 0, VECTOR4F(1.0, 1.0, 1.0, 1.0), false);
+	m_sprite->End(immediateContext);
 }
 
 void Over::ImGui()

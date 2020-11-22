@@ -55,6 +55,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Vector.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\vectorCombo.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui.cpp" />
@@ -89,6 +90,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteData.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vector.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad.hlsli" />
@@ -103,6 +105,7 @@
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\SkinnedMesh.hlsli" />
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\SpriteBatch.hlsli" />
     <None Include="$(MSBuildThisFileDirectory)LibrarySource\StaticMesh.hlsli" />
+    <None Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BillBorad_ps.hlsl">
@@ -233,6 +236,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>

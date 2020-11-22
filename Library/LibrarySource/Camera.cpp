@@ -6,7 +6,7 @@ namespace Source
 	{
 		void Camera::Initialize()
 		{
-			m_eye = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
+			m_eye = VECTOR4F(0.0f, 0.0f, -10.0f, 1.0f);
 			m_focus = VECTOR4F(0.0f, 0.0f, 1.0f, 1.0f);
 
 			m_up = VECTOR4F(0.0f, 1.0f, 0.0f, 1.0f);
@@ -179,6 +179,9 @@ namespace Source
 				ChangeObject();
 				break;
 			case CameraManager::ORBIT:
+				m_direction = VECTOR3F(sinf(m_angle.y), 0.f, cosf(m_angle.y));
+			//	m_camera->Reset(m_target, m_direction, m_focalLength, m_heightAboveGround);
+			//	m_camera->DebugCamera();
 				break;
 			case CameraManager::FREE:
 				m_camera->DebugCamera();
@@ -193,6 +196,8 @@ namespace Source
 
 		void CameraManager::LockON()
 		{
+			m_direction = NormalizeVec3(m_direction);
+
 			VECTOR3F n_Vec = LerpVec3(m_oldDirection, m_direction, 1.0f);
 			m_eye.x = m_object.x + n_Vec.x * m_length.x ;
 			m_eye.y = m_object.y + n_Vec.y * m_length.y + m_heightAboveGround;
@@ -251,7 +256,7 @@ namespace Source
 			{
 				m_vibrateTimer -= elapsedTime;
 
-				DirectX::XMFLOAT3 focus;
+			//	DirectX::XMFLOAT3 focus;
 
 				float dx = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
 				float dy = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;

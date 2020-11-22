@@ -715,5 +715,5 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 #endif
 
-	m_swapChain->Present(0, 0);
+	m_swapChain->Present(1, 0);
 }

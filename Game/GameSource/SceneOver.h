@@ -16,24 +16,28 @@
 
 class Over : public Scene
 {
-private:
-	std::unique_ptr<Source::BillBoard::BillBoard> m_board;
-	std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>> m_sceneConstantBuffer;
-	std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> m_actModel;
-	std::shared_ptr<Source::StaticMesh::StaticMesh> m_staticModel;
-
-	VECTOR3F scale = { 1.0f, 1.0f, 1.0f };
-	VECTOR3F angle = { 0.0f, 180.0f * 0.01745f, 0.0f };
-	VECTOR3F translate = { 15.0f, 1.0f, .0f };
-	VECTOR4F direction = { sinf(angle.y * 0.01745f), 0.0f, cosf(angle.y * 0.01745f),1.0f };
-	float focalLength = 5.0f;
 public:
 	Over() = default;
 	virtual ~Over() = default;
 
-	bool Initialize(ID3D11Device* device)override;
+	bool Initialize(ID3D11Device * device)override;
 	void Update(float& elapsedTime)override;
-	void Render(ID3D11DeviceContext* immediateContext, float elapsedTime)override;
+	void Render(ID3D11DeviceContext * immediateContext, float elapsedTime)override;
 	void ImGui()override;
 	void Uninitialize()override;
+private:
+	std::shared_ptr<Source::Sprite::SpriteBatch>		m_sprite;
+
+	Source::Input::Input* m_input;
+	bool isTitle = false;
+	bool isGame = false;
+	bool isEvent = false;
+
+
+	VECTOR2F position = {};
+	VECTOR2F scale = { 640.0f,640.0f };
+	VECTOR2F texPos = {};
+	VECTOR2F texSize = { 640.0f,640.0f };
+	int m_eventState = 0;
+
 };

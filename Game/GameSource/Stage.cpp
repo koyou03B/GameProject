@@ -1,5 +1,5 @@
 #include "Stage.h"
-
+#include "MessengTo.h"
 
 void Stage::Init()
 {
@@ -11,6 +11,33 @@ void Stage::Init()
 	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::STAGE);
 	//Source::ModelData::fbxLoader().SaveStaticForBinary(Source::ModelData::StaticModel::STAGE);
 	m_model->_shaderON.normalMap = true;
+
+	m_range.left = -36.0f;
+	m_range.right = 36.0f;
+	m_range.top = 180.0f;
+	m_range.down = -180.0f;
+}
+
+void Stage::Update(float& elapsedTime)
+{
+	auto players = MESSENGER.CallPlayersInstance();
+	auto enemys = MESSENGER.CallEnemysInstance();
+
+	for (auto& player : players)
+	{
+		Collision coll;
+		VECTOR3F mySelf = player->GetWorldTransform().position;
+		player->GetWorldTransform().position = coll.JudgePointAndAABB(mySelf, m_range);
+		player->GetWorldTransform().WorldUpdate();
+	}
+
+	for (auto& enemy : enemys)
+	{
+		Collision coll;
+		VECTOR3F mySelf = enemy->GetWorldTransform().position;
+		enemy->GetWorldTransform().position = coll.JudgePointAndAABB(mySelf, m_range);
+		enemy->GetWorldTransform().WorldUpdate();
+	}
 }
 
 void Stage::Render(ID3D11DeviceContext* immediateContext)

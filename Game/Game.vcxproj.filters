@@ -33,12 +33,6 @@
     <Filter Include="Sources\Characters\Player">
       <UniqueIdentifier>{fdf4d319-64e0-4f75-a94b-5aed646eb007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Objects\Stage">
-      <UniqueIdentifier>{7f1cfc50-751d-40d0-bb73-c62e80e33e54}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Collision">
-      <UniqueIdentifier>{44d46777-fd6a-49a2-a306-e0db986813df}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Blend">
       <UniqueIdentifier>{9613ce54-1c3d-4166-a663-eab42254b9b6}</UniqueIdentifier>
     </Filter>
@@ -66,23 +60,8 @@
     <Filter Include="Headers\Messeng">
       <UniqueIdentifier>{b751c32c-39e7-4139-8677-6c4254f98870}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Objects\Aim">
-      <UniqueIdentifier>{b9c5c44f-b43c-46e3-8860-52d6e913cca6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Object">
       <UniqueIdentifier>{c7499d5c-47dc-48bb-959d-a629966dd254}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Object\Stage">
-      <UniqueIdentifier>{c5fccd82-89c1-4a19-89d5-728a4ec34740}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Object\Scope">
-      <UniqueIdentifier>{2366ef6f-7695-443f-9e15-98ed91896bdf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Object\Arrow">
-      <UniqueIdentifier>{6d09ba99-f576-4766-8039-9f04cd6ae608}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Objects\Arrow">
-      <UniqueIdentifier>{606e1fd7-e951-40a0-8257-e4604c7b54b1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Sources\BehaviorTree">
       <UniqueIdentifier>{03a4091d-703a-4aef-bb47-535e551ad12f}</UniqueIdentifier>
@@ -168,6 +147,45 @@
     <Filter Include="Headers\BehaviorTree\Enemy\Node\Fight\OldNodes">
       <UniqueIdentifier>{247629a4-1289-49d2-9659-6afe48c4129d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Collision">
+      <UniqueIdentifier>{44d46777-fd6a-49a2-a306-e0db986813df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\TitleObj">
+      <UniqueIdentifier>{14f3b755-fcf0-41b2-bd30-c5aef7871212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\GameObj">
+      <UniqueIdentifier>{6161fa2c-804a-4b31-8f26-4aaa781add5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\GameObj\Arrow">
+      <UniqueIdentifier>{6d09ba99-f576-4766-8039-9f04cd6ae608}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\GameObj\Scope">
+      <UniqueIdentifier>{2366ef6f-7695-443f-9e15-98ed91896bdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\GameObj\Stage">
+      <UniqueIdentifier>{c5fccd82-89c1-4a19-89d5-728a4ec34740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Object\GameObj\Stone">
+      <UniqueIdentifier>{022a39cf-7049-4fdb-98d4-152a86e9157d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\GameObject">
+      <UniqueIdentifier>{99f1824d-e2ba-4acb-a4e1-3750b12ac1fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\GameObject\Arrow">
+      <UniqueIdentifier>{606e1fd7-e951-40a0-8257-e4604c7b54b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\GameObject\Aim">
+      <UniqueIdentifier>{b9c5c44f-b43c-46e3-8860-52d6e913cca6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\GameObject\Stage">
+      <UniqueIdentifier>{7f1cfc50-751d-40d0-bb73-c62e80e33e54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\GameObject\Stone">
+      <UniqueIdentifier>{a3b2a16d-2bd3-4859-afe7-a6f1c12e749e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\TitleObject">
+      <UniqueIdentifier>{59ce414b-34a0-46d1-acfd-67610413dc86}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -195,7 +213,7 @@
       <Filter>Sources\Blend\AnimationBlending</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\Stage.cpp">
-      <Filter>Sources\Object\Stage</Filter>
+      <Filter>Sources\Object\GameObj\Stage</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\PartialBlendAnimation.cpp">
       <Filter>Sources\Blend\PartialAnimationsBlending</Filter>
@@ -222,10 +240,10 @@
       <Filter>Sources\Collision</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\Scope.cpp">
-      <Filter>Sources\Object\Scope</Filter>
+      <Filter>Sources\Object\GameObj\Scope</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\Arrow.cpp">
-      <Filter>Sources\Object\Arrow</Filter>
+      <Filter>Sources\Object\GameObj\Arrow</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\EnemyBehaviorTree.cpp">
       <Filter>Sources\BehaviorTree</Filter>
@@ -296,6 +314,12 @@
     <ClCompile Include="GameSource\EnemyFarAttack2Task.cpp">
       <Filter>Sources\BehaviorTree\Task\Attack\UnSpecial\Far</Filter>
     </ClCompile>
+    <ClCompile Include="GameSource\Stone.cpp">
+      <Filter>Sources\Object\GameObj\Stone</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\TitleObjectAdominist.cpp">
+      <Filter>Sources\Object\TitleObj</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -323,7 +347,7 @@
       <Filter>Headers\Blend\AnimationBlending</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\Stage.h">
-      <Filter>Headers\Objects\Stage</Filter>
+      <Filter>Headers\Objects\GameObject\Stage</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\PartialBlendAnimation.h">
       <Filter>Headers\Blend\PartialAnimationsBlending</Filter>
@@ -365,10 +389,10 @@
       <Filter>Headers\Collision</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\Scope.h">
-      <Filter>Headers\Objects\Aim</Filter>
+      <Filter>Headers\Objects\GameObject\Aim</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\Arrow.h">
-      <Filter>Headers\Objects\Arrow</Filter>
+      <Filter>Headers\Objects\GameObject\Arrow</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\EnemyBehaviorTree.h">
       <Filter>Headers\BehaviorTree\Enemy</Filter>
@@ -450,6 +474,12 @@
     </ClInclude>
     <ClInclude Include="GameSource\EnemyFarAttack2Task.h">
       <Filter>Headers\BehaviorTree\Enemy\Task\Attack\Far</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Stone.h">
+      <Filter>Headers\Objects\GameObject\Stone</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\TitleObjectAdominist.h">
+      <Filter>Headers\Objects\TitleObject</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
