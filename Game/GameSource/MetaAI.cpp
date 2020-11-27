@@ -296,7 +296,7 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 					player->GetDamage().hasBigDamaged = true;
 
 				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
-				m_enemys[id]->GetStatus().isAttack = true;
+			//	m_enemys[id]->GetStatus().isAttack = true;
 
 				VECTOR3F vector = m_enemys[id]->GetWorldTransform().position - player->GetWorldTransform().position;
 

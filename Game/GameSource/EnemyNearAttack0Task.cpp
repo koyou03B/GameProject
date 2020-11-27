@@ -214,8 +214,11 @@ bool EnemyNearAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& a
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
-		animation.animationBlend.ResetAnimationSampler(0);
-		animation.animationBlend.ReleaseSampler(0);
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		for (size_t i = 0; i < samplerSize; ++i)
+		{
+			animation.animationBlend.ReleaseSampler(0);
+		}
 		if(!isLoop)
 			animation.animationBlend.FalseAnimationLoop(0);
 		return true;

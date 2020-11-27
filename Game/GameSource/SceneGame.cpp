@@ -380,6 +380,8 @@ void Game::ImGui()
 			static float direction[4] = { -0.5f, -1.f, 1.f, 0.f };
 			ImGui::SliderFloat4("Direction", direction, -1.0f, 1.0f);
 			m_sceneConstantBuffer->data.directionalLight.direction = VECTOR4F(direction[0], direction[1], direction[2], direction[3]);
+		
+			
 		}
 
 		if (ImGui::CollapsingHeader("PointLight"))

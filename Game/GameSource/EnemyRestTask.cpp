@@ -30,9 +30,15 @@ void EnemyRestTask::Run(Enemy* enemy)
 	case 2:
 	{
 		m_restTime += enemy->GetElapsedTime();
-		if (m_restTime >= 5)
+		if (m_restTime >= 3)
 		{
 			m_taskState = TASK_STATE::END;
+			m_moveState = 0;
+			enemy->GetJudgeElement().moveCount = 0;
+			enemy->GetJudgeElement().attackCount = 0;
+			enemy->GetJudgeElement().damageCount = 0;
+			enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
+			enemy->GetEmotion().exhaustionParm.isExhaustion = false;
 		}
 		animation.animationBlend.SetAnimationSpeed(1.0f);
 	}

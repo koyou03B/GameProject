@@ -81,7 +81,7 @@ private:
 	const uint32_t	kRowlingTimer[2] = { 30,80 };
 	const float		kBlendValue = 0.08f;
 	const float		kAttackLength = 20.0f;
-	const float		kAccel = 42.0f;
+	const float		kAccel = 40.0f;
 	int				m_attackNo = 0;
 	float			m_turnSpeed = 0.0f;
 	bool            m_isHit = false;

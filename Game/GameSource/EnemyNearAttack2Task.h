@@ -76,7 +76,7 @@ private:
 	const uint32_t		kAttackSlowTimer = 30;
 	const int			kCollisionNo = 3;
 	const float			kAccel = 35.0f;
-	const float			kMinDirection = 20.0f;
+	const float			kMinDirection = 25.0f;
 	int					m_attackNo = 0;
 	bool				m_isHit = false;
 	float				m_blendValue = 0.0f;

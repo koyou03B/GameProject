@@ -157,8 +157,11 @@ public:
 		uint32_t frameCount = 0;
 		uint32_t inputRange[2] = {};
 		uint32_t slowTimeFrameCount[2] = {};
+		uint32_t attackTimerRange[2] = {};
+
 		float attackPoint = 0.0f;
 		float attackSpeed[2] = {};
+		bool hasAttacked = false;
 		VECTOR3F speed = {};
 		VECTOR3F maxSpeed = {};
 		VECTOR3F deceleration = {};
@@ -178,7 +181,7 @@ public:
 					inputRange[0], inputRange[1],
 					attackPoint,buttons, slowTimeFrameCount[0],
 					attackSpeed[0], attackSpeed[1], slowTimeFrameCount[1],
-					speed, deceleration
+					speed, deceleration, attackTimerRange[0], attackTimerRange[1]
 				);
 			}
 			else
@@ -188,7 +191,8 @@ public:
 					frameCount,
 					inputRange[0], inputRange[1],
 					attackPoint, buttons, slowTimeFrameCount[0],
-					attackSpeed[0], attackSpeed[1], slowTimeFrameCount[1]
+					attackSpeed[0], attackSpeed[1], slowTimeFrameCount[1],
+					speed, deceleration
 
 				);
 			}
@@ -270,7 +274,8 @@ public:
 		float attackBlendRtio = 0.0f;
 		float idleBlendRtio = 0.0f;
 		float moveBlendRatio = 0.0f;
-
+		float damageBlendRatio = 0.0f;
+		float blendRatio = 0.0f;
 		 int samplerSize ;
 		 float blendRatioMax = 1.0f;
 
@@ -287,7 +292,8 @@ public:
 					idleBlendRtio,
 					moveBlendRatio,
 					blendValueRange[0],
-					blendValueRange[1]
+					blendValueRange[1],
+					damageBlendRatio
 				);
 			}
 			else
@@ -419,7 +425,7 @@ CEREAL_CLASS_VERSION(CharacterParameter::Status, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Move, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Camera, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Collision, 12);
-CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 12);
+CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 13);
 CEREAL_CLASS_VERSION(CharacterParameter::Step, 12);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 15);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 16);
 CEREAL_CLASS_VERSION(CharacterParameter::Damage, 0);

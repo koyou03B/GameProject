@@ -276,8 +276,12 @@ namespace Source
 				m_stickLeftXValue =  m_xPad.Gamepad.sThumbLX;														   
 				m_stickLeftYValue =  m_xPad.Gamepad.sThumbLY;
 
-				//XInputEnable(TRUE);
-				//m_vibration.wLeftMotorSpeed = m_vibration.wRightMotorSpeed = 65000;
+				if (m_vibrationTimer >= 0)
+					--m_vibrationTimer;
+				else
+					ZeroMemory(&m_vibration, sizeof(XINPUT_VIBRATION));
+
+				XInputSetState(m_userIndex, &m_vibration);
 			}
 		}
 
@@ -671,6 +675,13 @@ namespace Source
 
 		}
 
+		void XInput::SetVibrationParm(UVECTOR2 vibration, int vibrationTimer)
+		{
+			m_vibration.wLeftMotorSpeed = static_cast<WORD>(vibration.x);
+			m_vibration.wRightMotorSpeed = static_cast<WORD>(vibration.y);
+			m_vibrationTimer = vibrationTimer;
+		}
+
 		VECTOR2F XInput::StickVectorLeft()
 		{
 			VECTOR2F vec2 = {};
@@ -1038,6 +1049,11 @@ namespace Source
 			}
 
 
+		}
+
+		void WInput::SetVibrationParm(UVECTOR2 vibration, int vibrationTimer)
+		{
+			//If I'm goint to writing,using PS4Controller 
 		}
 
 		bool WInput::CheckConnect()

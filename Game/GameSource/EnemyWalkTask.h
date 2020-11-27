@@ -9,10 +9,13 @@ public:
 	EnemyWalkTask() { m_moveState = Action::START; };
 	~EnemyWalkTask() = default;
 	void Run(Enemy* enemy);
-	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation);
+	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation, const bool isLoop = false);
+	bool Walk(Enemy* enemy);
 	bool IsTurnChase(Enemy* enemy);
+	bool StepMove(Enemy* enemy,bool isBlendFinish);
 
 	int  JudgeTurnChace(Enemy* enemy);
+	void JudgeVectorDirection(Enemy* enemy);
 	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;
 
 	void LoadOfBinaryFile(std::string taskName)
@@ -67,17 +70,18 @@ private:
 	enum Action
 	{
 		START,
+		STEP,
 		WALK,
 		END
 	};
 	const float		kWalkTimer = 3.0f;
 	const float		kFIveSecond = 300.0f;
-	const float		kBlendValue = 0.05f;
 	const float		kTurnValue = 0.01f;
+	float m_blendValue = 0.0f;
 	float m_walkTime = 0;
-	float m_accel = 52.0f;
+	float m_accel[2] = { 30.0f,62.0f };
 	float m_maxDirection = 0.0f;
-
+	VECTOR3F m_nVecToTarget = {};
 };
 
 CEREAL_CLASS_VERSION(EnemyWalkTask, 2);

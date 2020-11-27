@@ -300,6 +300,16 @@ void Title::ImGui()
 			ImGui::SliderFloat3("Target", targetArray, -1980.0f, 1080.0f, "%.4f");
 		}
 
+		if (ImGui::CollapsingHeader("PAD"))
+		{
+			static int vibration[2] = {};
+			static int timer = 0;
+			ImGui::InputInt("VibrationL", &vibration[0], 0, 65000);
+			ImGui::InputInt("VibrationR", &vibration[1], 0, 65000);
+			ImGui::InputInt("Timer", &timer, 0, 300);
+			if (ImGui::Button("Set"))
+				m_input->SetVibrationParm(UVECTOR2(vibration[0], vibration[1]), timer);
+		}
 	}
 
 	ImGui::End();

@@ -148,7 +148,7 @@ mov r0.xyz, r0.xyzx
 #line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
 mov r2.xyz, -r2.xyzx
 dp3 r0.w, r1.xyzx, r2.xyzx
-add r0.w, r0.w, l(0.750000)  // r0.w <- D
+add r0.w, r0.w, l(0.650000)  // r0.w <- D
 
 #line 26
 itof r1.x, l(0)

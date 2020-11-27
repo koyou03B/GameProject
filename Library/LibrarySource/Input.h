@@ -128,6 +128,7 @@ namespace Source
 
 			virtual void InputState() {};
 			virtual void PadButtonState() {};
+			virtual void SetVibrationParm(UVECTOR2 vibration, int vibrationTimer) = 0;
 			virtual bool CheckConnect() { return false; };
 
 			virtual VECTOR2F StickVectorLeft()  = 0;
@@ -159,19 +160,21 @@ namespace Source
 			int m_userIndex = -1;
 			float m_stickLeftXValue;
 			float m_stickLeftYValue;
-			VECTOR2F m_vibration;
+			int m_vibrationTimer;
+			UVECTOR2 m_vibration;
 		};
 
 		class XInput : public Input
 		{
 		public:
 			XInput() = default;
-			~XInput() = default;
+			~XInput() {};
 
 			void InputState()override;
 			void PadButtonState()override;
+			void SetVibrationParm(UVECTOR2 vibration,int vibrationTimer) override;
 			bool CheckConnect() override;
-		
+
 			void SetUserIndex(const int index) { m_userIndex = index; };
 
 			bool StickDeadzoneLX(float deadZone) override
@@ -207,6 +210,7 @@ namespace Source
 
 			void InputState()override;
 			void PadButtonState()override;
+			void SetVibrationParm(UVECTOR2 vibration, int vibrationTimer) override;
 			bool CheckConnect() override;
 
 			void SetUserIndex(const int index) { m_userIndex = index; };

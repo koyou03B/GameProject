@@ -202,7 +202,10 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 			{
 				static bool blendFinishStamp = false;
 				if (!blendFinishStamp)
+				{
 					blendFinishStamp = JudgeBlendRatio(animation);
+					enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(0.8f);
+				}
 				else
 				{
 					m_attackNo = Enemy::AttackType::TurnAttackLower;
@@ -210,6 +213,8 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 					uint32_t attackFrameCount = enemy->GetAttack(m_attackNo).frameCount;
 					if (currentAnimationTime >= attackFrameCount)
 					{
+						enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.0f);
+
 						m_blendValue = 0.05f;
 
 						isTurn = false;
@@ -266,8 +271,11 @@ bool EnemyFarAttack1Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& an
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
-		animation.animationBlend.ResetAnimationSampler(0);
-		animation.animationBlend.ReleaseSampler(0);
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		for (size_t i = 0; i < samplerSize; ++i)
+		{
+			animation.animationBlend.ReleaseSampler(0);
+		}
 		if (!isLoop)
 			animation.animationBlend.FalseAnimationLoop(0);
 		return true;
@@ -434,7 +442,7 @@ void EnemyFarAttack1Task::BackFlipTurn(Enemy* enemy)
 
 		enemyTransform.WorldUpdate();
 	}
-	else if (currentAnimationTime >= 40 && currentAnimationTime <= 80)
+	else if (currentAnimationTime >= 40 && currentAnimationTime <= 70)
 	{
 		enemy->GetMove().velocity = m_nVecToTarget * kAccel;
 		enemyTransform.position += enemy->GetMove().velocity * enemy->GetElapsedTime();
@@ -453,7 +461,7 @@ void EnemyFarAttack1Task::BackFlipTurn(Enemy* enemy)
 
 		float dot = DotVec3(front, targetNormal);
 		float rot = 1.0f - dot;
-		float limit = enemy->GetMove().turnSpeed;
+		float limit = enemy->GetMove().turnSpeed+0.02f;
 		if (rot > limit)
 			rot = limit;
 
@@ -529,7 +537,7 @@ bool EnemyFarAttack1Task::AttackMove(Enemy* enemy)
 		m_accel = 75.0f;
 	}
 	float dist = ToDistVec3(m_targetPosition - enemyTransform.position);
-	if (dist <= 30.0f && !m_isNear)
+	if (dist <= 40.0f && !m_isNear)
 	{
 		m_isNear = true;
 		return true;
@@ -563,12 +571,25 @@ uint32_t EnemyFarAttack1Task::JudgePriority(const int id, const VECTOR3F playerP
 		return m_priority;
 
 	auto player = MESSENGER.CallPlayersInstance();
+	int targetID = enemy->GetJudgeElement().targetID;
 
 	VECTOR3F playerPosition = playerPos;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 
 	float direction = ToDistVec3(playerPosition - enemyPosition);
-	if (direction > kMinDirection)
+	VECTOR3F normalizeDist = NormalizeVec3(playerPosition - enemyPosition);
+
+	VECTOR3F angle = enemy->GetWorldTransform().angle;
+	VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
+	front = NormalizeVec3(front);
+
+	float dot = DotVec3(front, normalizeDist);
+
+	float cosTheta = acosf(dot);
+
+	float frontValue = enemy->GetStandardValue().viewFrontValue;
+
+	if (cosTheta > frontValue)
 		return m_priority;
 
 	return minPriority;

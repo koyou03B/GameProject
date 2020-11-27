@@ -100,6 +100,9 @@ std::pair<int, std::shared_ptr<EnemyBehaviorTask>> EnemyBehaviorNode::SelectOfAc
 				priority = taskPriority;
 			}
 		}
+
+		assert(selectTask);
+
 		//if (!selectTask)
 		//{
 		//	int taskCount = static_cast<int>(m_task.size()) - 1;

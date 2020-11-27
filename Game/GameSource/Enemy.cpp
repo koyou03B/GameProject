@@ -22,6 +22,7 @@ void Enemy::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/LeftTurn.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/RightTurn.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/Run.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/Step.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/BackFlip.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/StandardAnim/StandUp.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/SignalAnim/MuscleSignal.fbx", 60);
@@ -36,7 +37,6 @@ void Enemy::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/FallFlat_edit.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/RightPunchUpper.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/WrathAttack.fbx", 60);
-
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
 	m_statusParm.isExit = true;
@@ -49,7 +49,7 @@ void Enemy::Init()
 ;
 	for (auto& atk : m_attackParm)
 	{
-		atk.serialVersion = 15;
+		atk.serialVersion = 16;
 	}
 
 	m_behaviorTree.CreateRootNode();
@@ -118,6 +118,12 @@ void Enemy::Update(float& elapsedTime)
 				if(m_selectTask->GetParentNodeName() == "SpecialAttack" || 
 					m_selectTask->GetParentNodeName() == "UnSpecialAttack")
 				m_behaviorTree.AddUseTask(m_selectTask);
+
+				//if (m_selectTask->GetTaskName() == "FarAttack2Task")
+				//{
+				//	auto chaseNode = m_behaviorTree.GetRootNode()->SearchNode("ChaseNode");
+				//	//dynamic_cast<EnemyChaseNode*>(chaseNode.get())->SetNodeName();
+				//}
 				m_selectTask.reset();
 				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
 			}
@@ -132,7 +138,7 @@ void Enemy::Update(float& elapsedTime)
 	FLOAT4X4 boneTransform = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
 	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 	FLOAT4X4 getBoneTransform = boneTransform * modelAxisTransform * m_transformParm.world;
-	m_collision[0].position[0] = { getBoneTransform._41,getBoneTransform._42,getBoneTransform._43 };
+	m_collision[0].position[0] = { m_transformParm.position.x,getBoneTransform._42,m_transformParm.position.z };
 
 	if (m_statusParm.isExit == false)
 		MESSENGER.MessageFromEnemy(m_id, MessengType::TELL_DEAD);

@@ -73,12 +73,12 @@ private:
 		TURN_CHACE,
 		END
 	};
-
+	
+	const uint32_t  kDamageRatio = 15;
 	const uint32_t	kTurnChanseTimer = 70;
 	const uint32_t	kAttackTimer[2] = { 50,80 };
 	const float		kBlendValue = 0.05f;
-	const float		kMinDirection = 27.0f;
-
+	const float		kMinDirection = 25.0f;
 	int			m_attackNo = 0;
 	bool		m_isHit = false;
 	bool		m_isTurning = false;

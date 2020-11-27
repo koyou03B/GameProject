@@ -60,6 +60,7 @@ public:
 	}
 private:
 	float m_maxDirection = 0.0f;
+	uint32_t m_selectCount = 0;
 };
 
 CEREAL_CLASS_VERSION(EnemyChaseNode, 3);

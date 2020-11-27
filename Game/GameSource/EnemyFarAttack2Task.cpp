@@ -99,8 +99,11 @@ bool EnemyFarAttack2Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& an
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
-		animation.animationBlend.ResetAnimationSampler(0);
-		animation.animationBlend.ReleaseSampler(0);
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		for (size_t i = 0; i < samplerSize; ++i)
+		{
+			animation.animationBlend.ReleaseSampler(0);
+		}
 		if (!isLoop)
 			animation.animationBlend.FalseAnimationLoop(0);
 		return true;
@@ -278,13 +281,17 @@ uint32_t EnemyFarAttack2Task::JudgePriority(const int id, const VECTOR3F playerP
 		auto player = MESSENGER.CallPlayersInstance();
 		int targetID = enemy->GetJudgeElement().targetID;
 
-		VECTOR3F playerPosition = playerPos;
-		VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-
-		float direction = ToDistVec3(playerPosition - enemyPosition);
-		if (direction > kMinDirection)
+		uint32_t damageCount = enemy->GetJudgeElement().damageCount;
+		if (damageCount >= kDamageRatio)
 			return m_priority;
 	}
+
+	VECTOR3F playerPosition = playerPos;
+	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
+
+	float direction = ToDistVec3(playerPosition - enemyPosition);
+	if (direction > kMinDirection)
+		return m_priority;
 
 	return minPriority;
 

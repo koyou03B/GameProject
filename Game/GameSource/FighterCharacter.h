@@ -102,7 +102,7 @@ private:
 
 	void SerialVersionUpdate(uint32_t version)
 	{
-		m_blendAnimation.serialVersion = version;
+		m_blendAnimation.serialVersion = 13;
 		m_statusParm.serialVersion = version;
 		m_moveParm.serialVersion = version;
 		m_cameraParm.serialVersion = version;

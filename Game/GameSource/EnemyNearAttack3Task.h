@@ -72,15 +72,15 @@ private:
 		END
 	};
 	const uint32_t		kAttackTimer[2] = { 65,90 };
-	const uint32_t		kAnimationSpeed[3] = { 40,70 };
-	const uint32_t		kRowlingTimer[2] = { 30,80 };
+	const uint32_t		kAnimationSpeed[3] = { 70,82 };
+	const uint32_t		kRowlingTimer[2] = { 30,70 };
 	const uint32_t		kTurnChanseTimer = 70;
 	const uint32_t		kAttackSlowTimer = 60;
 	const uint32_t		kRowlingMoveTimer = 65;
 	const int			kCollisionNo = 1;
 	const int			kRestValue = 4;
 	const float			kBlendValue = 0.05f;
-	const float			kMinDirection = 25.0f;
+	const float			kMinDirection = 27.0f;
 	const float			kAccel = 42.0f;
 
 	int					m_attackNo = 0;

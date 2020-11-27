@@ -86,7 +86,7 @@
 //
 ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
-dcl_constantbuffer CB1[1], immediateIndexed
+dcl_constantbuffer CB1[2], immediateIndexed
 dcl_constantbuffer CB2[8], immediateIndexed
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
@@ -150,18 +150,18 @@ mov r0.xyz, r0.xyzx
 #line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
 mov r7.xyz, -r3.xyzx
 dp3 r0.w, r2.xyzx, r7.xyzx
-add r0.w, r0.w, l(0.750000)  // r0.w <- D
+add r0.w, r0.w, l(0.650000)  // r0.w <- D
 
 #line 26
 itof r1.w, l(0)
 max r0.w, r0.w, r1.w
 
 #line 27
-mul r0.xyz, r5.xyzx, r0.xyzx
-mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <Diffuse return value>.x; r0.y <- <Diffuse return value>.y; r0.z <- <Diffuse return value>.z
+mul r7.xyz, r5.xyzx, r0.xyzx
+mul r7.xyz, r0.wwww, r7.xyzx  // r7.x <- <Diffuse return value>.x; r7.y <- <Diffuse return value>.y; r7.z <- <Diffuse return value>.z
 
 #line 37 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
-mov r0.xyz, r0.xyzx  // r0.x <- D.x; r0.y <- D.y; r0.z <- D.z
+mov r7.xyz, r7.xyzx  // r7.x <- D.x; r7.y <- D.y; r7.z <- D.z
 
 #line 38
 mov r1.xyz, r1.xyzx  // r1.x <- Ks.x; r1.y <- Ks.y; r1.z <- Ks.z
@@ -182,24 +182,24 @@ rsq r0.w, r0.w
 mul r3.xyz, r0.wwww, r3.xyzx  // r3.x <- H.x; r3.y <- H.y; r3.z <- H.z
 
 #line 46
-dp3 r2.z, r3.xyzx, r2.xyzx
-mov r2.xyz, r2.zzzz  // r2.x <- S.x; r2.y <- S.y; r2.z <- S.z
+dp3 r3.z, r3.xyzx, r2.xyzx
+mov r3.xyz, r3.zzzz  // r3.x <- S.x; r3.y <- S.y; r3.z <- S.z
 
 #line 47
-itof r3.xyz, l(0, 0, 0, 0)
-max r2.xyz, r2.xyzx, r3.xyzx
+itof r4.xyz, l(0, 0, 0, 0)
+max r3.xyz, r3.xyzx, r4.xyzx
 
 #line 48
-mov r3.xyz, l(1.000000,1.000000,1.000000,0)
-mul r2.xyz, r2.xyzx, r2.xyzx
-mul r2.xyz, r2.xyzx, r2.xyzx
-mul r3.xyz, r2.xyzx, r3.xyzx
-mul r2.xyz, r2.xyzx, r2.xyzx
-mul r2.xyz, r2.xyzx, r2.xyzx
-mul r2.xyz, r2.xyzx, r3.xyzx  // r2.x <- S.x; r2.y <- S.y; r2.z <- S.z
+mov r4.xyz, l(1.000000,1.000000,1.000000,0)
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r4.xyz, r3.xyzx, r4.xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r4.xyzx  // r3.x <- S.x; r3.y <- S.y; r3.z <- S.z
 
 #line 49
-mul r1.xyz, r1.xyzx, r2.xyzx
+mul r1.xyz, r1.xyzx, r3.xyzx
 mul r1.xyz, r5.xyzx, r1.xyzx  // r1.x <- S.x; r1.y <- S.y; r1.z <- S.z
 
 #line 50
@@ -208,16 +208,36 @@ mov r1.xyz, r1.xyzx  // r1.x <- <BlinnPhongSpecular return value>.x; r1.y <- <Bl
 #line 39 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
 mov r1.xyz, r1.xyzx  // r1.x <- S.x; r1.y <- S.y; r1.z <- S.z
 
-#line 54
-nop 
-
-#line 55
-nop 
-
 #line 58
+dp4 r0.w, cb1[1].xyzw, cb1[1].xyzw
+rsq r0.w, r0.w
+mul r3.xyz, r0.wwww, cb1[1].xyzx  // r3.x <- E.x; r3.y <- E.y; r3.z <- E.z
+
+#line 59
+nop 
+mov r3.xyz, r3.xyzx
+
+#line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
+mov r3.xyz, -r3.xyzx
+dp3 r0.w, r2.xyzx, r3.xyzx
+add r0.w, r0.w, l(0.650000)  // r0.w <- D
+
+#line 26
+itof r1.w, l(0)
+max r0.w, r0.w, r1.w
+
+#line 27
+mul r0.xyz, r5.xyzx, r0.xyzx
+mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <Diffuse return value>.x; r0.y <- <Diffuse return value>.y; r0.z <- <Diffuse return value>.z
+
+#line 59 "D:\Lib関連\GameProject\Library\LibrarySource\SkinnedMesh_ps.hlsl"
+mul r0.xyz, r0.xyzx, l(0.600000, 0.600000, 0.600000, 0.000000)
+add r0.xyz, r0.xyzx, r7.xyzx  // r0.x <- D.x; r0.y <- D.y; r0.z <- D.z
+
+#line 61
 add r0.xyz, r0.xyzx, r6.xyzx
 add r0.xyz, r1.xyzx, r0.xyzx
 mov r0.w, l(1.000000)
 mul o0.xyzw, r0.xyzw, v3.xyzw
 ret 
-// Approximately 65 instruction slots used
+// Approximately 77 instruction slots used

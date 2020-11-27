@@ -75,7 +75,7 @@ void EnemyNearAttack3Task::Run(Enemy* enemy)
 	{
 	case Action::START:
 		m_taskState = TASK_STATE::RUN;
-		m_animNo = Enemy::Animation::TURN_ATTACK_LOWER;
+		m_animNo = Enemy::Animation::TURN_ATTACK_HEIGHT;
 		if (animation.animationBlend.SearchSampler(m_animNo))
 		{
 			if (JudgeBlendRatio(animation))
@@ -140,8 +140,11 @@ bool EnemyNearAttack3Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& a
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
-		animation.animationBlend.ResetAnimationSampler(0);
-		animation.animationBlend.ReleaseSampler(0);
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		for (size_t i = 0; i < samplerSize; ++i)
+		{
+			animation.animationBlend.ReleaseSampler(0);
+		}
 		if (!isLoop)
 			animation.animationBlend.FalseAnimationLoop(0);
 		return true;
@@ -156,11 +159,11 @@ void EnemyNearAttack3Task::JudgeAttack(Enemy* enemy, const int attackNo)
 
 	uint32_t attackTimer = 0;
 	if (currentAnimationTime < kAnimationSpeed[0])
-		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(0.8f);
+		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.0f);
 	else if (currentAnimationTime >= kAnimationSpeed[0] && currentAnimationTime < kAnimationSpeed[1])
-		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.2f);
+		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.4f);
 	else
-		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(0.8f);
+		enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.0f);
 
 	attackTimer = kAnimationSpeed[0];
 
@@ -348,7 +351,7 @@ uint32_t EnemyNearAttack3Task::JudgePriority(const int id, const VECTOR3F player
 			if (cosTheta > frontValue)
 				return m_priority;
 
-			if (direction >= kMinDirection)
+			if (direction <= kMinDirection)
 				return m_priority;
 		}
 

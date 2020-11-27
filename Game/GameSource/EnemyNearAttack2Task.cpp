@@ -152,7 +152,7 @@ void EnemyNearAttack2Task::Run(Enemy* enemy)
 		{
 			m_isUsed = true;
 			animation.animationBlend.ResetAnimationSampler(0);
-			m_coolTimer = 6.0f;
+			m_coolTimer = 5.0f;
 			m_moveState = Action::START;
 			m_taskState = TASK_STATE::END;
 		}
@@ -167,8 +167,11 @@ bool EnemyNearAttack2Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& a
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
-		animation.animationBlend.ResetAnimationSampler(0);
-		animation.animationBlend.ReleaseSampler(0);
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		for (size_t i = 0; i < samplerSize; ++i)
+		{
+			animation.animationBlend.ReleaseSampler(0);
+		}
 		if (!isLoop)
 			animation.animationBlend.FalseAnimationLoop(0);
 		return true;
@@ -337,8 +340,8 @@ uint32_t EnemyNearAttack2Task::JudgePriority(const int id, const VECTOR3F player
 
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 
-	//if (cosTheta <= frontValue)
-	//		return m_priority;
+	if (cosTheta >= frontValue)
+			return m_priority;
 
 	uint32_t attackHitCount = enemy->GetJudgeElement().attackHitCount;
 	uint32_t attackCount = enemy->GetJudgeElement().attackCount;
@@ -347,7 +350,7 @@ uint32_t EnemyNearAttack2Task::JudgePriority(const int id, const VECTOR3F player
 	if (ratio <= attackRatio)
 		return m_priority;
 
-	if (direction >= kMinDirection)
+	if (direction <= kMinDirection)
 		return m_priority;
 
 	return minPriority;

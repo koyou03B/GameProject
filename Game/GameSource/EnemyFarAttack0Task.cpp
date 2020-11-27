@@ -285,8 +285,11 @@ bool EnemyFarAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& an
 	if (animation.animationBlend._blendRatio >= animation.blendRatioMax)//magicNumber
 	{
 		animation.animationBlend._blendRatio = 0.0f;
-		animation.animationBlend.ResetAnimationSampler(0);
-		animation.animationBlend.ReleaseSampler(0);
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		for (size_t i = 0; i < samplerSize; ++i)
+		{
+			animation.animationBlend.ReleaseSampler(0);
+		}
 		if (!isLoop)
 			animation.animationBlend.FalseAnimationLoop(0);
 		return true;
@@ -383,7 +386,7 @@ void EnemyFarAttack0Task::BackFlipTurn(Enemy* enemy)
 
 		enemyTransform.WorldUpdate();
 	}
-	else if (currentAnimationTime >= 40 && currentAnimationTime <= 80) 
+	else if (currentAnimationTime >= 40 && currentAnimationTime <= 70) 
 	{
 		enemy->GetMove().velocity = m_nVecToTarget * kAccel;
 		enemyTransform.position += enemy->GetMove().velocity * enemy->GetElapsedTime();
@@ -402,7 +405,7 @@ void EnemyFarAttack0Task::BackFlipTurn(Enemy* enemy)
 
 		float dot = DotVec3(front, targetNormal);
 		float rot = 1.0f - dot;
-		float limit = enemy->GetMove().turnSpeed;
+		float limit = enemy->GetMove().turnSpeed + 0.02f;
 		if (rot > limit)
 			rot = limit;
 
@@ -460,7 +463,7 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 
 	axis = NormalizeVec3(axis);
 
-	VECTOR3F movePoint = enemyPosition + axis * 7.0f;
+	VECTOR3F movePoint = enemyPosition + axis * 10.0f;
 	Collision::AABB stageRange;
 	stageRange.left = -36.0f;
 	stageRange.right = 36.0f;
@@ -473,7 +476,7 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 	else
 	{
 		axis *= -1.0f;
-		movePoint = enemyPosition + axis * 7.0f;
+		movePoint = enemyPosition + axis * 10.0f;
 		if (coll.JudgePointAndAABB(VECTOR2F(movePoint.x, movePoint.z), stageRange))
 			m_nVecToTarget = axis;
 	}
@@ -482,7 +485,7 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 	VECTOR3F playerPosition = player->GetWorldTransform().position;
 	axis = enemyPosition - playerPosition;
 	axis = NormalizeVec3(axis);
-	movePoint = enemyPosition + axis * 7.0f;
+	movePoint = enemyPosition + axis * 10.0f;
 
 	if (coll.JudgePointAndAABB(VECTOR2F(movePoint.x, movePoint.z), stageRange))
 		m_nVecToTarget = axis;
@@ -579,7 +582,16 @@ uint32_t EnemyFarAttack0Task::JudgePriority(const int id, const VECTOR3F playerP
 
 	uint32_t damageCount = enemy->GetJudgeElement().damageCount;
 	if (damageCount >= kDamageRatio)
-		return m_priority;
+	{
+		auto player = MESSENGER.CallPlayersInstance();
+
+		VECTOR3F playerPosition = playerPos;
+		VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
+
+		float direction = ToDistVec3(playerPosition - enemyPosition);
+		if (direction < kMinDirection)
+			return m_priority;
+	}
 
 	return minPriority;
 }

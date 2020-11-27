@@ -81,6 +81,7 @@ public:
 		LEFT_TURN,
 		RIGHT_TURN,
 		RUN,
+		STEP,
 		BACK_FLIP,
 		STAND_UP,
 		MUSCLE_SIGNAL,

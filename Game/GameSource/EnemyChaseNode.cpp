@@ -26,13 +26,24 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 		}
 	}
 
+	if (m_selectCount > 1)
+	{
+		m_selectCount = 0;
+		return minPriority;
+	}
+
 	VECTOR3F playerPosition = players.at(targetID)->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 
 	float distance = ToDistVec3(playerPosition - enemyPosition);
 
 	if (distance >= m_maxDirection)
+	{
+		++m_selectCount;
 		return m_priority;
+	}
+
+
 
 	return minPriority;
 }
