@@ -17,7 +17,7 @@ void EnemyRestTask::Run(Enemy* enemy)
 		enemy->GetJudgeElement().attackCount = 0;
 		enemy->GetJudgeElement().damageCount = 0;
 		enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
-		animation.animationBlend.SetAnimationSpeed(1.5f);
+		animation.animationBlend.SetAnimationSpeed(2.0f);
 		m_restTime = 0;
 		++m_moveState;
 	}
@@ -39,6 +39,11 @@ void EnemyRestTask::Run(Enemy* enemy)
 			enemy->GetJudgeElement().damageCount = 0;
 			enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
 			enemy->GetEmotion().exhaustionParm.isExhaustion = false;
+			auto& players = MESSENGER.CallPlayersInstance();
+			for (auto& player : players)
+			{
+				player->GetJudgeElement().attackHitCount = 0;
+			}
 		}
 		animation.animationBlend.SetAnimationSpeed(1.0f);
 	}

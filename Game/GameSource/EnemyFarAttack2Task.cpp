@@ -12,6 +12,7 @@ void EnemyFarAttack2Task::Run(Enemy* enemy)
 	case Action::START:
 		m_taskState = TASK_STATE::RUN;
 		m_animNo = Enemy::Animation::RIGHT_PUNCH_UPPER;
+		m_hasFinishedBlend = false;
 		if (animation.animationBlend.SearchSampler(m_animNo))
 		{
 			if (JudgeBlendRatio(animation))
@@ -227,9 +228,8 @@ void EnemyFarAttack2Task::TurningChase(Enemy* enemy)
 bool EnemyFarAttack2Task::IsTurnChase(Enemy* enemy)
 {
 	auto& animation = enemy->GetBlendAnimation();
-	static bool blendFinish = false;
-	if (!blendFinish)
-		blendFinish = JudgeBlendRatio(animation, true);
+	if (!m_hasFinishedBlend)
+		m_hasFinishedBlend = JudgeBlendRatio(animation, true);
 
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 
@@ -251,7 +251,7 @@ bool EnemyFarAttack2Task::IsTurnChase(Enemy* enemy)
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 	if (cosTheta <= frontValue && currentAnimationTime == 0)
 	{
-		blendFinish = false;
+		m_hasFinishedBlend = false;
 		return true;
 	}
 

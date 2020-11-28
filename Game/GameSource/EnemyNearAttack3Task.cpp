@@ -4,78 +4,14 @@
 
 void EnemyNearAttack3Task::Run(Enemy* enemy)
 {
-#if 0
-	auto& animation = enemy->GetBlendAnimation();
-	switch (m_moveState)
-	{
-	case Action::START:
-
-		m_taskState = TASK_STATE::RUN;
-		if (animation.animationBlend.GetSampler().size() != 2)
-		{
-			m_animNo = Enemy::Animation::RIGHT_LOWER;
-			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-		}
-		else
-		{
-			if (JudgeBlendRatio(animation))
-			{
-				++m_moveState;
-				++enemy->GetJudgeElement().attackCount;
-			}
-		}
-
-		break;
-	case Action::RIGHT_PUNCH_LOWER:
-
-		m_attackNo = static_cast<int>(Enemy::AttackType::RIGHT_LOWER);
-		if (JudgeAnimationRatio(enemy, m_attackNo, m_animNo))
-		{
-			enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.0f);
-			m_animNo = JudgeTurnChace(enemy);
-			if (m_animNo <= 1)
-			{
-				m_animNo = Enemy::Animation::IDLE;
-				animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-				animation.animationBlend.ResetAnimationFrame();
-				m_moveState = Action::END;
-				break;
-			}
-			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-			++m_moveState;
-		}
-
-		JudgeAttack(enemy, m_attackNo);
-
-		break;
-	case Action::TURN_CHACE:
-		if (IsTurnChase(enemy))
-		{
-			m_animNo = Enemy::Animation::IDLE;
-			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-			++m_moveState;
-		}
-		break;
-	case Action::END:
-		if (JudgeBlendRatio(animation))
-		{
-			animation.animationBlend.ResetAnimationSampler(0);
-			m_moveState = Action::START;
-			m_taskState = TASK_STATE::END;
-		}
-		break;
-	}
-#endif
-
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
 	case Action::START:
 		m_taskState = TASK_STATE::RUN;
 		m_animNo = Enemy::Animation::TURN_ATTACK_HEIGHT;
+		m_hasFinishedBlend = false;
+		m_isHit = false;
 		if (animation.animationBlend.SearchSampler(m_animNo))
 		{
 			if (JudgeBlendRatio(animation))
@@ -234,9 +170,8 @@ int EnemyNearAttack3Task::JudgeTurnChace(Enemy* enemy)
 bool EnemyNearAttack3Task::IsTurnChase(Enemy* enemy)
 {
 	auto& animation = enemy->GetBlendAnimation();
-	static bool blendFinish = false;
-	if (!blendFinish)
-		blendFinish = JudgeBlendRatio(animation, true);
+	if (!m_hasFinishedBlend)
+		m_hasFinishedBlend = JudgeBlendRatio(animation, true);
 
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 
@@ -258,7 +193,7 @@ bool EnemyNearAttack3Task::IsTurnChase(Enemy* enemy)
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 	if (cosTheta <= frontValue && currentAnimationTime == 0)
 	{
-		blendFinish = false;
+		m_hasFinishedBlend = false;
 		return true;
 	}
 

@@ -71,7 +71,7 @@ private:
 		TURN_CHACE,
 		END
 	};
-	const uint32_t		kAttackTimer[2] = { 50,75 };
+	const uint32_t		kAttackTimer[2] = { 55,75 };
 	const uint32_t		kTurnChanseTimer = 70;
 	const uint32_t		kAttackSlowTimer = 30;
 	const int			kCollisionNo = 3;

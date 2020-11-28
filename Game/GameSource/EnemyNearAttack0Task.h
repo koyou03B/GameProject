@@ -85,6 +85,7 @@ private:
 	int				m_attackNo = 0;
 	float			m_turnSpeed = 0.0f;
 	bool            m_isHit = false;
+	bool			m_hasSentSignal = false;
 	VECTOR3F		m_targetPosition = {};
 };
 

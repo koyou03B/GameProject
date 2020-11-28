@@ -83,9 +83,11 @@ protected:
 	std::string m_taskName;
 	TASK_STATE m_taskState;
 	uint32_t m_moveState = 0;
-	float m_coolTimer;
 	uint32_t m_priority;
+	float m_coolTimer;
 	int m_animNo;
 	bool m_isUsed = false;
+	bool m_hasFinishedBlend = false;
+
 	uint32_t m_serialVersion = 3;
 };

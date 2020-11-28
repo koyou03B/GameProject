@@ -5,142 +5,6 @@
 
 void EnemyFarAttack0Task::Run(Enemy* enemy)
 {
-#if 0
-	auto& animation = enemy->GetBlendAnimation();
-
-	switch (m_moveState)
-	{
-	case Action::START:
-		m_taskState = TASK_STATE::RUN;
-		if (animation.animationBlend.GetSampler().size() != 2)
-		{
-			m_animNo = Enemy::Animation::RUN_SIGNAL;
-			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-		}
-		else
-		{
-			m_targetID = enemy->GetJudgeElement().targetID;
-			auto player = MESSENGER.CallPlayerInstance(m_targetID);
-			m_targetPosition = player->GetWorldTransform().position;
-			++m_moveState;
-		}
-
-		m_nVecToTarget = {};
-		m_speedToTarget = {};
-		m_chaseTimer = 0;
-		m_restTimer = 0.0f;
-		m_isNear = false;
-		m_isTurning = false;
-		animation.animationBlend._blendRatio = 0.0f;
-		break;
-	case Action::TURNING:
-		if (JudgeBlendRatio(animation))
-			m_isTurning = true;
-
-		if (m_isTurning)
-		{
-			uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
-			if (currentAnimationTime >= kTurningTimer)
-			{
-				m_animNo = Enemy::Animation::RUN;
-				enemy->GetBlendAnimation().animationBlend.AddSampler(m_animNo, enemy->GetModel());
-				++m_moveState;
-			}
-		}
-		TurningChase(enemy);
-	
-		break;
-	case Action::RUN :
-		if (animation.animationBlend.GetSampler().size() == 2)
-		{
-			animation.animationBlend._blendRatio += kBlendValue;
-			if (animation.animationBlend._blendRatio >= animation.blendRatioMax)
-			{
-				animation.animationBlend._blendRatio = 0.0f;
-				animation.animationBlend.ResetAnimationSampler(0);
-				animation.animationBlend.ReleaseSampler(0);
-			}
-		}
-
-		if (m_isNear)
-		{
-			m_animNo = Enemy::Animation::TURN_ATTACK;
-			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-			++m_moveState;
-			++enemy->GetJudgeElement().attackCount;
-			++enemy->GetJudgeElement().moveCount;
-			
-		}
-		else
-		{
-			auto& enemyTransform = enemy->GetWorldTransform();
-
-			if (m_chaseTimer <= kChaseTimer)
-			{
-				enemy->GetMove().velocity = m_nVecToTarget * m_speedToTarget;
-				enemyTransform.position += enemy->GetMove().velocity;
-				enemyTransform.WorldUpdate();
-				++m_chaseTimer;
-				m_attackNo = static_cast<int>(Enemy::AttackType::RUN_ATTACK);
-				JudgeAttack(enemy, m_attackNo);
-			}
-			else
-			{
-				m_isNear = true;
-				m_chaseTimer = 0;
-			}
-		}
-		break;
-	case Action::ANIM_CHANGE:
-		if (JudgeBlendRatio(animation))
-		{
-			++m_moveState;
-			++enemy->GetJudgeElement().attackCount;
-		}
-		break;
-	case Action::TURN_ATTACK:
-		m_attackNo = static_cast<int>(Enemy::AttackType::TURN_ATTACK);
-		if (JudgeAnimationRatio(enemy, m_attackNo, m_animNo))
-		{
-			animation.animationBlend.SetAnimationSpeed(1.0f);
-			m_animNo = JudgeTurnChace(enemy);
-			if (m_animNo <= 1)
-			{
-				m_animNo = Enemy::Animation::IDLE;
-				animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-				animation.animationBlend.ResetAnimationFrame();
-				m_moveState = Action::END;
-				break;
-			}
-			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-			++m_moveState;
-		}
-		JudgeAttack(enemy, m_attackNo);
-		AttackMove(enemy);
-	
-		break;
-	case Action::TURN_CHACE:
-		if (IsTurnChase(enemy))
-		{
-			m_animNo = Enemy::Animation::IDLE;
-			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
-			animation.animationBlend.ResetAnimationFrame();
-			++m_moveState;
-		}
-		break;
-	case Action::END:
-		if (JudgeBlendRatio(animation))
-		{
-			animation.animationBlend.ResetAnimationSampler(0);
-			m_moveState = Action::START;
-			m_taskState = TASK_STATE::END;
-		}
-		break;
-	}
-#endif
-
 	auto& animation = enemy->GetBlendAnimation();
 
 	switch (m_moveState)
@@ -148,6 +12,11 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 	case Action::START:
 		m_taskState = TASK_STATE::RUN;
 		m_animNo = Enemy::Animation::BACK_FLIP;
+		m_hasFinishedBlend = false;
+		m_hasFinishedStamp = false;
+		m_isHit = false;
+		m_isNear = false;
+		m_setTarget = false;
 		if (animation.animationBlend.SearchSampler(m_animNo))
 		{
 			m_blendValue = 0.05f;
@@ -183,36 +52,30 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 		break;
 	}
 	case Action::RUN_STAMP:
-	{
 		m_attackNo = Enemy::AttackType::FallFlat_edit;
-		static bool blendFinish = false;
-		if (!blendFinish)
-			blendFinish = JudgeBlendRatio(animation, true);
+		if (!m_hasFinishedBlend)
+			m_hasFinishedBlend = JudgeBlendRatio(animation, true);
 		else
 		{
-			static bool isStamp = false;
 			if (AttackMove(enemy))
 			{
 				m_animNo = Enemy::Animation::FALL_FLAT_EDIT;
 				animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
 				animation.animationBlend.ResetAnimationFrame();
 				m_blendValue = 0.2f;
-				isStamp = true;
 			}
 
-			if (isStamp)
+			if (m_isNear)
 			{
-				static bool blendFinishStamp = false;
-				if(!blendFinishStamp)
-					blendFinishStamp = JudgeBlendRatio(animation);
+				if(!m_hasFinishedStamp)
+					m_hasFinishedStamp = JudgeBlendRatio(animation);
 				else
 				{
 					//m_animNo = ;
 					if (JudgeAnimationRatio(enemy, m_attackNo, Enemy::Animation::STAND_UP))
 					{
-						isStamp = false;
-						blendFinish = false;
-						blendFinishStamp = false;
+						m_hasFinishedBlend = false;
+						m_hasFinishedStamp = false;
 						m_isHit = false;
 						m_isNear = false;
 						m_setTarget = false;
@@ -223,13 +86,10 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 			JudgeAttack(enemy, m_attackNo);
 		}
 		break;
-	}
 	case Action::STAND_UP:
-	{
 		m_blendValue = 0.015f;
-		static bool blendFinish = false;
-		if (!blendFinish)
-			blendFinish = JudgeBlendRatio(animation);
+		if (!m_hasFinishedBlend)
+			m_hasFinishedBlend = JudgeBlendRatio(animation);
 		else
 		{
 			animation.animationBlend.SetAnimationSpeed(1.7f);
@@ -237,7 +97,7 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 			if (currentAnimationTime >= 683)
 			{
 				m_blendValue = 0.05f;
-				blendFinish = false;
+				m_hasFinishedBlend = false;
 				animation.animationBlend.SetAnimationSpeed(1.0f);
 				m_animNo = JudgeTurnChace(enemy);
 				if (m_animNo <= 1)
@@ -253,7 +113,6 @@ void EnemyFarAttack0Task::Run(Enemy* enemy)
 				++m_moveState;
 			}
 		}
-	}
 		break;
 	case Action::TURN_CHACE:
 		if (IsTurnChase(enemy))
@@ -496,9 +355,8 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 bool EnemyFarAttack0Task::IsTurnChase(Enemy* enemy)
 {
 	auto& animation = enemy->GetBlendAnimation();
-	static bool blendFinish = false;
-	if (!blendFinish)
-		blendFinish = JudgeBlendRatio(animation, true);
+	if (!m_hasFinishedBlend)
+		m_hasFinishedBlend = JudgeBlendRatio(animation, true);
 
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 
@@ -520,7 +378,7 @@ bool EnemyFarAttack0Task::IsTurnChase(Enemy* enemy)
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
 	if (cosTheta <= frontValue && currentAnimationTime == 0)
 	{
-		blendFinish = false;
+		m_hasFinishedBlend = false;
 		return true;
 	}
 

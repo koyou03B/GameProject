@@ -12,7 +12,9 @@ void EnemyBehaviorTree::Release()
 
 	m_useTasks.clear();
 
-	//m_nodes->Release();
+	m_taskData.Release();
+	m_nodeData.Release();
+	m_nodes->Release();
 }
 
 void EnemyBehaviorTree::UpdateUseTasks(const float elapsedTime)
@@ -108,16 +110,12 @@ void EnemyBehaviorTree::SetRootNodeChild()
 	std::shared_ptr<EnemyWaitNode>				waitNode	 = m_nodeData.waitNode;
 	std::shared_ptr<EnemyChaseNode>				chaseNode	 = m_nodeData.chaseNode;
 	std::shared_ptr<EnemyFightNode>				fightNode	 = m_nodeData.fightNode;
-	//std::shared_ptr<EnemyFightNearNode>			fightNearNode = m_nodeData.fightNearNode;
-	//std::shared_ptr<EnemyFightFarNode>			fightFarNode = m_nodeData.fightFarNode;
 	std::shared_ptr<EnemySpecialAttackNode>		specialAttackNode = m_nodeData.specialAttackNode;
 	std::shared_ptr<EnemyUnSpecialAttackNode>	unSpecialAttackNode = m_nodeData.unSpecialAttackNode;
 
 	AddNode(waitNode->GetParentName(),		waitNode);
 	AddNode(chaseNode->GetParentName(),		chaseNode);
 	AddNode(fightNode->GetParentName(),		fightNode);
-	//AddNode(fightNearNode->GetParentName(), fightNearNode);
-	//AddNode(fightFarNode->GetParentName(),	fightFarNode);
 	AddNode(specialAttackNode->GetParentName(), specialAttackNode);
 	AddNode(unSpecialAttackNode->GetParentName(), unSpecialAttackNode);
 }
@@ -156,10 +154,6 @@ void EnemyBehaviorTree::SetTaskToNode()
 	selectNode->SetTask(fightFarTask0);
 	selectNode->SetTask(fightFarTask1);
 	selectNode->SetTask(fightFarTask2);
-	//dynamic_cast<EnemyFarAttack0Task*>(selectNode->GetTask().at(3).get())->SetMaxDirection(direction);
-	//dynamic_cast<EnemyFarAttack1Task*>(selectNode->GetTask().at(4).get())->SetMaxDirection(direction);
-
-
 
 	selectNode = m_nodes->SearchNode(fightNearSpecialTask0->GetParentNodeName());
 	selectNode->SetTask(fightNearSpecialTask0);

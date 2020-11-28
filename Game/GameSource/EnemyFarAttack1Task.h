@@ -90,6 +90,7 @@ private:
 	bool	m_isHit = false;
 	bool	m_isTurning = false;
 	bool	m_setTarget = false;
+	bool    m_hasFinishedAttack = false;
 	VECTOR3F m_nVecToTarget = {};
 	VECTOR3F m_targetPosition = {};
 };

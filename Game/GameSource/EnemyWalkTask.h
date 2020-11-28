@@ -13,7 +13,7 @@ public:
 	bool Walk(Enemy* enemy);
 	bool IsTurnChase(Enemy* enemy);
 	bool StepMove(Enemy* enemy,bool isBlendFinish);
-
+	bool IsNearTarget(Enemy* enemy);
 	int  JudgeTurnChace(Enemy* enemy);
 	void JudgeVectorDirection(Enemy* enemy);
 	uint32_t JudgePriority(const int id, const VECTOR3F playerPos) override;

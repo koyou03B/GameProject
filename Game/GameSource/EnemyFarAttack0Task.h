@@ -90,6 +90,7 @@ private:
 	bool	m_isNear = false;
 	bool	m_isHit = false;
 	bool	m_isTurning = false;
+	bool	m_hasFinishedStamp = false;
 	bool	m_setTarget = false;
 	VECTOR3F m_nVecToTarget = {};
 	VECTOR3F m_targetPosition = {};

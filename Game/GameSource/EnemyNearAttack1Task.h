@@ -77,7 +77,7 @@ private:
 	};
 	const uint32_t	kAttackTimer[2] = { 50,80 };
 	const uint32_t	kMoveTimer[2] = { 20,40 };	
-	const uint32_t  kAnimationSpeed[4] = { 60,80,60,90 };
+	const uint32_t  kAnimationSpeed[4] = { 60,80,60,80 };
 	const uint32_t  kTurnChanseTimer = 70;
 	const float		kAttackLength = 25.0f;
 	const float		kBlendValue = 0.08f;
@@ -86,6 +86,7 @@ private:
 
 	int				m_attackNo = 0;
 	bool            m_isHit = false;
+	bool			m_hasSentSignal = false;
 	VECTOR3F		m_targetPosition = {};
 };
 

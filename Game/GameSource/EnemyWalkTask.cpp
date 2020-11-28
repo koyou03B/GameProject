@@ -14,7 +14,8 @@ void EnemyWalkTask::Run(Enemy* enemy)
 		m_animNo = Enemy::Animation::STEP;
 		m_walkTime = 0.0f;
 		m_blendValue = 0.1f;
-		enemy->GetJudgeElement().moveCount += 2;
+		m_hasFinishedBlend = false;
+		++enemy->GetJudgeElement().moveCount;
 		animation.animationBlend.SetAnimationSpeed(1.1f);
 		animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
@@ -22,25 +23,24 @@ void EnemyWalkTask::Run(Enemy* enemy)
 		++m_moveState;
 	break;
 	case Action::STEP:
-	{
-		static bool blendFinish = false;
-		if (!blendFinish)
-			blendFinish = JudgeBlendRatio(animation);
+		if (!m_hasFinishedBlend)
+			m_hasFinishedBlend = JudgeBlendRatio(animation);
 		else
 		{
-			if (StepMove(enemy, blendFinish))
+			if (StepMove(enemy, m_hasFinishedBlend))
 			{
-				animation.animationBlend.SetAnimationSpeed(1.1f);
-				m_animNo = Enemy::Animation::RUN;
+				m_hasFinishedBlend = false;
+				bool isNear = IsNearTarget(enemy);
+				m_animNo = isNear ? Enemy::Animation::IDLE : Enemy::Animation::RUN;
+				m_moveState = isNear ? Action::END : Action::WALK;
+				m_blendValue = isNear ? 0.07f : 0.1f;
+				float animationSpeed = isNear ? 1.0f : 1.1f;
 				animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
+				animation.animationBlend.SetAnimationSpeed(animationSpeed);
 				animation.animationBlend.ResetAnimationFrame();
 				++enemy->GetJudgeElement().moveCount;
-				m_blendValue = 0.1f;
-				++m_moveState;
-				blendFinish = false;
 			}
 		}
-	}
 	break;
 	case Action::WALK:
 		if (Walk(enemy))
@@ -49,13 +49,13 @@ void EnemyWalkTask::Run(Enemy* enemy)
 			animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
 			animation.animationBlend.ResetAnimationFrame();
 			animation.animationBlend.SetAnimationSpeed(1.0f);
+			m_blendValue = 0.07f;
 			++m_moveState;
 		}
 		break;
 	case Action::END:
 		if (JudgeBlendRatio(animation))
 		{
-			animation.animationBlend.ResetAnimationSampler(0);
 			m_moveState = 0;
 			m_taskState = TASK_STATE::END;
 
@@ -95,9 +95,8 @@ bool EnemyWalkTask::Walk(Enemy* enemy)
 	int targetID = enemy->GetJudgeElement().targetID;
 	auto& player = MESSENGER.CallPlayerInstance(targetID);
 
-	static bool blendFinish = false;
-	if (!blendFinish)
-		blendFinish = JudgeBlendRatio(animation,true);
+	if (!m_hasFinishedBlend)
+		m_hasFinishedBlend = JudgeBlendRatio(animation,true);
 
 #if 0
 	auto playerTransform = player->GetWorldTransform();
@@ -195,7 +194,7 @@ bool EnemyWalkTask::Walk(Enemy* enemy)
 	//^‚Á‚·‚®‚Å‚¢‚¢‚æ
 	if (m_walkTime > kWalkTimer)
 	{
-		blendFinish = false;
+		m_hasFinishedBlend = false;
 		return true;
 	}
 	else
@@ -240,7 +239,7 @@ bool EnemyWalkTask::Walk(Enemy* enemy)
 
 		if (distance < 24.0f)
 		{
-			blendFinish = false;
+			m_hasFinishedBlend = false;
 			return true;
 		}
 
@@ -255,22 +254,17 @@ bool EnemyWalkTask::IsTurnChase(Enemy* enemy)
 	//static bool blendFinish = false;
 	//if (!blendFinish)
 	//	blendFinish = JudgeBlendRatio(animation, true);
-
 	//VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-
 	//float direction = ToDistVec3(m_targetPosition - enemyPosition);
 	//VECTOR3F normalizeDist = NormalizeVec3(m_targetPosition - enemyPosition);
-
 	//VECTOR3F angle = enemy->GetWorldTransform().angle;
 	//VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
 	//front = NormalizeVec3(front);
-
 	//float dot = DotVec3(front, normalizeDist);
 	//float rot = 1.0f - dot;
 	//float limit = enemy->GetMove().turnSpeed;
 	//if (rot > limit)
 	//	rot = limit;
-
 	//uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 	//float cosTheta = acosf(dot);
 	//float frontValue = enemy->GetStandardValue().viewFrontValue;
@@ -279,13 +273,11 @@ bool EnemyWalkTask::IsTurnChase(Enemy* enemy)
 	//	blendFinish = false;
 	//	return true;
 	//}
-
 	//if (kTurnChanseTimer > currentAnimationTime)
 	//{
 	//	auto& enemyTransform = enemy->GetWorldTransform();
 	//	if (m_animNo == Enemy::Animation::LEFT_TURN)
 	//		rot *= -1;
-
 	//	enemyTransform.angle.y += rot;
 	//	enemyTransform.WorldUpdate();
 	//}
@@ -425,6 +417,24 @@ bool EnemyWalkTask::StepMove(Enemy* enemy, bool isBlendFinish)
 
 	}
 	enemyTransform.WorldUpdate();
+
+	return false;
+}
+
+bool EnemyWalkTask::IsNearTarget(Enemy* enemy)
+{
+	int targetID = enemy->GetJudgeElement().targetID;
+	auto& player = MESSENGER.CallPlayerInstance(targetID);
+
+	auto playerTransform = player->GetWorldTransform();
+	auto& enemyTransform = enemy->GetWorldTransform();
+
+	VECTOR3F enemyPosition = enemyTransform.position;
+	VECTOR3F playerPosition = playerTransform.position;
+	float distance = ToDistVec3(playerPosition - enemyPosition);
+
+	if (distance < 24.0f)
+		return true;
 
 	return false;
 }

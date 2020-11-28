@@ -51,6 +51,17 @@ struct NodeData
 		}
 	}
 
+	void Release()
+	{
+		waitNode.reset();
+		chaseNode.reset();
+		fightNode.reset();
+		fightNearNode.reset();
+		fightFarNode.reset();
+		specialAttackNode.reset();
+		unSpecialAttackNode.reset();
+	}
+
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -161,6 +172,23 @@ struct TaskData
 		default:
 			break;
 		}
+	}
+
+	void Release()
+	{
+		restTask.reset();
+		intimidateTask.reset();
+		walkTask.reset();
+		targetTurnTask.reset();
+		fightNearTask0.reset();
+		fightNearTask1.reset();
+		fightNearTask2.reset();
+		fightNearTask3.reset();
+		fightNearSpecialTask0.reset();
+		fightFarTask0.reset();
+		fightFarTask1.reset();
+		fightFarTask2.reset();
+		fightFarSpecialTask0.reset();
 	}
 
 	template<class T>
