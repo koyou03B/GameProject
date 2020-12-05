@@ -47,7 +47,7 @@ public:
 		bool isExit = false;
 		bool isAttack = false;
 		bool isDamage = false;
-
+		
 		uint32_t serialVersion = 0;
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version)

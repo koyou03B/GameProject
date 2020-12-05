@@ -42,25 +42,57 @@
 // SV_TARGET                0   xyzw        0   TARGET   float   xyzw
 //
 ps_5_0
-dcl_globalFlags refactoringAllowed
+dcl_globalFlags refactoringAllowed | skipOptimization
 dcl_constantbuffer CB0[2], immediateIndexed
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
 dcl_input_ps linear v1.xy
 dcl_output o0.xyzw
 dcl_temps 2
-add r0.xy, v1.xyxx, l(-0.500000, -0.500000, 0.000000, 0.000000)
-add r0.xy, |r0.xyxx|, |r0.xyxx|
-dp2 r0.x, r0.xyxx, r0.xyxx
-div r0.x, r0.x, cb0[1].x
-min r0.x, r0.x, l(1.000000)
-log r0.x, |r0.x|
-mul r0.x, r0.x, cb0[1].y
-exp r0.x, r0.x
-mul_sat r0.x, r0.x, cb0[1].z
-sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t0.xyzw, s0
-add r0.yzw, -r1.xxyz, cb0[0].xxyz
-mad o0.xyz, r0.xxxx, r0.yzwy, r1.xyzx
-mov o0.w, r1.w
+//
+// Initial variable locations:
+//   v0.x <- pin.sv_position.x; v0.y <- pin.sv_position.y; v0.z <- pin.sv_position.z; v0.w <- pin.sv_position.w; 
+//   v1.x <- pin.texcoord.x; v1.y <- pin.texcoord.y; 
+//   v2.x <- pin.color.x; v2.y <- pin.color.y; v2.z <- pin.color.z; v2.w <- pin.color.w; 
+//   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
+//
+#line 9 "D:\Lib関連\GameProject\Library\LibrarySource\Vignette_ps.hlsl"
+sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v1.xyxx, t0.xyzw, s0  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z; r0.w <- color.w
+
+#line 10
+mov r1.xy, l(-0.500000,-0.500000,-0.000000,-0.000000)
+add r1.xy, r1.xyxx, v1.xyxx
+mov r1.zw, -r1.xxxy
+max r1.xy, r1.zwzz, r1.xyxx
+mul r1.xy, r1.xyxx, l(2.000000, 2.000000, 0.000000, 0.000000)  // r1.x <- d.x; r1.y <- d.y
+
+#line 11
+dp2 r1.x, r1.xyxx, r1.xyxx  // r1.x <- r2
+
+#line 12
+mov r1.y, l(0)  // r1.y <- vignettingFactor
+
+#line 14
+div r1.x, r1.x, cb0[1].x
+min r1.x, r1.x, l(1.000000)
+mov r1.z, -r1.x
+max r1.x, r1.z, r1.x
+log r1.x, r1.x
+mul r1.x, r1.x, cb0[1].y
+exp r1.x, r1.x
+mul r1.x, r1.x, cb0[1].z
+add r1.x, r1.x, r1.y  // r1.x <- vignettingFactor
+
+#line 15
+max r1.x, r1.x, l(0.000000)
+min r1.x, r1.x, l(1.000000)
+mov r1.yzw, -r0.xxyz
+add r1.yzw, r1.yyzw, cb0[0].xxyz
+mul r1.xyz, r1.yzwy, r1.xxxx
+add r0.xyz, r0.xyzx, r1.xyzx
+
+#line 16
+mov o0.xyz, r0.xyzx
+mov o0.w, r0.w
 ret 
-// Approximately 14 instruction slots used
+// Approximately 26 instruction slots used

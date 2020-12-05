@@ -29,6 +29,7 @@ namespace Source
 
 			void End(ID3D11DeviceContext * immediateContext);
 
+			D3D11_TEXTURE2D_DESC m_texture2dDesc;
 
 		private:
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	 m_shaderResourceView;
@@ -36,7 +37,6 @@ namespace Source
 			Microsoft::WRL::ComPtr<ID3D11Buffer>				 m_vertexBuffer;
 			Microsoft::WRL::ComPtr<ID3D11Buffer>				 m_instanceBuffer;
 
-			D3D11_TEXTURE2D_DESC m_texture2dDesc;
 			D3D11_TEXTURE2D_DESC m_dissolveTexture2dDesc;
 			D3D11_VIEWPORT		 m_viewPort;
 

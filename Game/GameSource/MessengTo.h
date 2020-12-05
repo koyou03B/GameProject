@@ -1,5 +1,6 @@
 #pragma once
 #include "MetaAI.h"
+#include "UIAdominist.h"
 #include "MessengType.h"
 
 class MessengTo
@@ -62,9 +63,20 @@ public:
 		return false;
 	}
 
+	void MessageToLifeUpdate(const float currentHP, const float maxHP,
+		const UIActLabel label, const uint32_t id)
+	{
+		m_uiAdominist->LifeUpdate(label, (maxHP - currentHP) / maxHP, id);
+	}
+
 	inline void SetMetaAI(const std::shared_ptr<MetaAI>& metaAI)
 	{
 		m_metaAI = metaAI;
+	}
+
+	inline void SetUIAdominist(const std::shared_ptr<UIAdominist>& uiAdominist)
+	{
+		m_uiAdominist = uiAdominist;
 	}
 
 	inline static MessengTo& GetInstance()
@@ -76,6 +88,7 @@ public:
 	bool isVignette = false;
 private:
 	std::shared_ptr<MetaAI> m_metaAI;
+	std::shared_ptr<UIAdominist> m_uiAdominist;
 };
 
 

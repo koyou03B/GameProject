@@ -26,7 +26,7 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 		}
 	}
 
-	if (m_selectCount > 1)
+	if (m_selectCount > 2)
 	{
 		m_selectCount = 0;
 		return minPriority;

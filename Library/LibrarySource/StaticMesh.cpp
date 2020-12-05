@@ -177,7 +177,7 @@ namespace Source
 			const DirectX::XMFLOAT3& endPosition,
 			DirectX::XMFLOAT3* outPosition,
 			DirectX::XMFLOAT3* outNormal,
-			float* outLength)
+			float* outLength, const std::vector<std::string>& searchMeshName)
 		{
 			int ret = -1;
 			DirectX::XMVECTOR start = DirectX::XMLoadFloat3(&startPosition);
@@ -192,6 +192,18 @@ namespace Source
 			DirectX::XMVECTOR position, normal;
 			for (auto& mesh : _resource->_meshes)
 			{
+				bool hasSearch = false;
+				for (const auto& name : searchMeshName)
+				{
+					if (mesh.name == name)
+					{
+						hasSearch = true;
+						break;
+					}
+				}
+
+				if (!hasSearch) continue;
+
 				for (const auto& it : mesh.faces)
 				{
 					//Å@ñ í∏ì_éÊìæ
@@ -271,12 +283,16 @@ namespace Source
 
 				VECTOR3F rayPositionInModelSpace;
 				VECTOR3F rayDirectionInModelSpace;
+				VECTOR3F offset = { 0.01f,0.01f,0.01f };
 				DirectX::XMStoreFloat3(&rayPositionInModelSpace, DirectX::XMVector4Transform(DirectX::XMVectorSet(rayPosition.x, rayPosition.y, rayPosition.z, 1), T));
 				DirectX::XMStoreFloat3(&rayDirectionInModelSpace, DirectX::XMVector3Normalize(
 					DirectX::XMVector4Transform(DirectX::XMVectorSet(rayDirection.x, rayDirection.y, rayDirection.z, 0), T)));
+				DirectX::XMStoreFloat3(&offset, DirectX::XMVector4Transform(DirectX::XMVectorSet(offset.x, offset.y, offset.z, 1), T));
 
+				VECTOR3F boundingBoxMin = mesh.boundingBox.max ;
+				VECTOR3F boundingBoxMax = mesh.boundingBox.min ;
 				if (!Source::RayTriangle::PointInAABB(reinterpret_cast<const float*>(&rayPositionInModelSpace),
-					reinterpret_cast<const float*>(&mesh.boundingBox.min), reinterpret_cast<const float*>(&mesh.boundingBox.max)))
+					reinterpret_cast<const float*>(&boundingBoxMin), reinterpret_cast<const float*>(&boundingBoxMax)))
 				{
 					continue;
 				}

@@ -9,9 +9,9 @@ CEREAL_CLASS_VERSION(Enemy, 8);
 
 void Enemy::Init()
 {
-	m_transformParm.position = { -10.0f,0.0f,80.0f };
+	m_transformParm.position = { 0.0f,0.0f,30.0f };
 	m_transformParm.angle = { 0.0f * 0.01745f, 180.0f * 0.01745f,0.0f * 0.017454f };
-	m_transformParm.scale = { 0.08f,0.08f,0.08f };
+	m_transformParm.scale = { 0.085f,0.085f,0.085f };
 	m_transformParm.WorldUpdate();
 
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::ENEMY);
@@ -41,7 +41,7 @@ void Enemy::Init()
 
 	m_statusParm.isExit = true;
 	m_statusParm.life = 700.0f;
-
+	m_statusParm.maxLife = 700.0f;
 	m_blendAnimation.animationBlend.Init(m_model);
 	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::IDLE, m_model);
 	m_attackParm.resize(13);
@@ -1327,6 +1327,13 @@ void Enemy::ImGui(ID3D11Device* device)
 
 		m_stoneParm.m_stoneAdom->ImGui(device);
 	}
+
+
+	float scale = m_transformParm.scale.x;
+	ImGui::SliderFloat("Scale", &scale, 0.01f, 0.1f);
+	m_transformParm.scale = VECTOR3F(scale, scale, scale);
+	m_transformParm.WorldUpdate();
+
 
 
 	if (ImGui::Button("ActiveBehaviorTree"))

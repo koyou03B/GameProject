@@ -226,6 +226,9 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 			++m_enemys[0]->GetJudgeElement().damageCount;
 			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;
 
+			MESSENGER.MessageToLifeUpdate(m_enemys[0]->GetStatus().life,m_enemys[0]->GetStatus().maxLife ,
+				UIActLabel::LIFE_E, 0);
+
 			if (m_enemys[0]->GetStatus().life <= 0)
 			{
 				m_enemys[0]->GetStatus().isExit = false;
@@ -297,7 +300,8 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 
 				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
 			//	m_enemys[id]->GetStatus().isAttack = true;
-
+				MESSENGER.MessageToLifeUpdate(player->GetStatus().life, player->GetStatus().maxLife,
+					UIActLabel::LIFE_P, player->GetID());
 				VECTOR3F vector = m_enemys[id]->GetWorldTransform().position - player->GetWorldTransform().position;
 
 				player->GetDamage().vector = vector;
@@ -339,7 +343,9 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 			{
 				++m_enemys[id]->GetJudgeElement().attackHitCount;
 				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;
-				m_enemys[id]->GetStatus().isAttack = true;
+				MESSENGER.MessageToLifeUpdate(player->GetStatus().life, player->GetStatus().maxLife,
+					UIActLabel::LIFE_P, player->GetID());
+				//m_enemys[id]->GetStatus().isAttack = true;
 				//if (m_scope->GetAimMode()) m_scope->GetAimMode() = false;
 				if (m_players[targetID]->GetStatus().life <= 0)
 				{

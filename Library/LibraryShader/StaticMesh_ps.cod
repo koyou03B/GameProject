@@ -4,6 +4,25 @@
 //
 // Buffer Definitions: 
 //
+// cbuffer CAMERA_CONSTANTS
+// {
+//
+//   struct CAMERA
+//   {
+//       
+//       float4 position;               // Offset:    0
+//       float4 direction;              // Offset:   16
+//       row_major float4x4 view;       // Offset:   32
+//       row_major float4x4 projection; // Offset:   96
+//       row_major float4x4 view_projection;// Offset:  160
+//       row_major float4x4 inverse_view;// Offset:  224
+//       row_major float4x4 inverse_view_projection;// Offset:  288
+//       row_major float4x4 previous_view_projection;// Offset:  352
+//
+//   } camera;                          // Offset:    0 Size:   416
+//
+// }
+//
 // cbuffer SCENE_CONSTANTS
 // {
 //
@@ -43,6 +62,7 @@
 // diffuse_map_sampler_state         sampler      NA          NA             s0      1 
 // diffuse_map                       texture  float4          2d             t0      1 
 // normal_map                        texture  float4          2d             t3      1 
+// CAMERA_CONSTANTS                  cbuffer      NA          NA            cb1      1 
 // SCENE_CONSTANTS                   cbuffer      NA          NA            cb2      1 
 //
 //
@@ -66,6 +86,7 @@
 //
 ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
+dcl_constantbuffer CB1[2], immediateIndexed
 dcl_constantbuffer CB2[8], immediateIndexed
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
@@ -151,6 +172,34 @@ dp3 r0.w, r1.xyzx, r2.xyzx
 add r0.w, r0.w, l(0.650000)  // r0.w <- D
 
 #line 26
+itof r1.w, l(0)
+max r0.w, r0.w, r1.w
+
+#line 27
+mul r2.xyz, r3.xyzx, r0.xyzx
+mul r2.xyz, r0.wwww, r2.xyzx  // r2.x <- <Diffuse return value>.x; r2.y <- <Diffuse return value>.y; r2.z <- <Diffuse return value>.z
+
+#line 39 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
+mov r2.xyz, r2.xyzx  // r2.x <- D.x; r2.y <- D.y; r2.z <- D.z
+
+#line 41
+nop 
+
+#line 60
+dp4 r0.w, cb1[1].xyzw, cb1[1].xyzw
+rsq r0.w, r0.w
+mul r5.xyz, r0.wwww, cb1[1].xyzx  // r5.x <- E.x; r5.y <- E.y; r5.z <- E.z
+
+#line 61
+nop 
+mov r5.xyz, r5.xyzx
+
+#line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
+mov r5.xyz, -r5.xyzx
+dp3 r0.w, r1.xyzx, r5.xyzx
+add r0.w, r0.w, l(0.650000)  // r0.w <- D
+
+#line 26
 itof r1.x, l(0)
 max r0.w, r0.w, r1.x
 
@@ -158,21 +207,13 @@ max r0.w, r0.w, r1.x
 mul r0.xyz, r3.xyzx, r0.xyzx
 mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <Diffuse return value>.x; r0.y <- <Diffuse return value>.y; r0.z <- <Diffuse return value>.z
 
-#line 39 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
-mov r0.xyz, r0.xyzx  // r0.x <- D.x; r0.y <- D.y; r0.z <- D.z
+#line 61 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
+mul r0.xyz, r0.xyzx, l(0.600000, 0.600000, 0.600000, 0.000000)
+add r0.xyz, r0.xyzx, r2.xyzx  // r0.x <- D.x; r0.y <- D.y; r0.z <- D.z
 
-#line 41
-nop 
-
-#line 56
-nop 
-
-#line 57
-nop 
-
-#line 61
+#line 62
 add r0.xyz, r0.xyzx, r4.xyzx
 mov r0.w, l(1.000000)
 mul o0.xyzw, r0.xyzw, v3.xyzw
 ret 
-// Approximately 52 instruction slots used
+// Approximately 64 instruction slots used

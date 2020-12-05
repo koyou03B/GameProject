@@ -186,6 +186,12 @@
     <Filter Include="Headers\Objects\TitleObject">
       <UniqueIdentifier>{59ce414b-34a0-46d1-acfd-67610413dc86}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Object\GameObj\UI">
+      <UniqueIdentifier>{f07ee70f-9b76-46dd-970e-e4b45f7e5633}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects\GameObject\UI">
+      <UniqueIdentifier>{b0159c04-1ff0-4d5e-b307-2cf27b413d49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -319,6 +325,9 @@
     </ClCompile>
     <ClCompile Include="GameSource\TitleObjectAdominist.cpp">
       <Filter>Sources\Object\TitleObj</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\UIAdominist.cpp">
+      <Filter>Sources\Object\GameObj\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -480,6 +489,9 @@
     </ClInclude>
     <ClInclude Include="GameSource\TitleObjectAdominist.h">
       <Filter>Headers\Objects\TitleObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\UIAdominist.h">
+      <Filter>Headers\Objects\GameObject\UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

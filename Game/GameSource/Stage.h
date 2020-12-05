@@ -29,6 +29,19 @@ public:
 			}
 		}
 	}
+
+	int RayPick(
+		const VECTOR3F& startPosition,
+		const VECTOR3F& endPosition,
+		VECTOR3F* outPosition,
+		VECTOR3F* outNormal);
+
+	int MoveCheck(
+		const VECTOR3F& startPosition,
+		const VECTOR3F& endPosition,
+		VECTOR3F* outPosition);
+
+
 	void ImGui();
 
 	void AddInstanceData(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& scale, const VECTOR4F& color)
@@ -51,5 +64,6 @@ public:
 private:
 	std::shared_ptr<Source::StaticMesh::StaticMesh> m_model;
 	std::vector<Source::InstanceData::InstanceData> m_instanceData;
-	Collision::AABB m_range;
+	std::vector<std::string> m_meshNames;
+	Collision::Circle m_circle;
 };

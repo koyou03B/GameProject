@@ -41,23 +41,24 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 S = BlinnPhongSpecular(N, L, C, E, Ks, 20);
 
     	// point light
-    float3 PD = float3(0, 0, 0);
-    float3 PS = float3(0, 0, 0);
-	{
-        float3 point_light_direction = pin.position.xyz - point_light.position.xyz;
+ //   float3 PD = float3(0, 0, 0);
+ //   float3 PS = float3(0, 0, 0);
+	//{
+ //       float3 point_light_direction = pin.position.xyz - point_light.position.xyz;
 
-        float distance = length(point_light_direction);
-        float range = point_light.position.w;
-        float influence = saturate(1.f - distance / range);
+ //       float distance = length(point_light_direction);
+ //       float range = point_light.position.w;
+ //       float influence = saturate(1.f - distance / range);
 
-        point_light_direction = normalize(point_light_direction);
-        float3 point_light_color = point_light.color.xyz;
+ //       point_light_direction = normalize(point_light_direction);
+ //       float3 point_light_color = point_light.color.xyz;
 
-        PD += Diffuse(pin.normal.xyz, point_light_direction, point_light_color, Kd) * influence * influence;
-        PS += BlinnPhongSpecular(N, point_light_direction, point_light_color, E, Ks, 20) * influence * influence;
-    }
+ //       PD += Diffuse(pin.normal.xyz, point_light_direction, point_light_color, Kd) * influence * influence;
+ //       PS += BlinnPhongSpecular(N, point_light_direction, point_light_color, E, Ks, 20) * influence * influence;
+ //   }
    
-    
+    E = normalize(camera.direction);
+    D += Diffuse(N, E, C, Kd) * 0.6f;
     return pin.color * float4(A + D , 1.0f);
 
     

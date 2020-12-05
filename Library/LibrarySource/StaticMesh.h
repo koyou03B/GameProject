@@ -30,8 +30,8 @@ namespace Source
 				const DirectX::XMFLOAT3 & endPosition,			//End coordinates for flying a ray
 				DirectX::XMFLOAT3 * outPosition,					//Coordinates for Ray's hit
 				DirectX::XMFLOAT3 * outNormal,					//The normal of the plane the ray hit
-				float* outLength								//Distance to the surface where the ray hit.
-				);
+				float* outLength,								//Distance to the surface where the ray hit.
+				const std::vector<std::string>& searchMeshName);
 
 			const char* RayTrianglesIntersection
 			(

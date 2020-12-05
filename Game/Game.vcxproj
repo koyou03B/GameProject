@@ -63,6 +63,7 @@
     <ClCompile Include="GameSource\Stage.cpp" />
     <ClCompile Include="GameSource\Stone.cpp" />
     <ClCompile Include="GameSource\TitleObjectAdominist.cpp" />
+    <ClCompile Include="GameSource\UIAdominist.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\AIParameter.h" />
@@ -118,6 +119,7 @@
     <ClInclude Include="GameSource\State.h" />
     <ClInclude Include="GameSource\Stone.h" />
     <ClInclude Include="GameSource\TitleObjectAdominist.h" />
+    <ClInclude Include="GameSource\UIAdominist.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -132,7 +132,7 @@ void TitleObjectData::ImGui(ID3D11Device* device)
 		float scale[3] = { m_worldData.scale.x,m_worldData.scale.y,m_worldData.scale.z };
 		float position[3] = { m_worldData.position.x,m_worldData.position.y,m_worldData.position.z };
 		ImGui::SliderFloat3("Angle", angle, -180.0f * 0.01745f, 180.0f * 0.01745f);
-		ImGui::SliderFloat3("Scale", scale, -1.0f, 1.0f);
+		ImGui::SliderFloat3("Scale", scale, -1.0f, 13.0f);
 		ImGui::SliderFloat3("Position", position, -50.0f, 50.0f);
 
 		m_worldData.angle = { angle[0],angle[1],angle[2] };
@@ -281,9 +281,6 @@ void TitleObjectData::SetStaticModel(ObjectElement element)
 	default:
 		break;
 	}
-	VECTOR3F scale = { 0.01f,0.01f,0.01f };
-	m_worldData.scale = scale;
-	m_worldData.WorldUpdate();
 }
 
 void TitleObjectData::SetSprite()

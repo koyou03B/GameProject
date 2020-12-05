@@ -52,5 +52,6 @@ public:
 		float radius;
 	};
 	bool JudgeCircleAndCircle(const Circle& myself, const Circle& target);
+	bool JudgeCircleAndpoint(const Circle& mySelf, const VECTOR2F& target);
 
 };

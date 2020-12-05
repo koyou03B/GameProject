@@ -12,7 +12,7 @@
 CEREAL_CLASS_VERSION(Fighter, 12);
 void Fighter::Init()
 {
-	m_transformParm.position = { -10.0f,0.0f,0.0f };
+	m_transformParm.position = { 0.0f,0.0f,-30.0f };
 	m_transformParm.angle = { 0.0f * 0.01745f, 0.0f * 0.01745f,0.0f * 0.017454f };
 	m_transformParm.scale = { 0.005f,0.005f,0.005f };
 	m_transformParm.WorldUpdate();
@@ -57,7 +57,8 @@ void Fighter::Init()
 		i_archive(*this);
 	}
 //	m_attackParm.resize(7);
-	m_statusParm.life = 500;
+	m_statusParm.life = 100;
+	m_statusParm.maxLife = 100;
 	m_stepParm.maxSpeed = m_stepParm.speed;
 	m_blendAnimation.blendRatioMax = 1.0f;
 	m_blendAnimation.samplerSize = 2;
@@ -1203,9 +1204,11 @@ void Fighter::ImGui(ID3D11Device* device)
 	if (ImGui::CollapsingHeader("Position"))
 	{
 
-		static float position[] = { m_transformParm.position.x,m_transformParm.position.y,m_transformParm.position.z };
+		float position[] = { m_transformParm.position.x,m_transformParm.position.y,m_transformParm.position.z };
 		ImGui::SliderFloat3("Position", position, -2000.0f, 2000.0f);
 
+		float dist = ToDistVec3(m_transformParm.position);
+		ImGui::SliderFloat("Dist", &dist, -2000.0f, 2000.0f);
 
 	}
 
@@ -1444,6 +1447,11 @@ void Fighter::ImGui(ID3D11Device* device)
 		ImGui::SliderFloat("DamageComparison", &m_damageParm.hitComparison, 0.0f, 100.0f);
 	}
 
+	float scale = m_transformParm.scale.x;
+	ImGui::SliderFloat("Scale", &scale, 0.001f, 0.005f);
+
+	m_transformParm.scale = VECTOR3F(scale, scale, scale);
+	m_transformParm.WorldUpdate();
 
 	ImGui::End();
 #endif

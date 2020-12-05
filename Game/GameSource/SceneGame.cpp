@@ -6,7 +6,6 @@
 #include ".\LibrarySource\VectorCombo.h"
 #include ".\LibrarySource\GeometricPrimitve.h"
 
-
 bool Game::Initialize(ID3D11Device* device)
 {
 	//**********************
@@ -31,6 +30,15 @@ bool Game::Initialize(ID3D11Device* device)
 	}
 
 	//*********************
+	// UI
+	//*********************
+	{
+		m_uiAdominist = std::make_shared<UIAdominist>();
+		m_uiAdominist->Init();
+		MESSENGER.GetInstance().SetUIAdominist(m_uiAdominist);
+
+	}
+	//*********************
 	// Camera
 	//*********************
 	{
@@ -41,13 +49,15 @@ bool Game::Initialize(ID3D11Device* device)
 		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
 		CharacterAI* player = m_metaAI->GetPlayCharacter();
 		VECTOR3F pos = player->GetWorldTransform().position;
+		pos.y = offsetY[0];
 		Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
 		Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
 		Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
-		Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
-		Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
+		Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(0.0f);
+		Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(0.0f);
 		CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
 		pos = enemy->GetWorldTransform().position;
+		pos.y = offsetY[1];
 		Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
 		Source::CameraControlle::CameraManager().GetInstance()->SetOldTarget(pos);
 
@@ -78,6 +88,7 @@ bool Game::Initialize(ID3D11Device* device)
 		m_vignette = std::make_unique<Source::Vignette::Vignette>(device);
 		m_vignette->ReadBinary();
 
+		m_vignetteTimer = 0.0f;
 	}
 
 
@@ -106,11 +117,12 @@ void Game::Update(float& elapsedTime)
 			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
 			VECTOR3F pos = player->GetWorldTransform().position;
+			pos.y = offsetY[0];
 			Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
 			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
 			pos = enemy->GetWorldTransform().position;
+			pos.y = offsetY[1];
 			Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
-
 			float time = 0.0f;
 			m_metaAI->UpdateOfEnemys(time);
 			m_metaAI->UpdateOfPlayers(time);
@@ -136,15 +148,39 @@ void Game::Update(float& elapsedTime)
 			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
 			VECTOR3F pos = player->GetWorldTransform().position;
+			pos.y = offsetY[0];
 			Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
+			Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
 			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
 			pos = enemy->GetWorldTransform().position;
+			pos.y = offsetY[1];
 			Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
 
 			m_metaAI->UpdateOfEnemys(elapsedTime);
 			m_metaAI->UpdateOfPlayers(elapsedTime);
+			m_uiAdominist->Update(elapsedTime);
 
-			
+			//VECTOR4F eye = Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->GetEye();
+			//VECTOR3F start = { eye.x,eye.y,eye.z };
+			//VECTOR3F end = player->GetWorldTransform().position;
+			//end.y = eye.y;
+			//VECTOR3F intersection, hitNormal;
+			//int ret = m_stage->RayPick(
+			//	start,
+			//	end,
+			//	&intersection, &hitNormal);
+
+			//if (ret != -1)
+			//{
+
+			//	start.x = intersection.x;
+			//	start.y = intersection.y;
+			//	start.z = intersection.z;
+
+			//	Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->SetEye(start);
+			//}
+
+
 			if (MESSENGER.isVignette)
 			{
 				m_vignetteTimer += elapsedTime;
@@ -180,20 +216,32 @@ void Game::Update(float& elapsedTime)
 		m_stage->Update(elapsedTime);
 		break;
 	case 2:
-		m_screenFilter->_screenBuffer->data.screenColor.x -= 0.01f;
-		m_screenFilter->_screenBuffer->data.screenColor.y -= 0.01f;
-		m_screenFilter->_screenBuffer->data.screenColor.z -= 0.01f;
-		if (m_screenFilter->_screenBuffer->data.screenColor.x <= 0.0f)
+		m_metaAI->UpdateOfPlayers(elapsedTime);
+		m_metaAI->UpdateOfEnemys(elapsedTime);
+		m_uiAdominist->Update(elapsedTime);
+
 		{
-			if (m_metaAI->GetIsFinish(0))
+			static float time = 0.0f;
+			time += elapsedTime;
+			if (time >= 2.0f)
 			{
-				SceneLabel label = SceneLabel::OVER;
-				ActivateScene.ChangeScene(label);
-			}
-			else if (m_metaAI->GetIsFinish(1))
-			{
-				SceneLabel label = SceneLabel::CLEAR;
-				ActivateScene.ChangeScene(label);
+				m_screenFilter->_screenBuffer->data.screenColor.x -= 0.01f;
+				m_screenFilter->_screenBuffer->data.screenColor.y -= 0.01f;
+				m_screenFilter->_screenBuffer->data.screenColor.z -= 0.01f;
+				if (m_screenFilter->_screenBuffer->data.screenColor.x <= 0.0f)
+				{
+					time = 0.0f;
+					if (m_metaAI->GetIsFinish(0))
+					{
+						SceneLabel label = SceneLabel::OVER;
+						ActivateScene.ChangeScene(label);
+					}
+					else if (m_metaAI->GetIsFinish(1))
+					{
+						SceneLabel label = SceneLabel::CLEAR;
+						ActivateScene.ChangeScene(label);
+					}
+				}
 			}
 		}
 
@@ -304,6 +352,8 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 
 		m_frameBuffer[1]->Deactivate(immediateContext);
 		m_vignette->Blit(immediateContext, m_frameBuffer[1]->GetRenderTargetShaderResourceView().Get(), nullptr);
+
+		m_uiAdominist->Render(immediateContext);
 
 		m_frameBuffer[0]->Deactivate(immediateContext);
 		m_screenFilter->Blit(immediateContext, m_frameBuffer[0]->GetRenderTargetShaderResourceView().Get());
@@ -502,14 +552,20 @@ void Game::ImGui()
 				m_vignette->SaveBinary();
 		}
 
-
 		if (ImGui::CollapsingHeader("Camera"))
 		{
+			ImGui::SliderFloat2("OffsetY", offsetY, 0.0f, 100.0f);
+
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ
 			ImGui::SetNextWindowPos(ImVec2(1520, 0), ImGuiSetCond_Once);//ポジション
 			ImGui::Begin("CameraEditer");
 			Source::CameraControlle::CameraManager().GetInstance()->Editor();
 			ImGui::End();
+		}
+
+		if (ImGui::CollapsingHeader("UI"))
+		{
+			m_uiAdominist->ImGui();
 		}
 
 		{
@@ -565,7 +621,9 @@ void Game::Uninitialize()
 {
 	//GetEntityManager().Relese();
 	m_stage->Release();
+	MESSENGER.isVignette = false;
 	m_metaAI->Release();
+	m_uiAdominist->Release();
 	Source::ModelData::fbxLoader().Release();
 }
 
@@ -573,9 +631,10 @@ VECTOR3F Game::DistancePlayerToEnemy()
 {
 	CharacterAI* player = m_metaAI->GetPlayCharacter();
 	CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
-
-	VECTOR3F distance = player->GetWorldTransform().position - enemy->GetWorldTransform().position;
-
+	VECTOR3F pos[2] = { player->GetWorldTransform().position ,enemy->GetWorldTransform().position };
+	pos[0].y = offsetY[0];
+	pos[1].y = offsetY[1];
+	VECTOR3F distance = pos[0] - pos[1];
 	return distance;
 }
 

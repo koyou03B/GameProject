@@ -145,3 +145,16 @@ bool Collision::JudgeCircleAndCircle(const Circle& mySelf, const Circle& target)
 
 	return false;
 }
+
+bool Collision::JudgeCircleAndpoint(const Circle& mySelf, const VECTOR2F& target)
+{
+	const float radius = mySelf.scale * mySelf.radius;
+
+	float distance;
+	distance = ToDistVec2(target);
+
+	if (distance > radius)
+		return true;
+
+	return false;
+}
