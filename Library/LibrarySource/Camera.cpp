@@ -174,7 +174,7 @@ namespace Source
 			case CameraManager::LOCK_ON:
 				LockON();	
 				Vibrate(elapsedTime);
-				m_camera->DebugCamera();
+				//m_camera->DebugCamera();
 				break;
 			case CameraManager::CHANGE_OBJECT:
 				ChangeObject();

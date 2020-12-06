@@ -127,7 +127,47 @@ void Enemy::Update(float& elapsedTime)
 				m_selectTask.reset();
 				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
 			}
+
+			if (m_statusParm.life <= 0)
+			{
+				m_selectTask->SetMoveState(0);
+				m_selectTask.reset();
+				m_blendAnimation.animationBlend.ChangeSampler(0,Animation::DIE, m_model);
+				if(m_blendAnimation.blendRatio <= 1.0f)
+					m_blendAnimation.blendRatio = 1.0f;
+				++m_moveState;
+			}
+			//if (m_statusParm.life <= 0)
+			//{
+			//	m_selectTask->SetMoveState(0);
+			//	m_selectTask.reset();
+			//	size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
+			//	for (size_t i = 0; i < samplerSize; ++i)
+			//	{
+			//		m_blendAnimation.animationBlend.ReleaseSampler(0);
+			//	}
+			//	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::DIE, m_model);
+			//	m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+			//	++m_moveState;
+			//}
 			break;
+		case 2:
+		{
+			float blendRatio = 0.0085f;
+			m_blendAnimation.blendRatio -= blendRatio;
+			if (m_blendAnimation.blendRatio <= 0.0f)//magicNumber
+			{
+				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
+				for (size_t i = 0; i < samplerSize; ++i)
+				{
+					m_blendAnimation.animationBlend.ReleaseSampler(1);
+				}
+				m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+			}
+		}
+		break;
+
 		}
 
 	}

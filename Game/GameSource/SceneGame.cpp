@@ -55,6 +55,7 @@ bool Game::Initialize(ID3D11Device* device)
 		Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
 		Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(0.0f);
 		Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(0.0f);
+		Source::CameraControlle::CameraManager().GetInstance()->SetRigth(VECTOR3F(0.0f, 0.0f, 0.0f));
 		CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
 		pos = enemy->GetWorldTransform().position;
 		pos.y = offsetY[1];
@@ -98,24 +99,16 @@ bool Game::Initialize(ID3D11Device* device)
 void Game::Update(float& elapsedTime)
 {	
 
-	switch (m_eventState)
+	if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() !=
+		Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
 	{
-	case 0:
-		m_screenFilter->_screenBuffer->data.screenColor.x += 0.01f;
-		m_screenFilter->_screenBuffer->data.screenColor.y += 0.01f;
-		m_screenFilter->_screenBuffer->data.screenColor.z += 0.01f;
-		if (m_screenFilter->_screenBuffer->data.screenColor.x >= 1.0f)
-			++m_eventState;
-
+		//Camera
+		if (!m_metaAI->GetIsFinish(0) && !m_metaAI->GetIsFinish(1))
 		{
-			CharacterAI* player = m_metaAI->GetPlayCharacter();
-
 			VECTOR3F distance = DistancePlayerToEnemy();
-		//	distance = NormalizeVec3(distance);
 			VECTOR3F rightVaule = CameraRightValue();
 			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
-
+			CharacterAI* player = m_metaAI->GetPlayCharacter();
 			VECTOR3F pos = player->GetWorldTransform().position;
 			pos.y = offsetY[0];
 			Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
@@ -123,43 +116,42 @@ void Game::Update(float& elapsedTime)
 			pos = enemy->GetWorldTransform().position;
 			pos.y = offsetY[1];
 			Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
-			float time = 0.0f;
-			m_metaAI->UpdateOfEnemys(time);
-			m_metaAI->UpdateOfPlayers(time);
+			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
 		}
-		break;
-	case 1:
-		if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() !=
-			Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
+		else if (m_metaAI->GetIsFinish(1))
 		{
-			CharacterAI* player = m_metaAI->GetPlayCharacter();
-
-			VECTOR3F distance = DistancePlayerToEnemy();
-			//distance = NormalizeVec3(distance);
-			VECTOR3F rightVaule = CameraRightValue();
-			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetRigth(rightVaule);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
-
-			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
-
-			VECTOR3F pos = player->GetWorldTransform().position;
-			pos.y = offsetY[0];
-			Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
-			Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
+			const float frontOffset = -33.430f;
+			const float frontYOffset = 15.698f;
+			float rightOffset = -19.608f;
 			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
-			pos = enemy->GetWorldTransform().position;
-			pos.y = offsetY[1];
-			Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
+			FLOAT4X4 world = enemy->GetWorldTransform().world;
+			VECTOR3F right = { world._11,world._12,world._13 };
+			VECTOR3F front = { world._31,world._32,world._33 };
+			front = NormalizeVec3(front);
+			right = NormalizeVec3(right);
+			rightOffset = right.x < 0.0f ? rightOffset : rightOffset * -1.0f;
+		//	right.x *= rightOffset;
+			VECTOR3F distance = enemy->GetWorldTransform().position - front;
+			Source::CameraControlle::CameraManager().GetInstance()->SetObject(enemy->GetWorldTransform().position);
+			Source::CameraControlle::CameraManager().GetInstance()->SetLength(VECTOR3F(1.0f, 1.0f, frontOffset));
+			Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(frontYOffset);
+			//Source::CameraControlle::CameraManager().GetInstance()->SetRigth(right);
+			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+		}
 
+
+		//AllUpdate
+		{
 			m_metaAI->UpdateOfEnemys(elapsedTime);
 			m_metaAI->UpdateOfPlayers(elapsedTime);
 			m_uiAdominist->Update(elapsedTime);
+			m_stage->Update(elapsedTime);
+		}
 
+		//RayPick()
+		{
 			//VECTOR4F eye = Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->GetEye();
 			//VECTOR3F start = { eye.x,eye.y,eye.z };
 			//VECTOR3F end = player->GetWorldTransform().position;
@@ -169,57 +161,54 @@ void Game::Update(float& elapsedTime)
 			//	start,
 			//	end,
 			//	&intersection, &hitNormal);
-
 			//if (ret != -1)
 			//{
-
 			//	start.x = intersection.x;
 			//	start.y = intersection.y;
 			//	start.z = intersection.z;
-
 			//	Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->SetEye(start);
 			//}
+		}
+	}
+	else
+		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
+	switch (m_eventState)
+	{
+	case 0:
+		m_screenFilter->_screenBuffer->data.screenColor.x += 0.03f;
+		m_screenFilter->_screenBuffer->data.screenColor.y += 0.03f;
+		m_screenFilter->_screenBuffer->data.screenColor.z += 0.03f;
+		if (m_screenFilter->_screenBuffer->data.screenColor.x >= 1.0f)
+			++m_eventState;
 
-			if (MESSENGER.isVignette)
+		break;
+	case 1:
+		if (MESSENGER.isVignette)
+		{
+			m_vignetteTimer += elapsedTime;
+			if (m_vignetteTimer >= 0.15f)
 			{
-				m_vignetteTimer += elapsedTime;
-				if (m_vignetteTimer >= 0.15f)
-				{
-					m_vignetteTimer = 0.0f;
-					MESSENGER.isVignette = false;
-				}
-				else
-					m_vignette->_vignetteBuffer->data.darkness = 7.0f;
+				m_vignetteTimer = 0.0f;
+				MESSENGER.isVignette = false;
 			}
 			else
-			{
-				if (m_vignette->_vignetteBuffer->data.darkness > 0.0f)
-					m_vignette->_vignetteBuffer->data.darkness -= 0.5f;
-
-				if (m_vignette->_vignetteBuffer->data.darkness < 0.0f)
-					m_vignette->_vignetteBuffer->data.darkness = 0.0f;
-			}
-
-			if (m_metaAI->GetIsFinish(0))
-			{
-				++m_eventState;
-			}
-			else if (m_metaAI->GetIsFinish(1))
-			{
-				++m_eventState;
-			}
+				m_vignette->_vignetteBuffer->data.darkness = 7.0f;
 		}
 		else
-			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+		{
+			if (m_vignette->_vignetteBuffer->data.darkness > 0.0f)
+				m_vignette->_vignetteBuffer->data.darkness -= 0.5f;
 
-		m_stage->Update(elapsedTime);
+			if (m_vignette->_vignetteBuffer->data.darkness < 0.0f)
+				m_vignette->_vignetteBuffer->data.darkness = 0.0f;
+		}
+
+		if (m_metaAI->GetIsFinish(0) || m_metaAI->GetIsFinish(1))
+			++m_eventState;
+
 		break;
 	case 2:
-		m_metaAI->UpdateOfPlayers(elapsedTime);
-		m_metaAI->UpdateOfEnemys(elapsedTime);
-		m_uiAdominist->Update(elapsedTime);
-
 		{
 			static float time = 0.0f;
 			time += elapsedTime;
@@ -244,14 +233,8 @@ void Game::Update(float& elapsedTime)
 				}
 			}
 		}
-
 		break;
 	}
-
-
-
-
-
 
 #if _DEBUG
 	if (KEYBOARD._keys[DIK_1] == 1)
@@ -554,8 +537,34 @@ void Game::ImGui()
 
 		if (ImGui::CollapsingHeader("Camera"))
 		{
-			ImGui::SliderFloat2("OffsetY", offsetY, 0.0f, 100.0f);
+			//ImGui::SliderFloat2("OffsetY", offsetY, 0.0f, 100.0f);
+			/*
+			{
+				static float frontOffset = {-10.0f};
+				static float frontYOffset = {};
+				static float rightOffset[3] = {};
+				ImGui::SliderFloat("FrontOffset", &frontOffset, 0.0f, -100.0f);
+				ImGui::SliderFloat("FrontYOffset", &frontYOffset, 100.0f, -100.0f);
+				ImGui::SliderFloat3("RightOffset", rightOffset, -100.0f, 100.0f);
 
+				CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
+				FLOAT4X4 world = enemy->GetWorldTransform().world;
+				VECTOR3F right = { world._11,world._12,world._13 };
+				VECTOR3F front = { world._31,world._32,world._33 };
+				front = NormalizeVec3(front);
+				right = NormalizeVec3(right);
+
+				right.x *= rightOffset[0];
+				right.z *= rightOffset[1];
+				right.y *= rightOffset[2];
+				VECTOR3F distance = enemy->GetWorldTransform().position - front;
+				Source::CameraControlle::CameraManager().GetInstance()->SetObject(enemy->GetWorldTransform().position);
+				Source::CameraControlle::CameraManager().GetInstance()->SetLength(VECTOR3F(1.0f, 1.0f, frontOffset));
+				Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(frontYOffset);
+				Source::CameraControlle::CameraManager().GetInstance()->SetRigth(right);
+				Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+			}
+			*/
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ
 			ImGui::SetNextWindowPos(ImVec2(1520, 0), ImGuiSetCond_Once);//ポジション
 			ImGui::Begin("CameraEditer");

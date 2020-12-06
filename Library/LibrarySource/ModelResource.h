@@ -661,6 +661,7 @@ namespace Source
 					FetchAnimationTakes(scene, _animationTakes, animationSamplingRate);
 				}
 
+
 				// Fetch node attributes and materials under this node recursively. Currently only mesh.
 				std::vector<FbxNode*> fetchedMeshes;
 				std::function<void(FbxNode*)> traverse = [&](FbxNode* node)
@@ -686,6 +687,7 @@ namespace Source
 				for (size_t i = 0; i < fetchedMeshes.size(); i++)
 				{
 					FbxMesh* fbxMesh = fetchedMeshes.at(i)->GetMesh();
+
 
 					Mesh& mesh = _meshes.at(i);
 					mesh.name = fbxMesh->GetNode()->GetName();

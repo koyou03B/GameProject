@@ -311,8 +311,7 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 				{
 					player->GetStatus().isExit = false;
 				}
-				else
-					player->Impact();
+				player->Impact();
 				return true;
 			}
 		}

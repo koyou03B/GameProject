@@ -1,5 +1,6 @@
 #include "ModelResource.h"
 #include "Function.h"
+
 // FbxDouble2 Å® VEC2
 inline VECTOR2F FbxDouble2ToFloat2(const FbxDouble2& fbx_value)
 {

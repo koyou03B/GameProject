@@ -752,15 +752,22 @@ void Fighter::Impact()
 	if (m_blendAnimation.animationBlend.SearchSampler(Animation::HIT_REACTION)) return;
 	if (m_blendAnimation.animationBlend.SearchSampler(Animation::HIT_BIG_REACTION)) return;
 
-	if (m_damageParm.hasBigDamaged)
+	if (m_statusParm.life > 0)
 	{
-		m_blendAnimation.animationBlend.AddSampler(Animation::HIT_BIG_REACTION, m_model);
-		m_input->SetVibrationParm(UVECTOR2(65000, 65000), 23);
+		if (m_damageParm.hasBigDamaged)
+		{
+			m_blendAnimation.animationBlend.AddSampler(Animation::HIT_BIG_REACTION, m_model);
+			m_input->SetVibrationParm(UVECTOR2(65000, 65000), 23);
+		}
+		else
+		{
+			m_blendAnimation.animationBlend.AddSampler(Animation::HIT_REACTION, m_model);
+			m_input->SetVibrationParm(UVECTOR2(65000, 65000), 10);
+		}
 	}
 	else
 	{
-		m_blendAnimation.animationBlend.AddSampler(Animation::HIT_REACTION, m_model);
-		m_input->SetVibrationParm(UVECTOR2(65000, 65000), 10);
+		m_blendAnimation.animationBlend.AddSampler(Animation::DEATH, m_model);
 	}
 
 	if (m_adjustAnimation)
@@ -809,24 +816,32 @@ bool Fighter::KnockBack()
 	}
 	else
 	{
+		if (m_statusParm.life > 0)
+		{
+			uint32_t animationEnd = m_damageParm.hasBigDamaged ? 131 : 79;
 
-		uint32_t animationEnd = m_damageParm.hasBigDamaged ? 131 : 79;
+			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
 
-		uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-	
-		//if(currentAnimationFrame >= 80)
-		//	m_blendAnimation.animationBlend.SetAnimationSpeed(f);
+			//if(currentAnimationFrame >= 80)
+			//	m_blendAnimation.animationBlend.SetAnimationSpeed(f);
 
-		if (currentAnimationFrame == animationEnd)
+			if (currentAnimationFrame == animationEnd)
+			{
+				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				m_blendAnimation.animationBlend.ResetAnimationFrame();
+				m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
+				m_animationType = Animation::IDLE;
+				m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+				m_blendAnimation.blendRatio = m_blendAnimation.damageBlendRatio;
+				m_adjustAnimation = true;
+				m_statusParm.isDamage = false;
+			}
+		}
+		else
 		{
 			m_blendAnimation.animationBlend._blendRatio = 0.0f;
 			m_blendAnimation.animationBlend.ResetAnimationFrame();
 			m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
-			m_animationType = Animation::IDLE;
-			m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
-			m_blendAnimation.blendRatio = m_blendAnimation.damageBlendRatio;
-			m_adjustAnimation = true;
-			m_statusParm.isDamage = false;
 		}
 	}
 
