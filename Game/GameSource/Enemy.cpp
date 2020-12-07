@@ -128,43 +128,43 @@ void Enemy::Update(float& elapsedTime)
 				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
 			}
 
-			if (m_statusParm.life <= 0)
-			{
-				m_selectTask->SetMoveState(0);
-				m_selectTask.reset();
-				m_blendAnimation.animationBlend.ChangeSampler(0,Animation::DIE, m_model);
-				if(m_blendAnimation.blendRatio <= 1.0f)
-					m_blendAnimation.blendRatio = 1.0f;
-				++m_moveState;
-			}
 			//if (m_statusParm.life <= 0)
 			//{
 			//	m_selectTask->SetMoveState(0);
 			//	m_selectTask.reset();
-			//	size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
-			//	for (size_t i = 0; i < samplerSize; ++i)
-			//	{
-			//		m_blendAnimation.animationBlend.ReleaseSampler(0);
-			//	}
-			//	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::DIE, m_model);
-			//	m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+			//	m_blendAnimation.animationBlend.ChangeSampler(0,Animation::DIE, m_model);
+			//	if(m_blendAnimation.blendRatio <= 1.0f)
+			//		m_blendAnimation.blendRatio = 1.0f;
 			//	++m_moveState;
 			//}
-			break;
-		case 2:
-		{
-			float blendRatio = 0.0085f;
-			m_blendAnimation.blendRatio -= blendRatio;
-			if (m_blendAnimation.blendRatio <= 0.0f)//magicNumber
+			if (m_statusParm.life <= 0)
 			{
-				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				m_selectTask->SetMoveState(0);
+				m_selectTask.reset();
 				size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
 				for (size_t i = 0; i < samplerSize; ++i)
 				{
-					m_blendAnimation.animationBlend.ReleaseSampler(1);
+					m_blendAnimation.animationBlend.ReleaseSampler(0);
 				}
+				m_blendAnimation.animationBlend.ChangeSampler(0, Animation::DIE, m_model);
 				m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+				++m_moveState;
 			}
+			break;
+		case 2:
+		{
+			//float blendRatio = 0.08f;
+			//m_blendAnimation.blendRatio -= blendRatio;
+			//if (m_blendAnimation.blendRatio <= 0.0f)//magicNumber
+			//{
+			//	m_blendAnimation.animationBlend._blendRatio = 0.0f;
+			//	size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
+			//	for (size_t i = 0; i < samplerSize; ++i)
+			//	{
+			//		m_blendAnimation.animationBlend.ReleaseSampler(1);
+			//	}
+			//	m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+			//}
 		}
 		break;
 
@@ -176,6 +176,7 @@ void Enemy::Update(float& elapsedTime)
 	int currentMesh = m_collision[0].GetCurrentMesh(0);
 	int currentBone = m_collision[0].GetCurrentBone(0);
 	FLOAT4X4 boneTransform = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
+	boneSpine = boneTransform;
 	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 	FLOAT4X4 getBoneTransform = boneTransform * modelAxisTransform * m_transformParm.world;
 	m_collision[0].position[0] = { m_transformParm.position.x,getBoneTransform._42,m_transformParm.position.z };
@@ -1369,9 +1370,9 @@ void Enemy::ImGui(ID3D11Device* device)
 	}
 
 
-	float scale = m_transformParm.scale.x;
-	ImGui::SliderFloat("Scale", &scale, 0.01f, 0.1f);
-	m_transformParm.scale = VECTOR3F(scale, scale, scale);
+	float scale = m_transformParm.angle.y;
+	ImGui::SliderFloat("Scale", &scale, 0.0f * 0.01745f, 360.0f * 0.01745f);
+	m_transformParm.angle = VECTOR3F(0.0f, scale, 0.0f);
 	m_transformParm.WorldUpdate();
 
 

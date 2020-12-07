@@ -45,7 +45,7 @@ private:
 	VECTOR3F translate = { 0.0f, 0.0f, .0f };
 	VECTOR4F direction = { sinf(angle.y * 0.01745f), 0.0f, cosf(angle.y * 0.01745f),1.0f };
 	float focalLength = 5.0f;
-	float offsetY[2] = { 9.816f,5.479f};
+	float offsetY[3] = { 9.816f,5.479f,9.816f};
 	std::unique_ptr<Stage> m_stage;
 	std::shared_ptr<MetaAI> m_metaAI;
 	std::shared_ptr<UIAdominist> m_uiAdominist;

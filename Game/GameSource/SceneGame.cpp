@@ -121,23 +121,18 @@ void Game::Update(float& elapsedTime)
 		}
 		else if (m_metaAI->GetIsFinish(1))
 		{
-			const float frontOffset = -33.430f;
-			const float frontYOffset = 15.698f;
-			float rightOffset = -19.608f;
+			const float frontOffset = 5.0f;
+			const float yOffset = 70.0f;
 			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
+			enemy->GetWorldTransform().WorldUpdate();
 			FLOAT4X4 world = enemy->GetWorldTransform().world;
-			VECTOR3F right = { world._11,world._12,world._13 };
 			VECTOR3F front = { world._31,world._32,world._33 };
-			front = NormalizeVec3(front);
-			right = NormalizeVec3(right);
-			rightOffset = right.x < 0.0f ? rightOffset : rightOffset * -1.0f;
-		//	right.x *= rightOffset;
-			VECTOR3F distance = enemy->GetWorldTransform().position - front;
-			Source::CameraControlle::CameraManager().GetInstance()->SetObject(enemy->GetWorldTransform().position);
-			Source::CameraControlle::CameraManager().GetInstance()->SetLength(VECTOR3F(1.0f, 1.0f, frontOffset));
-			Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(frontYOffset);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetRigth(right);
-			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+			front *= frontOffset;
+			front.y = yOffset;
+			VECTOR3F eye = (front + enemy->GetWorldTransform().position);
+			auto& camera = Source::CameraControlle::CameraManager().GetInstance()->GetCamera();
+			camera->SetEye(eye);
+			Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::CameraMode::END);		
 			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 		}
 
@@ -538,33 +533,27 @@ void Game::ImGui()
 		if (ImGui::CollapsingHeader("Camera"))
 		{
 			//ImGui::SliderFloat2("OffsetY", offsetY, 0.0f, 100.0f);
-			/*
+			
 			{
-				static float frontOffset = {-10.0f};
-				static float frontYOffset = {};
+				static float upOffset = {30.0f};
+				static float upYOffset = {};
 				static float rightOffset[3] = {};
-				ImGui::SliderFloat("FrontOffset", &frontOffset, 0.0f, -100.0f);
-				ImGui::SliderFloat("FrontYOffset", &frontYOffset, 100.0f, -100.0f);
+				ImGui::SliderFloat("UpOffset", &upOffset, 100.0f, -100.0f);
+				ImGui::SliderFloat("UpYOffset", &upYOffset, 100.0f, -100.0f);
 				ImGui::SliderFloat3("RightOffset", rightOffset, -100.0f, 100.0f);
 
 				CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
 				FLOAT4X4 world = enemy->GetWorldTransform().world;
-				VECTOR3F right = { world._11,world._12,world._13 };
-				VECTOR3F front = { world._31,world._32,world._33 };
-				front = NormalizeVec3(front);
-				right = NormalizeVec3(right);
-
-				right.x *= rightOffset[0];
-				right.z *= rightOffset[1];
-				right.y *= rightOffset[2];
-				VECTOR3F distance = enemy->GetWorldTransform().position - front;
-				Source::CameraControlle::CameraManager().GetInstance()->SetObject(enemy->GetWorldTransform().position);
-				Source::CameraControlle::CameraManager().GetInstance()->SetLength(VECTOR3F(1.0f, 1.0f, frontOffset));
-				Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(frontYOffset);
-				Source::CameraControlle::CameraManager().GetInstance()->SetRigth(right);
-				Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+				VECTOR3F up = { world._31,world._32,world._33 };
+				up = NormalizeVec3(up);
+				up *= upOffset;
+				up.y = upYOffset;
+				up += enemy->GetWorldTransform().position;
+				auto& camera = Source::CameraControlle::CameraManager().GetInstance()->GetCamera();
+				camera->SetEye(up);
+				Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::END);
 			}
-			*/
+			
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ
 			ImGui::SetNextWindowPos(ImVec2(1520, 0), ImGuiSetCond_Once);//ポジション
 			ImGui::Begin("CameraEditer");

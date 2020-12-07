@@ -81,6 +81,7 @@ namespace Source
 				CHANGE_OBJECT,
 				ORBIT,
 				FREE,
+				END,
 			};
 		public:
 			CameraManager() = default;

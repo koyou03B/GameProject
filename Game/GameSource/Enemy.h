@@ -67,7 +67,7 @@ public:
 			);
 		}
 	}
-
+	FLOAT4X4 boneSpine;
 public:
 	enum  Animation
 	{
