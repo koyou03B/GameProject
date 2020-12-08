@@ -187,6 +187,7 @@ float ToDistVec3(const VECTOR3F v);
 VECTOR3F NormalizeVec3(const VECTOR3F v);
 VECTOR3F ConvertVec3(const float conv, const VECTOR3F v);
 VECTOR3F LerpVec3(VECTOR3F lerpStart, VECTOR3F lerpEnd, float value);
+VECTOR3F SphereLinearVec3(VECTOR3F start, VECTOR3F end, float t);
 VECTOR3F SphereLinearVec3(VECTOR3F origin,VECTOR3F start,VECTOR3F end, float t);
 VECTOR3F CrossVec3(const VECTOR3F v1, const VECTOR3F v2);
 float DotVec3(const VECTOR3F v1, const VECTOR3F v2);

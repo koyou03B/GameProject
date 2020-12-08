@@ -46,7 +46,7 @@ void Fighter::Init()
 	m_attackParm.resize(7);
 	for (auto& atk : m_attackParm)
 	{
-		atk.serialVersion = 16;
+		atk.serialVersion = 17;
 	}
 
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str()))
@@ -67,7 +67,11 @@ void Fighter::Init()
 
 	VECTOR3F scale = { 0.8f,0.8f,0.8f };
 	VECTOR3F bonePosition = { 0,0,0 };
-	m_attackParm[1].maxSpeed = m_attackParm[1].speed;
+
+	for (auto& attack : m_attackParm)
+	{
+		attack.maxSpeed = attack.speed;
+	}
 	m_damageParm.maxSpeed = m_damageParm.speed;
 	m_blendAnimation.blendRatio = m_blendAnimation.idleBlendRtio;
 }
@@ -426,7 +430,7 @@ void Fighter::Stepping(float& elapsedTime)
 		{
 			m_animationType = Fighter::Animation::IDLE;
 			m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
-			m_blendAnimation.animationBlend._blendRatio = 0.3f;
+			m_blendAnimation.animationBlend._blendRatio = 0.1f;
 			m_blendAnimation.animationBlend.ResetAnimationFrame();
 			m_adjustAnimation = true;
 		}
@@ -457,7 +461,8 @@ void Fighter::Attack(float& elapsedTime)
 			}
 		}
 	}
-	else if (m_moveParm.isRun && m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_Y) == 1 && !m_statusParm.isAttack && !m_stepParm.isStep)
+	else if (m_moveParm.isRun && m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_Y) == 1 &&
+		!m_statusParm.isAttack && !m_stepParm.isStep)
 	{
 		m_animationType = Fighter::Animation::LEFT_DUSH_KICK;
 		m_attackType = Fighter::AttackType::LeftDushKick;
@@ -484,16 +489,18 @@ void Fighter::Attack(float& elapsedTime)
 		Animation nextaAnimtion = { Animation::RIGHT_KICK };
 		Attacking(m_animationType, nextaAnimtion, m_attackParm[1], m_collision[1]);
 
-		m_attackParm[1].speed -= m_attackParm[1].deceleration;
-		if (m_attackParm[1].speed.x <= 0.0f)
-			m_attackParm[1].speed = { 0.0f,0.0f,0.0f };
+		//m_attackParm[1].speed -= m_attackParm[1].deceleration;
+		//if (m_attackParm[1].speed.x <= 0.0f)
+		//	m_attackParm[1].speed = { 0.0f,0.0f,0.0f };
 
-		m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_attackParm[1].speed.x);
-		m_moveParm.velocity.y = 0.0f;
-		m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_attackParm[1].speed.z);
 
-		m_transformParm.position += m_moveParm.velocity * elapsedTime;
-		m_transformParm.WorldUpdate();
+
+		//m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_attackParm[1].speed.x);
+		//m_moveParm.velocity.y = 0.0f;
+		//m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_attackParm[1].speed.z);
+
+		//m_transformParm.position += m_moveParm.velocity * elapsedTime;
+		//m_transformParm.WorldUpdate();
 	}
 	break;
 	case Fighter::RIGHT_KICK:
@@ -544,10 +551,11 @@ void Fighter::Attack(float& elapsedTime)
 void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 	CharacterParameter::Attack& attack, CharacterParameter::Collision& collision)
 {
-
+#if 0	
 	//*********************************
 	//Å@å¸Ç´ÇÃèCê≥
 	//*********************************
+
 	auto& enemy = MESSENGER.CallEnemyInstance(0);
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
@@ -584,6 +592,9 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		}
 		m_moveParm.velocity = {};
 	}
+#endif
+
+	size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
 
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-
 	// Reset the first time.
@@ -597,41 +608,82 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
 		m_blendAnimation.animationBlend.ResetAnimationSampler(static_cast<int>(samplerSize) - 1);
 		m_blendAnimation.animationBlend.ResetAnimationFrame();
-		if(samplerSize != 2)
+		if (samplerSize != 2)
 			m_blendAnimation.animationBlend._blendRatio = 0.66f;
 		else
 			m_blendAnimation.animationBlend._blendRatio = 0.0f;
+	
+		m_moveParm.velocity = GetInputDirection();
 		m_statusParm.isAttack = true;
 	}
 
+	//*********************************
+	//Å@à⁄ìÆèàóù
+	//*********************************
+	if (m_attackType == AttackType::LeftDushKick)
+	{
+		attack.speed -= attack.deceleration;
+		if (attack.speed.x <= 0.0f)
+			attack.speed = { 0.0f,0.0f,0.0f };
+
+		VECTOR3F velocity = m_moveParm.velocity;
+		velocity += velocity * attack.speed;
+		m_transformParm.position += velocity * m_elapsedTime;
+		m_transformParm.position.y = 0.0f;
+		m_transformParm.WorldUpdate();
+	}
+	else
+	{
+		if (samplerSize == 1)
+		{
+			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+			if (attack.moveFrameStart <= currentAnimationFrame)
+			{
+				attack.speed -= attack.deceleration;
+				if (attack.speed.x <= 0.0f)
+					attack.speed = { 0.0f,0.0f,0.0f };
+
+				VECTOR3F velocity = m_moveParm.velocity;
+				velocity += velocity * attack.speed;
+				m_transformParm.position += velocity * m_elapsedTime;
+				m_transformParm.position.y = 0.0f;
+				m_transformParm.WorldUpdate();
+			}
+		}
+	}
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	// Set the blend ratio to 1.
 	// When we get to 1, we stop blending.
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	if (m_blendAnimation.animationBlend.GetSampler().size() >= 2)
+	if (samplerSize >= 2)
 	{
-		m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.attackBlendRtio;
-		if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
 		{
-			m_blendAnimation.animationBlend._blendRatio = 0.0f;
-			int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
-
-			for (int i = 0; i < samplerCount; ++i)
+			m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.attackBlendRtio;
+			if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
 			{
-				m_blendAnimation.animationBlend.ReleaseSampler(0);
+				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
+
+				for (int i = 0; i < samplerCount; ++i)
+				{
+					m_blendAnimation.animationBlend.ReleaseSampler(0);
+				}
+				m_blendAnimation.animationBlend.FalseAnimationLoop(0);
 			}
-			m_blendAnimation.animationBlend.FalseAnimationLoop(0);
 		}
 
+		{	
+			VECTOR2F vector = { m_moveParm.velocity.x, m_moveParm.velocity.z };
+			m_transformParm.angle = GetRotationAfterAngle(vector,m_moveParm.turnSpeed);
+			m_transformParm.WorldUpdate();
+		}
 		return;
 	}
-
 
 	//*********************************************
 	// Collsion
 	//*********************************************
 	uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-
 	if (attack.attackTimerRange[0] < currentAnimationFrame && currentAnimationFrame < attack.attackTimerRange[1])
 	{
 		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[collision.GetCurrentMesh(0)].at(collision.GetCurrentBone(0));
@@ -648,11 +700,11 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 			//ìñÇΩÇ¡ÇΩââèoî≠ìÆ
 		}
 	}
+
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	// If the button is pressed within the attack
 	// change range, the attack is changed
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-
 	if (attack.inputRange[0] < currentAnimationFrame && currentAnimationFrame < attack.inputRange[1])
 	{
 		size_t attackButton = attack.buttons.size();
@@ -664,6 +716,8 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 			m_animationType = nextAnimations;
 			m_blendAnimation.animationBlend._blendRatio = {};
 			attack.hasAttacked = false;
+			attack.speed = attack.maxSpeed;
+			m_moveParm.velocity = GetInputDirection();
 			return;
 		}
 		else if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1)
@@ -672,12 +726,16 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 			m_blendAnimation.animationBlend.ResetAnimationFrame();
 			m_statusParm.isAttack = false;
 			attack.hasAttacked = false;
+			attack.speed = attack.maxSpeed;
+
 			m_animationType = Fighter::Animation::DIVE;
 			m_attackType = Fighter::AttackType::NON;
 			Stepping(m_elapsedTime);
 			return;
 		}
 	}
+
+//	m_transformParm.WorldUpdate();
 
 	if (attack.hasAttacked)
 	{
@@ -687,7 +745,7 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 			m_blendAnimation.animationBlend.SetAnimationSpeed(attack.attackSpeed[0]);
 
 		if (m_attackType == AttackType::LeftDushKick)
-			attack.speed = {5.0f,0.0f,5.0f,};
+			attack.speed = { 5.0f,0.0f,5.0f, };
 	}
 	else
 		m_blendAnimation.animationBlend.SetAnimationSpeed(attack.attackSpeed[0]);
@@ -695,7 +753,7 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	//When the animation ends, the attack ends.
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	 if (currentAnimationFrame == attack.frameCount)
+	if (currentAnimationFrame == attack.frameCount)
 	{
 		if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
 		{
@@ -713,6 +771,9 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		m_blendAnimation.animationBlend._blendRatio = 0.0f;
 		m_blendAnimation.animationBlend.ResetAnimationFrame();
 		attack.hasAttacked = false;
+		m_moveParm.velocity = {};
+		attack.speed = attack.maxSpeed;
+
 	}
 }
 
@@ -780,6 +841,84 @@ void Fighter::Impact()
 
 	m_blendAnimation.animationBlend.SetAnimationSpeed(1.3f);
 	KnockBack();
+}
+
+VECTOR3F Fighter::GetInputDirection()
+{
+	if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
+	{
+		FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
+		view._14 = 0.0f;
+		view._24 = 0.0f;
+		view._34 = 0.0f;
+		view._41 = 0.0f;
+		view._42 = 0.0f;
+		view._43 = 0.0f;
+		view._44 = 1.0f;
+
+		DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
+		VECTOR3F stickVec(m_input->StickVectorLeft().x, 0.0f, m_input->StickVectorLeft().y);
+		DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
+
+		VECTOR3F stickVector = {};
+		vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
+		DirectX::XMStoreFloat3(&stickVector, vStickVex);
+		stickVector = NormalizeVec3(stickVector);
+
+		auto& enemy = MESSENGER.CallEnemyInstance(0);
+		VECTOR3F enemyPos = enemy->GetWorldTransform().position;
+
+		float direction = ToDistVec3(enemyPos - m_transformParm.position);
+		if (direction < 20.0f)
+		{
+			//VECTOR3F nDirection = NormalizeVec3(enemyPos - m_transformParm.position);
+			//FLOAT4X4 world = m_transformParm.world;
+			//VECTOR3F front = { world._31,world._32,world._33 };
+			//front = NormalizeVec3(front);
+			//float dot = DotVec3(nDirection, stickVector);
+			//float cosTheta = acosf(dot);
+			//if (cosTheta >= 0.1f)
+			//{
+			//	float angle = m_transformParm.angle.y;
+			//	VECTOR3F eDirection = nDirection;
+			//	VECTOR3F sDirection = stickVector;
+
+			//	stickVector = SphereLinearVec3(eDirection,sDirection , 0.25f);
+			//}
+		}
+		return stickVector;
+	}
+
+	float angle = m_transformParm.angle.y;
+	return { sinf(angle),0.0f,cosf(angle)};
+}
+
+VECTOR3F Fighter::GetRotationAfterAngle(VECTOR2F vector,float turnSpeed)
+{
+	VECTOR3F angle = m_transformParm.angle;
+
+	float dx = sinf(angle.y);
+	float dz = cosf(angle.y);
+	float dot = (vector.x * dx) + (vector.y * dz);
+	float rot = 1.0f - dot;
+
+	float limit = turnSpeed;
+
+	if (rot > limit)
+		rot = limit;
+	
+
+	float cross = (vector.x * dz) - (vector.y * dx);
+	if (cross > 0.0f)
+	{
+		angle.y += rot;
+	}
+	else
+	{
+		angle.y -= rot;
+	}
+
+	return angle;
 }
 
 bool Fighter::KnockBack()
@@ -1298,15 +1437,15 @@ void Fighter::ImGui(ID3D11Device* device)
 	{
 		static int current = 0;
 		ImGui::RadioButton("LeftKick", &current, 0); ImGui::SameLine();
-		ImGui::RadioButton("LeftDushKick" , &current, 1); ImGui::SameLine();
-		ImGui::RadioButton("RightKick" , &current, 2);
-		ImGui::RadioButton("LeftRollKick" , &current, 3); ImGui::SameLine();
-		ImGui::RadioButton("RightRollKick"  , &current, 4);  ImGui::SameLine();
+		ImGui::RadioButton("LeftDushKick", &current, 1); ImGui::SameLine();
+		ImGui::RadioButton("RightKick", &current, 2);
+		ImGui::RadioButton("LeftRollKick", &current, 3); ImGui::SameLine();
+		ImGui::RadioButton("RightRollKick", &current, 4);  ImGui::SameLine();
 		ImGui::RadioButton("RightPunch", &current, 5); ImGui::SameLine();
 		ImGui::RadioButton("RightFlyKick", &current, 6);
 		//FrameCount
 		{
-			 int frameCount = m_attackParm[current].frameCount;
+			int frameCount = m_attackParm[current].frameCount;
 			ImGui::InputInt("FrameCount", &frameCount, 0, 100); ImGui::SameLine();
 			if (ImGui::ArrowButton("Front", ImGuiDir_Left))
 			{
@@ -1321,7 +1460,7 @@ void Fighter::ImGui(ID3D11Device* device)
 			if (ImGui::Button("ADD FrameCount"))
 				m_attackParm[current].frameCount = frameCount;
 		}
-		
+
 		//Buttons
 		{
 			static int button = 0;
@@ -1367,26 +1506,27 @@ void Fighter::ImGui(ID3D11Device* device)
 
 		//InputRange
 		{
-			 int start = m_attackParm[current].inputRange[0];
+			int start = m_attackParm[current].inputRange[0];
 			ImGui::InputInt("Start", &start, 0, 100);
 
 			m_attackParm[current].inputRange[0] = start;
 
-			 int end = m_attackParm[current].inputRange[1];
-			ImGui::InputInt("End", &end, 0, 100); 
+			int end = m_attackParm[current].inputRange[1];
+			ImGui::InputInt("End", &end, 0, 100);
 
-				m_attackParm[current].inputRange[1] = end;
+			m_attackParm[current].inputRange[1] = end;
 		}
 
 		//attackPoint
 		{
 			static float point = m_attackParm[current].attackPoint;
-			ImGui::InputFloat("AttackPoint", &point, 0, 100); 
+			ImGui::InputFloat("AttackPoint", &point, 0, 100);
 
 			if (ImGui::Button("ADD AttackPoint"))
 				m_attackParm[current].attackPoint = point;
 		}
 
+		//attackSpeed
 		{
 			float attackSpeedFast = m_attackParm[current].attackSpeed[0];
 			ImGui::InputFloat("AttackSpeedFast", &attackSpeedFast, 1.0f, 2.0f);
@@ -1397,6 +1537,7 @@ void Fighter::ImGui(ID3D11Device* device)
 			m_attackParm[current].attackSpeed[1] = attackSpeedSlow;
 		}
 
+		//attackTimer
 		{
 			int attackTimerStart = m_attackParm[current].attackTimerRange[0];
 			ImGui::InputInt("AttackTimerStart", &attackTimerStart, 0, 100);
@@ -1407,8 +1548,9 @@ void Fighter::ImGui(ID3D11Device* device)
 			m_attackParm[current].attackTimerRange[1] = attackTimerEnd;
 		}
 
+		//SlowTime
 		{
-			 int slowTimeStart = m_attackParm[current].slowTimeFrameCount[0];
+			int slowTimeStart = m_attackParm[current].slowTimeFrameCount[0];
 			ImGui::InputInt("SlowTimeStart", &slowTimeStart, 0, 100);
 			m_attackParm[current].slowTimeFrameCount[0] = slowTimeStart;
 
@@ -1417,21 +1559,34 @@ void Fighter::ImGui(ID3D11Device* device)
 			m_attackParm[current].slowTimeFrameCount[1] = slowTimeEnd;
 		}
 
+		//moveFrame
 		{
-			if (current == 1)
+			int moveFrameStart = m_attackParm[current].moveFrameStart;
+			ImGui::InputInt("MoveFrameStart", &moveFrameStart, 0, 100);
+			m_attackParm[current].moveFrameStart = moveFrameStart;
+		}
+
+		{
+			float deceleration = m_attackParm[current].deceleration.x;
+			ImGui::SliderFloat("AttackDeceleration", &deceleration, 0.0f, 1.0f);
+			m_attackParm[current].deceleration = VECTOR3F(deceleration, 0.0f, deceleration);
+
+			float speed = m_attackParm[current].speed.x;
+			ImGui::SliderFloat("AttackSpeed", &speed, 0.0f, 100.0f);
+			m_attackParm[current].speed.x = m_attackParm[current].speed.z = speed;
+
+			if (ImGui::Button("SetMaxSpeed"))
 			{
-				float deceleration = m_attackParm[current].deceleration.x;
-				ImGui::SliderFloat("AttackDeceleration", &deceleration, 0.0f, 1.0f);
-				m_attackParm[current].deceleration = VECTOR3F(deceleration, 0.0f, deceleration);
-
-				float speed = m_attackParm[current].speed.x;
-				ImGui::SliderFloat("AttackSpeed", &speed, 0.0f, 100.0f);
-				m_attackParm[current].speed.x = m_attackParm[current].speed.z = speed;
-
-				if (ImGui::Button("Set"))
-				{
-					m_attackParm[1].maxSpeed = m_attackParm[1].speed;
-				}
+				m_attackParm[current].maxSpeed = m_attackParm[current].speed;
+			}
+			static float currentSpeed = 0.f;
+			if (ImGui::Button("SetCurrentAttackSpeed"))
+			{
+				currentSpeed = speed;
+			}
+			if (ImGui::Button("GetCurrentAttackSpeed"))
+			{
+				speed = currentSpeed;
 			}
 		}
 	}

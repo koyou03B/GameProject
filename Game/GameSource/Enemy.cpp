@@ -11,7 +11,7 @@ void Enemy::Init()
 {
 	m_transformParm.position = { 0.0f,0.0f,30.0f };
 	m_transformParm.angle = { 0.0f * 0.01745f, 180.0f * 0.01745f,0.0f * 0.017454f };
-	m_transformParm.scale = { 0.085f,0.085f,0.085f };
+	m_transformParm.scale = { 0.087f,0.087f,0.087f };
 	m_transformParm.WorldUpdate();
 
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::ENEMY);
@@ -49,7 +49,7 @@ void Enemy::Init()
 ;
 	for (auto& atk : m_attackParm)
 	{
-		atk.serialVersion = 16;
+		atk.serialVersion = 17;
 	}
 
 	m_behaviorTree.CreateRootNode();

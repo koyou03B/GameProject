@@ -158,7 +158,7 @@ public:
 		uint32_t inputRange[2] = {};
 		uint32_t slowTimeFrameCount[2] = {};
 		uint32_t attackTimerRange[2] = {};
-
+		uint32_t moveFrameStart = 0;
 		float attackPoint = 0.0f;
 		float attackSpeed[2] = {};
 		bool hasAttacked = false;
@@ -181,7 +181,7 @@ public:
 					inputRange[0], inputRange[1],
 					attackPoint,buttons, slowTimeFrameCount[0],
 					attackSpeed[0], attackSpeed[1], slowTimeFrameCount[1],
-					speed, deceleration, attackTimerRange[0], attackTimerRange[1]
+					speed, deceleration, attackTimerRange[0], attackTimerRange[1], moveFrameStart
 				);
 			}
 			else
@@ -192,7 +192,7 @@ public:
 					inputRange[0], inputRange[1],
 					attackPoint, buttons, slowTimeFrameCount[0],
 					attackSpeed[0], attackSpeed[1], slowTimeFrameCount[1],
-					speed, deceleration
+					speed, deceleration, attackTimerRange[0], attackTimerRange[1]
 
 				);
 			}
@@ -427,5 +427,5 @@ CEREAL_CLASS_VERSION(CharacterParameter::Camera, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::Collision, 12);
 CEREAL_CLASS_VERSION(CharacterParameter::BlendAnimation, 13);
 CEREAL_CLASS_VERSION(CharacterParameter::Step, 12);
-CEREAL_CLASS_VERSION(CharacterParameter::Attack, 16);
+CEREAL_CLASS_VERSION(CharacterParameter::Attack, 17);
 CEREAL_CLASS_VERSION(CharacterParameter::Damage, 0);

@@ -103,6 +103,35 @@ VECTOR3F LerpVec3(VECTOR3F lerpStart, VECTOR3F lerpEnd, float value)
 	return outPosition;
 }
 
+VECTOR3F SphereLinearVec3( VECTOR3F start, VECTOR3F end, float t)
+{
+	// 2ÉxÉNÉgÉãä‘ÇÃäpìxÅiâsäpë§Åj
+	float angle = acosf(DotVec3(start, end));
+
+	// sinÉ∆
+	float SinTh = sinf(angle);
+
+	// ï‚ä‘åWêî
+	float Ps = sinf(angle * (1.0f - t));
+	float Pe = sinf(angle * t);
+
+	VECTOR3F out;
+	if (angle == 0.0f)
+	{
+		out.x = 0.0f;
+		out.y = 0.0f;
+		out.z = 0.0f;
+	}
+	else
+	{
+		out.x = (Ps * start.x + Pe * end.x) / SinTh;
+		out.y = (Ps * start.y + Pe * end.y) / SinTh;
+		out.z = (Ps * start.z + Pe * end.z) / SinTh;
+	}
+
+	return out;
+}
+
 VECTOR3F SphereLinearVec3(VECTOR3F origin,VECTOR3F start, VECTOR3F end, float t)
 {
 	VECTOR3F sphereLinerStart = NormalizeVec3(start - origin);

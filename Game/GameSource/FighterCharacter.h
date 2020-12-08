@@ -21,6 +21,9 @@ public:
 
 	void Impact() override;
 
+	VECTOR3F GetInputDirection();
+	VECTOR3F GetRotationAfterAngle(VECTOR2F vector,float turnSpeed);
+
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
