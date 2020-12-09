@@ -643,11 +643,11 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 				if (attack.speed.x <= 0.0f)
 					attack.speed = { 0.0f,0.0f,0.0f };
 
-				VECTOR3F velocity = m_moveParm.velocity;
-				velocity += velocity * attack.speed;
-				m_transformParm.position += velocity * m_elapsedTime;
-				m_transformParm.position.y = 0.0f;
-				m_transformParm.WorldUpdate();
+				//VECTOR3F velocity = m_moveParm.velocity;
+				//velocity += velocity * attack.speed;
+				//m_transformParm.position += velocity * m_elapsedTime;
+				//m_transformParm.position.y = 0.0f;
+				//m_transformParm.WorldUpdate();
 			}
 		}
 	}
@@ -865,30 +865,20 @@ VECTOR3F Fighter::GetInputDirection()
 		DirectX::XMStoreFloat3(&stickVector, vStickVex);
 		stickVector = NormalizeVec3(stickVector);
 
+		return stickVector;
+	}
+	else
+	{
 		auto& enemy = MESSENGER.CallEnemyInstance(0);
 		VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
 		float direction = ToDistVec3(enemyPos - m_transformParm.position);
 		if (direction < 20.0f)
 		{
-			//VECTOR3F nDirection = NormalizeVec3(enemyPos - m_transformParm.position);
-			//FLOAT4X4 world = m_transformParm.world;
-			//VECTOR3F front = { world._31,world._32,world._33 };
-			//front = NormalizeVec3(front);
-			//float dot = DotVec3(nDirection, stickVector);
-			//float cosTheta = acosf(dot);
-			//if (cosTheta >= 0.1f)
-			//{
-			//	float angle = m_transformParm.angle.y;
-			//	VECTOR3F eDirection = nDirection;
-			//	VECTOR3F sDirection = stickVector;
-
-			//	stickVector = SphereLinearVec3(eDirection,sDirection , 0.25f);
-			//}
+			VECTOR3F nDirection = NormalizeVec3(enemyPos - m_transformParm.position);
+			return nDirection;
 		}
-		return stickVector;
 	}
-
 	float angle = m_transformParm.angle.y;
 	return { sinf(angle),0.0f,cosf(angle)};
 }
@@ -902,7 +892,11 @@ VECTOR3F Fighter::GetRotationAfterAngle(VECTOR2F vector,float turnSpeed)
 	float dot = (vector.x * dx) + (vector.y * dz);
 	float rot = 1.0f - dot;
 
-	float limit = turnSpeed;
+	auto& enemy = MESSENGER.CallEnemyInstance(0);
+	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
+
+	float direction = ToDistVec3(enemyPos - m_transformParm.position);
+	float limit = direction < 18.0f ? 0.03f : turnSpeed;
 
 	if (rot > limit)
 		rot = limit;
