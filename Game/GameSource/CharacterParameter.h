@@ -322,7 +322,8 @@ public:
 			SPHER,
 			CAPSULE,
 			CIRCLE,
-			RECT
+			RECT,
+			CYLINDER
 		} collisionType;
 
 		inline void SetCurrentMesh(const uint32_t& mesh,const uint32_t& num) { currentMesh[num] = mesh; }

@@ -54,4 +54,13 @@ public:
 	bool JudgeCircleAndCircle(const Circle& myself, const Circle& target);
 	bool JudgeCircleAndpoint(const Circle& mySelf, const VECTOR2F& target);
 
+	struct Cylinder
+	{
+		VECTOR3F startPos;
+		VECTOR3F endPos;
+		float scale;
+		float radius;
+	};
+	bool JudgeCylinderAndCylinder(const Cylinder& myself, const Cylinder& target);
+
 };

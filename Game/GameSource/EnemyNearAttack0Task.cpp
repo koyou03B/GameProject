@@ -189,9 +189,11 @@ void EnemyNearAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
 
 		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
 		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
-
+		float radius = attackParm.radius;
+		attackParm.radius = m_moveState == Action::CROSS_PUNCH ? 1.725f : radius;
 		if (!m_isHit && MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm))
 			m_isHit = true;
+		attackParm.radius = radius;
 	}
 }
 

@@ -264,6 +264,37 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 
 	}
 	break;
+	case CharacterParameter::Collision::CYLINDER:
+	{
+		Collision::Cylinder mySelf, target;
+		mySelf.startPos = collision.position[0];
+		mySelf.endPos = { collision.position[0].x,FLT_MAX,collision.position[0].z };
+		mySelf.radius = collision.radius;
+		mySelf.scale = collision.scale;
+		auto& enemy = m_enemys[0]->GetCollision()[0];
+		target.startPos = enemy.position[0];
+		target.endPos = { enemy.position[0].x,FLT_MAX,enemy.position[0].z };
+		target.radius = enemy.radius;
+		target.scale = enemy.scale;
+		Collision collision;
+		if (collision.JudgeCylinderAndCylinder(mySelf, target))
+		{
+			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f, 0.5f);
+			++m_players[id]->GetJudgeElement().attackHitCount;
+			++m_enemys[0]->GetJudgeElement().damageCount;
+			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;
+
+			MESSENGER.MessageToLifeUpdate(m_enemys[0]->GetStatus().life, m_enemys[0]->GetStatus().maxLife,
+				UIActLabel::LIFE_E, 0);
+
+			if (m_enemys[0]->GetStatus().life <= 0)
+			{
+				m_enemys[0]->GetStatus().isExit = false;
+			}
+			return true;
+		}
+	}
+	break;
 	}
 
 	return false;

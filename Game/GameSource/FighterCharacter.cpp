@@ -488,19 +488,6 @@ void Fighter::Attack(float& elapsedTime)
 	{
 		Animation nextaAnimtion = { Animation::RIGHT_KICK };
 		Attacking(m_animationType, nextaAnimtion, m_attackParm[1], m_collision[1]);
-
-		//m_attackParm[1].speed -= m_attackParm[1].deceleration;
-		//if (m_attackParm[1].speed.x <= 0.0f)
-		//	m_attackParm[1].speed = { 0.0f,0.0f,0.0f };
-
-
-
-		//m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_attackParm[1].speed.x);
-		//m_moveParm.velocity.y = 0.0f;
-		//m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_attackParm[1].speed.z);
-
-		//m_transformParm.position += m_moveParm.velocity * elapsedTime;
-		//m_transformParm.WorldUpdate();
 	}
 	break;
 	case Fighter::RIGHT_KICK:
@@ -551,48 +538,6 @@ void Fighter::Attack(float& elapsedTime)
 void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 	CharacterParameter::Attack& attack, CharacterParameter::Collision& collision)
 {
-#if 0	
-	//*********************************
-	//@Œü‚«‚ÌC³
-	//*********************************
-
-	auto& enemy = MESSENGER.CallEnemyInstance(0);
-	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
-
-	float direction = ToDistVec3(enemyPos - m_transformParm.position);
-	if (direction < 18.0f)
-	{
-		VECTOR3F nDirection = NormalizeVec3(enemyPos - m_transformParm.position);
-		VECTOR3F nForward = NormalizeVec3(VECTOR3F(sinf(m_transformParm.angle.y), 0.0f, cosf(m_transformParm.angle.y)));
-
-		float dot = DotVec3(nDirection, nForward);
-		float cosTheta = acosf(dot);
-		if (cosTheta >= 0.4f && dot > -0.1f)
-		{
-			float rot = 1.0f - dot;
-
-			float limit = m_moveParm.turnSpeed;
-
-			if (rot > limit)
-			{
-				rot = limit;
-			}
-
-			VECTOR3F cross = CrossVec3(nForward, nDirection);
-			if (cross.y > 0.0f)
-			{
-				m_transformParm.angle.y += rot;
-			}
-			else
-			{
-				m_transformParm.angle.y -= rot;
-			}
-			m_transformParm.WorldUpdate();
-			return;
-		}
-		m_moveParm.velocity = {};
-	}
-#endif
 
 	size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
 
@@ -632,25 +577,7 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		m_transformParm.position.y = 0.0f;
 		m_transformParm.WorldUpdate();
 	}
-	else
-	{
-		if (samplerSize == 1)
-		{
-			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-			if (attack.moveFrameStart <= currentAnimationFrame)
-			{
-				attack.speed -= attack.deceleration;
-				if (attack.speed.x <= 0.0f)
-					attack.speed = { 0.0f,0.0f,0.0f };
 
-				//VECTOR3F velocity = m_moveParm.velocity;
-				//velocity += velocity * attack.speed;
-				//m_transformParm.position += velocity * m_elapsedTime;
-				//m_transformParm.position.y = 0.0f;
-				//m_transformParm.WorldUpdate();
-			}
-		}
-	}
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	// Set the blend ratio to 1.
 	// When we get to 1, we stop blending.
@@ -680,10 +607,27 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		return;
 	}
 
+	uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+	if (attack.moveFrameStart <= currentAnimationFrame && m_attackType != AttackType::LeftDushKick)
+	{
+		attack.speed -= attack.deceleration;
+		if (attack.speed.x <= 0.0f)
+			attack.speed = { 0.0f,0.0f,0.0f };
+
+		VECTOR3F angle = m_transformParm.angle;
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+		FLOAT4X4 rotationM = {};
+		DirectX::XMStoreFloat4x4(&rotationM, R);
+		VECTOR3F front = { rotationM._31,rotationM._32,rotationM._33 };
+		VECTOR3F velocity = front * attack.speed;
+		m_transformParm.position += velocity * m_elapsedTime;
+		m_transformParm.position.y = 0.0f;
+		m_transformParm.WorldUpdate();
+	}
+
 	//*********************************************
 	// Collsion
 	//*********************************************
-	uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
 	if (attack.attackTimerRange[0] < currentAnimationFrame && currentAnimationFrame < attack.attackTimerRange[1])
 	{
 		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[collision.GetCurrentMesh(0)].at(collision.GetCurrentBone(0));
@@ -871,11 +815,11 @@ VECTOR3F Fighter::GetInputDirection()
 	{
 		auto& enemy = MESSENGER.CallEnemyInstance(0);
 		VECTOR3F enemyPos = enemy->GetWorldTransform().position;
-
-		float direction = ToDistVec3(enemyPos - m_transformParm.position);
-		if (direction < 20.0f)
+		VECTOR3F direction = enemyPos - m_transformParm.position;
+		float dist = ToDistVec3(direction);
+		if (dist < 25.0f)
 		{
-			VECTOR3F nDirection = NormalizeVec3(enemyPos - m_transformParm.position);
+			VECTOR3F nDirection = NormalizeVec3(direction);
 			return nDirection;
 		}
 	}
@@ -895,8 +839,8 @@ VECTOR3F Fighter::GetRotationAfterAngle(VECTOR2F vector,float turnSpeed)
 	auto& enemy = MESSENGER.CallEnemyInstance(0);
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
-	float direction = ToDistVec3(enemyPos - m_transformParm.position);
-	float limit = direction < 18.0f ? 0.03f : turnSpeed;
+	float dist = ToDistVec3(enemyPos - m_transformParm.position);
+	float limit = dist < 22.0f ? 0.03f : turnSpeed;
 
 	if (rot > limit)
 		rot = limit;
@@ -954,9 +898,6 @@ bool Fighter::KnockBack()
 			uint32_t animationEnd = m_damageParm.hasBigDamaged ? 131 : 79;
 
 			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-
-			//if(currentAnimationFrame >= 80)
-			//	m_blendAnimation.animationBlend.SetAnimationSpeed(f);
 
 			if (currentAnimationFrame == animationEnd)
 			{
@@ -1160,7 +1101,7 @@ void Fighter::ImGui(ID3D11Device* device)
 
 				//CollisionType
 				{
-					std::vector<std::string> collisionType = { "Cube","SPHER","CAPSULE","CIRCLE","RECT" };
+					std::vector<std::string> collisionType = { "Cube","SPHER","CAPSULE","CIRCLE","RECT","CYLINDER" };
 					static int currentCollisionType = 0;
 
 					ImGui::Combo("Name_of_CollisionType",
