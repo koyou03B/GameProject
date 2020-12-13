@@ -1192,7 +1192,7 @@ void Enemy::ImGui(ID3D11Device* device)
 		{
 			 float turnSpeed = m_moveParm.turnSpeed;
 
-			ImGui::SliderFloat("TurnSpeed", &turnSpeed, 0.0f, 0.05f);
+			ImGui::SliderFloat("TurnSpeed", &turnSpeed, 0.0f, 0.1f);
 
 			m_moveParm.turnSpeed = turnSpeed;
 		}

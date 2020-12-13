@@ -31,41 +31,52 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 			animation.animationBlend.ResetAnimationFrame();
 		}
 		break;
-	case Action::CROSS_PUNCH:
-		if (m_isHit && !m_hasSentSignal)
-		{
-			m_hasSentSignal = true;
-			m_animNo = GetRundumSignal();
-		}
-	
+	case Action::CROSS_PUNCH:	
 		m_attackNo = Enemy::AttackType::CrossPunch;
 		JudgeAttack(enemy, m_attackNo);
 
 		if (JudgeAnimationRatio(enemy, m_attackNo, m_animNo))
 		{
-			m_hasSentSignal = false;
-			m_isHit = false;
-			animation.animationBlend.SetAnimationSpeed(1.0f);
-			if (m_animNo == Enemy::Animation::TURN_ATTACK_LOWER)
+			if (m_isHit)
 			{
-				m_animNo = GetRundumSignal();
-				++enemy->GetJudgeElement().attackCount;
-				++enemy->GetJudgeElement().moveCount;
+				m_animNo = JudgeTurnChace(enemy);
+				if (m_animNo <= 1)
+				{
+					m_isHit = false;
+					animation.animationBlend.SetAnimationSpeed(1.0f);
+					animation.animationBlend.ReleaseSampler(1);
+					animation.animationBlend.ResetAnimationFrame();
+					m_moveState = Action::END;
+					break;
+				}
+				animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
+				animation.animationBlend.ResetAnimationFrame();
 				++m_moveState;
-			}			
+			}
 			else
 			{
-				m_coolTimer = 10.0f;
-				m_animNo = m_animNo % Enemy::Animation::MUSCLE_SIGNAL;
-				m_moveState = Action::SIGNAL;
-			}
-		}
+				if (m_animNo == Enemy::Animation::TURN_ATTACK_LOWER)
+				{
+					m_animNo = GetRundumSignal();
 
+					++enemy->GetJudgeElement().attackCount;
+					++enemy->GetJudgeElement().moveCount;
+					++m_moveState;
+				}
+			}
+			m_isHit = false;
+			animation.animationBlend.SetAnimationSpeed(1.0f);
+		}
 		break;
 	case Action::TURN_ATTACK:
 	
+
 		if (!m_hasFinishedBlend)
+		{
 			m_hasFinishedBlend = JudgeBlendRatio(animation);
+			auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
+			m_targetPosition = player->GetWorldTransform().position;
+		}
 		else
 		{
 			m_attackNo = Enemy::AttackType::TurnAttackLower;
@@ -118,10 +129,20 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 		}
 		break;
 	case Action::END:
-		if (JudgeBlendRatio(animation))
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		if (samplerSize != 1)
+		{
+			if (JudgeBlendRatio(animation))
+			{
+				m_isUsed = true;
+				animation.animationBlend.ResetAnimationSampler(0);
+				m_moveState = Action::START;
+				m_taskState = TASK_STATE::END;
+			}
+		}
+		else
 		{
 			m_isUsed = true;
-			animation.animationBlend.ResetAnimationSampler(0);
 			m_moveState = Action::START;
 			m_taskState = TASK_STATE::END;
 		}
@@ -298,10 +319,7 @@ void EnemyNearAttack0Task::AttackMove(Enemy* enemy)
 	if (currentAnimationTime >= kRowlingTimer[0] && currentAnimationTime <= kRowlingTimer[1])
 	{
 		auto& enemyTransform = enemy->GetWorldTransform();
-
-		auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
-		VECTOR3F targetPosition = player->GetWorldTransform().position;
-		VECTOR3F targetDistance = targetPosition - enemyTransform.position;
+		VECTOR3F targetDistance = m_targetPosition - enemyTransform.position;
 		VECTOR3F targetNormal = NormalizeVec3(targetDistance);
 		float targetDist = ToDistVec3(targetDistance);
 		VECTOR3F angle = enemy->GetWorldTransform().angle;
@@ -310,7 +328,7 @@ void EnemyNearAttack0Task::AttackMove(Enemy* enemy)
 
 		float dot = DotVec3(front, targetNormal);
 		float rot = 1.0f - dot;
-		float limit = enemy->GetMove().turnSpeed;
+		float limit = 0.1f;
 		if (rot > limit)
 			rot = limit;
 		
