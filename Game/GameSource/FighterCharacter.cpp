@@ -440,6 +440,7 @@ void Fighter::Attack(float& elapsedTime)
 				m_moveParm.isRun = false;
 			}
 		}
+		m_attackParm[0].speed = m_attackParm[0].maxSpeed;
 	}
 	else if (m_moveParm.isRun && m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_Y) == 1 &&
 		!m_statusParm.isAttack && !m_stepParm.isStep)
@@ -451,6 +452,8 @@ void Fighter::Attack(float& elapsedTime)
 			m_moveParm.isMove = false;
 			m_moveParm.isRun = false;
 		}
+		m_attackParm[1].speed = m_attackParm[1].maxSpeed;
+
 	}
 
 	switch (m_animationType)

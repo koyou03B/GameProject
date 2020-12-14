@@ -54,13 +54,14 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 	}	break;
 	case Action::RUN_TURN_ATTACK:
 
+
 		if (!m_hasFinishedBlend)
 			m_hasFinishedBlend = JudgeBlendRatio(animation, true);
 		else
 		{
 			if (AttackMove(enemy))
 			{
-				m_animNo = Enemy::Animation::TURN_ATTACK_LOWER;
+				m_animNo = Enemy::Animation::RIGHT_PUNCH_UPPER;
 				animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
 				animation.animationBlend.ResetAnimationFrame();
 			}
@@ -70,11 +71,11 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 				if (!m_hasFinishedAttack)
 				{
 					m_hasFinishedAttack = JudgeBlendRatio(animation);
-					enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(0.8f);
+					enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.2f);
 				}
 				else
 				{
-					m_attackNo = Enemy::AttackType::TurnAttackLower;
+					m_attackNo = Enemy::AttackType::RightPunchUpper;
 					uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 					uint32_t attackFrameCount = enemy->GetAttack(m_attackNo).frameCount;
 					if (currentAnimationTime >= attackFrameCount)
@@ -103,6 +104,9 @@ void EnemyFarAttack1Task::Run(Enemy* enemy)
 					}
 				}
 			}
+			else
+				enemy->GetBlendAnimation().animationBlend.SetAnimationSpeed(1.2f);
+
 			JudgeAttack(enemy, m_attackNo);
 		}
 		break;
@@ -158,7 +162,7 @@ void EnemyFarAttack1Task::JudgeAttack(Enemy* enemy, const int attackNo)
 		attackTimer[0] = attackTimer[1] = 100;
 		atkNo = 3;
 	}
-	else if (m_animNo == Enemy::Animation::TURN_ATTACK_LOWER)
+	else if (m_animNo == Enemy::Animation::RIGHT_PUNCH_UPPER)
 	{
 		attackTimer[0] = kAttackTimer[0];
 		attackTimer[1] = kAttackTimer[1];
@@ -239,33 +243,25 @@ void EnemyFarAttack1Task::JudgeVectorDirection(Enemy* enemy)
 
 	axis = NormalizeVec3(axis);
 
-	VECTOR3F movePoint = enemyPosition + axis * 5.0f;
-	Collision::AABB stageRange;
-	stageRange.left = -36.0f;
-	stageRange.right = 36.0f;
-	stageRange.top = 180.0f;
-	stageRange.down = -180.0f;
+	VECTOR3F movePoint = enemyPosition + axis * -20.0f;
+	Collision::Circle stageRange;
+	stageRange.radius = 81.0f;
+	stageRange.position = {};
+	stageRange.scale = 1.0f;
 	Collision coll;
 
-	if (coll.JudgePointAndAABB(VECTOR2F(movePoint.x, movePoint.z), stageRange))
+	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
 		m_nVecToTarget = axis;
-	else
-	{
-		axis *= -1.0f;
-		movePoint = enemyPosition + axis * 5.0f;
-		if (coll.JudgePointAndAABB(VECTOR2F(movePoint.x, movePoint.z), stageRange))
-			m_nVecToTarget = axis;
-	}
+
 	int targetID = enemy->GetJudgeElement().targetID;
 	auto& player = MESSENGER.CallPlayerInstance(targetID);
 	VECTOR3F playerPosition = player->GetWorldTransform().position;
 	axis = enemyPosition - playerPosition;
 	axis = NormalizeVec3(axis);
-	movePoint = enemyPosition + axis * 5.0f;
+	movePoint = enemyPosition + axis * 20.0f;
 
-	if (coll.JudgePointAndAABB(VECTOR2F(movePoint.x, movePoint.z), stageRange))
+	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
 		m_nVecToTarget = axis;
-
 
 }
 
@@ -413,7 +409,31 @@ bool EnemyFarAttack1Task::AttackMove(Enemy* enemy)
 		if (m_accel <= 0.0f)
 			m_accel = 0.0f;
 	}
-		
+	else
+	{
+		VECTOR3F targetDistance = m_targetPosition - enemy->GetWorldTransform().position;
+		VECTOR3F targetNormal = NormalizeVec3(targetDistance);
+		float targetDist = ToDistVec3(targetDistance);
+		VECTOR3F angle = enemy->GetWorldTransform().angle;
+		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
+		front = NormalizeVec3(front);
+
+		float dot = DotVec3(front, targetNormal);
+		float rot = 1.0f - dot;
+		float limit = enemy->GetMove().turnSpeed;
+		if (rot > limit)
+			rot = limit;
+
+		VECTOR3F cross = CrossVec3(front, targetNormal);
+		if (cross.y > 0.0f)
+		{
+			enemyTransform.angle.y += rot;
+		}
+		else
+		{
+			enemyTransform.angle.y -= rot;
+		}
+	}
 
 	enemy->GetMove().velocity = m_nVecToTarget * m_accel;
 	enemyTransform.position += enemy->GetMove().velocity * enemy->GetElapsedTime();
