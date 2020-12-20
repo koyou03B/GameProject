@@ -32,7 +32,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\ConstantBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Constants.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Easing.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\EntityComponentSystem.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\FrameBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Framework.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Function.h" />

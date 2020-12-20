@@ -192,6 +192,9 @@
     <Filter Include="Headers\Objects\GameObject\UI">
       <UniqueIdentifier>{b0159c04-1ff0-4d5e-b307-2cf27b413d49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\Market">
+      <UniqueIdentifier>{f074d0ac-87fc-4207-9b4a-af674ca079e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -492,6 +495,9 @@
     </ClInclude>
     <ClInclude Include="GameSource\UIAdominist.h">
       <Filter>Headers\Objects\GameObject\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Market.h">
+      <Filter>Headers\Market</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

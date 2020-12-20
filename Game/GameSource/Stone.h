@@ -1,159 +1,105 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include "Market.h"
+#include "CharacterParameter.h"
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\StaticMesh.h"
 #include ".\LibrarySource\InstanceData.h"
 
-class Stone
+struct StoneParam
+{
+	VECTOR3F	speed = {};
+	VECTOR3F	velocity = {};
+	bool		isFlying = false;
+	float		upPower= 0.0f;
+
+	inline void Clear()
+	{
+		speed = {};
+		velocity = {};
+		upPower = 0.0f;
+	}
+
+	void ReadBinary()
+	{
+		if (PathFileExistsA((std::string("../Asset/Binary/Enemy/Stone/StoneParameter") + ".bin").c_str()))
+		{
+			std::ifstream ifs;
+			ifs.open((std::string("../Asset/Binary/Enemy/Stone/StoneParameter") + ".bin").c_str(), std::ios::binary);
+			cereal::BinaryInputArchive i_archive(ifs);
+			i_archive(*this);
+		}
+	}
+
+	void SaveBinary()
+	{
+		std::ofstream ofs;
+		ofs.open((std::string("../Asset/Binary/Enemy/Stone/StoneParameter") + ".bin").c_str(), std::ios::binary);
+		cereal::BinaryOutputArchive o_archive(ofs);
+		o_archive(*this);
+	}
+
+	template<class T>
+	void serialize(T& archive, const std::uint32_t version)
+	{
+		if (version >= 1)
+		{
+			archive
+			(
+				speed,
+				upPower
+			);
+		}
+	};
+};
+CEREAL_CLASS_VERSION(StoneParam, 1);
+
+using  InstanceData = Source::InstanceData::InstanceData;
+class Stone : public ObjectProduct
 {
 public:
 	Stone() = default;
 	~Stone() = default;
 
-	void Init();
+	void Init()override;
+	void Update(float& elapsedTime)override;
+	void Render(ID3D11DeviceContext* immediateContext) override;
+	
+	void Clear();
+	void Reset(std::pair<InstanceData, StoneParam>& stoneData);
+	void Release();
+	void PrepareForStone(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& velocity);
 
-	void Update(float& elapsedTime);
-
-	void Relase();
-
-	VECTOR3F& GetSpeed() { return m_speed; }
-	VECTOR3F& GetVelocity() { return m_velocity; }
-	float& GetAttack() { return m_attack; }
-	float GetTimer() { return m_timer; }
-	bool GetExit() { return m_isExit; }
-
-	void SetSpeed(const VECTOR3F& speed) { m_speed = speed; }
-	void SetVelocity(const VECTOR3F& velocity) { m_velocity = velocity; }
-	void SetAttack(const float& attack) { m_attack = attack; }
-	void SetTimer(const float& timer) { m_timer = timer; }
-	void SetExit(const bool& flg) { m_isExit = flg; }
-
-
-protected:
-	const float Gravity = -9.8f;
-
-	VECTOR3F m_speed = {};
-	VECTOR3F m_velocity = {};
-	float m_timer = 0;
-	float m_attack = 0.0f;
-	bool m_isExit = false;
-};
-
-class StoneAdominist
-{
-public:
-	StoneAdominist() { Init(); };
-	~StoneAdominist() { Release(); };
-
-public:
-	void Init();
-
-	void Update(float& elapsedTime);
-
-	void Render(ID3D11DeviceContext* immediateContext);
-
+	void SetStoneParameter();
 	void ImGui(ID3D11Device* device);
 
-	void Release()
-	{
-		if (m_model.unique())
-			m_model.reset();
-		
-		if (!m_instanceData.empty())
-			m_instanceData.clear();
-
-		if (m_stone.unique())
-		{
-			m_stone->Relase();
-			m_stone.reset();
-		}
-	}
-
-	void Reset()
-	{
-		m_stone->SetExit(false);
-		m_power = 20.0f;
-		m_isFly = false;
-	}
-
-	void ReleaseArrowParm()
-	{
-		if (!m_stone) return;
-		m_stone->Relase();
-		m_isFly = false;
-	}
-
-	std::shared_ptr<Stone>& GetStone() { return m_stone; }
-	std::vector<Source::InstanceData::InstanceData>& GetInstanceData() { return m_instanceData; }
-	bool GetIsFly() { return m_isFly; }
-	inline float GetPower() { return m_power; }
-	void SetStone(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& velocity);
-
-	void SetFly(bool isFly) {	m_isFly = isFly; }
-
-
-
-	inline static StoneAdominist& GetInstance()
-	{
-		static 	StoneAdominist arrowAdomin;
-		return arrowAdomin;
-	}
+	const VECTOR3F& GetOffsetX() { return m_offsetX; }
+	const VECTOR3F& GetOffsetZ() { return m_offsetZ; }
+	std::vector<std::pair<InstanceData, StoneParam>>& GetStoneParam()		{ return m_stoneData; }
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 1)
+		if (version >= 2)
 		{
 			archive
 			(
-				m_survivalTime,
-				m_scale
+				m_stoneUpPower,
+				m_stoneScale,
+				m_offsetX,
+				m_offsetZ
 			);
 		}
 	};
-
 private:
-	std::shared_ptr<Source::StaticMesh::StaticMesh> m_model;
-	std::shared_ptr<Stone> m_stone;
-	std::vector<Source::InstanceData::InstanceData> m_instanceData;
+	float		m_stoneUpPower = 0.0f;
+	VECTOR3F	m_stoneScale = {0.5f,0.5f,0.5f };
+	VECTOR3F	m_offsetX = {};
+	VECTOR3F	m_offsetZ = {};
+	CharacterParameter::Collision						m_collision;
+	std::vector<InstanceData>							m_renderData;
+	std::shared_ptr<Source::StaticMesh::StaticMesh>		m_model;
+	std::vector<std::pair<InstanceData, StoneParam>>	m_stoneData;
 
-	int m_survivalTime = 0;
-	float m_power = 20.0f;
-	VECTOR3F m_scale;
-	bool m_isFly = false;
 };
-
-struct StoneParameter
-{
-	bool m_isExist;
-	VECTOR3F offsetZ;
-	VECTOR3F offsetX;
-	std::unique_ptr<StoneAdominist> m_stoneAdom;
-
-	template<class T>
-	void serialize(T& archive, const std::uint32_t version)
-	{
-		if (version >= 1)
-		{
-			archive
-			(
-				offsetZ,
-				offsetX,
-				m_stoneAdom
-			);
-		}
-		else
-		{
-			archive
-			(
-				offsetZ,
-				offsetX,
-				m_stoneAdom
-
-			);
-		}
-	}
-};
-
-//#define StoneInstamce StoneAdominist::GetInstance()

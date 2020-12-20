@@ -79,13 +79,13 @@ public:
 protected:
 	const uint32_t minPriority = 0;
 
-	std::string m_parentNodeName;
-	std::string m_taskName;
-	TASK_STATE m_taskState;
+	std::string m_parentNodeName = {};
+	std::string m_taskName = {};
+	TASK_STATE m_taskState = {};
 	uint32_t m_moveState = 0;
-	uint32_t m_priority;
-	float m_coolTimer;
-	int m_animNo;
+	uint32_t m_priority = 0;
+	float m_coolTimer = 0.0f;
+	int m_animNo = 0;
 	bool m_isUsed = false;
 	bool m_hasFinishedBlend = false;
 

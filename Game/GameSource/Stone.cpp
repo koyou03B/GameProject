@@ -1,4 +1,5 @@
 #include "Stone.h"
+#include "MessengTo.h"
 #include ".\LibrarySource\ModelData.h"
 
 #ifdef _DEBUG
@@ -7,37 +8,120 @@
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
-CEREAL_CLASS_VERSION(StoneAdominist, 1);
+CEREAL_CLASS_VERSION(Stone, 2);
+
 void Stone::Init()
 {
-	m_speed = { 150.0f,0.0f,150.0f };
-	m_velocity = { 0.0f,1.0f,1.0f };
-	m_attack = 0.0f;
-	m_timer = 0;
-	m_isExit = false;
+	Clear();
+	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::STONE);
+	m_stoneData.resize(3);
+	m_renderData.resize(3);
+	SetStoneParameter();
 }
 
 void Stone::Update(float& elapsedTime)
 {
-	m_timer+= elapsedTime;
+	if (m_stoneData.empty()) return;
+	using CollisionType = CharacterParameter::Collision::CollisionType;
+
+	for (auto& stone : m_stoneData)
+	{
+		if (stone.second.isFlying)
+		{
+			VECTOR3F velocity = stone.second.velocity;
+			VECTOR3F speed = stone.second.speed;
+			float upPower = stone.second.upPower;
+
+			velocity *= speed;
+			velocity.y = upPower;
+			stone.second.upPower -= 0.5f;
+			stone.first.position += velocity * elapsedTime;
+
+			stone.first.CreateWorld();
+
+			m_collision.position[0] = stone.first.position;
+			m_collision.position[1] = stone.first.position - velocity * elapsedTime;
+			m_collision.scale = 1.0f;
+			m_collision.radius = 1.5f;
+			m_collision.collisionType = CollisionType::SPHER;
+			if (MESSENGER.EnemyAttackingMessage(static_cast<int>(0), m_collision))
+			{
+				Reset(stone);
+				return;
+			}
+
+			if (stone.first.position.y <= -3.0f)
+			{
+				Reset(stone);
+			}
+		}
+	}
 }
 
-void Stone::Relase()
+void Stone::Render(ID3D11DeviceContext* immediateContext)
 {
-	m_velocity = {};
-	m_timer = 0;
-	m_isExit = false;
+	int count = 0;
+	if (m_stoneData.empty()) return;
+	size_t size = m_stoneData.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		if (m_stoneData[i].second.isFlying)
+		{
+			++count;
+			m_renderData[i] = m_stoneData[i].first;
+		}
+		else
+			m_renderData[i].ClearData();
+	}
+	if(count != 0)
+		m_model->Render(Framework::GetContext(), m_renderData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-
-void StoneAdominist::Init()
+void Stone::Clear()
 {
-	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::STONE);
-	m_instanceData.resize(1);
+	if (!m_stoneData.empty())
+	{
+		for (auto& stone : m_stoneData)
+		{
+			stone.first.ClearData();
+			stone.second.Clear();
+		}	
+	}
+}
 
-	m_stone = std::make_shared<Stone>();
-	m_stone->Init();
+void Stone::Reset(std::pair<InstanceData, StoneParam>& stoneData)
+{
+	stoneData.first.ClearData();
+	stoneData.second.isFlying = false;
+	stoneData.second.upPower = m_stoneUpPower;
+	stoneData.second.velocity = {};
+}
 
+void Stone::Release()
+{
+	Clear();
+	m_model.reset();
+	m_renderData.clear();
+}
+
+void Stone::PrepareForStone(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& velocity)
+{
+	for (auto& stone : m_stoneData)
+	{
+		if (stone.second.isFlying) continue;
+		stone.first.position = position;
+		stone.first.angle = angle;
+		stone.first.scale = m_stoneScale;
+		stone.first.color = { 1.0f,1.0f,1.0f,1.0f };
+		stone.first.CreateWorld();
+		stone.second.velocity = velocity;
+		stone.second.isFlying = true;
+		return;
+	}
+}
+
+void Stone::SetStoneParameter()
+{
 	if (PathFileExistsA((std::string("../Asset/Binary/Enemy/Stone/Stone") + ".bin").c_str()))
 	{
 		std::ifstream ifs;
@@ -45,68 +129,13 @@ void StoneAdominist::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
+
+	m_stoneData[0].second.ReadBinary();
+	m_stoneData[1].second.ReadBinary();
+	m_stoneData[2].second.ReadBinary();
 }
 
-void StoneAdominist::Update(float& elapsedTime)
-{
-	if (m_instanceData.empty()) return;
-
-	if (!m_isFly) return;
-	//	m_stone->Update(elapsedTime);
-
-	for (auto& worldPram : m_instanceData)
-	{
-		VECTOR3F velocity = m_stone->GetVelocity();
-		VECTOR3F speed = m_stone->GetSpeed();
-	
-		velocity *= speed;
-		velocity.y = m_power;
-		worldPram.position += velocity * elapsedTime;
-		m_power -= 0.5f;
-		//VECTOR3F distance = m_target - worldPram.position;
-		//worldPram.angle.y = atan2f(distance.x, distance.z);
-
-		worldPram.CreateWorld();
-
-		if (worldPram.position.y <= 0)
-		{
-			Reset();
-		}
-	}
-
-	//if (m_survivalTime <= m_stone->GetTimer())
-	//{
-	//	m_stone->Relase();
-	//	m_isFly = false;
-	//}
-}
-
-void StoneAdominist::Render(ID3D11DeviceContext* immediateContext)
-{
-	if (m_instanceData.empty()) return;
-	if (!m_stone) return;
-	if (!m_stone->GetExit()) return;
-
-	m_model->Render(Framework::GetContext(), m_instanceData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
-
-}
-
-void StoneAdominist::SetStone(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& target)
-{
-	for (auto& stone : m_instanceData)
-	{
-		stone.position = position;
-		stone.angle = angle;
-		stone.scale = m_scale;
-		stone.color = { 1.0f,1.0f,1.0f,1.0f };
-		stone.CreateWorld();
-	}
-	m_stone->SetVelocity(target);
-	m_stone->SetExit(true);
-	m_isFly = true;
-}
-
-void StoneAdominist::ImGui(ID3D11Device* device)
+void Stone::ImGui(ID3D11Device* device)
 {
 #if _DEBUG
 	ImGui::Begin("Stone", nullptr, ImGuiWindowFlags_MenuBar);//メニューバーをつかうならこのBEGIN
@@ -127,30 +156,72 @@ void StoneAdominist::ImGui(ID3D11Device* device)
 		ImGui::EndMenuBar();
 	}
 
-	if (ImGui::CollapsingHeader("Adominist"))
+	if (ImGui::CollapsingHeader("Scale"))
 	{
-		//************
-		// timer
-		//************
+		static float scale = m_stoneScale.x;
+		ImGui::SliderFloat("Scale", &scale, 0.001f, 10.0f);
+		m_stoneScale = { scale,scale,scale };
+		if (!m_stoneData.empty())
 		{
-			static int survivalTime = m_survivalTime;
-			ImGui::SliderInt("SurvivalTime", &survivalTime, 1, 100);
-			m_survivalTime = survivalTime;
-		}
-
-		//************
-		// Scale
-		//************
-		{
-			static float scale = m_scale.x;
-			ImGui::SliderFloat("Scale", &scale, 0.001f, 1.0f);
-			m_scale = { scale,scale,scale };
-			m_instanceData[0].scale = m_scale;
-			m_instanceData[0].CreateWorld();
+			m_stoneData.begin()->first.scale = m_stoneScale;
+			m_stoneData.begin()->first.CreateWorld();
 		}
 	}
 
+	if (ImGui::CollapsingHeader("Offset"))
+	{
+		static int current = 0;
+		ImGui::RadioButton("Z-Axis", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton("X-Axis", &current, 1);
 
+		if (current == 0)
+		{
+			VECTOR3F offset = m_offsetZ;
+			float offsetZ[] = { offset.x,offset.y,offset.z };
+			ImGui::SliderFloat3("Z-offset", offsetZ, -8.0f, 8.0f);
+			offset = { offsetZ[0],offsetZ[1],offsetZ[2] };
+			m_offsetZ = offset;
+		}
+		else
+		{
+			VECTOR3F offset = m_offsetX;
+			float offsetX[] = { offset.x,offset.y,offset.z };
+			ImGui::SliderFloat3("X-offset", offsetX, -7.0f, 7.0f);
+			offset = { offsetX[0],offsetX[1],offsetX[2] };
+			m_offsetX = offset;
+		}
+
+	}
+
+	if (!m_stoneData.empty())
+	{
+		static int current = 0;
+		ImGui::RadioButton("Zero", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton("OWE", &current, 1); ImGui::SameLine();
+		ImGui::RadioButton("TWO", &current, 2);
+
+		auto& stone = m_stoneData.at(current);
+		if (ImGui::CollapsingHeader("Speed"))
+		{
+			static float speed = stone.second.speed.x;
+			ImGui::SliderFloat("Speed", &speed, 0.0f, 200.0f);
+			stone.second.speed = { speed,speed,speed };
+		}
+		if (ImGui::CollapsingHeader("UpPower"))
+		{
+			static float upPower = stone.second.upPower;
+			ImGui::SliderFloat("UpPower->", &upPower, 0.0f, 20.0f);
+			m_stoneUpPower = stone.second.upPower = upPower;
+		}
+
+		ImGui::Text("IsFly%d", stone.second.isFlying);
+
+		if (ImGui::Button("Reset"))
+			stone.first.position.y = -10.0f;
+
+		if (ImGui::Button("Save"))
+			m_stoneData.at(current).second.SaveBinary();
+	}
 	ImGui::End();
 #endif
 }

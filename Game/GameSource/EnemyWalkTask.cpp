@@ -237,7 +237,7 @@ bool EnemyWalkTask::Walk(Enemy* enemy)
 
 		float distance = ToDistVec3(playerPosition - enemyPosition);
 
-		if (distance < 24.0f)
+		if (distance < 25.0f)
 		{
 			m_hasFinishedBlend = false;
 			return true;

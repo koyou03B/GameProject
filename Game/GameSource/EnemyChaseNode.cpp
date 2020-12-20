@@ -26,12 +26,6 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 		}
 	}
 
-	if (m_selectCount > 2)
-	{
-		m_selectCount = 0;
-		return minPriority;
-	}
-
 	VECTOR3F playerPosition = players.at(targetID)->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 
@@ -42,8 +36,6 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 		++m_selectCount;
 		return m_priority;
 	}
-
-
 
 	return minPriority;
 }

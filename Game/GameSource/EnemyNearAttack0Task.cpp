@@ -366,6 +366,7 @@ uint32_t EnemyNearAttack0Task::JudgePriority(const int id,const VECTOR3F playerP
 	if (m_isUsed) return minPriority;
 
 	auto player = MESSENGER.CallPlayersInstance();
+
 	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
 
 	VECTOR3F playerPosition = playerPos;

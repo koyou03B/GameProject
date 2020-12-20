@@ -26,6 +26,15 @@ namespace Source
 				DirectX::XMMATRIX W = S * R * T;
 				DirectX::XMStoreFloat4x4(&world, W);
 			}
+
+			void ClearData()
+			{
+				position = {};
+				scale = {};
+				angle = {};
+				color = {};
+				world = {};
+			}
 		};
 	}
 }

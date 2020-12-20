@@ -15,7 +15,7 @@ namespace Source
 
 		LoadStaticModel staticModel[] = {
 
-			{ StaticModel::STAGE,	"../Asset/Model/Static/Stage/Casul2.fbx"},
+			{ StaticModel::STAGE,	"../Asset/Model/Static/Stage/Casul.fbx"},
 			{ StaticModel::ARROW,	"../Asset/Model/Static/Arrow/Arrow.fbx"},
 			{ StaticModel::STONE,	"../Asset/Model/Static/Stone/untitled.fbx"},
 

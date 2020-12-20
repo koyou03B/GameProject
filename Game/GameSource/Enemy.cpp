@@ -5,7 +5,7 @@
 #include ".\LibrarySource\VectorCombo.h"
 
 //CEREAL_CLASS_VERSION(CharacterParameter::Collision, 1);
-CEREAL_CLASS_VERSION(Enemy, 8);
+CEREAL_CLASS_VERSION(Enemy, 10);
 
 void Enemy::Init()
 {
@@ -36,7 +36,7 @@ void Enemy::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/TurnAttackHeight.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/FallFlat_edit.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/RightPunchUpper.fbx", 60);
-	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/WrathAttack.fbx", 60);
+	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Enemy/Animation/AttackAnim/RunAttack.fbx", 60);
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::ENEMY);
 
 	m_statusParm.isExit = true;
@@ -69,8 +69,9 @@ void Enemy::Init()
 	m_moveState = 0;
 	//m_judgeElementPram.targetID
 
-	m_stoneParm.m_stoneAdom = std::make_unique<StoneAdominist>();
-
+	auto& wepon = RunningMarket().FindProductConer(0);
+	std::unique_ptr<Stone> stone{ wepon.GiveProduct<Stone>() };
+	m_stone = std::move(stone);
 }
 
 void Enemy::Update(float& elapsedTime)
@@ -92,51 +93,17 @@ void Enemy::Update(float& elapsedTime)
 		break;
 		case 1:
 			m_selectTask->Run(this);
+			m_stone->Update(m_elapsedTime);
 			m_behaviorTree.UpdateUseTasks(elapsedTime);
-			if (m_stoneParm.m_stoneAdom->GetStone()->GetExit())
-			{
-				m_stoneParm.m_stoneAdom->Update(m_elapsedTime);
-				VECTOR3F stonePos = m_stoneParm.m_stoneAdom->GetInstanceData()[0].position;
-				m_collision[5].position[0] = stonePos;
-
-				VECTOR3F velocity = m_stoneParm.m_stoneAdom->GetStone()->GetVelocity();
-				//	VECTOR3F speed = m_stoneParm.m_stoneAdom->GetStone()->GetSpeed();
-
-				//	velocity *= speed;
-				//	velocity.y = m_stoneParm.m_stoneAdom->GetPower();
-				stonePos -= velocity * m_elapsedTime;
-				m_collision[5].position[1] = stonePos;
-				m_statusParm.attackPoint = 12.0f;
-				if (MESSENGER.EnemyAttackingMessage(static_cast<int>(m_id), m_collision[5]))
-				{
-					m_stoneParm.m_stoneAdom->Reset();
-
-				}
-			}
 			if (m_selectTask->GetTaskState() == EnemyBehaviorTask::TASK_STATE::END)
 			{					
 				if(m_selectTask->GetParentNodeName() == "SpecialAttack" || 
 					m_selectTask->GetParentNodeName() == "UnSpecialAttack")
 				m_behaviorTree.AddUseTask(m_selectTask);
-
-				//if (m_selectTask->GetTaskName() == "FarAttack2Task")
-				//{
-				//	auto chaseNode = m_behaviorTree.GetRootNode()->SearchNode("ChaseNode");
-				//	//dynamic_cast<EnemyChaseNode*>(chaseNode.get())->SetNodeName();
-				//}
 				m_selectTask.reset();
 				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
 			}
 
-			//if (m_statusParm.life <= 0)
-			//{
-			//	m_selectTask->SetMoveState(0);
-			//	m_selectTask.reset();
-			//	m_blendAnimation.animationBlend.ChangeSampler(0,Animation::DIE, m_model);
-			//	if(m_blendAnimation.blendRatio <= 1.0f)
-			//		m_blendAnimation.blendRatio = 1.0f;
-			//	++m_moveState;
-			//}
 			if (m_statusParm.life <= 0)
 			{
 				m_selectTask->SetMoveState(0);
@@ -192,6 +159,7 @@ void Enemy::Update(float& elapsedTime)
 		m_isAction = true;
 
 	}
+
 }
 
 void Enemy::Render(ID3D11DeviceContext* immediateContext)
@@ -199,12 +167,8 @@ void Enemy::Render(ID3D11DeviceContext* immediateContext)
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
 	//	auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
-	
-	if (m_stoneParm.m_stoneAdom->GetStone()->GetExit())
-		m_stoneParm.m_stoneAdom->Render(immediateContext);
-
-	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
-
+	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);	
+	m_stone->Render(immediateContext);
 	m_debugObjects.debugObject.Render(immediateContext, VECTOR4F(0, 0, 0, 0),true);
 }
 
@@ -869,26 +833,7 @@ void Enemy::ImGui(ID3D11Device* device)
 					if (m_selectTask)
 					{
 						m_selectTask->Run(this);
-						if (m_stoneParm.m_stoneAdom->GetStone()->GetExit())
-						{
-							m_stoneParm.m_stoneAdom->Update(m_elapsedTime);
-							VECTOR3F stonePos = m_stoneParm.m_stoneAdom->GetInstanceData()[0].position;
-							m_collision[5].position[0] = stonePos;
-
-							VECTOR3F velocity = m_stoneParm.m_stoneAdom->GetStone()->GetVelocity();
-						//	VECTOR3F speed = m_stoneParm.m_stoneAdom->GetStone()->GetSpeed();
-
-						//	velocity *= speed;
-						//	velocity.y = m_stoneParm.m_stoneAdom->GetPower();
-							stonePos -= velocity * m_elapsedTime;
-							m_collision[5].position[1] = stonePos;
-							m_statusParm.attackPoint = 12.0f;
-							if (MESSENGER.EnemyAttackingMessage(static_cast<int>(m_id), m_collision[5]))
-							{
-								m_stoneParm.m_stoneAdom->Reset();
-
-							}
-						}
+						m_stone->Update(m_elapsedTime);
 						int state = m_selectTask->GetMoveState();
 						ImGui::SliderInt("MoveState", &state, 0, 10);
 
@@ -1287,6 +1232,7 @@ void Enemy::ImGui(ID3D11Device* device)
 	//**************************************
 	if (ImGui::CollapsingHeader("Stone"))
 	{
+		m_statusParm.attackPoint = 10.0f;
 		FLOAT4X4 world = m_transformParm.world;
 		VECTOR3F zAxis = { world._31,world._32,world._33 };
 		VECTOR3F xAxis = { world._11,world._12,world._13 };
@@ -1294,79 +1240,38 @@ void Enemy::ImGui(ID3D11Device* device)
 		xAxis = NormalizeVec3(xAxis);
 		if (ImGui::Button("Create"))
 		{
-			if (!m_stoneParm.m_stoneAdom->GetStone()->GetExit())
-			{
-				m_stoneParm.m_stoneAdom->SetStone(m_transformParm.position,
-					VECTOR3F(0.0f, 0.0f, 0.0f), zAxis);
-			}
+			VECTOR3F position = m_transformParm.position;
+			position += zAxis * m_stone->GetOffsetZ();
+			position += xAxis * m_stone->GetOffsetX();
+
+			m_stone->PrepareForStone(position,VECTOR3F(0.0f, 0.0f, 0.0f), zAxis);
 		}
 
+
+		if (ImGui::ArrowButton("Z", ImGuiDir_Left))
 		{
-			static int current = 0;
-			ImGui::RadioButton("Z-Axis", &current, 0); ImGui::SameLine();
-			ImGui::RadioButton("X-Axis", &current, 1);
-
-			if (current == 0)
+			for (auto& stone :  m_stone->GetStoneParam())
 			{
-				VECTOR3F offset = m_stoneParm.offsetZ;
-				float offsetZ[] = { offset.x,offset.y,offset.z };
-				ImGui::SliderFloat3("Z-offset", offsetZ, -15.0f, 15.0f);
-				offset = { offsetZ[0],offsetZ[1],offsetZ[2] };
-				m_stoneParm.offsetZ = offset;
+				if (!stone.second.isFlying) continue;
+				stone.first.position += zAxis * m_stone->GetOffsetZ();
+				stone.first.CreateWorld();
 			}
-			else
+		}
+		ImGui::SameLine();
+		if (ImGui::ArrowButton("X", ImGuiDir_Right))
+		{
+			for (auto& stone : m_stone->GetStoneParam())
 			{
-				VECTOR3F offset = m_stoneParm.offsetX;
-				float offsetX[] = { offset.x,offset.y,offset.z };
-				ImGui::SliderFloat3("X-offset", offsetX, -5.0f, 5.0f);
-				offset = { offsetX[0],offsetX[1],offsetX[2] };
-				m_stoneParm.offsetX = offset;
-
-			}
-
-			if (ImGui::ArrowButton("Z", ImGuiDir_Left))
-			{
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += zAxis * m_stoneParm.offsetZ;
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
-			}
-			ImGui::SameLine();
-			if (ImGui::ArrowButton("X", ImGuiDir_Right))
-			{
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += xAxis * m_stoneParm.offsetX;
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
-			}
-
-			if (ImGui::Button("Set"))
-			{
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += zAxis * m_stoneParm.offsetZ;
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position += xAxis * m_stoneParm.offsetX;
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
-			}
-
-
-			if (ImGui::Button("Reset"))
-			{
-				m_stoneParm.offsetX = m_stoneParm.offsetZ = {};
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).position = m_transformParm.position;
-				m_stoneParm.m_stoneAdom->GetInstanceData().at(0).CreateWorld();
-
-			}
-
-			static bool isUpdate = false;
-			if (ImGui::Button("Update"))
-			{
-				isUpdate = !isUpdate;
-			}
-
-			if (isUpdate)
-			{
-				if(m_stoneParm.m_stoneAdom->GetStone()->GetExit())
-					m_stoneParm.m_stoneAdom->Update(m_elapsedTime);
-
+				if (!stone.second.isFlying) continue;
+				stone.first.position += xAxis * m_stone->GetOffsetX();
+				stone.first.CreateWorld();
 			}
 		}
 
-		m_stoneParm.m_stoneAdom->ImGui(device);
+		if (ImGui::CollapsingHeader("Update"))
+			m_stone->Update(m_elapsedTime);
+
+		m_stone->ImGui(device);
 	}
 
 

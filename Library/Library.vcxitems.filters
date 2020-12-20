@@ -234,9 +234,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Input.h">
       <Filter>Headers\Necessary\Comon</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\EntityComponentSystem.h">
-      <Filter>Headers\ECS</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\ModelResource.h">
       <Filter>Headers\Model</Filter>
     </ClInclude>

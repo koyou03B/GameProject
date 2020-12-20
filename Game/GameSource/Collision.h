@@ -47,9 +47,9 @@ public:
 
 	struct Circle
 	{
-		VECTOR2F position;
-		float scale;
-		float radius;
+		VECTOR2F position = {};
+		float scale = .0f;
+		float radius = 0.0f;
 	};
 	bool JudgeCircleAndCircle(const Circle& myself, const Circle& target);
 	bool JudgeCircleAndpoint(const Circle& mySelf, const VECTOR2F& target);

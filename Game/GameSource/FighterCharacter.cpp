@@ -827,7 +827,7 @@ void Fighter::Impact()
 		else
 		{
 			m_blendAnimation.animationBlend.AddSampler(Animation::HIT_REACTION, m_model);
-			m_input->SetVibrationParm(UVECTOR2(65000, 65000), 10);
+			//m_input->SetVibrationParm(UVECTOR2(65000, 65000), 10);
 		}
 	}
 	else

@@ -94,6 +94,7 @@
     <ClInclude Include="GameSource\EnemyUnSpecialAttackNode.h" />
     <ClInclude Include="GameSource\EnemyWaitNode.h" />
     <ClInclude Include="GameSource\EnemyWalkTask.h" />
+    <ClInclude Include="GameSource\Market.h" />
     <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />

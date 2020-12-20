@@ -322,7 +322,7 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 
 	axis = NormalizeVec3(axis);
 
-	VECTOR3F movePoint = enemyPosition + axis * 20.0f;
+	VECTOR3F movePoint = enemyPosition + axis * 40.0f;
 	Collision::Circle stageRange;
 	stageRange.radius = 81.0f;
 	stageRange.position = {};
@@ -331,13 +331,18 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 
 	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
 		m_nVecToTarget = axis;
-
+	else
+	{
+		movePoint = enemyPosition + axis * -40.0f;
+		if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
+			m_nVecToTarget = axis * -1.0f;
+	}
 	int targetID = enemy->GetJudgeElement().targetID;
 	auto& player = MESSENGER.CallPlayerInstance(targetID);
 	VECTOR3F playerPosition = player->GetWorldTransform().position;
 	axis = enemyPosition - playerPosition;
 	axis = NormalizeVec3(axis);
-	movePoint = enemyPosition + axis * 20.0f;
+	movePoint = enemyPosition + axis * 40.0f;
 
 	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
 		m_nVecToTarget = axis;
@@ -412,9 +417,9 @@ bool EnemyFarAttack0Task::AttackMove(Enemy* enemy)
 	if (m_isNear)
 	{
 		//dist *= (1.0f / 3.f);
-		m_accel -=0.85f;
-		if (m_accel <= 10.0f)
-			m_accel = 10.0f;
+		m_accel -= 1.0f;
+		if (m_accel <= 5.0f)
+			m_accel = 5.0f;
 	}
 	else
 	{

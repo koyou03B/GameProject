@@ -79,8 +79,8 @@ private:
 	const uint32_t	kTurningTimer = 130;
 	const uint32_t	kAttackSlowTimer = 30;
 	const uint32_t	kTurnChanseTimer = 70;
-	const uint32_t	kAttackTimer[2] = { 55,70 };
-	const float		kAccel = 65.0f;
+	const uint32_t	kAttackTimer[2] = { 60,110 };
+	const float		kAccel = 80.0f;
 
 	int		m_attackNo = 0;
 	int		m_targetID = 0;

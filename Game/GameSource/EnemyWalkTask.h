@@ -74,7 +74,7 @@ private:
 		WALK,
 		END
 	};
-	const float		kWalkTimer = 3.0f;
+	const float		kWalkTimer = 2.0f;
 	const float		kFIveSecond = 300.0f;
 	const float		kTurnValue = 0.01f;
 	float m_blendValue = 0.0f;
