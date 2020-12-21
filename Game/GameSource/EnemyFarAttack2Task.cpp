@@ -96,7 +96,7 @@ void EnemyFarAttack2Task::Run(Enemy* enemy)
 		{
 			m_isUsed = true;
 			animation.animationBlend.ResetAnimationSampler(0);
-			m_coolTimer = 3.0f;
+			m_coolTimer = 6.0f;
 			m_moveState = Action::START;
 			m_taskState = TASK_STATE::END;
 		}

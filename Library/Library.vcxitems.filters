@@ -76,9 +76,6 @@
     <Filter Include="Sources\Sprite">
       <UniqueIdentifier>{dbf55e62-e786-4495-b55c-150fe2001106}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\ECS">
-      <UniqueIdentifier>{19d386b4-ecff-4eaf-b6cb-143b585664fe}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Headers\Necessary">
       <UniqueIdentifier>{4bc06979-b906-4085-8e94-ba5026860497}</UniqueIdentifier>
     </Filter>

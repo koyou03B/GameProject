@@ -81,7 +81,7 @@ private:
 	const uint32_t	kTurnChanseTimer = 70;
 	const uint32_t	kAttackTimer[2] = { 50,80 };
 	const float		kBlendValue = 0.05f;
-	const float		kMinDirection = 22.0f;
+	const float		kMinDirection = 25.0f;
 	int			m_attackNo = 0;
 	bool		m_isHit = false;
 	bool		m_isTurning = false;

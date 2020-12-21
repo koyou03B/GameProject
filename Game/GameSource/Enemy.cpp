@@ -65,13 +65,20 @@ void Enemy::Init()
 	m_behaviorTree.SetTaskToNode();
 	//TaskData& taskData = m_behaviorTree.GetTaskData();
 	//m_selectTask = taskData.intimidateTask;
-	m_isAction = false;
+
 	m_moveState = 0;
 	//m_judgeElementPram.targetID
 
 	auto& wepon = RunningMarket().FindProductConer(0);
 	std::unique_ptr<Stone> stone{ wepon.GiveProduct<Stone>() };
 	m_stone = std::move(stone);
+
+#if _DEBUG
+	m_isAction = false;
+#else
+	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
+	m_isAction = true;
+#endif
 }
 
 void Enemy::Update(float& elapsedTime)

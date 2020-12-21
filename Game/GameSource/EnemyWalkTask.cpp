@@ -313,41 +313,43 @@ void EnemyWalkTask::JudgeVectorDirection(Enemy* enemy)
 {
 	m_nVecToTarget = {};
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-	FLOAT4X4 world = enemy->GetWorldTransform().world;
-	VECTOR3F axis = { world._11,world._12,world._13 };
+	VECTOR3F enemyAngle = enemy->GetWorldTransform().angle;
+	DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(enemyAngle.x, enemyAngle.y, enemyAngle.z);
+	FLOAT4X4 rotationM = {};
+	DirectX::XMStoreFloat4x4(&rotationM, R);
+	VECTOR3F enemyFront = { rotationM._31,rotationM._32,rotationM._33 };
 
-	axis = NormalizeVec3(axis);
-
-	VECTOR3F movePoint = enemyPosition + axis * 12.0f;
 
 	auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
-	VECTOR3F targetPosition = player->GetWorldTransform().position;
-	float distance[2] = {};
+	FLOAT4X4 targetWorld = player->GetWorldTransform().world;
+	VECTOR3F targetAngle = player->GetWorldTransform().angle;
+	R = DirectX::XMMatrixRotationRollPitchYaw(targetAngle.x, targetAngle.y, targetAngle.z);
+	rotationM = {};
+	DirectX::XMStoreFloat4x4(&rotationM, R);
+	VECTOR3F targetFront = { rotationM._31,rotationM._32,rotationM._33 };
+	VECTOR3F targetPosition = { targetWorld._41,targetWorld._42,targetWorld._43 };
+	VECTOR3F maxAccel = player->GetMove().accle;
 
-	Collision::AABB stageRange;
-	stageRange.left = -36.0f;
-	stageRange.right = 36.0f;
-	stageRange.top = 180.0f;
-	stageRange.down = -180.0f;
+	VECTOR3F targetVeclocity = targetFront * (maxAccel * 46.0f);
+	VECTOR3F v = targetVeclocity * enemy->GetElapsedTime();
+	targetPosition += targetVeclocity /** enemy->GetElapsedTime()*/;
+
+	Collision::Circle stageRange;
+	stageRange.radius = 81.0f;
+	stageRange.position = {};
+	stageRange.scale = 1.0f;
 	Collision coll;
 
-	if (coll.JudgePointAndAABB(VECTOR2F(movePoint.x, movePoint.z), stageRange))
+//	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(targetPosition.x, targetPosition.z)))
+	m_nVecToTarget = NormalizeVec3(targetPosition - enemyPosition);
+	float dot = DotVec3(enemyFront, m_nVecToTarget);
+	if (-0.8f > dot && dot > -1.0f)
 	{
-		m_nVecToTarget = axis;
-		
-		distance[0] = ToDistVec3(targetPosition - movePoint);
+		targetPosition = { targetWorld._41,targetWorld._42,targetWorld._43 };
+		m_nVecToTarget = NormalizeVec3(targetPosition - enemyPosition);
+
 	}
 
-	axis *= -1.0f;
-	movePoint = enemyPosition + axis * 12.0f;
-	if (coll.JudgePointAndAABB(VECTOR2F(movePoint.x, movePoint.z), stageRange))
-	{
-		distance[1] = ToDistVec3(targetPosition - movePoint);
-
-		if(distance[0] > distance[1] || distance[0] == 0.0f)
-			m_nVecToTarget = axis;
-
-	}
 }
 
 bool EnemyWalkTask::StepMove(Enemy* enemy, bool isBlendFinish)
@@ -366,7 +368,7 @@ bool EnemyWalkTask::StepMove(Enemy* enemy, bool isBlendFinish)
 
 		float dot = DotVec3(front, m_nVecToTarget);
 		float rot = 1.0f - dot;
-		float limit = enemy->GetMove().turnSpeed+0.02f;
+		float limit = enemy->GetMove().turnSpeed+0.04f;
 		if (rot > limit)
 			rot = limit;
 
@@ -387,7 +389,7 @@ bool EnemyWalkTask::StepMove(Enemy* enemy, bool isBlendFinish)
 		if (currentAnimationTime >= 84)
 			return true;
 
-		if (currentAnimationTime >= 40)
+		if (currentAnimationTime >= 60)
 		{
 			auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
 			VECTOR3F targetPosition = player->GetWorldTransform().position;
@@ -400,7 +402,7 @@ bool EnemyWalkTask::StepMove(Enemy* enemy, bool isBlendFinish)
 
 			float dot = DotVec3(front, targetNormal);
 			float rot = 1.0f - dot;
-			float limit = enemy->GetMove().turnSpeed;
+			float limit = enemy->GetMove().turnSpeed + 0.04f;
 			if (rot > limit)
 				rot = limit;
 

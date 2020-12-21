@@ -794,7 +794,7 @@ VECTOR3F Fighter::GetRotationAfterAngle(VECTOR2F vector,float turnSpeed)
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
 	float dist = ToDistVec3(enemyPos - m_transformParm.position);
-	float limit = dist < 10.6f ? 0.03f : turnSpeed;
+	float limit = dist < 10.6f ? 0.02f : turnSpeed;
 
 	if (rot > limit)
 		rot = limit;
