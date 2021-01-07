@@ -9,7 +9,7 @@ void Stage::Init()
 	
 	AddInstanceData(translate, angle, scale, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
 	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::STAGE);
-	//Source::ModelData::fbxLoader().SaveStaticForBinary(Source::ModelData::StaticModel::STAGE);
+	Source::ModelData::fbxLoader().SaveStaticForBinary(Source::ModelData::StaticModel::STAGE);
 	//m_model->_shaderON.normalMap = true;
 
 	m_circle.radius = 81.0f;

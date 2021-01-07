@@ -82,7 +82,6 @@ void Fighter::Update(float& elapsedTime)
 	if (m_changeParm.isPlay)
 	{
 		m_input = PAD.GetPad(0);
-
 		if (m_input != nullptr)
 		{
 			if (!KnockBack())
@@ -98,17 +97,16 @@ void Fighter::Update(float& elapsedTime)
 			}
 		}
 	}
-
 	RestAnimationIdle();
 
     m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
-	FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
-	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
-	FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
-
-	float bonePositions[] = { getBone._41,getBone._42,getBone._43 };
-	m_collision[0].position[0] = { m_transformParm.position.x,getBone._42,m_transformParm.position.z };
-
+	{
+		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
+		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+		FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+		float bonePositions[] = { getBone._41,getBone._42,getBone._43 };
+		m_collision[0].position[0] = { m_transformParm.position.x,getBone._42,m_transformParm.position.z };
+	}
 	if (m_statusParm.isExit == false)
 		MESSENGER.MessageFromPlayer(m_id, MessengType::TELL_DEAD);
 }
@@ -117,19 +115,12 @@ void Fighter::Render(ID3D11DeviceContext* immediateContext)
 {
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
-
-
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
 
 	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
 	m_debugObjects.debugObject.Render(immediateContext, scroll,true);
-
-
 }
 
-//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-//IDLE WALK RUN : animtionBlend
-//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 void Fighter::Move(float& elapsedTime)
 {
 	if (m_stepParm.isStep || m_statusParm.isAttack ) return;
@@ -138,7 +129,6 @@ void Fighter::Move(float& elapsedTime)
 	{
 		if (!m_moveParm.isMove)
 		{
-		//	m_blendAnimation.animationBlend.AddSampler(Animation::IDLE, m_model);
 			m_blendAnimation.animationBlend.AddSampler(Animation::RUN, m_model);
 			m_moveParm.isMove = true;
 		}
@@ -197,6 +187,7 @@ void Fighter::Move(float& elapsedTime)
 
 			//*-*-*-*-*-*-*-*-*-*-*-*-
 			//If it's over max speed.
+			//*-*-*-*-*-*-*-*-*-*-*-*-
 			if (speed > m_moveParm.maxSpeed[1].x)
 				m_moveParm.velocity = vector * m_moveParm.maxSpeed[1].x;
 			else
@@ -217,36 +208,25 @@ void Fighter::Move(float& elapsedTime)
 
 			m_transformParm.position += m_moveParm.velocity * elapsedTime;
 
-
 			VECTOR3F angle = m_transformParm.angle;
 
 			float dx = sinf(angle.y);
 			float dz = cosf(angle.y);
-
 			float dot = (vector.x * dx) + (vector.z * dz);
 			float rot = 1.0f - dot;
 
 			float limit = m_moveParm.turnSpeed;
-
 			if (rot > limit)
-			{
 				rot = limit;
-			}
-
+			
 			float cross = (vector.x * dz) - (vector.z * dx);
 			if (cross > 0.0f)
-			{
 				angle.y += rot;
-			}
 			else
-			{
 				angle.y -= rot;
-			}
+
 			m_transformParm.angle = angle;
-
 			m_transformParm.WorldUpdate();
-
-
 		}
 		else
 			m_moveParm.velocity = {};
@@ -280,9 +260,6 @@ void Fighter::Move(float& elapsedTime)
 
 }
 
-//*-*-*-*-*-*-*-*-*-*-*-
-//STEP : animation
-//*-*-*-*-*-*-*-*-*-*-*-
 void Fighter::Step(float& elapsedTime)
 {
 	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1 && !m_statusParm.isAttack || m_stepParm.isStep)
@@ -290,162 +267,124 @@ void Fighter::Step(float& elapsedTime)
 		m_blendAnimation.animationBlend.SetAnimationSpeed(1.6f);
 		Stepping(elapsedTime);
 	}
-
 }
 
 void Fighter::Stepping(float& elapsedTime)
 {
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-
+	// Reset the first time.
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-
 	if (!m_stepParm.isStep)
 	{
-		//********************************
-		//	Angle in the STEP direction
-		//********************************
-		if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
-		{
-			FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
-			view._14 = 0.0f;
-			view._24 = 0.0f;
-			view._34 = 0.0f;
-			view._41 = 0.0f;
-			view._42 = 0.0f;
-			view._43 = 0.0f;
-			view._44 = 1.0f;
+		m_moveParm.velocity = GetInputDirection();
+		VECTOR2F vector = { m_moveParm.velocity.x, m_moveParm.velocity.z };
+		m_transformParm.angle.y = atan2f(vector.x, vector.y);
 
-			DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
-			VECTOR3F stickVec(m_input->StickVectorLeft().x, 0.0f, m_input->StickVectorLeft().y);
-			DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
-
-			VECTOR3F stickVector;
-			vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
-			DirectX::XMStoreFloat3(&stickVector, vStickVex);
-
-			float dot = atan2f(stickVector.x, stickVector.z);
-
-			m_transformParm.angle.y = dot;
-		}
-		
-		m_stepParm.isStep = true;
 		m_animationType = Fighter::Animation::DIVE;
 		if (m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
-		{
 			m_blendAnimation.animationBlend.ReleaseSampler(0);
-		}
+		
 		m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
 		m_blendAnimation.animationBlend.ResetAnimationFrame();
 		m_blendAnimation.animationBlend._blendRatio = 0.0f;
-	}
-
-
-	m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.moveBlendRatio;
-	if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
-	{
-		m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendRatioMax;
-		int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
-
-		for (int i = 0; i < samplerCount; ++i)
+		if (m_moveParm.isMove)
 		{
-			m_blendAnimation.animationBlend.ReleaseSampler(0);
+			m_moveParm.isMove = false;
+			m_moveParm.isRun = false;
 		}
-		m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+		m_stepParm.isStep = true;
+
+	}
+	
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	// AnimationBlend
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	{
+		m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.moveBlendRatio;
+		if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)
+		{
+			m_blendAnimation.animationBlend._blendRatio = m_blendAnimation.blendRatioMax;
+			int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
+
+			for (int i = 0; i < samplerCount; ++i)
+			{
+				m_blendAnimation.animationBlend.ReleaseSampler(0);
+			}
+			m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+		}
 	}
 
-
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	// Set the direction and move it.
+	// Moving front
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	m_stepParm.speed -= m_stepParm.deceleration;
-	if (m_stepParm.speed.x <= 0.0f)
-		m_stepParm.speed = { 0.0f,0.0f,0.0f };
+	{
+		m_stepParm.speed -= m_stepParm.deceleration;
+		if (m_stepParm.speed.x <= 0.0f)
+			m_stepParm.speed = { 0.0f,0.0f,0.0f };
 
-	m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_stepParm.speed.x);
-	m_moveParm.velocity.y = 0.0f;
-	m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_stepParm.speed.z);
+		VECTOR3F angle = m_transformParm.angle;
+		m_moveParm.velocity.x = sinf(angle.y) * m_stepParm.speed.x;
+		m_moveParm.velocity.y = 0.0f;
+		m_moveParm.velocity.z = cosf(angle.y) * m_stepParm.speed.z;
 
-	m_transformParm.position += m_moveParm.velocity * elapsedTime;
-	m_transformParm.WorldUpdate();
+		m_transformParm.position += m_moveParm.velocity * elapsedTime;
+		m_transformParm.WorldUpdate();
+	}
 
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	//When the animation ends, the attack ends.
-	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	// STEP or a different process.
+	// But if there's more than one sampler,
+	// don't do that process.
+	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	size_t size = m_blendAnimation.animationBlend.GetSampler().size();
+	if (size != 1) return;
+
 	static bool isIdle = false;
-	if (m_blendAnimation.animationBlend.GetSampler().size() != 1) return;
 	uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-
-	if (currentAnimationFrame < m_stepParm.frameCount && currentAnimationFrame > 60  && !isIdle)
+	if (!isIdle)
 	{
-		if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1)
+		if (60 < currentAnimationFrame && currentAnimationFrame < m_stepParm.frameCount)
 		{
-			m_stepParm.isStep = true;
-			isIdle = true;
-			m_blendAnimation.animationBlend.TrueAnimationLoop(0);
-		}
-	}
-	else if (currentAnimationFrame == m_stepParm.frameCount && isIdle)
-	{
-		m_blendAnimation.animationBlend.ResetAnimationSampler(0);
-		m_stepParm.speed = m_stepParm.maxSpeed;
-		isIdle = false;
-		//********************************
-		//	Angle in the STEP direction
-		//********************************
-		if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
+			if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1)
 			{
-				FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
-				view._14 = 0.0f;
-				view._24 = 0.0f;
-				view._34 = 0.0f;
-				view._41 = 0.0f;
-				view._42 = 0.0f;
-				view._43 = 0.0f;
-				view._44 = 1.0f;
-
-				DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
-				VECTOR3F stickVec(m_input->StickVectorLeft().x, 0.0f, m_input->StickVectorLeft().y);
-				DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
-
-				VECTOR3F stickVector;
-				vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
-				DirectX::XMStoreFloat3(&stickVector, vStickVex);
-
-				float dot = atan2f(stickVector.x, stickVector.z);
-
-				m_transformParm.angle.y = dot;
-			}
-	}
-	else if (currentAnimationFrame == m_stepParm.frameCount && !isIdle)
-	{
-		if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
-		{
-			m_blendAnimation.animationBlend._blendRatio = 0.15f;
-			m_stepParm.isStep = false;
-
-			m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
-			if (m_moveParm.isMove)
-			{
-				m_moveParm.isMove = false;
-				m_moveParm.isRun = false;
+				m_stepParm.isStep = true;
+				m_blendAnimation.animationBlend.TrueAnimationLoop(0);
+				isIdle = true;
 			}
 		}
-		else
+		else if (currentAnimationFrame == m_stepParm.frameCount)
 		{
-			m_animationType = Fighter::Animation::IDLE;
-			m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
-			m_blendAnimation.animationBlend._blendRatio = 0.1f;
-			m_blendAnimation.animationBlend.ResetAnimationFrame();
-			m_adjustAnimation = true;
+			if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
+			{
+				m_stepParm.isStep = false;
+				m_blendAnimation.animationBlend._blendRatio = 0.15f;
+				m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
+			}
+			else
+			{
+				m_animationType = Fighter::Animation::IDLE;
+				m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
+				m_blendAnimation.animationBlend._blendRatio = 0.1f;
+				m_blendAnimation.animationBlend.ResetAnimationFrame();
+				m_adjustAnimation = true;
+			}
+			m_stepParm.speed = m_stepParm.maxSpeed;
 		}
-		m_stepParm.speed = m_stepParm.maxSpeed;
 	}
-
+	else
+	{
+		if (currentAnimationFrame == m_stepParm.frameCount)
+		{
+			isIdle = false;
+			m_moveParm.velocity = GetInputDirection();
+			VECTOR2F vector = { m_moveParm.velocity.x, m_moveParm.velocity.z };
+			m_transformParm.angle.y = atan2f(vector.x, vector.y);
+			m_stepParm.speed = m_stepParm.maxSpeed;
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+		}
+	}
 }
 
-//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-//	RIGHTPUNCHING
-//	LEFTPUNCHING
-//	LAStTPUNCHING
-//	RIGHTKICK
-//	LEFTKICKING : animtion
-//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 void Fighter::Attack(float& elapsedTime)
 {
 	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_X) == 1 && !m_statusParm.isAttack && !m_stepParm.isStep)
@@ -472,40 +411,25 @@ void Fighter::Attack(float& elapsedTime)
 			m_moveParm.isRun = false;
 		}
 		m_attackParm[1].speed = m_attackParm[1].maxSpeed;
-
 	}
 
 	switch (m_animationType)
 	{
 	case Fighter::Animation::LEFT_KICK:
-		{
+	{
 			Animation nextaAnimtion = { Animation::RIGHT_KICK };
 			Attacking(m_animationType, nextaAnimtion, m_attackParm[0], m_collision[1]);
 
-		}
+	}
 		break;
 	case Fighter::Animation::LEFT_DUSH_KICK:
 	{
 		Animation nextaAnimtion = { Animation::RIGHT_KICK };
 		Attacking(m_animationType, nextaAnimtion, m_attackParm[1], m_collision[1]);
-
-		//m_attackParm[1].speed -= m_attackParm[1].deceleration;
-		//if (m_attackParm[1].speed.x <= 0.0f)
-		//	m_attackParm[1].speed = { 0.0f,0.0f,0.0f };
-
-
-
-		//m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_attackParm[1].speed.x);
-		//m_moveParm.velocity.y = 0.0f;
-		//m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_attackParm[1].speed.z);
-
-		//m_transformParm.position += m_moveParm.velocity * elapsedTime;
-		//m_transformParm.WorldUpdate();
 	}
-	break;
+		break;
 	case Fighter::RIGHT_KICK:
 	{
-	//	m_blendAnimation.animationBlend.SetAnimationSpeed(1.4f);
 		Animation nextaAnimtions = {Animation::LEFT_ROLL_KICK };
 		m_attackType = AttackType::RightKick;
 		Attacking(m_animationType, nextaAnimtions, m_attackParm[2], m_collision[2]);
@@ -513,7 +437,6 @@ void Fighter::Attack(float& elapsedTime)
 		break;
 	case Fighter::LEFT_ROLL_KICK:
 	{
-	//	m_blendAnimation.animationBlend.SetAnimationSpeed(1.4f);
 		Animation nextaAnimtions = { Animation::RIGHT_ROLL_KICK };
 		m_attackType = AttackType::LeftRollKick;
 		Attacking(m_animationType, nextaAnimtions, m_attackParm[3], m_collision[2]);
@@ -521,7 +444,6 @@ void Fighter::Attack(float& elapsedTime)
 		break;
 	case Fighter::RIGHT_ROLL_KICK:
 	{
-	//	m_blendAnimation.animationBlend.SetAnimationSpeed(1.2f);
 		Animation nextaAnimtions = { Animation::RIGHT_FLY_KICK };
 		m_attackType = AttackType::RightRollKick;
 		Attacking(m_animationType, nextaAnimtions, m_attackParm[4], m_collision[2]);
@@ -529,73 +451,24 @@ void Fighter::Attack(float& elapsedTime)
 		break;
 	case Fighter::RIGHT_PUNCH:
 	{
-		//	m_blendAnimation.animationBlend.SetAnimationSpeed(1.2f);
 		Animation nextaAnimtions = { Animation::RIGHT_FLY_KICK };
 		m_attackType = AttackType::RightPunch;
 		Attacking(m_animationType, nextaAnimtions, m_attackParm[5], m_collision[3]);
 	}
-	break;
+		break;
 	case Fighter::RIGHT_FLY_KICK:
 	{
-		//	m_blendAnimation.animationBlend.SetAnimationSpeed(1.2f);
 		Animation nextaAnimtions = { Animation::RIGHT_FLY_KICK };
 		m_attackType = AttackType::RightFlyKick;
 		Attacking(m_animationType, nextaAnimtions, m_attackParm[6], m_collision[1]);
 	}
-	break;
-	//default:
-	//	break;
+		break;
 	}
 }
 
 void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 	CharacterParameter::Attack& attack, CharacterParameter::Collision& collision)
 {
-#if 0	
-	//*********************************
-	//Å@å¸Ç´ÇÃèCê≥
-	//*********************************
-
-	auto& enemy = MESSENGER.CallEnemyInstance(0);
-	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
-
-	float direction = ToDistVec3(enemyPos - m_transformParm.position);
-	if (direction < 18.0f)
-	{
-		VECTOR3F nDirection = NormalizeVec3(enemyPos - m_transformParm.position);
-		VECTOR3F nForward = NormalizeVec3(VECTOR3F(sinf(m_transformParm.angle.y), 0.0f, cosf(m_transformParm.angle.y)));
-
-		float dot = DotVec3(nDirection, nForward);
-		float cosTheta = acosf(dot);
-		if (cosTheta >= 0.4f && dot > -0.1f)
-		{
-			float rot = 1.0f - dot;
-
-			float limit = m_moveParm.turnSpeed;
-
-			if (rot > limit)
-			{
-				rot = limit;
-			}
-
-			VECTOR3F cross = CrossVec3(nForward, nDirection);
-			if (cross.y > 0.0f)
-			{
-				m_transformParm.angle.y += rot;
-			}
-			else
-			{
-				m_transformParm.angle.y -= rot;
-			}
-			m_transformParm.WorldUpdate();
-			return;
-		}
-		m_moveParm.velocity = {};
-	}
-#endif
-
-	size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
-
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-
 	// Reset the first time.
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -617,9 +490,6 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		m_statusParm.isAttack = true;
 	}
 
-	//*********************************
-	//Å@à⁄ìÆèàóù
-	//*********************************
 	if (m_attackType == AttackType::LeftDushKick)
 	{
 		attack.speed -= attack.deceleration;
@@ -627,30 +497,14 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 			attack.speed = { 0.0f,0.0f,0.0f };
 
 		VECTOR3F velocity = m_moveParm.velocity;
-		velocity += velocity * attack.speed;
+		velocity = velocity * attack.speed;
 		m_transformParm.position += velocity * m_elapsedTime;
 		m_transformParm.position.y = 0.0f;
 		m_transformParm.WorldUpdate();
 	}
-	else
-	{
-		if (samplerSize == 1)
-		{
-			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-			if (attack.moveFrameStart <= currentAnimationFrame)
-			{
-				attack.speed -= attack.deceleration;
-				if (attack.speed.x <= 0.0f)
-					attack.speed = { 0.0f,0.0f,0.0f };
 
-				//VECTOR3F velocity = m_moveParm.velocity;
-				//velocity += velocity * attack.speed;
-				//m_transformParm.position += velocity * m_elapsedTime;
-				//m_transformParm.position.y = 0.0f;
-				//m_transformParm.WorldUpdate();
-			}
-		}
-	}
+	size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
+
 	//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	// Set the blend ratio to 1.
 	// When we get to 1, we stop blending.
@@ -678,6 +532,30 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 			m_transformParm.WorldUpdate();
 		}
 		return;
+	}
+
+	//*********************************
+	//Å@à⁄ìÆèàóù
+	//*********************************
+	{
+		uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+		if (attack.moveFrameStart <= currentAnimationFrame && m_attackType != AttackType::LeftDushKick)
+		{
+			attack.speed -= attack.deceleration;
+			if (attack.speed.x <= 0.0f)
+				attack.speed = { 0.0f,0.0f,0.0f };
+
+			FLOAT4X4 world = m_transformParm.world;
+			VECTOR3F angle = m_transformParm.angle;
+			DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+			FLOAT4X4 rMatrix;
+			DirectX::XMStoreFloat4x4(&rMatrix, R);
+			VECTOR3F frontVelocity = { rMatrix._31,rMatrix._32,rMatrix._33};
+			VECTOR3F velocity = frontVelocity * attack.speed;
+			m_transformParm.position += velocity * m_elapsedTime;
+			m_transformParm.position.y = 0.0f;
+			m_transformParm.WorldUpdate();
+		}
 	}
 
 	//*********************************************
@@ -735,8 +613,6 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		}
 	}
 
-//	m_transformParm.WorldUpdate();
-
 	if (attack.hasAttacked)
 	{
 		if (currentAnimationFrame > attack.slowTimeFrameCount[0] && currentAnimationFrame < attack.slowTimeFrameCount[1])
@@ -779,68 +655,31 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 
 void Fighter::RestAnimationIdle()
 {
-
-	if (m_adjustAnimation && !m_statusParm.isDamage)
+	if (m_adjustAnimation)
 	{
 		if (m_blendAnimation.animationBlend.GetSampler()[1].first == Animation::IDLE)
 		{
 			m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.blendRatio;
 			if (m_blendAnimation.animationBlend._blendRatio >= 1.0f)
 			{
-				m_blendAnimation.animationBlend.ReleaseSampler(0);
-				m_statusParm.isAttack = false;
+				m_moveParm.isRun = false;
 				m_stepParm.isStep = false;
 				m_moveParm.isMove = false;
-				m_moveParm.isRun = false;
+				m_statusParm.isAttack = false;
 				m_statusParm.isDamage = false;
-				m_adjustAnimation = false;
 				m_damageParm.hasBigDamaged = false;
-				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				m_adjustAnimation = false;
+				m_moveParm.velocity = {};
+				m_attackType = AttackType::NON;
 				m_stepParm.speed = m_stepParm.maxSpeed;
 				m_damageParm.speed = m_damageParm.maxSpeed;
-				m_attackType = AttackType::NON;
-				m_moveParm.velocity = {};
 				m_blendAnimation.blendRatio = m_blendAnimation.idleBlendRtio;
+				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				m_blendAnimation.animationBlend.ReleaseSampler(0);
 				m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
 			}
 		}
 	}
-
-}
-
-void Fighter::Impact()
-{
-	if (m_blendAnimation.animationBlend.SearchSampler(Animation::HIT_REACTION)) return;
-	if (m_blendAnimation.animationBlend.SearchSampler(Animation::HIT_BIG_REACTION)) return;
-
-	if (m_statusParm.life > 0)
-	{
-		if (m_damageParm.hasBigDamaged)
-		{
-			m_blendAnimation.animationBlend.AddSampler(Animation::HIT_BIG_REACTION, m_model);
-			m_input->SetVibrationParm(UVECTOR2(65000, 65000), 23);
-		}
-		else
-		{
-			m_blendAnimation.animationBlend.AddSampler(Animation::HIT_REACTION, m_model);
-			m_input->SetVibrationParm(UVECTOR2(65000, 65000), 10);
-		}
-	}
-	else
-	{
-		m_blendAnimation.animationBlend.AddSampler(Animation::DEATH, m_model);
-	}
-
-	if (m_adjustAnimation)
-		m_adjustAnimation = !m_adjustAnimation;
-
-	m_statusParm.isDamage = true;
-	float dot = atan2f(m_damageParm.vector.x, m_damageParm.vector.z);
-	m_transformParm.angle.y = dot;
-	m_transformParm.WorldUpdate();
-
-	m_blendAnimation.animationBlend.SetAnimationSpeed(1.3f);
-	KnockBack();
 }
 
 VECTOR3F Fighter::GetInputDirection()
@@ -873,7 +712,7 @@ VECTOR3F Fighter::GetInputDirection()
 		VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
 		float direction = ToDistVec3(enemyPos - m_transformParm.position);
-		if (direction < 20.0f)
+		if (direction < 22.0f)
 		{
 			VECTOR3F nDirection = NormalizeVec3(enemyPos - m_transformParm.position);
 			return nDirection;
@@ -892,34 +731,110 @@ VECTOR3F Fighter::GetRotationAfterAngle(VECTOR2F vector,float turnSpeed)
 	float dot = (vector.x * dx) + (vector.y * dz);
 	float rot = 1.0f - dot;
 
+	float limit = turnSpeed;
 	auto& enemy = MESSENGER.CallEnemyInstance(0);
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
-
 	float direction = ToDistVec3(enemyPos - m_transformParm.position);
-	float limit = direction < 18.0f ? 0.03f : turnSpeed;
+	if (direction < 22.0f)
+	{
+		if (m_input->StickDeadzoneLX(m_padDeadLine)
+			|| m_input->StickDeadzoneLY(m_padDeadLine))
+			limit = 0.03f;
+	}
 
 	if (rot > limit)
 		rot = limit;
-	
 
 	float cross = (vector.x * dz) - (vector.y * dx);
 	if (cross > 0.0f)
-	{
 		angle.y += rot;
-	}
 	else
-	{
 		angle.y -= rot;
-	}
 
 	return angle;
 }
 
+void Fighter::Impact()
+{
+	if (m_blendAnimation.animationBlend.SearchSampler(Animation::HIT_REACTION)) return;
+	if (m_blendAnimation.animationBlend.SearchSampler(Animation::HIT_BIG_REACTION)) return;
+	
+	//*************************
+	// Variation of reactions
+	// by conditions	
+	// conditions : èåè
+	//*************************
+	if (m_statusParm.life > 0)
+	{
+		if (m_damageParm.hasBigDamaged)
+		{
+			m_blendAnimation.animationBlend.AddSampler(Animation::HIT_BIG_REACTION, m_model);
+			m_input->SetVibrationParm(UVECTOR2(65000, 65000), 23);
+		}
+		else
+		{
+			m_blendAnimation.animationBlend.AddSampler(Animation::HIT_REACTION, m_model);
+			m_input->SetVibrationParm(UVECTOR2(65000, 65000), 10);
+		}
+	}
+	else
+	{
+		m_blendAnimation.animationBlend.AddSampler(Animation::DEATH, m_model);
+	}
+
+	//************************
+	// Activation even during 
+	// the adjustment
+	//***********************
+	if (m_adjustAnimation)
+		m_adjustAnimation = !m_adjustAnimation;
+
+	//****************************
+	// Turn to reaction direction
+	//****************************
+	{
+		float dot = atan2f(m_damageParm.vector.x, m_damageParm.vector.z);
+		m_transformParm.angle.y = dot;
+		m_transformParm.WorldUpdate();
+	}
+	//*****************************
+	// Set the Move and Step and 
+	// Attack flags to False
+	// But,DamgeFlg is True
+	//*****************************
+	{
+		m_moveParm.isMove = false;
+		m_moveParm.isWalk = false;
+		m_moveParm.isRun = false;
+		m_stepParm.isStep = false;
+		for (auto& attack : m_attackParm)
+		{
+			attack.hasAttacked = false;
+		}
+
+		m_statusParm.isDamage = true;
+	}
+
+	m_blendAnimation.animationBlend.SetAnimationSpeed(1.3f);
+	KnockBack();
+}
+
 bool Fighter::KnockBack()
 {
+	//******************************
+	// If it is false, 
+	// you can do Move,Step,Attack,
+	// but if it is true, 
+	// you can do KnockBack
+	//******************************
 	if (!m_statusParm.isDamage || m_adjustAnimation)
 		return false;
 
+	//*******************************
+	// Vary the process
+	// by the number of samplers
+	// Vary the process : èàóùÇÃïœâª
+	//*******************************
 	int samplerCount = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
 	if (samplerCount != 1)
 	{
@@ -936,16 +851,6 @@ bool Fighter::KnockBack()
 
 			m_blendAnimation.animationBlend.FalseAnimationLoop(0);
 		}
-
-		m_moveParm.isMove = false;
-		m_moveParm.isWalk = false;
-		m_moveParm.isRun = false;
-		m_stepParm.isStep = false;
-
-		for (auto& attack : m_attackParm)
-		{
-			attack.hasAttacked = false;
-		}
 	}
 	else
 	{
@@ -954,9 +859,6 @@ bool Fighter::KnockBack()
 			uint32_t animationEnd = m_damageParm.hasBigDamaged ? 131 : 79;
 
 			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-
-			//if(currentAnimationFrame >= 80)
-			//	m_blendAnimation.animationBlend.SetAnimationSpeed(f);
 
 			if (currentAnimationFrame == animationEnd)
 			{
@@ -978,22 +880,25 @@ bool Fighter::KnockBack()
 		}
 	}
 
-	if (m_damageParm.hasBigDamaged)
+	//*****************
+	//Moving backwards
+	//*****************
 	{
-		m_damageParm.speed -= m_damageParm.deceleration;
+		VECTOR3F deceleration = m_damageParm.hasBigDamaged ?
+			m_damageParm.deceleration : m_damageParm.deceleration * 0.5f;
+		m_damageParm.speed -= deceleration;
 		if (m_damageParm.speed.x <= 0.0f)
 			m_damageParm.speed = { 0.0f,0.0f,0.0f };
-
-		m_moveParm.velocity.x = sinf(m_transformParm.angle.y) * (m_damageParm.speed.x) * -1.0f;
+		VECTOR3F angle = m_transformParm.angle;
+		m_moveParm.velocity.x = sinf(angle.y) * (m_damageParm.speed.x) * -1.0f;
 		m_moveParm.velocity.y = 0.0f;
-		m_moveParm.velocity.z = cosf(m_transformParm.angle.y) * (m_damageParm.speed.z) * -1.0f;
+		m_moveParm.velocity.z = cosf(angle.y) * (m_damageParm.speed.z) * -1.0f;
 
 		m_transformParm.position += m_moveParm.velocity * m_elapsedTime;
 		m_transformParm.WorldUpdate();
 	}
 
 	return true;
-
 }
 
 void Fighter::ChangeCharacter()
@@ -1160,7 +1065,7 @@ void Fighter::ImGui(ID3D11Device* device)
 
 				//CollisionType
 				{
-					std::vector<std::string> collisionType = { "Cube","SPHER","CAPSULE","CIRCLE","RECT" };
+					std::vector<std::string> collisionType = { "Cube","SPHER","CAPSULE","CIRCLE","RECT","CYLINDER" };
 					static int currentCollisionType = 0;
 
 					ImGui::Combo("Name_of_CollisionType",

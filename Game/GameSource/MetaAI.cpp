@@ -221,12 +221,12 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 		Collision collision;
 		if (collision.JudgeSphereAndSphere(mySelf, target))
 		{
-			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f,0.5f);
+			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f, 0.5f);
 			++m_players[id]->GetJudgeElement().attackHitCount;
 			++m_enemys[0]->GetJudgeElement().damageCount;
 			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;
 
-			MESSENGER.MessageToLifeUpdate(m_enemys[0]->GetStatus().life,m_enemys[0]->GetStatus().maxLife ,
+			MESSENGER.MessageToLifeUpdate(m_enemys[0]->GetStatus().life, m_enemys[0]->GetStatus().maxLife,
 				UIActLabel::LIFE_E, 0);
 
 			if (m_enemys[0]->GetStatus().life <= 0)
@@ -262,6 +262,37 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 			return true;
 		}
 
+	}
+	break;
+	case CharacterParameter::Collision::CYLINDER:
+	{
+		Collision::Cylinder mySelf, target;
+		mySelf.bottom = collision.position[0];
+		mySelf.top = { mySelf.bottom.x,FLT_MAX,mySelf.bottom.z };
+		mySelf.radius = collision.radius;
+		mySelf.scale = collision.scale;
+		auto& enemy = m_enemys[0]->GetCollision()[0];
+		target.bottom = enemy.position[0];
+		target.top = { target.bottom.x,FLT_MAX,target.bottom.z };
+		target.radius = enemy.radius;
+		target.scale = enemy.scale;
+		Collision collision;
+		if (collision.JudgeCylinderAndCylinder(mySelf, target))
+		{
+			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f, 0.5f);
+			++m_players[id]->GetJudgeElement().attackHitCount;
+			++m_enemys[0]->GetJudgeElement().damageCount;
+			m_enemys[0]->GetStatus().life -= m_players[id]->GetStatus().attackPoint;
+
+			MESSENGER.MessageToLifeUpdate(m_enemys[0]->GetStatus().life, m_enemys[0]->GetStatus().maxLife,
+				UIActLabel::LIFE_E, 0);
+
+			if (m_enemys[0]->GetStatus().life <= 0)
+			{
+				m_enemys[0]->GetStatus().isExit = false;
+			}
+			return true;
+		}
 	}
 	break;
 	}

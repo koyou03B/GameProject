@@ -6,7 +6,6 @@
 
 void EnemyNearAttack0Task::Run(Enemy* enemy)
 {
-
 	auto& animation = enemy->GetBlendAnimation();
 	switch (m_moveState)
 	{
@@ -152,8 +151,9 @@ bool EnemyNearAttack0Task::JudgeBlendRatio(CharacterParameter::BlendAnimation& a
 void EnemyNearAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
 {
 	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
-
 	uint32_t attackTimer = 0;
+	static float radius = enemy->GetCollision().at(1).radius;
+
 	if (m_moveState == Action::CROSS_PUNCH)
 	{
 		if (currentAnimationTime < kAnimationSpeed[0])
@@ -190,9 +190,11 @@ void EnemyNearAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
 		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
 		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
 
+		attackParm.radius = m_moveState == Action::CROSS_PUNCH ? 2.3f : radius;
 		if (!m_isHit && MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm))
 			m_isHit = true;
 	}
+	enemy->GetCollision().at(1).radius = radius;
 }
 
 bool EnemyNearAttack0Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo)

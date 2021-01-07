@@ -6,6 +6,7 @@ void EnemyBehaviorTree::Release()
 
 	for (int i = 0; i < useTaskCount; ++i)
 	{
+	//	m_useTasks[i]->Clear();
 		if (m_useTasks[i].unique())
 			m_useTasks[i].reset();
 	}

@@ -52,6 +52,13 @@ public:
 			m_isUsed = false;
 	}
 
+	void Clear()
+	{
+		m_moveState = 0;
+		m_isUsed = false;
+		m_hasFinishedBlend = false;
+	}
+
 	virtual void Run(Enemy* enemy) = 0;
 
 	virtual uint32_t JudgePriority(const int id, const VECTOR3F playerPos = {}) = 0;

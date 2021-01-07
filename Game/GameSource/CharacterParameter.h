@@ -276,8 +276,8 @@ public:
 		float moveBlendRatio = 0.0f;
 		float damageBlendRatio = 0.0f;
 		float blendRatio = 0.0f;
-		 int samplerSize ;
-		 float blendRatioMax = 1.0f;
+		int samplerSize ;
+		float blendRatioMax = 1.0f;
 
 		uint32_t serialVersion = 0;
 
@@ -322,7 +322,8 @@ public:
 			SPHER,
 			CAPSULE,
 			CIRCLE,
-			RECT
+			RECT,
+			CYLINDER
 		} collisionType;
 
 		inline void SetCurrentMesh(const uint32_t& mesh,const uint32_t& num) { currentMesh[num] = mesh; }
