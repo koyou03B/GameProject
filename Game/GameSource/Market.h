@@ -115,6 +115,12 @@ private:
 class Market
 {
 public:
+	Market() = default;
+	~Market()
+	{
+		Closing();
+	}
+
 	//exsample:
 	//このお店にこのコーナーはありますか？
 	inline  ProductManager& FindProductConer(uint32_t tag)

@@ -61,6 +61,7 @@ class Stone : public ObjectProduct
 public:
 	Stone() = default;
 	~Stone() = default;
+	Stone(const Stone&) = delete;
 
 	void Init()override;
 	void Update(float& elapsedTime)override;

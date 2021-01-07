@@ -195,6 +195,27 @@
     <Filter Include="Headers\Market">
       <UniqueIdentifier>{f074d0ac-87fc-4207-9b4a-af674ca079e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\HTN">
+      <UniqueIdentifier>{97649331-7895-4d3c-a54a-8475c1f29234}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\HTN\Task">
+      <UniqueIdentifier>{78132c8f-634c-4886-9e8a-91ab67539c88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\HTN\WorldState">
+      <UniqueIdentifier>{cd0a77b2-33cb-4b7d-9919-f4788b84ee70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\HTN\Effect">
+      <UniqueIdentifier>{8d770631-ff1b-4c4a-8268-f627014e3ddc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\HTN\PreCondition">
+      <UniqueIdentifier>{ba80ab4b-e6df-4ebc-be66-3f5707f02d19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\HTN">
+      <UniqueIdentifier>{8b3cf39c-89cd-4116-82cd-76bbbf953212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\HTN\Metod">
+      <UniqueIdentifier>{994f791d-a70f-413b-955d-8dd5a47b6539}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -331,6 +352,12 @@
     </ClCompile>
     <ClCompile Include="GameSource\UIAdominist.cpp">
       <Filter>Sources\Object\GameObj\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\PrimitiveTask.cpp">
+      <Filter>Sources\HTN</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\CompoundTask.cpp">
+      <Filter>Sources\HTN</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -498,6 +525,39 @@
     </ClInclude>
     <ClInclude Include="GameSource\Market.h">
       <Filter>Headers\Market</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\ITask.h">
+      <Filter>Headers\HTN\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PlanList.h">
+      <Filter>Headers\HTN</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PrimitiveTask.h">
+      <Filter>Headers\HTN\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\ArcherWorldState.h">
+      <Filter>Headers\HTN\WorldState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\WorldState.h">
+      <Filter>Headers\HTN\WorldState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Effect.h">
+      <Filter>Headers\HTN\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PreCondition.h">
+      <Filter>Headers\HTN\PreCondition</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Method.h">
+      <Filter>Headers\HTN\Metod</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\CompoundTask.h">
+      <Filter>Headers\HTN\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\HTNPlanner.h">
+      <Filter>Headers\HTN</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\HTNPlanRunner.h">
+      <Filter>Headers\HTN</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

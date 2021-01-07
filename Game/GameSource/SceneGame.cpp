@@ -8,7 +8,6 @@
 
 bool Game::Initialize(ID3D11Device* device)
 {
-	RunningMarket().Closing();
 	auto& wepon = RunningMarket().AddProductConer(0);
 	wepon.AddProduct<Stone>();
 
@@ -625,6 +624,7 @@ void Game::Uninitialize()
 	//GetEntityManager().Relese();
 	m_stage->Release();
 	MESSENGER.isVignette = false;
+
 	m_metaAI->Release();
 	m_uiAdominist->Release();
 	Source::ModelData::fbxLoader().Release();

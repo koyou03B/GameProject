@@ -13,8 +13,8 @@ bool MetaAI::Init()
 
 	//AddPlayer(m_playerID, std::make_shared<Saber>());
 	//Archer
-	//AddPlayer(m_playerID, std::make_shared<Archer>());
 	AddPlayer(m_playerID, std::make_shared<Fighter>());
+	AddPlayer(m_playerID, std::make_shared<Archer>());
 
 	//Archer
 	//m_scope = std::make_unique<Scope>();

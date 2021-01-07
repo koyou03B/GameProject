@@ -14,6 +14,9 @@ CEREAL_CLASS_VERSION(Archer, 6);
 
 void Archer::Init()
 {
+	//m_primitiveTask = new PrimitiveTask<ArcherWorldState>();
+	//m_compoundTask.AddSubTask(m_primitiveTask);
+
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::Archer);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Walk.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Run.fbx",60);

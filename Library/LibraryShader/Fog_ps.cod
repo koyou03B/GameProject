@@ -96,7 +96,7 @@
 // SV_TARGET                0   xyzw        0   TARGET   float   xyzw
 //
 ps_5_0
-dcl_globalFlags refactoringAllowed
+dcl_globalFlags refactoringAllowed | skipOptimization
 dcl_constantbuffer CB1[22], immediateIndexed
 dcl_constantbuffer CB2[1], immediateIndexed
 dcl_constantbuffer CB0[3], immediateIndexed
@@ -105,50 +105,153 @@ dcl_resource_texture2d (float,float,float,float) t0
 dcl_resource_texture2d (float,float,float,float) t1
 dcl_input_ps linear v1.xy
 dcl_output o0.xyzw
-dcl_temps 2
-mad r0.x, v1.y, l(-2.000000), l(1.000000)
-mul r0.xyzw, r0.xxxx, cb1[19].xyzw
-mad r1.x, v1.x, l(2.000000), l(-1.000000)
-mad r0.xyzw, r1.xxxx, cb1[18].xyzw, r0.xyzw
+dcl_temps 4
+//
+// Initial variable locations:
+//   v0.x <- pin.sv_position.x; v0.y <- pin.sv_position.y; v0.z <- pin.sv_position.z; v0.w <- pin.sv_position.w; 
+//   v1.x <- pin.texcoord.x; v1.y <- pin.texcoord.y; 
+//   v2.x <- pin.color.x; v2.y <- pin.color.y; v2.z <- pin.color.z; v2.w <- pin.color.w; 
+//   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
+//
+#line 10 "D:\GameProject\Library\LibrarySource\Fog_ps.hlsl"
+sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v1.xyxx, t0.xyzw, s0  // r0.x <- colour_map_color.x; r0.y <- colour_map_color.y; r0.z <- colour_map_color.z; r0.w <- colour_map_color.w
+
+#line 11
 sample_indexable(texture2d)(float,float,float,float) r1.x, v1.xyxx, t1.xyzw, s0
-mad r0.xyzw, r1.xxxx, cb1[20].xyzw, r0.xyzw
-add r0.xyzw, r0.xyzw, cb1[21].xyzw
-div r0.xyz, r0.xyzx, r0.wwww
-add r0.xyz, r0.xyzx, -cb1[0].xyzx
-dp3 r0.w, r0.xyzx, r0.xyzx
-sqrt r0.w, r0.w
-add r1.x, r0.w, -cb0[0].w
-max r1.x, r1.x, l(0.000000)
-div r1.y, r1.x, r0.w
-div r0.xzw, r0.xxyz, r0.wwww
-mul r0.y, r0.y, r1.y
-mul r0.y, r0.y, cb0[2].w
-mul r1.y, r0.y, l(-1.442695)
-exp r1.y, r1.y
-add r1.y, -r1.y, l(1.000000)
-div r1.y, r1.y, r0.y
-lt r0.y, l(0.010000), |r0.y|
-movc r0.y, r0.y, r1.y, l(1.000000)
-mul r1.y, cb1[0].y, -cb0[2].w
-mul r1.y, r1.y, l(1.442695)
-exp r1.y, r1.y
-mul r1.x, r1.y, r1.x
-mul r1.x, r1.x, -cb0[1].w
-mul r0.y, r0.y, r1.x
-mul r0.y, r0.y, l(1.442695)
-exp r0.y, r0.y
-dp3 r1.x, -cb2[0].xyzx, -cb2[0].xyzx
-rsq r1.x, r1.x
-mul r1.xyz, r1.xxxx, -cb2[0].xyzx
-dp3_sat r0.x, r1.xyzx, r0.xzwx
-mul r0.x, r0.x, r0.x
-mul r0.x, r0.x, r0.x
-mul r0.x, r0.x, r0.x
-add r1.xyz, -cb0[0].xyzx, cb0[1].xyzx
-mad r0.xzw, r0.xxxx, r1.xxyz, cb0[0].xxyz
-sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t0.xyzw, s0
-add r1.xyz, -r0.xzwx, r1.xyzx
-mad o0.xyz, r0.yyyy, r1.xyzx, r0.xzwx
-mov o0.w, r1.w
+mov r1.x, r1.x  // r1.x <- depth_map_color
+
+#line 13
+mov r0.xyz, r0.xyzx  // r0.x <- fragment_color.x; r0.y <- fragment_color.y; r0.z <- fragment_color.z
+
+#line 14
+mov r0.w, r0.w  // r0.w <- alpha
+
+#line 19
+itof r1.y, l(2)
+mul r1.y, r1.y, v1.x
+itof r1.z, l(1)
+mov r1.z, -r1.z
+add r1.y, r1.z, r1.y  // r1.y <- position_in_ndc.x
+
+#line 20
+itof r1.z, l(-2)
+mul r1.z, r1.z, v1.y
+itof r1.w, l(1)
+add r1.z, r1.w, r1.z  // r1.z <- position_in_ndc.y
+
+#line 21
+mov r1.x, r1.x  // r1.x <- position_in_ndc.z
+
+#line 22
+itof r1.w, l(1)  // r1.w <- position_in_ndc.w
+
+#line 25
+mul r2.xyzw, r1.yyyy, cb1[18].xyzw
+mul r3.xyzw, r1.zzzz, cb1[19].xyzw
+add r2.xyzw, r2.xyzw, r3.xyzw
+mul r3.xyzw, r1.xxxx, cb1[20].xyzw
+add r2.xyzw, r2.xyzw, r3.xyzw
+mul r1.xyzw, r1.wwww, cb1[21].xyzw
+add r1.xyzw, r1.xyzw, r2.xyzw  // r1.x <- position_in_world_space.x; r1.y <- position_in_world_space.y; r1.z <- position_in_world_space.z; r1.w <- position_in_world_space.w
+
+#line 26
+div r1.xyz, r1.xyzx, r1.wwww
+
+#line 28
+nop 
+mov r0.xyz, r0.xyzx
+mov r1.xyz, r1.xyzx
+mov r2.xyz, cb1[0].xyzx
+
+#line 32 "D:\GameProject\Library\LibrarySource\Fog.hlsli"
+mov r2.xzw, -r2.xxyz
+add r1.xyz, r1.xyzx, r2.xzwx  // r1.x <- eyeToPixel.x; r1.y <- eyeToPixel.y; r1.z <- eyeToPixel.z
+
+#line 33
+dp3 r1.w, r1.xyzx, r1.xyzx
+sqrt r1.w, r1.w  // r1.w <- pixelDist
+
+#line 34
+div r2.xzw, r1.xxyz, r1.wwww  // r2.x <- eyeToPixelNorm.x; r2.z <- eyeToPixelNorm.y; r2.w <- eyeToPixelNorm.z
+
+#line 36
+mov r1.x, -cb0[0].w
+add r1.x, r1.x, r1.w
+max r1.x, r1.x, l(0.000000)  // r1.x <- fogDist
+
+#line 38
+mov r1.z, -cb0[2].w
+mul r1.z, r2.y, r1.z
+mul r1.z, r1.z, l(1.442695)
+exp r1.z, r1.z  // r1.z <- fogHeightDensityAtViewer
+
+#line 39
+mul r1.z, r1.z, r1.x  // r1.z <- fogDistInt
+
+#line 41
+div r1.x, r1.x, r1.w
+mul r1.x, r1.x, r1.y  // r1.x <- eyeToPixelY
+
+#line 42
+mul r1.x, r1.x, cb0[2].w  // r1.x <- t
+
+#line 43
+mov r1.y, l(0.010000)  // r1.y <- thresholdT
+
+#line 44
+mov r1.w, -r1.x
+max r1.w, r1.w, r1.x
+lt r1.y, r1.y, r1.w
+mov r1.w, -r1.x
+mul r1.w, r1.w, l(1.442695)
+exp r1.w, r1.w
+mov r1.w, -r1.w
+add r1.w, r1.w, l(1.000000)
+div r1.x, r1.w, r1.x
+movc r1.x, r1.y, r1.x, l(1.000000)  // r1.x <- fogHeightInt
+
+#line 47
+mov r1.y, -cb0[1].w
+mul r1.y, r1.z, r1.y
+mul r1.x, r1.x, r1.y
+mul r1.x, r1.x, l(1.442695)
+exp r1.x, r1.x  // r1.x <- fogFinalFactor
+
+#line 49
+mov r1.yzw, -cb2[0].xxyz
+dp3 r2.y, r1.yzwy, r1.yzwy
+rsq r2.y, r2.y
+mul r1.yzw, r1.yyzw, r2.yyyy  // r1.y <- lightNomal.x; r1.z <- lightNomal.y; r1.w <- lightNomal.z
+
+#line 50
+dp3 r1.y, r1.yzwy, r2.xzwx
+max r1.y, r1.y, l(0.000000)
+min r1.y, r1.y, l(1.000000)  // r1.y <- lightFactor
+
+#line 51
+mov r1.z, l(1.000000)
+mul r1.y, r1.y, r1.y
+mul r1.y, r1.y, r1.y
+mul r1.y, r1.y, r1.y
+mul r1.y, r1.y, r1.z  // r1.y <- lightFactor
+
+#line 52
+mov r2.xyz, -cb0[0].xyzx
+add r2.xyz, r2.xyzx, cb0[1].xyzx
+mul r1.yzw, r1.yyyy, r2.xxyz
+add r1.yzw, r1.yyzw, cb0[0].xxyz  // r1.y <- fogFinalColor.x; r1.z <- fogFinalColor.y; r1.w <- fogFinalColor.z
+
+#line 54
+mov r2.xyz, -r1.yzwy
+add r0.xyz, r0.xyzx, r2.xyzx
+mul r0.xyz, r0.xyzx, r1.xxxx
+add r0.xyz, r0.xyzx, r1.yzwy  // r0.x <- <ApplyFog return value>.x; r0.y <- <ApplyFog return value>.y; r0.z <- <ApplyFog return value>.z
+
+#line 28 "D:\GameProject\Library\LibrarySource\Fog_ps.hlsl"
+mov r0.xyz, r0.xyzx  // r0.x <- fragment_color.x; r0.y <- fragment_color.y; r0.z <- fragment_color.z
+
+#line 30
+mov o0.xyz, r0.xyzx
+mov o0.w, r0.w
 ret 
-// Approximately 45 instruction slots used
+// Approximately 84 instruction slots used

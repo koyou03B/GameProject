@@ -23,6 +23,7 @@
     <ClCompile Include="GameSource\ArcherCharacter.cpp" />
     <ClCompile Include="GameSource\Arrow.cpp" />
     <ClCompile Include="GameSource\Collision.cpp" />
+    <ClCompile Include="GameSource\CompoundTask.cpp" />
     <ClCompile Include="GameSource\DebugObject.cpp" />
     <ClCompile Include="GameSource\Enemy.cpp" />
     <ClCompile Include="GameSource\EnemyBehaviorNode.cpp" />
@@ -52,6 +53,7 @@
     <ClCompile Include="GameSource\FighterState.cpp" />
     <ClCompile Include="GameSource\MetaAI.cpp" />
     <ClCompile Include="GameSource\PartialBlendAnimation.cpp" />
+    <ClCompile Include="GameSource\PrimitiveTask.cpp" />
     <ClCompile Include="GameSource\SaberCharacter.cpp" />
     <ClCompile Include="GameSource\Scene.cpp" />
     <ClCompile Include="GameSource\SceneClear.cpp" />
@@ -67,7 +69,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\AIParameter.h" />
+    <ClInclude Include="GameSource\ArcherWorldState.h" />
     <ClInclude Include="GameSource\Arrow.h" />
+    <ClInclude Include="GameSource\CompoundTask.h" />
+    <ClInclude Include="GameSource\HTNPlanner.h" />
+    <ClInclude Include="GameSource\HTNPlanRunner.h" />
+    <ClInclude Include="GameSource\Method.h" />
+    <ClInclude Include="GameSource\PreCondition.h" />
+    <ClInclude Include="GameSource\Effect.h" />
     <ClInclude Include="GameSource\EnemyBehaviorNode.h" />
     <ClInclude Include="GameSource\EnemyBehaviorTask.h" />
     <ClInclude Include="GameSource\EnemyBehaviorTree.h" />
@@ -94,7 +103,11 @@
     <ClInclude Include="GameSource\EnemyUnSpecialAttackNode.h" />
     <ClInclude Include="GameSource\EnemyWaitNode.h" />
     <ClInclude Include="GameSource\EnemyWalkTask.h" />
+    <ClInclude Include="GameSource\ITask.h" />
+    <ClInclude Include="GameSource\WorldState.h" />
     <ClInclude Include="GameSource\Market.h" />
+    <ClInclude Include="GameSource\PlanList.h" />
+    <ClInclude Include="GameSource\PrimitiveTask.h" />
     <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />
