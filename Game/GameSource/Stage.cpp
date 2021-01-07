@@ -95,7 +95,8 @@ int Stage::RayPick(const VECTOR3F& startPosition, const VECTOR3F& endPosition,
 
 	int matIndex = -1;
 	// オブジェクト空間でのレイに変換 
-	DirectX::XMMATRIX worldtransform = DirectX::XMLoadFloat4x4(&(m_instanceData.begin()->world * m_model->_resource->axisSystemTransform));
+	FLOAT4X4 world = m_instanceData.begin()->world * m_model->_resource->axisSystemTransform;
+	DirectX::XMMATRIX worldtransform = DirectX::XMLoadFloat4x4(&world);
 
 	//逆行列化
 	DirectX::XMMATRIX inverseTransform = DirectX::XMMatrixInverse(nullptr, worldtransform);

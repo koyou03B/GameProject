@@ -2,7 +2,10 @@
 #include "CharacterAI.h"
 #include "CharacterParameter.h"
 #include ".\LibrarySource\Vector.h"
-
+#include "ArcherWorldState.h"
+#include "PrimitiveTask.h"
+#include "CompoundTask.h"
+#include "HTNPlanner.h"
 struct AimMode
 {
 	CharacterParameter::Camera	aimCameraParm;
@@ -191,4 +194,8 @@ private:
 	std::vector<CharacterParameter::Effect> m_effect;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 
+
+	PrimitiveTask<ArcherWorldState>* m_primitiveTask;
+	CompoundTask<ArcherWorldState> m_compoundTask;
+	HTNPlanner m_planner;
 };

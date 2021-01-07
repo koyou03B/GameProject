@@ -76,9 +76,9 @@ private:
 	};
 	const uint32_t	kAttackTimer = 50;
 	const uint32_t  kTurnChanseTimer = 70;
-	const uint32_t  kRowlingMoveTimer = 65;
+	const uint32_t  kRowlingMoveTimer = 50;
 	const uint32_t	kAnimationSpeed[3] = { 50,70,40 };
-	const uint32_t	kRowlingTimer[2] = { 30,80 };
+	const uint32_t	kRowlingTimer[2] = { 30,50 };
 	const float		kBlendValue = 0.08f;
 	const float		kAttackLength = 20.0f;
 	const float		kAccel = 40.0f;

@@ -74,12 +74,12 @@ private:
 		WALK,
 		END
 	};
-	const float		kWalkTimer = 3.0f;
+	const float		kWalkTimer = 2.0f;
 	const float		kFIveSecond = 300.0f;
 	const float		kTurnValue = 0.01f;
 	float m_blendValue = 0.0f;
 	float m_walkTime = 0;
-	float m_accel[2] = { 30.0f,62.0f };
+	float m_accel[2] = { 40.0f,62.0f };
 	float m_maxDirection = 0.0f;
 	VECTOR3F m_nVecToTarget = {};
 };

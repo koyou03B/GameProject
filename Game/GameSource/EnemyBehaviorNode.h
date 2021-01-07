@@ -87,6 +87,18 @@ public:
 		return nullptr;
 	}
 
+	std::shared_ptr<EnemyBehaviorTask> SearchTask(std::string taskName)
+	{
+		int taskCount = static_cast<int>(m_task.size());
+		for (int i = 0; i < taskCount; ++i)
+		{
+			if (m_task[i]->GetTaskName() == taskName)
+				return m_task[i];
+		}
+
+		return nullptr;
+	}
+
 	virtual void LoadOfBinaryFile(std::string nodeName) = 0;
 	virtual void SaveOfBinaryFile() = 0;
 

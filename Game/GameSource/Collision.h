@@ -47,12 +47,21 @@ public:
 
 	struct Circle
 	{
-		VECTOR2F position;
-		float scale;
-		float radius;
+		VECTOR2F position = {};
+		float scale = .0f;
+		float radius = 0.0f;
 	};
 	bool JudgeCircleAndCircle(const Circle& myself, const Circle& target);
 	bool JudgeCircleAndpoint(const Circle& mySelf, const VECTOR2F& target);
+
+	struct Cylinder
+	{
+		VECTOR3F startPos;
+		VECTOR3F endPos;
+		float scale;
+		float radius;
+	};
+	bool JudgeCylinderAndCylinder(const Cylinder& myself, const Cylinder& target);
 
 	struct Cylinder
 	{

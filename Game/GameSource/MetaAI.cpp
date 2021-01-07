@@ -13,8 +13,8 @@ bool MetaAI::Init()
 
 	//AddPlayer(m_playerID, std::make_shared<Saber>());
 	//Archer
-	//AddPlayer(m_playerID, std::make_shared<Archer>());
 	AddPlayer(m_playerID, std::make_shared<Fighter>());
+	AddPlayer(m_playerID, std::make_shared<Archer>());
 
 	//Archer
 	//m_scope = std::make_unique<Scope>();
@@ -267,13 +267,13 @@ bool MetaAI::CollisionPlayerAttack(int id, CharacterParameter::Collision& collis
 	case CharacterParameter::Collision::CYLINDER:
 	{
 		Collision::Cylinder mySelf, target;
-		mySelf.bottom = collision.position[0];
-		mySelf.top = { mySelf.bottom.x,FLT_MAX,mySelf.bottom.z };
+		mySelf.startPos = collision.position[0];
+		mySelf.endPos = { collision.position[0].x,FLT_MAX,collision.position[0].z };
 		mySelf.radius = collision.radius;
 		mySelf.scale = collision.scale;
 		auto& enemy = m_enemys[0]->GetCollision()[0];
-		target.bottom = enemy.position[0];
-		target.top = { target.bottom.x,FLT_MAX,target.bottom.z };
+		target.startPos = enemy.position[0];
+		target.endPos = { enemy.position[0].x,FLT_MAX,enemy.position[0].z };
 		target.radius = enemy.radius;
 		target.scale = enemy.scale;
 		Collision collision;

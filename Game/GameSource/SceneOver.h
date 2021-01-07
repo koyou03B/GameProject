@@ -9,7 +9,6 @@
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\ConstantBuffer.h"
 #include ".\LibrarySource\Constants.h"
-#include ".\LibrarySource\EntityComponentSystem.h"
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\SkinnedMesh.h"
 #include ".\LibrarySource\StaticMesh.h"

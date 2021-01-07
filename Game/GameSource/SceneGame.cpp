@@ -8,6 +8,10 @@
 
 bool Game::Initialize(ID3D11Device* device)
 {
+	auto& wepon = RunningMarket().AddProductConer(0);
+	wepon.AddProduct<Stone>();
+
+
 	//**********************
 	// SceneConstantBuffer
 	//**********************
@@ -534,25 +538,25 @@ void Game::ImGui()
 		{
 			//ImGui::SliderFloat2("OffsetY", offsetY, 0.0f, 100.0f);
 			
-			{
-				static float upOffset = {30.0f};
-				static float upYOffset = {};
-				static float rightOffset[3] = {};
-				ImGui::SliderFloat("UpOffset", &upOffset, 100.0f, -100.0f);
-				ImGui::SliderFloat("UpYOffset", &upYOffset, 100.0f, -100.0f);
-				ImGui::SliderFloat3("RightOffset", rightOffset, -100.0f, 100.0f);
+			//{
+			//	static float upOffset = {30.0f};
+			//	static float upYOffset = {};
+			//	static float rightOffset[3] = {};
+			//	ImGui::SliderFloat("UpOffset", &upOffset, 100.0f, -100.0f);
+			//	ImGui::SliderFloat("UpYOffset", &upYOffset, 100.0f, -100.0f);
+			//	ImGui::SliderFloat3("RightOffset", rightOffset, -100.0f, 100.0f);
 
-				CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
-				FLOAT4X4 world = enemy->GetWorldTransform().world;
-				VECTOR3F up = { world._31,world._32,world._33 };
-				up = NormalizeVec3(up);
-				up *= upOffset;
-				up.y = upYOffset;
-				up += enemy->GetWorldTransform().position;
-				auto& camera = Source::CameraControlle::CameraManager().GetInstance()->GetCamera();
-				camera->SetEye(up);
-				Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::END);
-			}
+			//	CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
+			//	FLOAT4X4 world = enemy->GetWorldTransform().world;
+			//	VECTOR3F up = { world._31,world._32,world._33 };
+			//	up = NormalizeVec3(up);
+			//	up *= upOffset;
+			//	up.y = upYOffset;
+			//	up += enemy->GetWorldTransform().position;
+			//	auto& camera = Source::CameraControlle::CameraManager().GetInstance()->GetCamera();
+			//	camera->SetEye(up);
+			//	Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::END);
+			//}
 			
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ
 			ImGui::SetNextWindowPos(ImVec2(1520, 0), ImGuiSetCond_Once);//ポジション
@@ -620,6 +624,7 @@ void Game::Uninitialize()
 	//GetEntityManager().Relese();
 	m_stage->Release();
 	MESSENGER.isVignette = false;
+
 	m_metaAI->Release();
 	m_uiAdominist->Release();
 	Source::ModelData::fbxLoader().Release();

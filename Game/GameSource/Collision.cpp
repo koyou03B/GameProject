@@ -159,6 +159,28 @@ bool Collision::JudgeCircleAndpoint(const Circle& mySelf, const VECTOR2F& target
 	return false;
 }
 
+bool Collision::JudgeCylinderAndCylinder(const Cylinder& myself, const Cylinder& target)
+{
+	Circle mine, yours;
+	mine.position = { myself.startPos.x,myself.startPos.z };
+	mine.radius = myself.radius;
+	mine.scale = myself.scale;
+	yours.position = { target.startPos.x,target.startPos.z };
+	yours.radius = target.radius;
+	yours.scale = target.scale;
+	
+	if(!JudgeCircleAndCircle(mine,yours))
+		return false;
+	if (myself.startPos.y <= target.startPos.y && target.startPos.y <= myself.endPos.y)
+		return true;
+	if (myself.startPos.y <= target.endPos.y && target.endPos.y <= myself.endPos.y)
+		return true;
+	if (target.startPos.y <= myself.startPos.y && myself.startPos.y <= target.endPos.y)
+		return true;
+
+	return false;
+}
+
 bool Collision::JudgeCylinderAndCylinder(const Cylinder& mySelf, const Cylinder& target)
 {
 	Circle mine, yours;

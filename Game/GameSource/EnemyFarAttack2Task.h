@@ -11,8 +11,10 @@ public:
 	bool JudgeBlendRatio(CharacterParameter::BlendAnimation& animation, const bool isLoop = false);
 	void JudgeAttack(Enemy* enemy, const int attackNo);
 	bool JudgeAnimationRatio(Enemy* enemy, const int attackNo, const int nextAnimNo);
+	bool JudgeLookTarget(Enemy* enemy);
 	int  JudgeTurnChace(Enemy* enemy);
 
+	void PrepareForStone(Enemy* enemy);
 	void TurningChase(Enemy* enemy);
 	bool IsTurnChase(Enemy* enemy);
 
@@ -69,6 +71,7 @@ private:
 	enum Action
 	{
 		START,
+		LOOK_TARGET,
 		RPUNCH_UPPER,
 		TURN_CHACE,
 		END

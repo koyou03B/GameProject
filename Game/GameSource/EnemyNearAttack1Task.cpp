@@ -48,7 +48,6 @@ void EnemyNearAttack1Task::Run(Enemy* enemy)
 			animation.animationBlend.SetAnimationSpeed(1.0f);
 			if (m_animNo == Enemy::Animation::RIGHT_PUNCH_LOWER)
 			{
-				m_animNo = GetRundumSignal();
 				++enemy->GetJudgeElement().attackCount;
 				++m_moveState;
 			}
@@ -67,14 +66,25 @@ void EnemyNearAttack1Task::Run(Enemy* enemy)
 		{
 			m_attackNo = Enemy::AttackType::RightPunchLower;
 			JudgeAttack(enemy, m_attackNo);
-			if (JudgeAnimationRatio(enemy, m_attackNo, m_animNo))
+			if (JudgeAnimationRatio(enemy, m_attackNo, -1))
 			{
 				m_hasFinishedBlend = false;
 				m_isHit = false;
-				m_animNo = m_animNo % Enemy::Animation::MUSCLE_SIGNAL;
 				animation.animationBlend.SetAnimationSpeed(1.0f);
 				m_coolTimer = 9.0f;
-				++m_moveState;
+				m_animNo = JudgeTurnChace(enemy);
+				if (m_animNo <= 1)
+				{
+					//m_animNo = Enemy::Animation::IDLE;
+					//animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
+					animation.animationBlend.ResetAnimationFrame();
+					m_moveState = Action::END;
+					break;
+				}
+				animation.animationBlend.AddSampler(m_animNo, enemy->GetModel());
+				animation.animationBlend.ResetAnimationFrame();
+				m_moveState = Action::TURN_CHACE;
+
 			}
 		}
 		break;
@@ -114,10 +124,20 @@ void EnemyNearAttack1Task::Run(Enemy* enemy)
 		}
 		break;
 	case Action::END:
-		if (JudgeBlendRatio(animation))
+		size_t samplerSize = animation.animationBlend.GetSampler().size();
+		if (samplerSize != 1)
+		{
+			if (JudgeBlendRatio(animation))
+			{
+				m_isUsed = true;
+				animation.animationBlend.ResetAnimationSampler(0);
+				m_moveState = Action::START;
+				m_taskState = TASK_STATE::END;
+			}
+		}
+		else
 		{
 			m_isUsed = true;
-			animation.animationBlend.ResetAnimationSampler(0);
 			m_moveState = Action::START;
 			m_taskState = TASK_STATE::END;
 		}
@@ -202,7 +222,8 @@ bool EnemyNearAttack1Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo,
 	if (m_moveState == Action::HOOK && !m_isHit) attackFrameCount = enemy->GetAttack(attackNo).frameCount - 30;
 	if (currentAnimationTime >= attackFrameCount)
 	{
-		enemy->GetBlendAnimation().animationBlend.AddSampler(nextAnimNo, enemy->GetModel());
+		if(nextAnimNo >= 0)
+			enemy->GetBlendAnimation().animationBlend.AddSampler(nextAnimNo, enemy->GetModel());
 		return true;
 	}
 

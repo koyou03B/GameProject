@@ -53,7 +53,7 @@ dcl_temps 3
 //   o1.x <- <main return value>.texcoord.x; o1.y <- <main return value>.texcoord.y; 
 //   o0.x <- <main return value>.sv_position.x; o0.y <- <main return value>.sv_position.y; o0.z <- <main return value>.sv_position.z; o0.w <- <main return value>.sv_position.w
 //
-#line 6 "D:\Lib関連\GameProject\Library\LibrarySource\SpriteBatch_vs.hlsl"
+#line 6 "D:\GameProject\Library\LibrarySource\SpriteBatch_vs.hlsl"
 dp4 r0.x, v0.xyzw, v2.xyzw  // r0.x <- vout.sv_position.x
 dp4 r0.y, v0.xyzw, v3.xyzw  // r0.y <- vout.sv_position.y
 dp4 r0.z, v0.xyzw, v4.xyzw  // r0.z <- vout.sv_position.z

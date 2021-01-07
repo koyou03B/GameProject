@@ -113,7 +113,7 @@ dcl_temps 4
 //   v2.x <- pin.color.x; v2.y <- pin.color.y; v2.z <- pin.color.z; v2.w <- pin.color.w; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 10 "D:\Lib関連\GameProject\Library\LibrarySource\Fog_ps.hlsl"
+#line 10 "D:\GameProject\Library\LibrarySource\Fog_ps.hlsl"
 sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v1.xyxx, t0.xyzw, s0  // r0.x <- colour_map_color.x; r0.y <- colour_map_color.y; r0.z <- colour_map_color.z; r0.w <- colour_map_color.w
 
 #line 11
@@ -163,7 +163,7 @@ mov r0.xyz, r0.xyzx
 mov r1.xyz, r1.xyzx
 mov r2.xyz, cb1[0].xyzx
 
-#line 32 "D:\Lib関連\GameProject\Library\LibrarySource\Fog.hlsli"
+#line 32 "D:\GameProject\Library\LibrarySource\Fog.hlsli"
 mov r2.xzw, -r2.xxyz
 add r1.xyz, r1.xyzx, r2.xzwx  // r1.x <- eyeToPixel.x; r1.y <- eyeToPixel.y; r1.z <- eyeToPixel.z
 
@@ -247,7 +247,7 @@ add r0.xyz, r0.xyzx, r2.xyzx
 mul r0.xyz, r0.xyzx, r1.xxxx
 add r0.xyz, r0.xyzx, r1.yzwy  // r0.x <- <ApplyFog return value>.x; r0.y <- <ApplyFog return value>.y; r0.z <- <ApplyFog return value>.z
 
-#line 28 "D:\Lib関連\GameProject\Library\LibrarySource\Fog_ps.hlsl"
+#line 28 "D:\GameProject\Library\LibrarySource\Fog_ps.hlsl"
 mov r0.xyz, r0.xyzx  // r0.x <- fragment_color.x; r0.y <- fragment_color.y; r0.z <- fragment_color.z
 
 #line 30

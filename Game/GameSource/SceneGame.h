@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "MetaAI.h"
 #include "Stage.h"
+#include "Stone.h"
 #include "UIAdominist.h"
 #include ".\LibrarySource\Fog.h"
 #include ".\LibrarySource\Camera.h"
@@ -11,7 +12,6 @@
 #include ".\LibrarySource\Constants.h"
 #include ".\LibrarySource\FrameBuffer.h"
 #include ".\LibrarySource\ConstantBuffer.h"
-#include ".\LibrarySource\EntityComponentSystem.h"
 #include ".\LibrarySource\ScreenFilter.h"
 #include ".\LibrarySource\Vignette.h"
 #ifdef _DEBUG

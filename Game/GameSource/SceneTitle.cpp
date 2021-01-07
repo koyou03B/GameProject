@@ -57,21 +57,25 @@ bool Title::Initialize(ID3D11Device* device)
 void Title::Update(float& elapsedTime)
 {
 #if _DEBUG
-	if (KEYBOARD._keys[DIK_0] == 1)
-	{
-		SceneLabel label = SceneLabel::GAME;
-		ActivateScene.ChangeScene(label);
-	}
+
 #endif
 	Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 
 	m_input = PAD.GetPad(0);
-	if (!m_input) return;
-	if (m_input->GetButtons())
+	if (m_input)
 	{
-		isEvent = true;
+		if (m_input->GetButtons())
+		{
+			isEvent = true;
+		}
 	}
-
+	else
+	{
+		if (KEYBOARD._keys[DIK_0] == 1)
+		{
+			isEvent = true;
+		}
+	}
 	if (isEvent)
 	{
 		switch (m_eventState)

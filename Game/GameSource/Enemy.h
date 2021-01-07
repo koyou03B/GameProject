@@ -14,6 +14,7 @@ public:
 		{
 			m_selectTask.reset();
 		}
+		m_stone->Release();
 	}
 
 	void Init() override;
@@ -29,14 +30,13 @@ public:
 	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
 	inline CharacterParameter::Attack& GetAttack(const int num) { return m_attackParm.at(num); }
 	inline CharacterParameter::BlendAnimation& GetBlendAnimation() { return m_blendAnimation; }
-	inline StoneParameter& GetStoneParameter() { return m_stoneParm; }
-
+	inline std::unique_ptr<Stone>& GetStone() { return m_stone; }
 	inline uint32_t& GetSignalAnimFrame(const int animNo) { return m_signalFrame[animNo]; }
 	inline float& GetElapsedTime() { return m_elapsedTime; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 8)
+		if (version >= 10)
 		{
 			archive
 			(
@@ -48,7 +48,7 @@ public:
 				m_moveParm,
 				m_signalFrame[0], m_signalFrame[1],
 				m_signalFrame[2], m_signalFrame[3],
-				m_stoneParm
+				m_stone
 			);
 		}
 		else
@@ -62,8 +62,7 @@ public:
 				m_attackParm,
 				m_moveParm,
 				m_signalFrame[0], m_signalFrame[1],
-				m_signalFrame[2], m_signalFrame[3],
-				m_stoneParm
+				m_signalFrame[2], m_signalFrame[3]
 			);
 		}
 	}
@@ -96,7 +95,7 @@ public:
 		TURN_ATTACK_HEIGHT,
 		FALL_FLAT_EDIT,
 		RIGHT_PUNCH_UPPER,
-		WRATH_NEAR_ATTACK,
+		RUN_ATTACK,
 		WRATH_FAR_ATTACK,
 	};
 
@@ -109,7 +108,7 @@ public:
 		TurnAttackHeight,
 		FallFlat_edit,
 		RightPunchUpper,
-		WrathNearAttack,
+		Run_Attack,
 		WrathFarAttack,
 	};
 	
@@ -118,11 +117,10 @@ private:
 	{
 	}
 private:
-
 	EnemyBehaviorTree m_behaviorTree;
 	std::shared_ptr<EnemyBehaviorTask> m_selectTask;
+	std::unique_ptr<Stone> m_stone;
 
-	StoneParameter							m_stoneParm;
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
