@@ -98,6 +98,7 @@ public:
 		return m_compoundTask;
 	}
 
+	inline std::vector<std::shared_ptr<Method<WorldState>>>& GetMethod() { return m_method; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{

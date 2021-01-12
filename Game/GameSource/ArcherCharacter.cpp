@@ -1925,6 +1925,7 @@ ImGui::Combo("Name_of_BoneName",
 		}
 		#pragma endregion
 
+		#pragma region  Task
 		static int selectTask = 0;
 		ImGui::DragInt("Task Select", &selectTask, 0, currentSize);
 
@@ -1954,7 +1955,7 @@ ImGui::Combo("Name_of_BoneName",
 				if (ImGui::Button("Push Task"))
 					task[selectTask] = m_primitiveTask;
 			}
-			else
+			else if (value == 1)
 			{
 				auto& task = m_domain.GetCompoundTasks();
 				static int beforeTaskSelect = INT_MAX;
@@ -1971,13 +1972,91 @@ ImGui::Combo("Name_of_BoneName",
 				if (ImGui::Button("Push Task"))
 					task[selectTask] = m_compoundTask;
 			}
-
 		}
+		#pragma endregion
 
-
-		if (value == 0)
+		#pragma region Method
+		if (value == 2)
 		{
+			auto& primitiveTask = m_domain.GetPrimitiveTasks();
+			auto& compoundTask = m_domain.GetCompoundTasks();
+
+			size_t pCount = primitiveTask.size();
+			size_t cCount = compoundTask.size();
+
+			static std::vector<std::string> pTaskName;
+			static std::vector<std::string> cTaskName;
+
+			if (pTaskName.size() != pCount)
+			{
+				if (!pTaskName.empty())
+					pTaskName.clear();
+
+				for (size_t i = 0; i < pCount; ++i)
+				{
+					pTaskName.push_back(primitiveTask[i]->GetTaskName());
+				}
+			}
+
+			if (cTaskName.size() != cCount)
+			{
+				if (!cTaskName.empty())
+					cTaskName.clear();
+
+				for (size_t i = 0; i < cCount; ++i)
+				{
+					cTaskName.push_back(compoundTask[i]->GetTaskName());
+				}
+			}
+
+			static int pTaskSelect;
+			ImGui::Combo("PrimitiveTaskName",
+				&pTaskSelect,
+				vectorGetter,
+				static_cast<void*>(&pTaskName),
+				static_cast<int>(pTaskName.size())
+			);
+			ImGui::DragInt("SelectPrimitiveTask", &pTaskSelect, 0, 10);
+
+			static int cTaskSelect;
+			ImGui::Combo("CompoundTaskName",
+				&cTaskSelect,
+				vectorGetter,
+				static_cast<void*>(&cTaskName),
+				static_cast<int>(cTaskName.size())
+			);
+			ImGui::DragInt("SelectCompoundTask", &cTaskSelect, 0, 10);
+
+			static int selectMethod = 0;
+			ImGui::DragInt("Mehod Select", &selectMethod, 0, currentSize);
+
+			static bool isSelectMethod = false;
+			if (ImGui::Button("Select Method"))
+				isSelectMethod = true;
+			ImGui::SameLine();
+			if (ImGui::Button("No Select Method"))
+				isSelectMethod = false;
+
+			if (isSelectMethod)
+			{
+				auto& method = m_domain.GetMethod();
+				static int beforeMethodSelect = INT_MAX;
+				if (beforeMethodSelect != selectMethod)
+				{
+					if (method[selectMethod])
+						m_method = method[selectMethod];
+					else
+						m_method = std::make_shared<Method<ArcherWorldState>>();
+				}
+				m_method->ImGui();
+				beforeMethodSelect = selectMethod;
+				if (ImGui::Button("Push Method"))
+					method[selectMethod] = m_method;
+			}
 		}
+		#pragma endregion
+
+
 	}
 
 #endif
