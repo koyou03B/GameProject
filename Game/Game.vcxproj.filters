@@ -356,9 +356,6 @@
     <ClCompile Include="GameSource\PrimitiveTask.cpp">
       <Filter>Sources\HTN</Filter>
     </ClCompile>
-    <ClCompile Include="GameSource\CompoundTask.cpp">
-      <Filter>Sources\HTN</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -526,9 +523,6 @@
     <ClInclude Include="GameSource\Market.h">
       <Filter>Headers\Market</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\ITask.h">
-      <Filter>Headers\HTN\Task</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\PlanList.h">
       <Filter>Headers\HTN</Filter>
     </ClInclude>
@@ -558,6 +552,12 @@
     </ClInclude>
     <ClInclude Include="GameSource\HTNPlanRunner.h">
       <Filter>Headers\HTN</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Domain.h">
+      <Filter>Headers\HTN</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\ITask.h">
+      <Filter>Headers\HTN\Task</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -63,12 +63,4 @@ public:
 	};
 	bool JudgeCylinderAndCylinder(const Cylinder& myself, const Cylinder& target);
 
-	struct Cylinder
-	{
-		VECTOR3F bottom;
-		VECTOR3F top;
-		float scale;
-		float radius;
-	};
-	bool JudgeCylinderAndCylinder(const Cylinder& mySelf, const Cylinder& target);
 };

@@ -1,5 +1,10 @@
 #pragma once
 
+#undef max
+#undef min
+#include<cereal/cereal.hpp>
+#include<cereal/archives/binary.hpp>
+
 #pragma region WorldState‚É‚Â‚¢‚Ä
 //©•ª‚Ìó‘Ô‚à‚Ó‚­‚ß‚½ƒQ[ƒ€‚Ì¢ŠE‘S‘Ì‚Ìó‘Ô
 //‚ªA‚±‚±‚Å‚Í‹¤’Ê‚·‚é‚à‚Ì‚µ‚©‘‚©‚È‚¢

@@ -6,6 +6,8 @@
 #include "PrimitiveTask.h"
 #include "CompoundTask.h"
 #include "HTNPlanner.h"
+#include "Domain.h"
+
 struct AimMode
 {
 	CharacterParameter::Camera	aimCameraParm;
@@ -195,7 +197,8 @@ private:
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 
 
-	PrimitiveTask<ArcherWorldState>* m_primitiveTask;
-	CompoundTask<ArcherWorldState> m_compoundTask;
 	HTNPlanner m_planner;
+	Domain<ArcherWorldState> m_domain;
+	std::shared_ptr<PrimitiveTask<ArcherWorldState>> m_primitiveTask;
+	std::shared_ptr<CompoundTask<ArcherWorldState>> m_compoundTask;
 };

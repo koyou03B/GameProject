@@ -8,6 +8,7 @@
 
 bool Game::Initialize(ID3D11Device* device)
 {
+//	RunningMarket().Closing();
 	auto& wepon = RunningMarket().AddProductConer(0);
 	wepon.AddProduct<Stone>();
 
@@ -326,7 +327,7 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 
 		m_metaAI->RenderOfPlayer(immediateContext, 0);
 		//Archer
-		//m_metaAI->RenderOfPlayer(immediateContext, 1);
+		m_metaAI->RenderOfPlayer(immediateContext, 1);
 		//m_metaAI->RenderOfPlayer(immediateContext, 2);
 		
 		m_frameBuffer[2]->Deactivate(immediateContext);
@@ -571,40 +572,42 @@ void Game::ImGui()
 		}
 
 		{
-			CharacterAI* player = m_metaAI->GetPlayCharacter();
+			auto& player = m_metaAI->GetPlayers();
 
-			player->ImGui(Framework::GetInstance().GetDevice());
+			player[0]->ImGui(Framework::GetInstance().GetDevice());
+			player[1]->ImGui(Framework::GetInstance().GetDevice());
+
 			//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
 			////Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
 			//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
 			//Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
 
-			VECTOR3F currentDistance = DistancePlayerToEnemy();
-			currentDistance = NormalizeVec3(currentDistance);
+			//VECTOR3F currentDistance = DistancePlayerToEnemy();
+			//currentDistance = NormalizeVec3(currentDistance);
 
-			if (ImGui::Button("kkkk"))
-			{
+			//if (ImGui::Button("kkkk"))
+			//{
 
-				MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CALL_HELP);
-			}
+			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CALL_HELP);
+			//}
 
-			if (ImGui::Button("Saber"))
-			{
-				//player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::SABER;
-				MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Archer"))
-			{
-				player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::ARCHER;
-				MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Fighter"))
-			{
-				player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::FIGHTER;
-				MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
-			}
+			//if (ImGui::Button("Saber"))
+			//{
+			//	//player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::SABER;
+			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
+			//}
+			//ImGui::SameLine();
+			//if (ImGui::Button("Archer"))
+			//{
+			//	player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::ARCHER;
+			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
+			//}
+			//ImGui::SameLine();
+			//if (ImGui::Button("Fighter"))
+			//{
+			//	player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::FIGHTER;
+			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
+			//}
 		}
 	}
 
@@ -624,7 +627,7 @@ void Game::Uninitialize()
 	//GetEntityManager().Relese();
 	m_stage->Release();
 	MESSENGER.isVignette = false;
-
+	RunningMarket().Reset();
 	m_metaAI->Release();
 	m_uiAdominist->Release();
 	Source::ModelData::fbxLoader().Release();

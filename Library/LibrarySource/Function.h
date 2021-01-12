@@ -2,6 +2,7 @@
 #include <d3d11.h>
 #include <wrl.h>
 #include <string>
+#include <vector>
 #include "Vector.h"
 
 namespace Source
@@ -92,6 +93,7 @@ namespace Source
 	{
 		void CombineResourcePath(wchar_t(&combinedResourcePath)[256], const wchar_t* referrerFilename, const wchar_t* referentFilename);
 		void ConvertResourcePath(wchar_t(&combinedResourcePath)[256], const wchar_t* referentFilename);
+		bool GetFileNames(std::string folderPath, std::vector<std::string>& fileNames);
 	}
 
 	namespace Math

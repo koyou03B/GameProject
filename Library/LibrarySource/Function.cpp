@@ -275,6 +275,36 @@ namespace Source
 
 			wcscpy_s(combinedResourcePath, str.c_str());
 		}
+
+		bool GetFileNames(std::string folderPath, std::vector<std::string>& fileNames)
+		{
+			HANDLE hFind;
+			WIN32_FIND_DATA win32fd;
+			std::string searchName = folderPath + "\\*";
+
+			hFind = FindFirstFile(searchName.c_str(), &win32fd);
+
+			if (hFind == INVALID_HANDLE_VALUE) 
+			{
+				return false;
+			}
+
+			/* 指定のディレクトリ以下のファイル名をファイルがなくなるまで取得する */
+			do {
+				if (win32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+					/* ディレクトリの場合は何もしない */
+					//printf("directory\n");
+				}
+				else {
+					/* ファイルが見つかったらVector配列に保存する */
+					fileNames.push_back(win32fd.cFileName);
+				}
+			} while (FindNextFile(hFind, &win32fd));
+
+			FindClose(hFind);
+
+			return true;
+		}
 	}
 
 	namespace Math

@@ -212,8 +212,9 @@ public:
 		enum class PlayerType
 		{
 			//SABER,
+			FIGHTER,
 			ARCHER,
-			FIGHTER
+			
 		};
 		PlayerType changeType;
 		bool isPlay = false;

@@ -105,7 +105,7 @@ dcl_temps 6
 //   v4.x <- pin.texcoord.x; v4.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 16 "D:\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
+#line 16 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t0.xyzw, s0
 mov r0.xyz, r0.xyzx  // r0.x <- diffuse_map_color.x; r0.y <- diffuse_map_color.y; r0.z <- diffuse_map_color.z
 
@@ -166,7 +166,7 @@ mov r2.xyz, r2.xyzx
 mov r3.xyz, r3.xyzx
 mov r0.xyz, r0.xyzx
 
-#line 25 "D:\GameProject\Library\LibrarySource\Function.hlsli"
+#line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
 mov r2.xyz, -r2.xyzx
 dp3 r0.w, r1.xyzx, r2.xyzx
 add r0.w, r0.w, l(0.650000)  // r0.w <- D
@@ -179,7 +179,7 @@ max r0.w, r0.w, r1.w
 mul r2.xyz, r3.xyzx, r0.xyzx
 mul r2.xyz, r0.wwww, r2.xyzx  // r2.x <- <Diffuse return value>.x; r2.y <- <Diffuse return value>.y; r2.z <- <Diffuse return value>.z
 
-#line 39 "D:\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
+#line 39 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
 mov r2.xyz, r2.xyzx  // r2.x <- D.x; r2.y <- D.y; r2.z <- D.z
 
 #line 41
@@ -194,7 +194,7 @@ mul r5.xyz, r0.wwww, cb1[1].xyzx  // r5.x <- E.x; r5.y <- E.y; r5.z <- E.z
 nop 
 mov r5.xyz, r5.xyzx
 
-#line 25 "D:\GameProject\Library\LibrarySource\Function.hlsli"
+#line 25 "D:\Lib関連\GameProject\Library\LibrarySource\Function.hlsli"
 mov r5.xyz, -r5.xyzx
 dp3 r0.w, r1.xyzx, r5.xyzx
 add r0.w, r0.w, l(0.650000)  // r0.w <- D
@@ -207,7 +207,7 @@ max r0.w, r0.w, r1.x
 mul r0.xyz, r3.xyzx, r0.xyzx
 mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <Diffuse return value>.x; r0.y <- <Diffuse return value>.y; r0.z <- <Diffuse return value>.z
 
-#line 61 "D:\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
+#line 61 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_ps.hlsl"
 mul r0.xyz, r0.xyzx, l(0.600000, 0.600000, 0.600000, 0.000000)
 add r0.xyz, r0.xyzx, r2.xyzx  // r0.x <- D.x; r0.y <- D.y; r0.z <- D.z
 

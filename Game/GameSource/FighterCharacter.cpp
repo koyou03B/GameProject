@@ -286,7 +286,7 @@ void Fighter::Stepping(float& elapsedTime)
 		m_animationType = Fighter::Animation::DIVE;
 		if (m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
 			m_blendAnimation.animationBlend.ReleaseSampler(0);
-		
+
 		m_blendAnimation.animationBlend.AddSampler(m_animationType, m_model);
 		m_blendAnimation.animationBlend.ResetAnimationFrame();
 		m_blendAnimation.animationBlend._blendRatio = 0.0f;
@@ -296,6 +296,7 @@ void Fighter::Stepping(float& elapsedTime)
 			m_moveParm.isRun = false;
 		}
 		m_stepParm.isStep = true;
+	}
 
 	//**************************************
 	// Set the blend ratio to 1.
@@ -349,10 +350,10 @@ void Fighter::Stepping(float& elapsedTime)
 		// Else, If there is a stick input, MOVE processing.
 		// But it is not, Animation Reset
 		//***************************************************
-		if(60 < currentAnimationFrame && currentAnimationFrame < m_stepParm.frameCount)
+		if (60 < currentAnimationFrame && currentAnimationFrame < m_stepParm.frameCount)
 		{
 			if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1)
-			{	
+			{
 				isNextStep = true;
 				m_stepParm.isStep = true;
 				m_blendAnimation.animationBlend.TrueAnimationLoop(0);
@@ -769,7 +770,7 @@ VECTOR3F Fighter::GetRotationAfterAngle(VECTOR2F vector,float turnSpeed)
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
 	float dist = ToDistVec3(enemyPos - m_transformParm.position);
-	float limit = dist < 10.6f ? 0.02f : turnSpeed;
+	limit = dist < 10.6f ? 0.02f : turnSpeed;
 
 	if (rot > limit)
 		rot = limit;
@@ -941,13 +942,13 @@ void Fighter::ImGui(ID3D11Device* device)
 {
 #ifdef _DEBUG
 
-	ImGui::Begin("FighterCharacter", nullptr, ImGuiWindowFlags_MenuBar);//���j���[�o�[������Ȃ炱��BEGIN
+	ImGui::Begin("FighterCharacter", nullptr, ImGuiWindowFlags_MenuBar);
 
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu("File"))//�t�@�C���̒��ɂ�
+		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Save"))//�f�[�^�̕ۑ��Ƃ�
+			if (ImGui::MenuItem("Save"))
 			{
 				std::ofstream ofs;
 				ofs.open((std::string("../Asset/Binary/Player/Fighter/Parameter") + ".bin").c_str(), std::ios::binary);

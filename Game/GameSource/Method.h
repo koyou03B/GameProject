@@ -19,7 +19,7 @@ public:
 	Method() = default;
 	~Method() = default;
 
-	void Add(ITask<State>* state)
+	void AddTask(ITask<State>* state)
 	{
 		std::shared_ptr<ITask<State>> uState(state);
 		m_subTasks.push_back(uState);
@@ -50,9 +50,47 @@ public:
 		return true;
 	}
 
+	inline void ToSave(std::string name)
+	{
+		std::ofstream ofs;
+		ofs.open((std::string("../Asset/Binary/HTN/Method/") + name + ".bin").c_str(), std::ios::binary);
+		cereal::BinaryOutputArchive o_archive(ofs);
+		o_archive(*this);
+	}
+
+	inline void ToLoad(std::string name, int value)
+	{
+		if (PathFileExistsA((std::string("../Asset/Binary/HTN/Method/") + name + ".bin").c_str()))
+		{
+			std::ofstream ifs;
+			ifs.open((std::string("../Asset/Binary/HTN/Method/") + name + ".bin").c_str(), std::ios::binary);
+			cereal::BinaryInputArchive i_archive(ifs);
+			i_archive(*this);
+		}
+	}
+
+	template<class T>
+	void serialize(T& archive, const std::uint32_t version)
+	{
+
+		if (0 <= version)
+		{
+			archive
+			(
+				m_preconditions,
+				m_subTasks
+			);
+		}
+		else
+		{
+			archive
+			(
+				m_preconditions,
+				m_subTasks
+			);
+		}
+	}
 public:
 	std::vector<std::shared_ptr<PreCondition<State>>> m_preconditions;
 	std::vector<std::shared_ptr<ITask<State>>> m_subTasks;
-	//std::vector<ITask<State>*> m_subTasks;
-	//std::shared_ptr<ITask<State>> m_subTasks;
 };

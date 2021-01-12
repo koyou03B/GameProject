@@ -97,7 +97,7 @@ dcl_temps 5
 //   o1.x <- <main return value>.position.x; o1.y <- <main return value>.position.y; o1.z <- <main return value>.position.z; o1.w <- <main return value>.position.w; 
 //   o0.x <- <main return value>.sv_position.x; o0.y <- <main return value>.sv_position.y; o0.z <- <main return value>.sv_position.z; o0.w <- <main return value>.sv_position.w
 //
-#line 8 "D:\GameProject\Library\LibrarySource\StaticMesh_vs.hlsl"
+#line 8 "D:\Lib関連\GameProject\Library\LibrarySource\StaticMesh_vs.hlsl"
 mul r0.xyzw, v3.xyzw, cb1[10].xxxx
 mul r1.xyzw, v4.xyzw, cb1[11].xxxx
 add r0.xyzw, r0.xyzw, r1.xyzw

@@ -133,10 +133,24 @@ public:
 		return *static_cast<ProductManager*>(nullptr);
 	}
 
+	inline bool HasProductConer(uint32_t tag)
+	{
+		const auto it = m_productConers.find(tag);
+		if (it != m_productConers.end())
+		{
+			return false;
+		}
+		return true;
+	}
+
 	//exsample:
 	//このお店にこのコーナー作りました！
 	ProductManager& AddProductConer(uint32_t tag)
 	{
+		if (!HasProductConer(tag))
+		{
+			return FindProductConer(tag);
+		}
 		ProductManager* e = new ProductManager();
 		std::unique_ptr<ProductManager> uPtr{ e };
 		m_productConers.insert(std::make_pair(tag, std::move(uPtr)));
@@ -154,6 +168,15 @@ public:
 		m_productConers.clear();
 	}
 
+	void Reset()
+	{
+		if (m_productConers.empty())return;
+		for (auto& productConer : m_productConers)
+		{
+			if (productConer.second)
+				productConer.second->Release();
+		}
+	}
 private:
 	//exsample:
 	//<鮮魚,鮮魚コーナーです>

@@ -14,9 +14,6 @@ CEREAL_CLASS_VERSION(Archer, 6);
 
 void Archer::Init()
 {
-	//m_primitiveTask = new PrimitiveTask<ArcherWorldState>();
-	//m_compoundTask.AddSubTask(m_primitiveTask);
-
 	m_model = Source::ModelData::fbxLoader().GetActorModel(Source::ModelData::ActorModel::Archer);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Walk.fbx", 60);
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Run.fbx",60);
@@ -39,7 +36,7 @@ void Archer::Init()
 	m_transformParm.scale = { 0.05f,0.05f,0.05f };
 	m_transformParm.WorldUpdate();
 
-	m_changeParm.isPlay = true;
+//	m_changeParm.isPlay = true;
 	m_blendAnimation.animationBlend.Init(m_model);
 	//m_blendAnimation.partialBlend.Init(m_model);
 	SerialVersionUpdate(12);
@@ -49,13 +46,13 @@ void Archer::Init()
 	//*********************
 	ArrowInstamce.Init();
 
-	if (PathFileExistsA((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str()))
-	{
-		std::ifstream ifs;
-		ifs.open((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str(), std::ios::binary);
-		cereal::BinaryInputArchive i_archive(ifs);
-		i_archive(*this);
-	}
+	//if (PathFileExistsA((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str()))
+	//{
+	//	std::ifstream ifs;
+	//	ifs.open((std::string("../Asset/Binary/Player/Archer/Parameter") + ".bin").c_str(), std::ios::binary);
+	//	cereal::BinaryInputArchive i_archive(ifs);
+	//	i_archive(*this);
+	//}
 	m_statusParm.life = 12000;
 
 	m_stepParm.maxSpeed = m_stepParm.speed;
@@ -65,66 +62,61 @@ void Archer::Init()
 void Archer::Update(float& elapsedTime)
 {
 	m_elapsedTime = elapsedTime;
-	if (m_changeParm.isPlay)
-	{
-		m_input = PAD.GetPad(0);
 
-		if (m_input != nullptr)
-		{
-			if (!KnockBack())
-			{
-				//***********************
-				// Movement in each mode
-				//***********************
-				if (m_mode != Mode::Aiming)
-				{
-					Move(m_elapsedTime);
-					Aim();
-					Step(m_elapsedTime);
-				}
-				else
-				{
-					Aiming();
-					AimMove(m_elapsedTime);
-					AimStep(m_elapsedTime);
-					Shot();
-				}
-			}
-			//***********************
-			// Common Movements
-			//***********************
-			ArrowInstamce.Update(elapsedTime);
-
-			ChangeCharacter();
-			RestAnimationIdle();
-		}
-	}
-	else
-	{
-		m_input = PAD.GetPad(0);
-
-		//Step(m_elapsedTime);
-
-		//Attack(m_elapsedTime);
-		KnockBack();
-		RestAnimationIdle();
-	}
+	//if (m_changeParm.isPlay)
+	//{
+	//	m_input = PAD.GetPad(0);
+	//	if (m_input != nullptr)
+	//	{
+	//		if (!KnockBack())
+	//		{
+	//			//***********************
+	//			// Movement in each mode
+	//			//***********************
+	//			if (m_mode != Mode::Aiming)
+	//			{
+	//				Move(m_elapsedTime);
+	//				Aim();
+	//				Step(m_elapsedTime);
+	//			}
+	//			else
+	//			{
+	//				Aiming();
+	//				AimMove(m_elapsedTime);
+	//				AimStep(m_elapsedTime);
+	//				Shot();
+	//			}
+	//		}
+	//		//***********************
+	//		// Common Movements
+	//		//***********************
+	//		ArrowInstamce.Update(elapsedTime);
+	//		ChangeCharacter();
+	//		RestAnimationIdle();
+	//	}
+	//}
+	//else
+	//{
+	//	m_input = PAD.GetPad(0);
+	//	//Step(m_elapsedTime);
+	//	//Attack(m_elapsedTime);
+	//	KnockBack();
+	//	RestAnimationIdle();
+	//}
 
 	//*********************
 	// Collision Detection
 	//*********************
-	m_blendAnimation.animationBlend.Update(m_model, m_elapsedTime);
-	FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
-	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
-	FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
-	m_collision[0].position[0] = { getBone._41,getBone._42,getBone._43 };
+	//m_blendAnimation.animationBlend.Update(m_model, m_elapsedTime);
+	//FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
+	//FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+	//FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+	//m_collision[0].position[0] = { getBone._41,getBone._42,getBone._43 };
 }
 
 void Archer::Render(ID3D11DeviceContext* immediateContext)
 {
-	ArrowInstamce.Render(immediateContext);
-
-
+//	ArrowInstamce.Render(immediateContext);
 	auto& localTransforms = m_blendAnimation.animationBlend._blendLocals;
 	//auto& localTransforms = m_blendAnimation.partialBlend._blendLocals;
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
@@ -490,8 +482,6 @@ void Archer::Impact()
 	Source::CameraControlle::CameraManager().GetInstance()->SetLength(m_cameraParm.lenght);
 
 }
-
-
 
 bool Archer::KnockBack()
 {
@@ -1401,7 +1391,7 @@ ImGui::Combo("Name_of_BoneName",
 	//	m_blendAnimation.animationBlend.ReleaseSampler(currentAnim);
 	//}
 }
-
+#if 0 
 	//**************************************
 	// Camera
 	//**************************************
@@ -1457,6 +1447,7 @@ ImGui::Combo("Name_of_BoneName",
 			}
 		}
 	}
+
 	//**************************************
 	// Status
 	//**************************************
@@ -1512,11 +1503,8 @@ ImGui::Combo("Name_of_BoneName",
 	//**************************************
 	if (ImGui::CollapsingHeader("Position"))
 	{
-
 		static float position[] = { m_transformParm.position.x,m_transformParm.position.y,m_transformParm.position.z };
 		ImGui::SliderFloat3("Position", position, -2000.0f, 2000.0f);
-
-
 	}
 
 	//**************************************
@@ -1892,6 +1880,106 @@ ImGui::Combo("Name_of_BoneName",
 			m_statusParm.isDamage = false;
 
 	}
+#endif 
+
+	//**************************************
+	// Domain
+	//**************************************
+	if (ImGui::CollapsingHeader("Domain"))
+	{
+		#pragma region Save/Load
+		if (ImGui::Button("Save"))
+			m_domain.ToSave("Archer");
+		ImGui::SameLine();
+		if (ImGui::Button("Load"))
+			m_domain.ToLoad("Archer");
+		#pragma endregion
+
+		#pragma region DomainContentsResize
+		static int value = 0;
+		ImGui::RadioButton("PrimitiveTask", &value, 0); ImGui::SameLine();
+		ImGui::RadioButton("CompoundTask", &value, 1); ImGui::SameLine();
+		ImGui::RadioButton("Method", &value, 2);
+		ImGui::RadioButton("PreCondition", &value, 3); ImGui::SameLine();
+		ImGui::RadioButton("Effect", &value, 4);
+		DomainContents select = static_cast<DomainContents>(value);
+
+		int currentSize = m_domain.CommunicateNumber(select);
+		static int size = 0;
+		ImGui::DragInt("Size Count" , &currentSize, 0, 10);
+		ImGui::DragInt("Size Select", &size, 0, 10);
+
+		static bool hasResize = false;
+		if (ImGui::Button("Resize ?") && !hasResize)
+		{
+			hasResize = true;
+			m_domain.ToResize(size, select);
+		}
+		if (hasResize)
+		{
+			ImGui::SameLine();
+			ImGui::BulletText("Resize Complete");
+			ImGui::SameLine();
+			if (ImGui::Button("Close"))
+				hasResize = false;
+		}
+		#pragma endregion
+
+		static int selectTask = 0;
+		ImGui::DragInt("Task Select", &selectTask, 0, currentSize);
+
+		static bool isSelect = false;
+		if (ImGui::Button("Select"))
+			isSelect = true;
+		ImGui::SameLine();
+		if (ImGui::Button("No Select"))
+			isSelect = false;
+
+		if (isSelect)
+		{
+			if (value == 0)
+			{
+				auto& task = m_domain.GetPrimitiveTasks();
+				static int beforeTaskSelect = INT_MAX;
+				if (beforeTaskSelect != selectTask)
+				{
+					if (task[selectTask])
+						m_primitiveTask = task[selectTask];
+					else
+						m_primitiveTask = std::make_shared<PrimitiveTask<ArcherWorldState>>();
+				}
+
+				m_primitiveTask->ImGui();
+				beforeTaskSelect = selectTask;
+				if (ImGui::Button("Push Task"))
+					task[selectTask] = m_primitiveTask;
+			}
+			else
+			{
+				auto& task = m_domain.GetCompoundTasks();
+				static int beforeTaskSelect = INT_MAX;
+				if (beforeTaskSelect != selectTask)
+				{
+					if (task[selectTask])
+						m_compoundTask = task[selectTask];
+					else
+						m_compoundTask = std::make_shared<CompoundTask<ArcherWorldState>>();
+				}
+
+				m_compoundTask->ImGui();
+				beforeTaskSelect = selectTask;
+				if (ImGui::Button("Push Task"))
+					task[selectTask] = m_compoundTask;
+			}
+
+		}
+
+
+		if (value == 0)
+		{
+		}
+	}
+
 #endif
 	ImGui::End();
 
