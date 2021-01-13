@@ -216,6 +216,9 @@
     <Filter Include="Headers\HTN\Metod">
       <UniqueIdentifier>{994f791d-a70f-413b-955d-8dd5a47b6539}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\HTN\Other">
+      <UniqueIdentifier>{f6524649-ffdf-45a1-b8b1-29d715e358b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -523,9 +526,6 @@
     <ClInclude Include="GameSource\Market.h">
       <Filter>Headers\Market</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\PlanList.h">
-      <Filter>Headers\HTN</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\PrimitiveTask.h">
       <Filter>Headers\HTN\Task</Filter>
     </ClInclude>
@@ -547,17 +547,20 @@
     <ClInclude Include="GameSource\CompoundTask.h">
       <Filter>Headers\HTN\Task</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\HTNPlanner.h">
-      <Filter>Headers\HTN</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\HTNPlanRunner.h">
-      <Filter>Headers\HTN</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\Domain.h">
-      <Filter>Headers\HTN</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\ITask.h">
       <Filter>Headers\HTN\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Domain.h">
+      <Filter>Headers\HTN\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\HTNPlanner.h">
+      <Filter>Headers\HTN\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\HTNPlanRunner.h">
+      <Filter>Headers\HTN\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PlanList.h">
+      <Filter>Headers\HTN\Other</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include <unordered_map>
+#include <map>
 #include "ITask.h"
 #include "ArcherWorldState.h"
 #include "PreCondition.h"
@@ -119,41 +119,45 @@ inline void Method<State>::ImGui()
 {
 	ImGui::BeginChild("Method", ImVec2(500, 200), true);
 
-	static int select = 0;
+	#pragma region Save/Load
+		static int select = 0;
+		if (ImGui::Button("Method Save"))
+			ToSave(m_methodName);
+		ImGui::SameLine();
+		if (ImGui::Button("Method Load"))
+			ToLoad(m_fileNames[select]);
+	
+		if (ImGui::Button("File Name Get"))
+		{
+			bool isError = Source::Path::GetFileNames("../Asset/Binary/HTN/Method/", m_fileNames);
+		}
+	
+		ImGui::Combo("SelectFileNames",
+			&select,
+			vectorGetter,
+			static_cast<void*>(&m_fileNames),
+			static_cast<int>(m_fileNames.size())
+		);
+	#pragma endregion
 
-	if (ImGui::Button("Method Save"))
-		ToSave(m_methodName);
-	ImGui::SameLine();
-	if (ImGui::Button("Method Load"))
-		ToLoad(m_fileNames[select]);
+	#pragma region MethodTask
+		static char methodName[256] = "";
+		std::string currentMethodName = m_methodName.c_str();
+		if (currentMethodName.size() == 0)currentMethodName = "EmptyMehodName";
+		ImGui::Text("MethodName : %s", currentMethodName.c_str());
+		ImGui::InputText("MethodName", methodName, 256);
+		std::string nameDecided = methodName;
+		if (ImGui::Button("Set MethodName"))
+			m_methodName = nameDecided;
+	#pragma endregion
 
-	if (ImGui::Button("File Name Get"))
-	{
-		bool isError = Source::Path::GetFileNames("../Asset/Binary/HTN/Method/", m_fileNames);
-	}
-
-	ImGui::Combo("SelectFileNames",
-		&select,
-		vectorGetter,
-		static_cast<void*>(&m_fileNames),
-		static_cast<int>(m_fileNames.size())
-	);
-
-	static char methodName[256] = "";
-	std::string currentMethodName = m_methodName.c_str();
-	if (currentMethodName.size() == 0)currentMethodName = "EmptyMehodName";
-	ImGui::Text("MethodName : %s", currentMethodName.c_str());
-	ImGui::InputText("MethodName", methodName, 256);
-	std::string nameDecided = methodName;
-	if (ImGui::Button("Set MethodName"))
-		m_methodName = nameDecided;
-
+	#pragma region SubTaskID
 
 	static int value = 0;
 	ImGui::RadioButton("Primitive", &value, 0); ImGui::SameLine();
 	ImGui::RadioButton("Compound", &value, 1);
 	TaskType taskType = static_cast<TaskType>(value);
-
+	
 	static int taskID = 0;
 	ImGui::DragInt("TaskID", &taskID, 0, 20);
 
@@ -161,7 +165,47 @@ inline void Method<State>::ImGui()
 		m_subTasksID.insert(std::make_pair(taskType, taskID));
 	int subTaskCount = static_cast<int>(m_subTasksID.size());
 	ImGui::DragInt("SubTaskCount", &subTaskCount, 0, 20);
+	
+	#pragma endregion
+
+	#pragma region ReadSubTask
+		static int selectTaskID = 0;
+		ImGui::DragInt("SelectTaskID", &selectTaskID, 0, subTaskCount);
+	
+		static bool isRead = false;
+		if (ImGui::Button("Open"))
+			isRead = true;
+		ImGui::SameLine();
+		if (ImGui::Button("Close"))
+			isRead = false;
+	
+		if (isRead)
+		{
+	
+			if (selectTaskID == 0)
+			{
+				std::multimap <TaskType, int>::iterator begin = m_subTasksID.begin();
+	
+				if (begin->first == TaskType::Primitive)
+					ImGui::Text("PrimitiveTask");
+				else
+					ImGui::Text("CompoundTask");
+	
+				ImGui::DragInt("taskID", &begin->second, 0, 10);
+			}
+			else
+			{
+				std::multimap <TaskType, int>::reverse_iterator rbegin = m_subTasksID.rbegin();
+	
+				if (rbegin->first == TaskType::Primitive)
+					ImGui::Text("PrimitiveTask");
+				else
+					ImGui::Text("CompoundTask");
+	
+				ImGui::DragInt("taskID", &rbegin->second, 0, 10);
+			}
+		}
+	#pragma endregion
 
 	ImGui::EndChild();
-
 }

@@ -202,4 +202,5 @@ private:
 	std::shared_ptr<PrimitiveTask<ArcherWorldState>> m_primitiveTask;
 	std::shared_ptr<CompoundTask<ArcherWorldState>> m_compoundTask;
 	std::shared_ptr<Method<ArcherWorldState>> m_method;
+	std::shared_ptr<PreCondition<ArcherWorldState>> m_preCondition;
 };

@@ -93,32 +93,39 @@ private:
 template<class State>
 inline void CompoundTask<State>::ImGui()
 {
-	static int select = 0;
+	ImGui::BeginChild("CompoundTask", ImVec2(500, 200), true);
 
-	if (ImGui::Button("Task Save"))
-		ToSave(m_taskName, 0);
-	ImGui::SameLine();
-	if (ImGui::Button("Task Load"))
-		ToLoad(m_fileNames[select]);
+	#pragma region  Save/Load
+		static int select = 0;
+		if (ImGui::Button("Task Save"))
+			ToSave(m_taskName, 0);
+		ImGui::SameLine();
+		if (ImGui::Button("Task Load"))
+			ToLoad(m_fileNames[select]);
+	
+		if (ImGui::Button("File Name Get"))
+		{
+			bool isError = Source::Path::GetFileNames("../Asset/Binary/HTN/CompoundTask/", m_fileNames);
+		}
+	
+		ImGui::Combo("SelectFileNames",
+			&select,
+			vectorGetter,
+			static_cast<void*>(&m_fileNames),
+			static_cast<int>(m_fileNames.size())
+		);
+	#pragma endregion
 
-	if (ImGui::Button("File Name Get"))
-	{
-		bool isError = Source::Path::GetFileNames("../Asset/Binary/HTN/CompoundTask/", m_fileNames);
-	}
+	#pragma region TaskName
+		static char taskName[256] = "";
+		std::string currentTaskName = m_taskName.c_str();
+		if (currentTaskName.size() == 0)currentTaskName = "EmptyTaskName";
+		ImGui::Text("TaskName : %s", currentTaskName.c_str());
+		ImGui::InputText("TaskName", taskName, 256);
+		std::string nameDecided = taskName;
+		if (ImGui::Button("Set TaskName"))
+			m_taskName = nameDecided;
+	#pragma endregion
 
-	ImGui::Combo("SelectFileNames",
-		&select,
-		vectorGetter,
-		static_cast<void*>(&m_fileNames),
-		static_cast<int>(m_fileNames.size())
-	);
-
-	static char taskName[256] = "";
-	std::string currentTaskName = m_taskName.c_str();
-	if (currentTaskName.size() == 0)currentTaskName = "EmptyTaskName";
-	ImGui::Text("TaskName : %s", currentTaskName.c_str());
-	ImGui::InputText("TaskName", taskName, 256);
-	std::string nameDecided = taskName;
-	if (ImGui::Button("Set TaskName"))
-		m_taskName = nameDecided;
+	ImGui::EndChild();
 }

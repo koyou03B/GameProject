@@ -2056,6 +2056,39 @@ ImGui::Combo("Name_of_BoneName",
 		}
 		#pragma endregion
 
+		#pragma region Precondition
+		if (value == 3)
+		{
+			static int selectPreCondition = 0;
+			ImGui::DragInt("Mehod Select", &selectPreCondition, 0, currentSize);
+
+			static bool isSelectPreCondition = false;
+			if (ImGui::Button("Select Method"))
+				isSelectPreCondition = true;
+			ImGui::SameLine();
+			if (ImGui::Button("No Select Method"))
+				isSelectPreCondition = false;
+
+			if (isSelectPreCondition)
+			{
+				auto& preCondition = m_domain.GetPreCondition();
+				static int beforePreConditionSelect = INT_MAX;
+				if (beforePreConditionSelect != selectPreCondition)
+				{
+					if (preCondition[selectPreCondition])
+						m_preCondition = preCondition[selectPreCondition];
+					else
+						m_preCondition = std::make_shared<PreCondition<ArcherWorldState>>();
+				}
+
+				m_preCondition->ImGui();
+				beforePreConditionSelect = selectPreCondition;
+				if (ImGui::Button("Push PreCondition"))
+					preCondition[selectPreCondition] = m_preCondition;
+
+			}
+		}
+		#pragma endregion
 
 	}
 
