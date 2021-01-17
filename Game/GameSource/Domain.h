@@ -100,7 +100,9 @@ public:
 
 	inline std::vector<std::shared_ptr<Method<WorldState>>>& GetMethod() { return m_method; }
 
-	inline std::vector<std::shared_ptr<PreCondition<WorldState>>>& GetPreCondition() { return m_precondition; }
+	inline std::vector<std::shared_ptr<Precondition<WorldState>>>& GetPrecondition() { return m_precondition; }
+
+	inline std::vector<std::shared_ptr<Effect<WorldState>>>& GetEffect() { return m_effect; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -132,7 +134,7 @@ private:
 	std::vector<std::shared_ptr<PrimitiveTask<WorldState>>> m_primitiveTask;
 	std::vector<std::shared_ptr<CompoundTask<WorldState>>> m_compoundTask;
 	std::vector<std::shared_ptr<Method<WorldState>>> m_method;
-	std::vector<std::shared_ptr<PreCondition<WorldState>>> m_precondition;
+	std::vector<std::shared_ptr<Precondition<WorldState>>> m_precondition;
 	std::vector<std::shared_ptr<Effect<WorldState>>> m_effect;
 };
 
@@ -140,5 +142,5 @@ CEREAL_CLASS_VERSION(Domain<ArcherWorldState>, 0);
 CEREAL_CLASS_VERSION(PrimitiveTask<ArcherWorldState>, 0);
 CEREAL_CLASS_VERSION(CompoundTask<ArcherWorldState>, 0);
 CEREAL_CLASS_VERSION(Method<ArcherWorldState>, 0);
-CEREAL_CLASS_VERSION(PreCondition<ArcherWorldState>, 0);
+CEREAL_CLASS_VERSION(Precondition<ArcherWorldState>, 1);
 CEREAL_CLASS_VERSION(Effect<ArcherWorldState>, 0);

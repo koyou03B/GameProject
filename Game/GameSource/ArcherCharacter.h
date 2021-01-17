@@ -193,7 +193,6 @@ private:
 	CharacterParameter::Step				m_stepParm;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	CharacterParameter::BlendAnimation		m_blendAnimation;
-	std::vector<CharacterParameter::Effect> m_effect;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 
 
@@ -202,5 +201,6 @@ private:
 	std::shared_ptr<PrimitiveTask<ArcherWorldState>> m_primitiveTask;
 	std::shared_ptr<CompoundTask<ArcherWorldState>> m_compoundTask;
 	std::shared_ptr<Method<ArcherWorldState>> m_method;
-	std::shared_ptr<PreCondition<ArcherWorldState>> m_preCondition;
+	std::shared_ptr<Precondition<ArcherWorldState>> m_precondition;
+	std::shared_ptr<Effect<ArcherWorldState>> m_effect;
 };

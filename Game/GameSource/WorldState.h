@@ -24,6 +24,7 @@ public:
 		CanAvoid,	//‰ñ”ğ‚Å‚«‚é
 		CanRecover,	//‰ñ•œ‚Å‚«‚é
 		CanRevive,	//‘h¶‚Å‚«‚é
+		AlwaysTrue,	//í‚ÉOK
 		MaxStatus
 	};
 

@@ -1938,6 +1938,46 @@ ImGui::Combo("Name_of_BoneName",
 
 		if (isSelect)
 		{
+			size_t pcSize = m_domain.CommunicateNumber(DomainContents::Precondition);
+			static std::vector<std::string> pcNames;
+			if (pcNames.size() != pcSize)
+			{
+				if (!pcNames.empty())
+					pcNames.clear();
+
+				for (size_t i = 0; i < pcSize; ++i)
+				{
+					pcNames.push_back(m_domain.GetPrecondition().at(i)->GetPreconditionName());
+				}
+			}
+
+			static int selectPC;
+			ImGui::Combo("Select Precondition",
+				&selectPC,
+				vectorGetter,
+				static_cast<void*>(&pcNames),
+				static_cast<int>(pcNames.size())
+			);
+
+			size_t effectSize = m_domain.CommunicateNumber(DomainContents::Effect);
+			static std::vector<std::string> effectNames;
+			if (effectNames.size() != effectSize)
+			{
+				if (!effectNames.empty())
+					effectNames.clear();
+
+				for (size_t i = 0; i < effectSize; ++i)
+				{
+					effectNames.push_back(m_domain.GetEffect().at(i)->GetEffectName());
+				}
+			}
+			static int selectEffect;
+			ImGui::Combo("Select selectEffect",
+				&selectEffect,
+				vectorGetter,
+				static_cast<void*>(&effectNames),
+				static_cast<int>(effectNames.size())
+			);
 			if (value == 0)
 			{
 				auto& task = m_domain.GetPrimitiveTasks();
@@ -1949,9 +1989,14 @@ ImGui::Combo("Name_of_BoneName",
 					else
 						m_primitiveTask = std::make_shared<PrimitiveTask<ArcherWorldState>>();
 				}
-
-				m_primitiveTask->ImGui();
 				beforeTaskSelect = selectTask;
+				m_primitiveTask->ImGui();
+				if (ImGui::Button("Add Precondition"))
+					m_primitiveTask->SetPrecondition(m_domain.GetPrecondition().at(selectPC));
+				ImGui::SameLine();
+				if (ImGui::Button("Add Effect"))
+					m_primitiveTask->SetEffect(m_domain.GetEffect().at(selectEffect));
+				ImGui::SameLine();
 				if (ImGui::Button("Push Task"))
 					task[selectTask] = m_primitiveTask;
 			}
@@ -2059,32 +2104,66 @@ ImGui::Combo("Name_of_BoneName",
 		#pragma region Precondition
 		if (value == 3)
 		{
-			static int selectPreCondition = 0;
-			ImGui::DragInt("Mehod Select", &selectPreCondition, 0, currentSize);
+			static int selectPrecondition = 0;
+			ImGui::DragInt("Precondition Select", &selectPrecondition, 0, currentSize);
 
-			static bool isSelectPreCondition = false;
-			if (ImGui::Button("Select Method"))
-				isSelectPreCondition = true;
+			static bool isSelectPrecondition = false;
+			if (ImGui::Button("Select Precondition"))
+				isSelectPrecondition = true;
 			ImGui::SameLine();
-			if (ImGui::Button("No Select Method"))
-				isSelectPreCondition = false;
+			if (ImGui::Button("No Select Precondition"))
+				isSelectPrecondition = false;
 
-			if (isSelectPreCondition)
+			if (isSelectPrecondition)
 			{
-				auto& preCondition = m_domain.GetPreCondition();
-				static int beforePreConditionSelect = INT_MAX;
-				if (beforePreConditionSelect != selectPreCondition)
+				auto& precondition = m_domain.GetPrecondition();
+				static int beforePreconditionSelect = INT_MAX;
+				if (beforePreconditionSelect != selectPrecondition)
 				{
-					if (preCondition[selectPreCondition])
-						m_preCondition = preCondition[selectPreCondition];
+					if (precondition[selectPrecondition])
+						m_precondition = precondition[selectPrecondition];
 					else
-						m_preCondition = std::make_shared<PreCondition<ArcherWorldState>>();
+						m_precondition = std::make_shared<Precondition<ArcherWorldState>>();
 				}
 
-				m_preCondition->ImGui();
-				beforePreConditionSelect = selectPreCondition;
+				m_precondition->ImGui();
+				beforePreconditionSelect = selectPrecondition;
 				if (ImGui::Button("Push PreCondition"))
-					preCondition[selectPreCondition] = m_preCondition;
+					precondition[selectPrecondition] = m_precondition;
+
+			}
+		}
+		#pragma endregion
+
+		#pragma region Effect
+		if (value == 4)
+		{
+			static int selectEffect = 0;
+			ImGui::DragInt("Effect Select", &selectEffect, 0, currentSize);
+
+			static bool isSelectEffect = false;
+			if (ImGui::Button("Select Effect"))
+				isSelectEffect = true;
+			ImGui::SameLine();
+			if (ImGui::Button("No Select Effect"))
+				isSelectEffect = false;
+
+			if (isSelectEffect)
+			{
+				auto& effect = m_domain.GetEffect();
+				static int beforeEffectSelect = INT_MAX;
+				if (beforeEffectSelect != selectEffect)
+				{
+					if (effect[selectEffect])
+						m_effect = effect[selectEffect];
+					else
+						m_effect = std::make_shared<Effect<ArcherWorldState>>();
+				}
+
+				m_effect->ImGui();
+				beforeEffectSelect = selectEffect;
+				if (ImGui::Button("Insert Effect"))
+					effect[selectEffect] = m_effect;
 
 			}
 		}

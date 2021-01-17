@@ -22,13 +22,13 @@
 //Šî’êƒNƒ‰ƒX
 #pragma endregion
 template<class State>
-class PreCondition
+class Precondition
 {
 public:
-	PreCondition() = default;
-	~PreCondition() = default;
+	Precondition() = default;
+	~Precondition() = default;
 
-	inline bool CheckPreCondition(State& state)
+	inline bool CheckPrecondition(State& state)
 	{
 		if (m_status != WorldState::Status::MaxStatus)
 			return state.GetStatus(m_status) == m_value;
@@ -36,40 +36,24 @@ public:
 		return  state.GetStatus(m_statusForTemp) == m_value;
 	}
 
-	inline void ToSave(std::string name)
-	{
-		std::ofstream ofs;
-		ofs.open((std::string("../Asset/Binary/HTN/PreCondition/") + name + ".bin").c_str(), std::ios::binary);
-		cereal::BinaryOutputArchive o_archive(ofs);
-		o_archive(*this);
-	}
-
-	inline void ToLoad(std::string name, int value)
-	{
-		if (PathFileExistsA((std::string("../Asset/Binary/HTN/PreCondition/") + name).c_str()))
-		{
-			std::ifstream ifs;
-			ifs.open((std::string("../Asset/Binary/HTN/PreCondition/") + name).c_str(), std::ios::binary);
-			cereal::BinaryInputArchive i_archive(ifs);
-			i_archive(*this);
-		}
-	}
-
 	void ImGui();
+
+	inline std::string& GetPreconditionName() { return m_preconditionName; }
+	inline void SetPreconditionName(const std::string name) { m_preconditionName = name; }
+
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
 
-		if (0 <= version)
+		if (1 <= version)
 		{
 			archive
 			(
 				m_status,
 				m_statusForTemp,
 				m_value,
-				m_methodName,
-				m_fileNames
+				m_preconditionName
 			);
 		}
 		else
@@ -79,37 +63,54 @@ public:
 				m_status,
 				m_statusForTemp,
 				m_value,
-				m_methodName,
-				m_fileNames
+				m_preconditionName
 			);
 		}
 	}
+private:
+	inline void ToSave(std::string name)
+	{
+		std::ofstream ofs;
+		ofs.open((std::string("../Asset/Binary/HTN/Precondition/") + name + ".bin").c_str(), std::ios::binary);
+		cereal::BinaryOutputArchive o_archive(ofs);
+		o_archive(*this);
+	}
 
+	inline void ToLoad(std::string name)
+	{
+		if (PathFileExistsA((std::string("../Asset/Binary/HTN/Precondition/") + name).c_str()))
+		{
+			std::ifstream ifs;
+			ifs.open((std::string("../Asset/Binary/HTN/Precondition/") + name).c_str(), std::ios::binary);
+			cereal::BinaryInputArchive i_archive(ifs);
+			i_archive(*this);
+		}
+	}
 private:
 	WorldState::Status m_status;
 	int m_statusForTemp;
 	bool m_value;
 
-	std::string m_methodName;
+	std::string m_preconditionName;
 	std::vector<std::string> m_fileNames;
 };
 
 template<class State>
-inline void PreCondition<State>::ImGui()
+inline void Precondition<State>::ImGui()
 {
-	ImGui::BeginChild("PreCondition", ImVec2(500, 200), true);
+	ImGui::BeginChild("Precondition", ImVec2(500, 200), true);
 
 	#pragma region Save/Load
 		static int select = 0;
-		if (ImGui::Button("PreCondition Save"))
-			ToSave(m_taskName, 0);
+		if (ImGui::Button("Precondition Save"))
+			ToSave(m_preconditionName);
 		ImGui::SameLine();
-		if (ImGui::Button("PreCondition Load"))
+		if (ImGui::Button("Precondition Load"))
 			ToLoad(m_fileNames[select]);
 	
 		if (ImGui::Button("File Name Get"))
 		{
-			bool isError = Source::Path::GetFileNames("../Asset/Binary/HTN/PreCondition/", m_fileNames);
+			bool isError = Source::Path::GetFileNames("../Asset/Binary/HTN/Precondition/", m_fileNames);
 		}
 	
 		ImGui::Combo("SelectFileNames",
@@ -120,15 +121,16 @@ inline void PreCondition<State>::ImGui()
 		);
 	#pragma endregion
 
-	#pragma region TaskName
-		static char taskName[256] = "";
-		std::string currentTaskName = m_taskName.c_str();
-		if (currentTaskName.size() == 0)currentTaskName = "EmptyTaskName";
-		ImGui::Text("TaskName : %s", currentTaskName.c_str());
-		ImGui::InputText("TaskName", taskName, 256);
-		std::string nameDecided = taskName;
-		if (ImGui::Button("Set TaskName"))
-			m_taskName = nameDecided;
+	#pragma region PreconditionName
+		static char preconditionName[256] = "";
+		std::string currentPreconditionName = m_preconditionName.c_str();
+		if (currentPreconditionName.size() == 0)
+			currentPreconditionName = "EmptyPreconditionName";
+		ImGui::Text("PreconditionName : %s", currentPreconditionName.c_str());
+		ImGui::InputText("PreconditionName", preconditionName, 256);
+		std::string nameDecided = preconditionName;
+		if (ImGui::Button("Set PreconditionName"))
+			m_preconditionName = nameDecided;
 	#pragma endregion
 
 	#pragma region Status/StatusToTemplate
@@ -145,6 +147,7 @@ inline void PreCondition<State>::ImGui()
 			"CanAvoid",
 			"CanRecover",
 			"CanRevive",
+			"AlwaysTrue",
 			"MaxStatus"
 			};
 
@@ -166,26 +169,27 @@ inline void PreCondition<State>::ImGui()
 				std::vector<std::string> statusName =
 				{
 				"HoldingArrow"
-				//"CanMove",
-				//"CanAvoid",
-				//"CanRecover",
-				//"CanRevive",
-				//"MaxStatus"
 				};
 
-				int selectStatus = m_status;
+				int selectStatus = m_statusForTemp;
 				ImGui::Combo("ArcherStatusName",
 					&selectStatus,
 					vectorGetter,
 					static_cast<void*>(&statusName),
 					static_cast<int>(statusName.size())
 				);
-				m_status = static_cast<ArcherWorldState::Status>(selectStatus);
+				m_status = WorldState::MaxStatus;
+				m_statusForTemp = static_cast<ArcherWorldState::Status>(selectStatus);
 
 			}
 
 		}
 	#pragma endregion
+
+	#pragma region True/False
+		ImGui::Checkbox(u8"WorldState‚Í—LŒø‚©",&m_value);
+	#pragma endregion
+
 
 	ImGui::EndChild();
 

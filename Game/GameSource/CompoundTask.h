@@ -20,7 +20,7 @@ public:
 		size_t count = m_methods.size();
 		for (size_t i = 0; i < count; ++i)
 		{
-			if (!m_methods[i]->CheckPreCondition(state))
+			if (!m_methods[i]->CheckPrecondition(state))
 				continue;
 
 			PlanList currentPlanList = planList;

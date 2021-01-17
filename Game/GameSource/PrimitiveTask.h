@@ -4,7 +4,7 @@
 #include <memory>
 #include "ITask.h"
 #include "ArcherWorldState.h"
-#include "PreCondition.h"
+#include "Precondition.h"
 #include "Effect.h"
 #include ".\LibrarySource\Function.h"
 #include ".\LibrarySource\vectorCombo.h"
@@ -12,7 +12,7 @@
 //PrimitiveTaskは
 //世界に影響を与える行動を表すもの
 //次の3つの要素でできている
-//PreCondition	タスクを実行するために必要な条件
+//Precondition	タスクを実行するために必要な条件
 //Operator		オペレータは実際に行う行動
 //Effect		オペレータの行動でワールドステートがどのように変わるか
 #pragma endregion
@@ -29,7 +29,7 @@ public:
 		size_t count = m_preconditions.size();
 		for (size_t i = 0; i < count; ++i)
 		{
-			if (m_preconditions[i]->CheckPreCondition(state))
+			if (m_preconditions[i]->CheckPrecondition(state))
 				return false;
 		}
 
@@ -47,6 +47,15 @@ public:
 	inline std::string& GetTaskName() { return m_taskName; }
 	inline void SetTaskName(const std::string name) { m_taskName = name; }
 
+	inline void SetPrecondition(std::shared_ptr<Precondition<State>>& precondition)
+	{
+		m_preconditions.push_back(precondition);
+	}
+
+	inline void SetEffect(std::shared_ptr<Effect<State>>& effect)
+	{
+		m_effects.push_back(effect);
+	}
 	void ImGui();
 
 	template<class T>
@@ -95,7 +104,7 @@ private:
 	}
 private:
 	std::string m_taskName;
-	std::vector<std::shared_ptr<PreCondition<State>>>	m_preconditions;
+	std::vector<std::shared_ptr<Precondition<State>>>	m_preconditions;
 	std::vector<std::shared_ptr<Effect<State>>>			m_effects;
 	uint32_t m_operatorID = 0;
 	std::vector<std::string> m_fileNames;
@@ -138,5 +147,40 @@ inline void PrimitiveTask<State>::ImGui()
 			m_taskName = nameDecided;
 	#pragma endregion
 	
+	#pragma region Precondition
+		int pcSize = static_cast<int>(m_preconditions.size());
+		ImGui::DragInt("Precondition Size", &pcSize, 0, 10);
+
+		if (!m_preconditions.empty())
+		{
+			static int selectPC = 0;
+			ImGui::DragInt("Precondition Select", &selectPC, 0, 10);
+			auto preCondition = m_preconditions.at(selectPC);
+			std::string pcName = preCondition->GetPreconditionName();
+			ImGui::Text("PreconditionName : %s", pcName.c_str());
+
+
+		}
+
+	#pragma endregion
+
+	#pragma region Effect
+		int effectSize = static_cast<int>(m_effects.size());
+		ImGui::DragInt("Effect Size", &effectSize, 0, 10);
+
+		if (!m_effects.empty())
+		{
+			static int selectEffect = 0;
+			ImGui::DragInt("Effect Select", &selectEffect, 0, 10);
+			auto effect = m_effects.at(selectEffect);
+			std::string effectName = effect->GetEffectName();
+			ImGui::Text("EffectName : %s", effectName.c_str());
+
+			if (ImGui::Button("Delete"))
+				m_effects.erase(m_effects.begin());
+		}
+
+	#pragma endregion
+
 	ImGui::EndChild();
 }

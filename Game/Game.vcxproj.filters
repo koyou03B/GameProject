@@ -538,9 +538,6 @@
     <ClInclude Include="GameSource\Effect.h">
       <Filter>Headers\HTN\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\PreCondition.h">
-      <Filter>Headers\HTN\PreCondition</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\Method.h">
       <Filter>Headers\HTN\Metod</Filter>
     </ClInclude>
@@ -561,6 +558,9 @@
     </ClInclude>
     <ClInclude Include="GameSource\PlanList.h">
       <Filter>Headers\HTN\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Precondition.h">
+      <Filter>Headers\HTN\PreCondition</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

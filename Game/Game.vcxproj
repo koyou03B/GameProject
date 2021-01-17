@@ -75,7 +75,7 @@
     <ClInclude Include="GameSource\HTNPlanner.h" />
     <ClInclude Include="GameSource\HTNPlanRunner.h" />
     <ClInclude Include="GameSource\Method.h" />
-    <ClInclude Include="GameSource\PreCondition.h" />
+    <ClInclude Include="GameSource\Precondition.h" />
     <ClInclude Include="GameSource\Effect.h" />
     <ClInclude Include="GameSource\EnemyBehaviorNode.h" />
     <ClInclude Include="GameSource\EnemyBehaviorTask.h" />

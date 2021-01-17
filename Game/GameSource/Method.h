@@ -4,7 +4,7 @@
 #include <map>
 #include "ITask.h"
 #include "ArcherWorldState.h"
-#include "PreCondition.h"
+#include "Precondition.h"
 #include "PrimitiveTask.h"
 
 #include <cereal/types/map.hpp>
@@ -36,12 +36,12 @@ public:
 		m_subTasks.push_back(uState);
 	}
 
-	bool CheckPreCondition(State state)
+	bool CheckPrecondition(State state)
 	{
 		size_t count = m_preconditions.size();
 		for (size_t i = 0; i < count; ++i)
 		{
-			if (!m_preconditions[i]->CheckPreCondition(state))
+			if (!m_preconditions[i]->CheckPrecondition(state))
 				return  false;
 		}
 		return true;
@@ -106,7 +106,7 @@ public:
 		}
 	}
 public:
-	std::vector<std::shared_ptr<PreCondition<State>>> m_preconditions;
+	std::vector<std::shared_ptr<Precondition<State>>> m_preconditions;
 	std::multimap <TaskType, int>	m_subTasksID;
 	std::vector<std::shared_ptr<ITask<State>>> m_subTasks;
 
