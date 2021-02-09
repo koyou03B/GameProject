@@ -1,109 +1,55 @@
 #pragma once
 #include "CharacterAI.h"
 #include "CharacterParameter.h"
-#include ".\LibrarySource\Vector.h"
-#include "ArcherWorldState.h"
-#include "PrimitiveTask.h"
-#include "CompoundTask.h"
-#include "HTNPlanner.h"
 #include "Domain.h"
+#include "ArcherWorldState.h"
+#include "DomainConverter.h"
+#include "HTN/PlanRunner.h"
 
-struct AimMode
-{
-	CharacterParameter::Camera	aimCameraParm;
-	CharacterParameter::Move	aimMoveParm;
+#include ".\LibrarySource\Vector.h"
 
-	VECTOR3F arrowAngle = {};
-	uint32_t meshNomber = 0;
-	uint32_t boneNomber = 0;
-	uint32_t frameCount = 0;
-
-	float aimIdleBlendRatio = 0.0f;
-	float aimMoveBlendRatio = 0.0f;
-	float aimShotBlendRatio = 0.0f;
-	float aimStepBlendRatio = 0.0f;
-
-	float collsionVector = 0.0f;
-	bool isAim = false;
-	bool isStep = false;
-	bool isShot = false;
-	uint32_t serialVersion = 0;
-	template<class T>
-	void serialize(T& archive, const std::uint32_t version)
-	{
-		if (serialVersion <= version)
-		{
-			archive
-			(
-				aimCameraParm,
-				aimMoveParm,
-				arrowAngle,
-				meshNomber,
-				boneNomber,
-				aimIdleBlendRatio,
-				aimMoveBlendRatio,
-				aimShotBlendRatio,
-				aimStepBlendRatio,
-				collsionVector,
-				frameCount
-			);
-		}
-		else
-		{
-			archive
-			(
-				aimCameraParm,
-				aimMoveParm,
-				arrowAngle,
-				meshNomber,
-				boneNomber,
-				aimIdleBlendRatio,
-				aimMoveBlendRatio,
-				aimShotBlendRatio,
-				aimStepBlendRatio,
-				collsionVector,
-				frameCount
-			);
-		}
-	}
-};
-
-CEREAL_CLASS_VERSION(AimMode, 12);
 
 class Archer : public CharacterAI
 {
 public:
 
 	Archer() = default;
-	~Archer() = default;
+	~Archer()
+	{
+		m_domain.Release();
+	};
 
 	void Init() override;
-
 	void Update(float& elapsedTime) override;
-
 	void Render(ID3D11DeviceContext* immediateContext) override;
-
 	void ImGui(ID3D11Device* device) override;
 
 	void Impact() override;
-
 	void RestAnimationIdle();
+
+	bool FindAttackPoint();
+	bool MoveRun();
+	bool SetArrow();
+	bool Shoot();
+	bool SearchAttackDirection();
+	bool Avoid();
+	bool Heal();
+	bool Revival();
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 6)
+		if (version >= 1)
 		{
 			archive
 			(
-				m_blendAnimation,
 				m_attackParm,
 				m_statusParm,
 				m_moveParm,
 				m_cameraParm,
 				m_stepParm,
 				m_collision,
-				m_aimMode
+				m_domainConverter
 			);
 		}
 		else
@@ -116,38 +62,24 @@ public:
 				m_moveParm,
 				m_cameraParm,
 				m_stepParm,
-				m_collision,
-				m_aimMode
+				m_collision
 			);
 		}
 	}
 private:
+	void Move(float& elapsedTime);
 
 	void ChangeCharacter();
-
-	void Move(float& elapsedTime);
-	void Step(float& elapsedTime);
-	void Stepping(float& elapsedTime);
 	bool KnockBack();
-
-	void Aim();
-	void Aiming();
-	void AimMove(float& elapsedTime);
-	void AimStep(float& elapsedTime);
-	void AimStepping(float& elapsedTime);
-	void Shot();
-
-
+	bool JudgeBlendRatio(const bool isLoop = true);
+	bool Rotate(VECTOR3F& target,const float turnSpeed, bool isLookEnemy = false);
 	void SerialVersionUpdate(uint32_t version)
 	{
-		m_blendAnimation.serialVersion = version;
 		m_statusParm.serialVersion = version;
 		m_moveParm.serialVersion = version;
 		m_cameraParm.serialVersion = version;
 		m_stepParm.serialVersion = version;
-		m_aimMode.serialVersion = version;
-		m_aimMode.aimCameraParm.serialVersion = version;
-		m_aimMode.aimMoveParm.serialVersion = version;
+
 		for (auto& atk : m_attackParm)
 		{
 			atk.serialVersion = version;
@@ -163,17 +95,19 @@ private:
 	enum Animation
 	{
 		IDLE,
-		WALK,
 		RUN,
+		RUNL,
+		RUNR,
+		NOUSE,
 		DIVE,
-		AIMRECOIL,
+		SET,
 		AIM,
-		AIMWALKUNDER,
-		ARROWSHOT,
-		IMPACT,
-		DEATH,
-		SPELL,
-		AIMWALK
+		SHOOT,
+		HIT,
+		HITBIG,
+		HEAL,
+		REVIVAL,
+		DEATH
 	} m_animationType = IDLE;
 
 	enum class Mode
@@ -184,23 +118,32 @@ private:
 
 	Mode m_mode = Mode::Moving;
 
+	const float	kSafeAreaRadius = 30.0f;
+	const float	kBlendValue = 0.1f;
+	const float	kViewRange = 0.15f;
+	const float	kAimRange = 0.05f;
+	const float	kPredictionViewRangeE = 0.8f;
+
+	int m_state;
 	float m_padDeadLine;
 	float m_elapsedTime;
+	float m_MoveOffset;
+	bool m_hasBlendAnim;
+	bool m_hasRotated;
+	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
 
-	AimMode									m_aimMode;
+	VECTOR3F m_attackPoint;
+	VECTOR3F m_safeAreaSclae;
+	
 	Source::Input::Input*					m_input;
-
 	CharacterParameter::Step				m_stepParm;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 
-
-	HTNPlanner m_planner;
-	Domain<ArcherWorldState> m_domain;
-	std::shared_ptr<PrimitiveTask<ArcherWorldState>> m_primitiveTask;
-	std::shared_ptr<CompoundTask<ArcherWorldState>> m_compoundTask;
-	std::shared_ptr<Method<ArcherWorldState>> m_method;
-	std::shared_ptr<Precondition<ArcherWorldState>> m_precondition;
-	std::shared_ptr<Effect<ArcherWorldState>> m_effect;
+	ArcherWorldState						m_worldState;
+	Domain<ArcherWorldState, Archer>		m_domain;
+	DomainConverter							m_domainConverter;
+	PlanRunner<ArcherWorldState, Archer>	m_planRunner;
+	std::vector<TaskBase<ArcherWorldState, Archer>*> m_currentPlanList;
 };

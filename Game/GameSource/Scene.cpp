@@ -80,4 +80,5 @@ void SceneManager::Render(ID3D11DeviceContext* immediateContext, float elapsedTi
 void SceneManager::Uninitialize()
 {
 	m_activeScene->Uninitialize();
+
 }

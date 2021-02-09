@@ -22,6 +22,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imstb_rectpack.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imstb_textedit.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imstb_truetype.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\WICTextureLoader\WICTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\BillBoard.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\BlendingJob.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.h" />
@@ -63,6 +64,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\WICTextureLoader\WICTextureLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BillBoard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\BlendingJob.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Fog.cpp" />

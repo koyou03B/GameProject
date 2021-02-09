@@ -79,7 +79,7 @@ private:
 	const uint32_t	kAttackSlowTimer = 30;
 	const uint32_t	kTurnChanseTimer = 70;
 	const uint32_t  kDamageRatio = 7;
-	const uint32_t	kAttackTimer[2] = { 50,75 };
+	const uint32_t	kAttackTimer[2] = { 50,90 };
 	const float		kAccel = 50.0f;
 	const float		kMinDirection = 27.0f;
 

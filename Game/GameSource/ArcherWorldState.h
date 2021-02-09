@@ -9,27 +9,13 @@
 //‹¤’Ê‚µ‚Ä’l‚Ì•Û‚ğ‚µ‚Ä‚à‚ç‚¤‚É‚Í
 //intŒ^‚ª—LŒø‚Æ”»’f
 #pragma endregion
+
 class ArcherWorldState : public WorldState
 {
 public:
     ArcherWorldState() = default;
     ~ArcherWorldState() = default;
+public:
+    bool isSetArrow = false;
 
-    enum ArcherStatus
-    {
-        HoldingArrow,   //–î‚ğ‚©‚Ü‚¦‚Ä‚¢‚é
-        Max_ArcherStatus
-    };
-
-    inline bool GetStatus(const int status)
-    {
-        return m_aHasBecame[status];
-    }
-
-    inline void SetStatus(const int status,bool value)
-    {
-        m_aHasBecame[status] = value;
-    }
-private:
-    bool m_aHasBecame[Max_ArcherStatus]; 
 };

@@ -19,7 +19,7 @@ namespace Source
 			m_fov = 30 * 0.01745f;
 			m_aspect = 0.0f;
 			m_nearZ = 0.1f;
-			m_farZ = 3000.0f;
+			m_farZ = 50000.0f;
 
 			m_rotateX = 0.0f;
 			m_rotateY = 0.0f;

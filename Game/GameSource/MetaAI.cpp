@@ -132,7 +132,6 @@ void MetaAI::AddPlayer(uint16_t& playerID, std::shared_ptr<CharacterAI> player)
 	m_players.emplace_back(player);
 }
 
-#include "FighterState.h"
 void MetaAI::DeterminationOfPlayer(int id, MessengType type)
 {
 	switch (type)
@@ -140,10 +139,6 @@ void MetaAI::DeterminationOfPlayer(int id, MessengType type)
 	case MessengType::CALL_FRIEND:
 		break;
 	case MessengType::CALL_HELP:
-		if (m_players[id]->GetChangeComand().isPlay)
-		{
-			m_players[id]->SetState(MovekState::GetInstance());
-		}
 
 		break;
 	case MessengType::CHANGE_PLAYER:
@@ -321,7 +316,9 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 			target.scale = playerColl.scale;
 
 			Collision collision;
-			if (collision.JudgeSphereAndSphere(mySelf, target))
+			bool invincibleMode = m_players[id]->GetJudgeElement().invincibleMode;
+
+			if (!invincibleMode && collision.JudgeSphereAndSphere(mySelf, target))
 			{
 				++m_enemys[id]->GetJudgeElement().attackHitCount;
 				float attackPoint = m_enemys[id]->GetStatus().attackPoint;
@@ -369,7 +366,9 @@ bool MetaAI::CollisionEnemyAttack(int id, CharacterParameter::Collision& collisi
 			target.scale = playerColl.scale;
 
 			Collision collision;
-			if (collision.JudgeCapsuleAndSphere(mySelf, target))
+			bool invincibleMode = m_players[id]->GetJudgeElement().invincibleMode;
+
+			if (!invincibleMode && collision.JudgeCapsuleAndSphere(mySelf, target))
 			{
 				++m_enemys[id]->GetJudgeElement().attackHitCount;
 				player->GetStatus().life -= m_enemys[id]->GetStatus().attackPoint;

@@ -107,7 +107,8 @@ VECTOR3F SphereLinearVec3( VECTOR3F start, VECTOR3F end, float t)
 {
 	// 2ベクトル間の角度（鋭角側）
 	float angle = acosf(DotVec3(start, end));
-
+	if (!std::isfinite(angle))
+		angle = 0.0f;
 	// sinθ
 	float SinTh = sinf(angle);
 

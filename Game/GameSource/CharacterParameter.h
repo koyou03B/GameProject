@@ -31,7 +31,6 @@ public:
 			DirectX::XMMATRIX S, R, T;
 			S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
 			R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
-			//	R = DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(m_angle.x,m_angle.y,m_angle.z,m_angle.w));
 			T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
 			DirectX::XMStoreFloat4x4(&world, S * R * T);
 		}
@@ -407,6 +406,7 @@ public:
 	struct DebugObjects
 	{
 		DebugObject debugObject;
+		DebugObject controlPoint;
 		std::unique_ptr<Source::GeometricPrimitive::GeometricCube> GetCube(ID3D11Device* device,std::string fileName) 
 		{
 			return std::make_unique<Source::GeometricPrimitive::GeometricCube>(device, fileName);

@@ -238,13 +238,17 @@ int EnemyFarAttack1Task::JudgeTurnChace(Enemy* enemy)
 void EnemyFarAttack1Task::JudgeVectorDirection(Enemy* enemy)
 {
 	m_nVecToTarget = {};
+	VECTOR3F angle = enemy->GetWorldTransform().angle;
+	DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+	FLOAT4X4 rotationM = {};
+	DirectX::XMStoreFloat4x4(&rotationM, R);
+	VECTOR3F axis = { rotationM._11,rotationM._12,rotationM._13 };
+
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-	FLOAT4X4 world = enemy->GetWorldTransform().world;
-	VECTOR3F axis = { world._11,world._12,world._13 };
 
 	axis = NormalizeVec3(axis);
 
-	VECTOR3F movePoint = enemyPosition + axis * -40.0f;
+	VECTOR3F movePoint = enemyPosition + axis * -30.0f;
 	Collision::Circle stageRange;
 	stageRange.radius = 81.0f;
 	stageRange.position = {};
@@ -252,12 +256,12 @@ void EnemyFarAttack1Task::JudgeVectorDirection(Enemy* enemy)
 	Collision coll;
 
 	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
-		m_nVecToTarget = axis;
+		m_nVecToTarget = axis * -1.0f;
 	else
 	{
-		 movePoint = enemyPosition + axis * 40.0f;
+		 movePoint = enemyPosition + axis * 30.0f;
 		 if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
-			 m_nVecToTarget = axis * -1.0f;
+			 m_nVecToTarget = axis;
 	}
 
 	int targetID = enemy->GetJudgeElement().targetID;
@@ -392,25 +396,23 @@ bool EnemyFarAttack1Task::AttackMove(Enemy* enemy)
 	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 
 	auto& enemyTransform = enemy->GetWorldTransform();
-	auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
 
 	if (!m_setTarget)
 	{
+		auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
+		m_targetPosition = player->GetWorldTransform().position;
+		VECTOR3F targetDistance = m_targetPosition - enemyTransform.position;
+		m_nVecToTarget = NormalizeVec3(targetDistance);
 		m_setTarget = true;
-		m_accel = 75.0f;
+		m_accel = 85.0f;
 	}
 	float dist = ToDistVec3(m_targetPosition - enemyTransform.position);
-	if (dist <= 60.0f && !m_isNear)
+	if (dist <= 45.0f && !m_isNear)
 	{
 		m_isNear = true;
 		return true;
 	}
-	if (dist >= 30.0f)
-	{
-		m_targetPosition = player->GetWorldTransform().position;
-		VECTOR3F targetDistance = m_targetPosition - enemy->GetWorldTransform().position;
-		m_nVecToTarget = NormalizeVec3(targetDistance);
-	}
+
 	if (m_isNear)
 	{
 		//dist *= (1.0f / 3.f);
@@ -420,18 +422,20 @@ bool EnemyFarAttack1Task::AttackMove(Enemy* enemy)
 	}
 	else
 	{
-
+		VECTOR3F targetDistance = m_targetPosition - enemy->GetWorldTransform().position;
+		VECTOR3F targetNormal = NormalizeVec3(targetDistance);
+		float targetDist = ToDistVec3(targetDistance);
 		VECTOR3F angle = enemy->GetWorldTransform().angle;
 		VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
 		front = NormalizeVec3(front);
 
-		float dot = DotVec3(front, m_nVecToTarget);
+		float dot = DotVec3(front, targetNormal);
 		float rot = 1.0f - dot;
 		float limit = enemy->GetMove().turnSpeed;
 		if (rot > limit)
 			rot = limit;
 
-		VECTOR3F cross = CrossVec3(front, m_nVecToTarget);
+		VECTOR3F cross = CrossVec3(front, targetNormal);
 		if (cross.y > 0.0f)
 		{
 			enemyTransform.angle.y += rot;
@@ -439,6 +443,7 @@ bool EnemyFarAttack1Task::AttackMove(Enemy* enemy)
 		else
 		{
 			enemyTransform.angle.y -= rot;
+
 		}
 	}
 

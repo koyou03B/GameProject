@@ -1,6 +1,5 @@
 #pragma once
 #include <d3d11.h>
-#include <DirectXTex.h>
 #include <wrl.h>
 #include "Misc.h"
 #include"Vector.h"

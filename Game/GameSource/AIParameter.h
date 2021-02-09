@@ -118,6 +118,7 @@ public:
 		uint32_t attackHitCount = 0; //
 		uint32_t moveCount = 0;   //WaitNode
 		uint32_t attackCount = 0; //WaitNode
+		bool invincibleMode = false;
 		int targetID = 0;
 	};
 

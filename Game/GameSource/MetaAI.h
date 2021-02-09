@@ -73,7 +73,7 @@ public:
 				break;
 		}
 		//Archer
-		return &(*m_players[0]);
+		return &(*m_players[i]);
 	};
 	inline std::unique_ptr<Scope>& GetScope() { return m_scope; }
 	inline bool GetIsFinish(const int charaID) { return m_isFinish[charaID]; }

@@ -79,27 +79,27 @@ void Fighter::Init()
 void Fighter::Update(float& elapsedTime)
 {
 	m_elapsedTime = elapsedTime;
-	//if (m_changeParm.isPlay)
-	//{
-	//}
-
-	m_input = PAD.GetPad(0);
-	if (m_input != nullptr)
+	if (m_changeParm.isPlay)
 	{
-		if (!KnockBack())
+
+		m_input = PAD.GetPad(0);
+		if (m_input != nullptr)
 		{
-			if (!m_adjustAnimation)
+			if (!KnockBack())
 			{
-				Move(m_elapsedTime);
+				if (!m_adjustAnimation)
+				{
+					Move(m_elapsedTime);
 
-				Step(m_elapsedTime);
+					Step(m_elapsedTime);
 
-				Attack(m_elapsedTime);
+					Attack(m_elapsedTime);
+				}
 			}
 		}
-	}
 
-	RestAnimationIdle();
+		RestAnimationIdle();
+	}
 
 	{
 		m_blendAnimation.animationBlend.Update(m_model, elapsedTime);
@@ -314,7 +314,10 @@ void Fighter::Stepping(float& elapsedTime)
 				m_blendAnimation.animationBlend.ReleaseSampler(0);
 			}
 			m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+			m_judgeElementPram.invincibleMode = false;
 		}
+		else
+			m_judgeElementPram.invincibleMode = true;
 	}
 
 	//*****************
@@ -345,6 +348,11 @@ void Fighter::Stepping(float& elapsedTime)
 
 	if (!isNextStep)
 	{
+		if (0 < currentAnimationFrame && currentAnimationFrame < 30)
+			m_judgeElementPram.invincibleMode = true;
+		else
+			m_judgeElementPram.invincibleMode = false;
+
 		//***************************************************
 		// If input A button, isNextStep true.
 		// Else, If there is a stick input, MOVE processing.

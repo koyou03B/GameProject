@@ -277,6 +277,8 @@ void EnemyFarAttack0Task::BackFlipTurn(Enemy* enemy)
 		{
 			enemyTransform.angle.y -= rot;
 		}
+		enemyTransform.WorldUpdate();
+
 	}
 }
 
@@ -316,13 +318,17 @@ int EnemyFarAttack0Task::JudgeTurnChace(Enemy* enemy)
 void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 {
 	m_nVecToTarget = {};
+	VECTOR3F angle = enemy->GetWorldTransform().angle;
+	DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+	FLOAT4X4 rotationM = {};
+	DirectX::XMStoreFloat4x4(&rotationM, R);
+	VECTOR3F axis = { rotationM._11,rotationM._12,rotationM._13 };
+
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-	FLOAT4X4 world = enemy->GetWorldTransform().world;
-	VECTOR3F axis = { world._11,world._12,world._13 };
 
 	axis = NormalizeVec3(axis);
 
-	VECTOR3F movePoint = enemyPosition + axis * 40.0f;
+	VECTOR3F movePoint = enemyPosition + axis * -30.0f;
 	Collision::Circle stageRange;
 	stageRange.radius = 81.0f;
 	stageRange.position = {};
@@ -330,13 +336,14 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 	Collision coll;
 
 	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
-		m_nVecToTarget = axis;
+		m_nVecToTarget = axis * -1.0f;
 	else
 	{
-		movePoint = enemyPosition + axis * -40.0f;
+		movePoint = enemyPosition + axis * 30.0f;
 		if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
-			m_nVecToTarget = axis * -1.0f;
+			m_nVecToTarget = axis;
 	}
+
 	int targetID = enemy->GetJudgeElement().targetID;
 	auto& player = MESSENGER.CallPlayerInstance(targetID);
 	VECTOR3F playerPosition = player->GetWorldTransform().position;
@@ -346,7 +353,6 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 
 	if (!coll.JudgeCircleAndpoint(stageRange, VECTOR2F(movePoint.x, movePoint.z)))
 		m_nVecToTarget = axis;
-
 }
 
 bool EnemyFarAttack0Task::IsTurnChase(Enemy* enemy)

@@ -328,7 +328,6 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 		m_metaAI->RenderOfPlayer(immediateContext, 0);
 		//Archer
 		m_metaAI->RenderOfPlayer(immediateContext, 1);
-		//m_metaAI->RenderOfPlayer(immediateContext, 2);
 		
 		m_frameBuffer[2]->Deactivate(immediateContext);
 		m_fog->Blit(immediateContext, m_frameBuffer[2]->GetRenderTargetShaderResourceView().Get(), m_frameBuffer[2]->GetDepthStencilShaderResourceView().Get());
@@ -571,12 +570,13 @@ void Game::ImGui()
 			m_uiAdominist->ImGui();
 		}
 
+		if (ImGui::CollapsingHeader("Player"))
 		{
 			auto& player = m_metaAI->GetPlayers();
 
 			player[0]->ImGui(Framework::GetInstance().GetDevice());
 			player[1]->ImGui(Framework::GetInstance().GetDevice());
-
+#if 0
 			//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
 			////Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
 			//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
@@ -599,8 +599,8 @@ void Game::ImGui()
 			//ImGui::SameLine();
 			//if (ImGui::Button("Archer"))
 			//{
-			//	player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::ARCHER;
-			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
+			//	player[0]->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::ARCHER;
+			//	MESSENGER.MessageFromPlayer(player[0]->GetID(), MessengType::CHANGE_PLAYER);
 			//}
 			//ImGui::SameLine();
 			//if (ImGui::Button("Fighter"))
@@ -608,17 +608,21 @@ void Game::ImGui()
 			//	player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::FIGHTER;
 			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
 			//}
+#endif
+		}
+
+		if (ImGui::CollapsingHeader("Enemy"))
+		{
+			m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice(), 0);
+		}
+
+		if (ImGui::CollapsingHeader("Stage"))
+		{
+			m_stage->ImGui();
 		}
 	}
 
 	ImGui::End();
-	if (!ActivateScene.GetIsStart())
-	{
-		m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice(), 0);
-		m_stage->ImGui();
-		ArrowInstamce.ImGui(Framework::GetInstance().GetDevice());
-		m_metaAI->ImGuiOfScope(Framework::GetInstance().GetDevice());
-	}
 #endif
 }
 
@@ -631,6 +635,9 @@ void Game::Uninitialize()
 	m_metaAI->Release();
 	m_uiAdominist->Release();
 	Source::ModelData::fbxLoader().Release();
+	Source::Shader::ReleaseAllCachedVertexShaders();
+	Source::Shader::ReleaseAllCachedPixelShaders();
+	Source::Texture::ReleaseAllCachedTextures();
 }
 
 VECTOR3F Game::DistancePlayerToEnemy()

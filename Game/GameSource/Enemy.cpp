@@ -1282,9 +1282,14 @@ void Enemy::ImGui(ID3D11Device* device)
 	}
 
 
-	float scale = m_transformParm.angle.y;
-	ImGui::SliderFloat("Scale", &scale, 0.0f * 0.01745f, 360.0f * 0.01745f);
-	m_transformParm.angle = VECTOR3F(0.0f, scale, 0.0f);
+	float posX = m_transformParm.position.x;
+	float posZ = m_transformParm.position.z;
+	ImGui::SliderFloat("POS X", &posX, -100.0f, 100.0f);
+	ImGui::SliderFloat("POS Z", &posZ, -100.0f, 100.0f);
+
+	m_transformParm.position.x = posX;
+	m_transformParm.position.z = posZ;
+
 	m_transformParm.WorldUpdate();
 
 

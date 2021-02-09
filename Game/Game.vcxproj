@@ -49,10 +49,8 @@
     <ClCompile Include="GameSource\EnemyWaitNode.cpp" />
     <ClCompile Include="GameSource\EnemyWalkTask.cpp" />
     <ClCompile Include="GameSource\FighterCharacter.cpp" />
-    <ClCompile Include="GameSource\FighterState.cpp" />
     <ClCompile Include="GameSource\MetaAI.cpp" />
     <ClCompile Include="GameSource\PartialBlendAnimation.cpp" />
-    <ClCompile Include="GameSource\PrimitiveTask.cpp" />
     <ClCompile Include="GameSource\SaberCharacter.cpp" />
     <ClCompile Include="GameSource\Scene.cpp" />
     <ClCompile Include="GameSource\SceneClear.cpp" />
@@ -70,13 +68,11 @@
     <ClInclude Include="GameSource\AIParameter.h" />
     <ClInclude Include="GameSource\ArcherWorldState.h" />
     <ClInclude Include="GameSource\Arrow.h" />
-    <ClInclude Include="GameSource\CompoundTask.h" />
+    <ClInclude Include="GameSource\AttackMethod.h" />
+    <ClInclude Include="GameSource\AttackPrecondition.h" />
+    <ClInclude Include="GameSource\AttackTask.h" />
     <ClInclude Include="GameSource\Domain.h" />
-    <ClInclude Include="GameSource\HTNPlanner.h" />
-    <ClInclude Include="GameSource\HTNPlanRunner.h" />
-    <ClInclude Include="GameSource\Method.h" />
-    <ClInclude Include="GameSource\Precondition.h" />
-    <ClInclude Include="GameSource\Effect.h" />
+    <ClInclude Include="GameSource\DomainConverter.h" />
     <ClInclude Include="GameSource\EnemyBehaviorNode.h" />
     <ClInclude Include="GameSource\EnemyBehaviorTask.h" />
     <ClInclude Include="GameSource\EnemyBehaviorTree.h" />
@@ -103,11 +99,18 @@
     <ClInclude Include="GameSource\EnemyUnSpecialAttackNode.h" />
     <ClInclude Include="GameSource\EnemyWaitNode.h" />
     <ClInclude Include="GameSource\EnemyWalkTask.h" />
-    <ClInclude Include="GameSource\ITask.h" />
+    <ClInclude Include="GameSource\FindAPMethod.h" />
+    <ClInclude Include="GameSource\FindAPTask.h" />
+    <ClInclude Include="GameSource\HTNAllHeader.h" />
+    <ClInclude Include="GameSource\MoveTask.h" />
+    <ClInclude Include="GameSource\PrepareAttackMethod.h" />
+    <ClInclude Include="GameSource\PrepareAttackPrecondition.h" />
+    <ClInclude Include="GameSource\PrepareAttackTask.h" />
+    <ClInclude Include="GameSource\SetArrowTask.h" />
+    <ClInclude Include="GameSource\ShootArrowTask.h" />
+    <ClInclude Include="GameSource\TypeToRegister.h" />
     <ClInclude Include="GameSource\WorldState.h" />
     <ClInclude Include="GameSource\Market.h" />
-    <ClInclude Include="GameSource\PlanList.h" />
-    <ClInclude Include="GameSource\PrimitiveTask.h" />
     <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />
@@ -206,7 +209,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;..\Solution\HTNPlanning;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -228,14 +231,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\cereal-1.2.2\include;..\Solution\HTNPlanning\;..\External_libraries\imgui;..\Library\Source;..\External_libraries\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\External_libraries\DirectXTK-master\Bin\Desktop_2015\$(PlatformName)\$(Configuration);..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);..\External_libraries\DirectXTex\Bin\Desktop_2015\$(PlatformName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x64\debug\libfbxsdk-md.lib;..\External_libraries\DirectXTex\Bin\Desktop_2015\x64\Debug\DirectXTex.lib;..\External_libraries\DirectXTK-master\Bin\Desktop_2015\x64\Debug\DirectXTK.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x64\debug\libfbxsdk-md.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <FxCompile>
@@ -253,7 +256,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\External_libraries\imgui;..\Library\Source;..\Solution\HTNPlanning;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -278,15 +281,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External_libraries\DirectXTK-master\Inc;..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\DirectXTex;..\External_libraries\cereal-1.2.2\include;..\Library\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External_libraries\FBX SDK\2016.1.2\include;..\External_libraries\cereal-1.2.2\include;..\Solution\HTNPlanning\;..\Library\Source;..\External_libraries\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x64\Release\libfbxsdk-md.lib;..\External_libraries\DirectXTex\Bin\Desktop_2015\x64\Release\DirectXTex.lib;..\External_libraries\DirectXTK-master\Bin\Desktop_2015\x64\Release\DirectXTK.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\External_libraries\DirectXTK-master\Bin\Desktop_2015\$(PlatformName)\$(Configuration);..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);..\External_libraries\DirectXTex\Bin\Desktop_2015\$(PlatformName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\x64\Release\libfbxsdk-mt.lib;dxguid.lib;d3d11.lib;dxgi.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\External_libraries\FBX SDK\2016.1.2\lib\vs2015\$(PlatformShortName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>

@@ -321,7 +321,7 @@ bool EnemyFarAttack2Task::IsTurnChase(Enemy* enemy)
 	uint32_t currentAnimationTime = enemy->GetBlendAnimation().animationBlend.GetAnimationTime(0);
 	float cosTheta = acosf(dot);
 	float frontValue = enemy->GetStandardValue().viewFrontValue;
-	if (cosTheta <= frontValue && currentAnimationTime == 0)
+	if (cosTheta <= frontValue )
 	{
 		m_hasFinishedBlend = false;
 		return true;

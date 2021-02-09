@@ -154,6 +154,9 @@
     <Filter Include="Sources\Shaders\Vignette">
       <UniqueIdentifier>{cf495f99-741a-44e6-bfbf-3bc6d23230cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="WICTex">
+      <UniqueIdentifier>{b285ac84-fe53-4ca8-b33f-b1b687d5b033}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imconfig.h">
@@ -279,6 +282,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.h">
       <Filter>Headers\Shaders\Vignette</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\External_libraries\WICTextureLoader\WICTextureLoader.h">
+      <Filter>WICTex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\imgui\imgui.cpp">
@@ -379,6 +385,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)LibrarySource\Vignette.cpp">
       <Filter>Sources\Shaders\Vignette</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\External_libraries\WICTextureLoader\WICTextureLoader.cpp">
+      <Filter>WICTex</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

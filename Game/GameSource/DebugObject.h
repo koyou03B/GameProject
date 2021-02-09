@@ -12,7 +12,7 @@ public:
 	DebugObject() : m_isWireFrame(0) {};
 	~DebugObject() = default;
 
-	void Render(ID3D11DeviceContext* immediateContext,const VECTOR4F& scrollValue,bool isScroll);
+	void Render(ID3D11DeviceContext* immediateContext,const VECTOR4F& scrollValue,bool isWireFrame = true);
 
 	template<typename T>
 	void AddGeometricPrimitive(std::unique_ptr<T> geometry)
@@ -56,5 +56,5 @@ public:
 private:
 	std::unique_ptr<Source::GeometricPrimitive::GeometricPrimitive> m_geomtry;
 	std::vector<Source::InstanceData::InstanceData> m_instanceData;
-	bool m_isWireFrame;
+	bool m_isWireFrame=true;
 };

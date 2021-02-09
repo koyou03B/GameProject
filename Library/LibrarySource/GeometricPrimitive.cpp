@@ -42,8 +42,6 @@ namespace Source
 			delete[] instances;
 		}
 
-
-
 		void GeometricPrimitive::CreateBuffers(ID3D11Device* device, Vertex* vertices, int num_vertices, u_int* indices, int num_indices)
 		{
 			HRESULT hr;
@@ -136,7 +134,7 @@ namespace Source
 			}
 			immediateContext->Unmap(m_instanceBuffer.Get(), 0);
 
-			m_constantBuffer->data.scrollValue += scrollValue;
+			//m_constantBuffer->data.scrollValue += scrollValue;
 			m_constantBuffer->Activate(immediateContext, SLOT0, true, true);
 
 			immediateContext->PSSetShaderResources(SLOT0, 1, m_shaderResourceView.GetAddressOf());
@@ -156,8 +154,6 @@ namespace Source
 			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
 
 		}
-
-
 
 		GeometricCube::GeometricCube(ID3D11Device* device, std::string fileName) : GeometricPrimitive(device,fileName)
 		{

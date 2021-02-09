@@ -58,9 +58,9 @@ public:
 	}
 	~Framework()
 	{
-		Source::Shader::ReleaseAllCachedVertexShaders();
-		Source::Shader::ReleaseAllCachedPixelShaders();
-		Source::Texture::ReleaseAllCachedTextures();
+		//Source::Shader::ReleaseAllCachedVertexShaders();
+		//Source::Shader::ReleaseAllCachedPixelShaders();
+		//Source::Texture::ReleaseAllCachedTextures();
 		m_swapChain->SetFullscreenState(FALSE, nullptr);
 		
 	}
@@ -226,7 +226,8 @@ public:
 				float mspf = 1000.0f / fps;
 				std::ostringstream outs;
 				outs.precision(6);
-				outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
+				//outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
+				outs << "REGION MATE";
 				SetWindowTextA(m_hwnd, outs.str().c_str());
 
 				// Reset for next average.

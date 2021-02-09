@@ -1,4 +1,3 @@
-#include <DirectXTex.h>
 #include <wrl.h>
 #include <memory>
 #include <map>
@@ -12,6 +11,7 @@
 #include "misc.h"
 #include "Framework.h"
 #include "Camera.h"
+
 
 namespace Source
 {
@@ -131,48 +131,21 @@ namespace Source
 				return S_OK;
 			}
 
-			DirectX::TexMetadata  metaData;
-			DirectX::ScratchImage image;
-
 
 			std::wstring extension = PathFindExtensionW(filenameW);
 			std::transform(extension.begin(), extension.end(), extension.begin(), ::towlower);
-
+			ID3D11Resource* resource = nullptr;
 			if (extension == L".png" || extension == L".jpeg" || extension == L".jpg" || extension == L".JPG" || extension == L".bmp")
 			{
-				HRESULT hr = DirectX::LoadFromWICFile(filenameW, 0, &metaData, image);
+				HRESULT hr = DirectX::CreateWICTextureFromFile(device, filenameW, &resource, shaderResourceView);
 				if (FAILED(hr))
 					assert(!"Unable to load texture from file");
 
-			}
-			else if (extension == L".dds")
-			{
-				hr = DirectX::LoadFromDDSFile(filenameW, 0, &metaData, image);
-				if (FAILED(hr))
-					assert(!"Unable to load texture from file");
-			}
-			else if (extension == L".tga")
-			{
-				HRESULT	hr = DirectX::LoadFromTGAFile(filenameW, &metaData, image);
-				if (FAILED(hr))
-					assert(!"Unable to load texture from file");
 			}
 			else
 			{
 				assert(!"File format not found");
 			}
-
-			hr = DirectX::CreateShaderResourceViewEx(
-				device,								 //	ID3D11Device* pDevice,
-				image.GetImages(),					 //	const Image* srcImages,
-				image.GetImageCount(),				 //	size_t nimages,
-				metaData,							 //	const TexMetadata& metadata,
-				D3D11_USAGE_DEFAULT,				 //	D3D11_USAGE usage,
-				D3D11_BIND_SHADER_RESOURCE,			 //	unsigned int bindFlags,
-				0,									 //	unsigned int cpuAccessFlags,
-				D3D11_RESOURCE_MISC_TEXTURECUBE,	 //	unsigned int miscFlags,
-				sRGB,								 //	bool forceSRGB,
-				shaderResourceView);								 //	ID3D11ShaderResourceView** ppSRV);
 
 			if (FAILED(hr))
 			{
@@ -180,7 +153,7 @@ namespace Source
 			}
 
 			g_cachedTextures.insert(std::make_pair(filenameW, *shaderResourceView));
-
+			resource->Release();
 			return hr;
 
 		}
@@ -278,30 +251,30 @@ namespace Source
 
 		bool GetFileNames(std::string folderPath, std::vector<std::string>& fileNames)
 		{
-			HANDLE hFind;
-			WIN32_FIND_DATA win32fd;
-			std::string searchName = folderPath + "\\*";
+			//HANDLE hFind;
+			//WIN32_FIND_DATA win32fd;
+			//std::string searchName = folderPath + "\\*";
 
-			hFind = FindFirstFile(searchName.c_str(), &win32fd);
+			//hFind = FindFirstFile(searchName.c_str(), &win32fd);
 
-			if (hFind == INVALID_HANDLE_VALUE) 
-			{
-				return false;
-			}
+			//if (hFind == INVALID_HANDLE_VALUE) 
+			//{
+			//	return false;
+			//}
 
-			/* 指定のディレクトリ以下のファイル名をファイルがなくなるまで取得する */
-			do {
-				if (win32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-					/* ディレクトリの場合は何もしない */
-					//printf("directory\n");
-				}
-				else {
-					/* ファイルが見つかったらVector配列に保存する */
-					fileNames.push_back(win32fd.cFileName);
-				}
-			} while (FindNextFile(hFind, &win32fd));
+			///* 指定のディレクトリ以下のファイル名をファイルがなくなるまで取得する */
+			//do {
+			//	if (win32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			//		/* ディレクトリの場合は何もしない */
+			//		//printf("directory\n");
+			//	}
+			//	else {
+			//		/* ファイルが見つかったらVector配列に保存する */
+			//		fileNames.push_back(win32fd.cFileName);
+			//	}
+			//} while (FindNextFile(hFind, &win32fd));
 
-			FindClose(hFind);
+			//FindClose(hFind);
 
 			return true;
 		}

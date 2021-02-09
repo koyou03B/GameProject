@@ -15,29 +15,15 @@ class WorldState
 {
 public:
 	WorldState() = default;
-	~WorldState() = default;
+	virtual ~WorldState() = default;
 
-	enum Status
-	{
-		CanAttack,	//UŒ‚‚Å‚«‚é
-		CanMove,	//ˆÚ“®‚Å‚«‚é
-		CanAvoid,	//‰ñ”ğ‚Å‚«‚é
-		CanRecover,	//‰ñ•œ‚Å‚«‚é
-		CanRevive,	//‘h¶‚Å‚«‚é
-		AlwaysTrue,	//í‚ÉOK
-		MaxStatus
-	};
-
-	inline bool GetStatus(const Status status)
-	{
-		return m_hasBecome[static_cast<int>(status)];
-	}
-
-	inline void SetStatus(const Status status, const bool value)
-	{
-		m_hasBecome[static_cast<int>(status)] = value;
-	}
-
-protected:
-	bool m_hasBecome[Status::MaxStatus];
+	bool canAttack = false;			//UŒ‚‚Å‚«‚é
+	bool canPrepareAttack = false;	//UŒ‚€”õ‚Í‚Å‚«‚Ä‚¢‚é
+	bool canFindAttackPoint = false;//UŒ‚’n“_‚ğ”­Œ©‚µ‚Ä‚¢‚é
+	bool canMove = false;			//ˆÚ“®‚Å‚«‚é
+	bool canRecover = false;		//‰ñ•œ‚Å‚«‚é
+	bool canRevive = false;			//‘h¶‚Å‚«‚é
+	
+	bool isTargeted = false;		//•W“I‚É‚³‚ê‚Ä‚¢‚é
+	bool hasDamaged = false;		//UŒ‚‚ğó‚¯‚Ä‚¢‚é
 };

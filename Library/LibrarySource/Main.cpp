@@ -57,13 +57,13 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = _T("Project2-2");
+	wcex.lpszClassName = _T("REGION MATE");
 	wcex.hIconSm = 0;
 	RegisterClassEx(&wcex);
 
 	RECT rc = { 0, 0, 1980, 1070 };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-	HWND hwnd = CreateWindow(_T("Project2-2"), _T("Project2-2"), WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, instance, NULL);
+	HWND hwnd = CreateWindow(_T("REGION MATE"), _T("REGION MATE"), WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, instance, NULL);
 	ShowWindow(hwnd, cmd_show);
 
 

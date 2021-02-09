@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Library", "Library\Library.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{2A4B4768-7341-4A12-A6BD-8B7B3286FBED}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTN", "Solution\HTNPlanning\HTN.vcxproj", "{A9160511-F5D9-473F-A35F-E64350BC35FF}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Library\Library.vcxitems*{0eb6e8be-b7e8-4798-86f0-7824ac581a96}*SharedItemsImports = 9
@@ -27,6 +29,14 @@ Global
 		{2A4B4768-7341-4A12-A6BD-8B7B3286FBED}.Release|x64.Build.0 = Release|x64
 		{2A4B4768-7341-4A12-A6BD-8B7B3286FBED}.Release|x86.ActiveCfg = Release|Win32
 		{2A4B4768-7341-4A12-A6BD-8B7B3286FBED}.Release|x86.Build.0 = Release|Win32
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Debug|x64.ActiveCfg = Debug|x64
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Debug|x64.Build.0 = Debug|x64
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Debug|x86.ActiveCfg = Debug|Win32
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Debug|x86.Build.0 = Debug|Win32
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Release|x64.ActiveCfg = Release|x64
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Release|x64.Build.0 = Release|x64
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Release|x86.ActiveCfg = Release|Win32
+		{A9160511-F5D9-473F-A35F-E64350BC35FF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

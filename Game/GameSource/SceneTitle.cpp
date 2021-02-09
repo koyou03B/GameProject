@@ -314,6 +314,10 @@ void Title::ImGui()
 			if (ImGui::Button("Set"))
 				m_input->SetVibrationParm(UVECTOR2(vibration[0], vibration[1]), timer);
 		}
+
+		ImGui::Begin("CameraEditer");
+		Source::CameraControlle::CameraManager().GetInstance()->Editor();
+		ImGui::End();
 	}
 
 	ImGui::End();
@@ -323,4 +327,7 @@ void Title::ImGui()
 void Title::Uninitialize()
 {
 	m_tObjectAdominist->Release();
+	Source::Shader::ReleaseAllCachedVertexShaders();
+	Source::Shader::ReleaseAllCachedPixelShaders();
+	Source::Texture::ReleaseAllCachedTextures();
 }

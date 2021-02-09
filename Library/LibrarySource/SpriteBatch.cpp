@@ -53,7 +53,7 @@ namespace Source
 			}
 			delete[] instances;
 
-			bool sRGB = false;
+			bool sRGB = true;
 
 			m_spriteVS = std::make_unique<Source::Shader::VertexShader<Vertex>>(device, "../Library/LibraryShader/SpriteBatch_vs.cso");
 

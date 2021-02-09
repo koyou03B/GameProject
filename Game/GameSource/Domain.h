@@ -1,146 +1,285 @@
 #pragma once
-#include "CompoundTask.h"
-#include "Method.h"
-#include "PreCondition.h"
-#include "Effect.h"
+#include <memory>
+#include <map>
+#include <vector>
+#include <minmax.h>
 
-enum class DomainContents
-{
-	PrimitiveTask,
-	CompoundTask,
-	Method,
-	Precondition,
-	Effect
-};
+#include "HTNAllHeader.h"
+#include "TypeToRegister.h"
+#include "DomainConverter.h"
 
-template<class WorldState>
+template<class TWorldState, class TChara>
 class Domain
 {
 public:
 	Domain() = default;
 	~Domain() = default;
+	
+	void CompleteCompoundTask(const CompoundTaskType& type);
+	void AllSet(DomainConverter& converter);
+	void Release();
 
-	inline void ToSave(std::string name)
-	{
-		std::ofstream ofs;
-		ofs.open((std::string("../Asset/Binary/HTN/Domain/") + name + ".bin").c_str(), std::ios::binary);
-		cereal::BinaryOutputArchive o_archive(ofs);
-		o_archive(*this);
-	}
+	std::map < PrimitiveTaskType,
+		std::shared_ptr<PrimitiveTask<TWorldState, TChara>>>& GetPrimitiveTasks() { return m_primitiveTasks; }
+	std::map<CompoundTaskType,
+		std::shared_ptr<CompoundTask<TWorldState, TChara>>>& GetCompoundTasks() { return m_compoundTasks; }
+	std::map<MethodType,
+		std::shared_ptr<Method<TWorldState, TChara>>>& GetMethods() { return m_methods; }
+	std::map<PreconditionType,
+		std::shared_ptr<PreconditionBase<TWorldState>>>& GetPreconditions() { return m_preconditions; }
 
-	inline void ToLoad(std::string name)
-	{
-		if (PathFileExistsA((std::string("../Asset/Binary/HTN/Domain/")+ name + ".bin").c_str()))
-		{
-			std::ifstream ifs;
-			ifs.open((std::string("../Asset/Binary/HTN/Domain/")+ name + ".bin").c_str(), std::ios::binary);
-			cereal::BinaryInputArchive i_archive(ifs);
-			i_archive(*this);
-		}
-	}
+	std::shared_ptr<PrimitiveTask<TWorldState, TChara>> GetPrimitiveTask(const PrimitiveTaskType& type);
+	std::shared_ptr<CompoundTask<TWorldState, TChara>>	GetCompoundTask(const CompoundTaskType& type);
+	std::shared_ptr<Method<TWorldState, TChara>>		GetMethod(const MethodType& type);
+	std::shared_ptr<PreconditionBase<TWorldState>>		GetPrecondition(const PreconditionType& type);
 
-	inline void ToResize(const int size, DomainContents value)
-	{
-		switch (value)
-		{
-		case DomainContents::PrimitiveTask:
-			m_primitiveTask.resize(size);
-			break;
-		case DomainContents::CompoundTask:
-			m_compoundTask.resize(size);
-			break;
-		case DomainContents::Method:
-			m_method.resize(size);
-			break;
-		case DomainContents::Precondition:
-			m_precondition.resize(size);
-			break;
-		case DomainContents::Effect:
-			m_effect.resize(size);
-			break;
-		}
-	}
-
-	inline int CommunicateNumber(DomainContents value)
-	{
-		size_t count = 0;
-		switch (value)
-		{
-		case DomainContents::PrimitiveTask:
-			count = m_primitiveTask.size();
-			break;
-		case DomainContents::CompoundTask:
-			count = m_compoundTask.size();
-			break;
-		case DomainContents::Method:
-			count = m_method.size();
-			break;
-		case DomainContents::Precondition:
-			count = m_precondition.size();
-			break;
-		case DomainContents::Effect:
-			count = m_effect.size();
-			break;
-		default:
-			break;
-		}
-
-		return static_cast<int>(count);
-	}
-
-	inline std::vector<std::shared_ptr<PrimitiveTask<WorldState>>>& GetPrimitiveTasks()
-	{
-		return m_primitiveTask;
-	}
-
-	inline std::vector<std::shared_ptr<CompoundTask<WorldState>>>& GetCompoundTasks()
-	{
-		return m_compoundTask;
-	}
-
-	inline std::vector<std::shared_ptr<Method<WorldState>>>& GetMethod() { return m_method; }
-
-	inline std::vector<std::shared_ptr<Precondition<WorldState>>>& GetPrecondition() { return m_precondition; }
-
-	inline std::vector<std::shared_ptr<Effect<WorldState>>>& GetEffect() { return m_effect; }
-	template<class T>
-	void serialize(T& archive, const std::uint32_t version)
-	{
-		if (0 <= version)
-		{
-			archive
-			(
-				m_primitiveTask,
-				m_compoundTask,
-				m_method,
-				m_precondition,
-				m_effect
-			);
-		}
-		else
-		{
-			archive
-			(
-				m_primitiveTask,
-				m_compoundTask,
-				m_method,
-				m_precondition,
-				m_effect
-			);
-		}
-	}
+	void SetPrimitiveTask(const PrimitiveTaskType type);
+	void SetCompoundTask(const CompoundTaskType type);
+	void SetMethod(const MethodType type);
+	void SetPrecondition(const PreconditionType type);
 
 private:
-	std::vector<std::shared_ptr<PrimitiveTask<WorldState>>> m_primitiveTask;
-	std::vector<std::shared_ptr<CompoundTask<WorldState>>> m_compoundTask;
-	std::vector<std::shared_ptr<Method<WorldState>>> m_method;
-	std::vector<std::shared_ptr<Precondition<WorldState>>> m_precondition;
-	std::vector<std::shared_ptr<Effect<WorldState>>> m_effect;
+	void CompleteAttackTask();
+	void CompletePrepareAttackTask();
+private:
+	std::map < PrimitiveTaskType,
+		std::shared_ptr<PrimitiveTask<TWorldState, TChara>>> m_primitiveTasks;
+	std::map<CompoundTaskType,
+		std::shared_ptr<CompoundTask<TWorldState, TChara>>> m_compoundTasks;
+	std::map<MethodType,
+		std::shared_ptr<Method<TWorldState, TChara>>> m_methods;
+	std::map<PreconditionType,
+		std::shared_ptr<PreconditionBase<TWorldState>>> m_preconditions;
 };
 
-CEREAL_CLASS_VERSION(Domain<ArcherWorldState>, 0);
-CEREAL_CLASS_VERSION(PrimitiveTask<ArcherWorldState>, 0);
-CEREAL_CLASS_VERSION(CompoundTask<ArcherWorldState>, 0);
-CEREAL_CLASS_VERSION(Method<ArcherWorldState>, 0);
-CEREAL_CLASS_VERSION(Precondition<ArcherWorldState>, 1);
-CEREAL_CLASS_VERSION(Effect<ArcherWorldState>, 0);
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::CompleteCompoundTask(const CompoundTaskType& type)
+{
+	switch (type)
+	{
+	case Attack:
+		CompleteAttackTask();
+		break;
+	case PrepareAttack:
+		CompletePrepareAttackTask();
+		break;
+	}
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::AllSet(DomainConverter& converter)
+{
+	auto primitiveTaskType = converter.GetPrimitiveTaskType();
+	auto compoundTaskType = converter.GetCompoundTaskType();
+	auto methodType = converter.GetMethodType();
+	auto preconditionType = converter.GetPreconditionType();
+
+	int ptCount = static_cast<int>(primitiveTaskType.size());
+	int ctCount = static_cast<int>(compoundTaskType.size());
+	int meCount = static_cast<int>(methodType.size());
+	int prCount = static_cast<int>(preconditionType.size());
+	int count = std::max({ ptCount, ctCount, meCount, prCount });
+
+	for (int i = 0; i < count; ++i)
+	{
+		if (ptCount > i)
+			SetPrimitiveTask(primitiveTaskType.at(i));
+		if (ctCount > i)
+			SetCompoundTask(compoundTaskType.at(i));
+		if (meCount > i)
+			SetMethod(methodType.at(i));
+		if (prCount > i)
+			SetPrecondition(preconditionType.at(i));
+	}
+
+	CompleteCompoundTask(CompoundTaskType::Attack);
+	CompleteCompoundTask(CompoundTaskType::PrepareAttack);
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::Release()
+{
+	int ptCount = static_cast<int>(PrimitiveTaskType::PTaskEnd);
+	int ctCount = static_cast<int>(CompoundTaskType::CTaskEnd);
+	int meCount = static_cast<int>(MethodType::MethodEnd);
+	int prCount = static_cast<int>(PreconditionType::PreconditionEnd);
+	int count = std::max({ ptCount, ctCount, meCount, prCount });
+
+	for (int i = 0; i < count; ++i)
+	{
+		if (ptCount > i)
+			m_primitiveTasks.find(static_cast<PrimitiveTaskType>(i))->second.reset();
+		if (prCount > i)
+			m_preconditions.find(static_cast<PreconditionType>(i))->second.reset();
+		if (meCount > i)
+			m_methods.find(static_cast<MethodType>(i))->second.reset();
+		if (ctCount > i)
+			m_compoundTasks.find(static_cast<CompoundTaskType>(i))->second.reset();
+
+
+	}
+	m_primitiveTasks.clear();
+	m_compoundTasks.clear();
+	m_methods.clear();
+	m_preconditions.clear();
+}
+
+template<class TWorldState, class TChara>
+inline std::shared_ptr<PrimitiveTask<TWorldState, TChara>> Domain<TWorldState, TChara>::GetPrimitiveTask(const PrimitiveTaskType& type)
+{
+	auto it = m_primitiveTasks.find(type);
+	if (it != m_primitiveTasks.end())
+		return it->second;
+
+	return nullptr;
+}
+
+template<class TWorldState, class TChara>
+inline std::shared_ptr<CompoundTask<TWorldState, TChara>> Domain<TWorldState, TChara>::GetCompoundTask(const CompoundTaskType& type)
+{
+	auto it =  m_compoundTasks.find(type);
+	if (it != m_compoundTasks.end())
+		return it->second;
+
+	return nullptr;
+}
+
+template<class TWorldState, class TChara>
+inline std::shared_ptr<Method<TWorldState, TChara>> Domain<TWorldState, TChara>::GetMethod(const MethodType& type)
+{
+	auto it = m_methods.find(type);
+	if (it != m_methods.end())
+		return it->second;
+
+	return nullptr;
+}
+
+template<class TWorldState, class TChara>
+inline std::shared_ptr<PreconditionBase<TWorldState>> Domain<TWorldState, TChara>::GetPrecondition(const PreconditionType& type)
+{
+	auto it = m_preconditions.find(type);
+	if (it != m_preconditions.end())
+		return it->second;
+
+	return nullptr;
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::SetPrimitiveTask(const PrimitiveTaskType type)
+{
+	std::shared_ptr<PrimitiveTask<TWorldState, TChara>> task;
+	switch (type)
+	{
+	case FindAttackPoint:
+		task = std::make_shared<FindAPTask<TWorldState, TChara>>();
+		break;
+	case Move:
+		task = std::make_shared<MoveTask<TWorldState, TChara>>();
+		break;
+	case SetArrow:
+		task = std::make_shared<SetArrowTask<TWorldState, TChara>>();
+		break;
+	case ShootArrow:
+		task = std::make_shared<ShootArrowTask<TWorldState, TChara>>();
+		break;
+	}
+	m_primitiveTasks.insert(std::make_pair(type, task));
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::SetCompoundTask(const CompoundTaskType type)
+{
+	std::shared_ptr<CompoundTask<TWorldState, TChara>> task;
+	switch (type)
+	{
+	case Attack:
+		task = std::make_shared<AttackTask<TWorldState, TChara>>();
+		break;
+	case PrepareAttack:
+		task = std::make_shared<PrepareAttackTask<TWorldState, TChara>>();
+		break;
+	}
+	m_compoundTasks.insert(std::make_pair(type, task));
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::SetMethod(const MethodType type)
+{
+	std::shared_ptr<Method<TWorldState, TChara>> method;
+	switch (type)
+	{
+	case AtkMethod:
+		method = std::make_shared<AttackMethod<TWorldState, TChara>>();
+		break;
+	case FindAPMethod:
+		method = std::make_shared<FindAttackPointMethod<TWorldState, TChara>>();
+		break;
+	case PrepareAtkMethod:
+		method = std::make_shared<PrepareAttackMethod<TWorldState, TChara>>();
+		break;
+	}
+	m_methods.insert(std::make_pair(type, method));
+
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::SetPrecondition(const PreconditionType type)
+{
+	std::shared_ptr<PreconditionBase<TWorldState>> precondition;
+	switch (type)
+	{
+	case AtkPrecondition:
+		precondition = std::make_shared<AttackPrecondition<TWorldState>>();
+		break;
+	case PrepareAtkPrecondition:
+		precondition = std::make_shared<PrepareAttackPrecondition<TWorldState>>();
+		break;
+	case TruePrecondition:
+		precondition = std::make_shared<PreconditionBase<TWorldState>>();
+		break;
+	}
+	m_preconditions.insert(std::make_pair(type, precondition));
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::CompleteAttackTask()
+{
+	auto atkTask = GetCompoundTask(CompoundTaskType::Attack);
+	
+	auto setArrowTask = GetPrimitiveTask(PrimitiveTaskType::SetArrow);
+	auto shootArrowTask = GetPrimitiveTask(PrimitiveTaskType::ShootArrow);
+	auto atkPrecondition = GetPrecondition(PreconditionType::AtkPrecondition);
+	auto atkMethod = GetMethod(MethodType::AtkMethod);
+
+	atkMethod->AddSubTask(GetPrimitiveTask(PrimitiveTaskType::SetArrow));
+	atkMethod->AddSubTask(shootArrowTask);
+	atkMethod->AddPrecondition(atkPrecondition);
+	atkTask->AddMethod(atkMethod);
+
+	auto prepareAttackTask = GetCompoundTask(CompoundTaskType::PrepareAttack);
+	auto prepareAtkMethod = GetMethod(MethodType::PrepareAtkMethod);
+	auto prepareAtkPrecondition = GetPrecondition(PreconditionType::PrepareAtkPrecondition);
+
+	prepareAtkMethod->AddSubTask(prepareAttackTask);
+	prepareAtkMethod->AddSubTask(atkTask);
+	prepareAtkMethod->AddPrecondition(prepareAtkPrecondition);
+	atkTask->AddMethod(prepareAtkMethod);
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::CompletePrepareAttackTask()
+{
+	auto prepareAtkTask = GetCompoundTask(CompoundTaskType::PrepareAttack);
+
+	auto findAttackPointTask = GetPrimitiveTask(PrimitiveTaskType::FindAttackPoint);
+	auto moveTask = GetPrimitiveTask(PrimitiveTaskType::Move);
+	auto truePrecondition = GetPrecondition(PreconditionType::TruePrecondition);
+	auto findAPMethod = GetMethod(MethodType::FindAPMethod);
+
+	findAPMethod->AddSubTask(findAttackPointTask);
+	findAPMethod->AddSubTask(moveTask);
+	findAPMethod->AddPrecondition(truePrecondition);
+	
+	prepareAtkTask->AddMethod(findAPMethod);
+}
+
