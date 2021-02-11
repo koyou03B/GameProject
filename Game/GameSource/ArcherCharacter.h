@@ -31,7 +31,7 @@ public:
 	bool MoveRun();
 	bool SetArrow();
 	bool Shoot();
-	bool SearchAttackDirection();
+	bool FindDirectionToAvoid();
 	bool Avoid();
 	bool Heal();
 	bool Revival();
@@ -133,6 +133,7 @@ private:
 	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
 
 	VECTOR3F m_attackPoint;
+	VECTOR3F m_avoidPoint;
 	VECTOR3F m_safeAreaSclae;
 	
 	Source::Input::Input*					m_input;

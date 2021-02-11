@@ -571,5 +571,26 @@
     <ClInclude Include="GameSource\TypeToRegister.h">
       <Filter>Headers\HTN\Domain</Filter>
     </ClInclude>
+    <ClInclude Include="GameSource\FindDATask.h">
+      <Filter>Headers\HTN\Task\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AvoidPrecondition.h">
+      <Filter>Headers\HTN\PreCondition</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\FindDAPrecondition.h">
+      <Filter>Headers\HTN\PreCondition</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AvoidingTask.h">
+      <Filter>Headers\HTN\Task\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AvoidTask.h">
+      <Filter>Headers\HTN\Task\Compound</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AvoidMethod.h">
+      <Filter>Headers\HTN\Metod</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\FindDAMethod.h">
+      <Filter>Headers\HTN\Metod</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

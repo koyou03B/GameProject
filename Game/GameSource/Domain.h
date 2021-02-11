@@ -41,6 +41,7 @@ public:
 private:
 	void CompleteAttackTask();
 	void CompletePrepareAttackTask();
+	void CompleteAvoidTask();
 private:
 	std::map < PrimitiveTaskType,
 		std::shared_ptr<PrimitiveTask<TWorldState, TChara>>> m_primitiveTasks;
@@ -57,12 +58,14 @@ inline void Domain<TWorldState, TChara>::CompleteCompoundTask(const CompoundTask
 {
 	switch (type)
 	{
-	case Attack:
+	case CompoundTaskType::Attack:
 		CompleteAttackTask();
 		break;
-	case PrepareAttack:
+	case CompoundTaskType::PrepareAttack:
 		CompletePrepareAttackTask();
 		break;
+	case CompoundTaskType::Avoid:
+		CompleteAvoidTask();
 	}
 }
 
@@ -170,17 +173,23 @@ inline void Domain<TWorldState, TChara>::SetPrimitiveTask(const PrimitiveTaskTyp
 	std::shared_ptr<PrimitiveTask<TWorldState, TChara>> task;
 	switch (type)
 	{
-	case FindAttackPoint:
+	case PrimitiveTaskType::FindAttackPoint:
 		task = std::make_shared<FindAPTask<TWorldState, TChara>>();
 		break;
-	case Move:
+	case PrimitiveTaskType::Move:
 		task = std::make_shared<MoveTask<TWorldState, TChara>>();
 		break;
-	case SetArrow:
+	case PrimitiveTaskType::SetArrow:
 		task = std::make_shared<SetArrowTask<TWorldState, TChara>>();
 		break;
-	case ShootArrow:
+	case PrimitiveTaskType::ShootArrow:
 		task = std::make_shared<ShootArrowTask<TWorldState, TChara>>();
+		break;
+	case PrimitiveTaskType::Avoiding:
+		task = std::make_shared<AvoidingTask<TWorldState, TChara>>();
+		break;
+	case PrimitiveTaskType::FindDirectionAvoid:
+		task = std::make_shared<FindDATask<TWorldState, TChara>>();
 		break;
 	}
 	m_primitiveTasks.insert(std::make_pair(type, task));
@@ -192,11 +201,14 @@ inline void Domain<TWorldState, TChara>::SetCompoundTask(const CompoundTaskType 
 	std::shared_ptr<CompoundTask<TWorldState, TChara>> task;
 	switch (type)
 	{
-	case Attack:
+	case CompoundTaskType::Attack:
 		task = std::make_shared<AttackTask<TWorldState, TChara>>();
 		break;
-	case PrepareAttack:
+	case CompoundTaskType::PrepareAttack:
 		task = std::make_shared<PrepareAttackTask<TWorldState, TChara>>();
+		break;
+	case CompoundTaskType::Avoid:
+		task = std::make_shared<AvoidTask<TWorldState, TChara>>();
 		break;
 	}
 	m_compoundTasks.insert(std::make_pair(type, task));
@@ -208,14 +220,20 @@ inline void Domain<TWorldState, TChara>::SetMethod(const MethodType type)
 	std::shared_ptr<Method<TWorldState, TChara>> method;
 	switch (type)
 	{
-	case AtkMethod:
+	case MethodType::AtkMethod:
 		method = std::make_shared<AttackMethod<TWorldState, TChara>>();
 		break;
-	case FindAPMethod:
+	case MethodType::FindAPMethod:
 		method = std::make_shared<FindAttackPointMethod<TWorldState, TChara>>();
 		break;
-	case PrepareAtkMethod:
+	case MethodType::PrepareAtkMethod:
 		method = std::make_shared<PrepareAttackMethod<TWorldState, TChara>>();
+		break;
+	case MethodType::AvoidMethod:
+		method = std::make_shared<AvoidMethod<TWorldState, TChara>>();
+		break;
+	case MethodType::FindDAMethod:
+		method = std::make_shared<FindDAMethod<TWorldState, TChara>>();
 		break;
 	}
 	m_methods.insert(std::make_pair(type, method));
@@ -228,14 +246,20 @@ inline void Domain<TWorldState, TChara>::SetPrecondition(const PreconditionType 
 	std::shared_ptr<PreconditionBase<TWorldState>> precondition;
 	switch (type)
 	{
-	case AtkPrecondition:
+	case PreconditionType::AtkPrecondition:
 		precondition = std::make_shared<AttackPrecondition<TWorldState>>();
 		break;
-	case PrepareAtkPrecondition:
+	case PreconditionType::PrepareAtkPrecondition:
 		precondition = std::make_shared<PrepareAttackPrecondition<TWorldState>>();
 		break;
-	case TruePrecondition:
+	case PreconditionType::TruePrecondition:
 		precondition = std::make_shared<PreconditionBase<TWorldState>>();
+		break;
+	case PreconditionType::AvoidPrecondition:
+		precondition = std::make_shared<AvoidPrecondition<TWorldState>>();
+		break;
+	case PreconditionType::FindDAPrecondition:
+		precondition = std::make_shared<FindDAPrecondition<TWorldState>>();
 		break;
 	}
 	m_preconditions.insert(std::make_pair(type, precondition));
@@ -281,5 +305,28 @@ inline void Domain<TWorldState, TChara>::CompletePrepareAttackTask()
 	findAPMethod->AddPrecondition(truePrecondition);
 	
 	prepareAtkTask->AddMethod(findAPMethod);
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::CompleteAvoidTask()
+{
+	auto avoidTask = GetCompoundTask(CompoundTaskType::Avoid);
+	
+	auto avoidingTask = GetPrimitiveTask(PrimitiveTaskType::Avoiding);
+	auto avoidPrecondition = GetPrecondition(PreconditionType::AvoidPrecondition);
+	auto avoidMethod = GetMethod(MethodType::AvoidMethod);
+	avoidMethod->AddSubTask(avoidingTask);
+	avoidMethod->AddPrecondition(avoidPrecondition);
+
+	auto findDirectionAvoidTask = GetPrimitiveTask(PrimitiveTaskType::FindDirectionAvoid);
+	auto findDAPrecondition = GetPrecondition(PreconditionType::FindDAPrecondition);
+	auto findDAMethod = GetMethod(MethodType::FindDAMethod);
+	findDAMethod->AddSubTask(findDirectionAvoidTask);
+	findDAMethod->AddSubTask(avoidTask);
+	findDAMethod->AddPrecondition(findDAPrecondition);
+
+	avoidTask->AddMethod(avoidMethod);
+	avoidTask->AddMethod(findDAMethod);
+
 }
 

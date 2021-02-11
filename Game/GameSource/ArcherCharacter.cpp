@@ -56,6 +56,8 @@ void Archer::Init()
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::Move)->SetOperator(&Archer::MoveRun);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::SetArrow)->SetOperator(&Archer::SetArrow);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::ShootArrow)->SetOperator(&Archer::Shoot);
+	m_domain.GetPrimitiveTask(PrimitiveTaskType::Avoiding)->SetOperator(&Archer::Avoid);
+	m_domain.GetPrimitiveTask(PrimitiveTaskType::FindDirectionAvoid)->SetOperator(&Archer::FindDirectionToAvoid);
 
 	m_statusParm.life = 12000;
 	m_stepParm.maxSpeed = m_stepParm.speed;
@@ -120,10 +122,10 @@ void Archer::Update(float& elapsedTime)
 	// Collision Detection
 	//*********************
 	m_blendAnimation.animationBlend.Update(m_model, m_elapsedTime);
-	//FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
-	//FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
-	//FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
-	//m_collision[0].position[0] = { getBone._41,getBone._42,getBone._43 };
+	FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[m_collision[0].GetCurrentMesh(0)].at(m_collision[0].GetCurrentBone(0));
+	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+	FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+	m_collision[0].position[0] = { getBone._41,getBone._42,getBone._43 };
 }
 
 void Archer::Render(ID3D11DeviceContext* immediateContext)
@@ -499,6 +501,7 @@ bool Archer::FindAttackPoint()
 	m_moveParm.velocity = NormalizeVec3(m_attackPoint - m_transformParm.position);
 
 #if _DEBUG
+	m_debugObjects.controlPoint.GetInstance().clear();
 	if (m_debugObjects.controlPoint.GetInstance().empty())
 	{
 		auto primitive = m_debugObjects.GetSphere(Framework::GetInstance().GetDevice(), "");
@@ -616,7 +619,7 @@ bool Archer::Shoot()
 	return false;
 }
 
-bool Archer::SearchAttackDirection()
+bool Archer::FindDirectionToAvoid()
 {
 	auto& enemy = MESSENGER.CallEnemyInstance(0);
 
@@ -671,10 +674,12 @@ bool Archer::SearchAttackDirection()
 	srand((unsigned)time(NULL));
 	int selectID = rand() % static_cast<int>(entryPointID.size());
 	int selectPointID = entryPointID[selectID];
+	m_avoidPoint = m_controlPoint[selectPointID].second;
 	m_hasRotated = false;
-	m_moveParm.velocity = NormalizeVec3(m_controlPoint[selectPointID].second - m_transformParm.position);
+	m_moveParm.velocity = NormalizeVec3(m_avoidPoint - m_transformParm.position);
 
 #if _DEBUG
+	m_debugObjects.controlPoint.GetInstance().clear();
 	if (m_debugObjects.controlPoint.GetInstance().empty())
 	{
 		auto primitive = m_debugObjects.GetSphere(Framework::GetInstance().GetDevice(), "");
@@ -722,6 +727,49 @@ bool Archer::SearchAttackDirection()
 
 bool Archer::Avoid()
 {
+	if (!m_hasRotated)
+		m_hasRotated = Rotate(m_avoidPoint, 0.1f);
+
+	m_stepParm.speed -= m_stepParm.deceleration;
+	if (m_stepParm.speed.x <= 0.0f)
+		m_stepParm.speed = { 0.0f,0.0f,0.0f };
+
+	VECTOR3F  velocity = {};
+	velocity.x = m_moveParm.velocity.x * m_stepParm.speed.x;
+	velocity.y =  0.0f;
+	velocity.z = m_moveParm.velocity.z * m_stepParm.speed.z;
+
+	m_transformParm.position += velocity * m_elapsedTime;
+	m_transformParm.WorldUpdate();
+
+	if (!m_stepParm.isStep)
+	{
+		if (m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
+		{
+			if (JudgeBlendRatio(false))
+				m_stepParm.isStep = true;
+		}
+		else
+		{
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+			m_blendAnimation.animationBlend.AddSampler(Animation::DIVE, m_model);
+			m_blendAnimation.animationBlend.SetAnimationSpeed(1.6f);
+		}
+	}
+	else
+	{
+		uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+		if (currentAnimationFrame == m_stepParm.frameCount)
+		{
+			m_state = 0;
+			m_hasRotated = false;
+			m_stepParm.isStep = false;
+			m_stepParm.speed = m_stepParm.maxSpeed;
+			m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -1057,7 +1105,39 @@ ImGui::Combo("Name_of_BoneName",
 
 
 	}
+	
+	//**************************************
+	// Step
+	//**************************************
+	if (ImGui::CollapsingHeader("Step"))
+	{
+		//FrameCount
+		{
+			static float frameCount = m_stepParm.frameCount;
+			ImGui::InputFloat("FrameCount", &frameCount, 0, 100); ImGui::SameLine();
+			if (ImGui::ArrowButton("Front", ImGuiDir_Left))
+			{
+				if (0 >= frameCount)
+					frameCount = 0;
+				else
+					--frameCount;
+			}
+			ImGui::SameLine();
+			if (ImGui::ArrowButton("Next", ImGuiDir_Right))
+				++frameCount;
+			if (ImGui::Button("ADD FrameCount"))
+				m_stepParm.frameCount = frameCount;
+		}
 
+		float deceleration = m_stepParm.deceleration.x;
+		ImGui::SliderFloat("StepDeceleration", &deceleration, 0.0f, 1.0f);
+		m_stepParm.deceleration = VECTOR3F(deceleration, 0.0f, deceleration);
+
+		float speed = m_stepParm.speed.x;
+		ImGui::SliderFloat("StepSpeed", &speed, 0.0f, 100.0f);
+		m_stepParm.speed.x = m_stepParm.speed.z = speed;
+
+	}
 	//**************************************
 	// Collision
 	//**************************************
@@ -1196,7 +1276,7 @@ ImGui::Combo("Name_of_BoneName",
 	
 	if (ImGui::CollapsingHeader("Function"))
 	{
-		static bool activeFunction[5];
+		static bool activeFunction[6];
 		if (ImGui::Button("Search"))
 			activeFunction[0] = true;
 		if (activeFunction[0])
@@ -1265,13 +1345,22 @@ ImGui::Combo("Name_of_BoneName",
 				activeFunction[3] = false;
 		}
 
-		if (ImGui::Button("Vellocity"))
+		if (ImGui::Button("Velocity"))
 			activeFunction[4] = true;
 
 		if (activeFunction[4])
 		{
-			if ((SearchAttackDirection()))
+			if ((FindDirectionToAvoid()))
 				activeFunction[4] = false;
+		}
+
+		if (ImGui::Button("Avoid"))
+			activeFunction[5] = true;
+
+		if (activeFunction[5])
+		{
+			if ((Avoid()))
+				activeFunction[5] = false;
 		}
 	}
 
@@ -1288,6 +1377,8 @@ ImGui::Combo("Name_of_BoneName",
 			ImGui::RadioButton("Move", &primitiveTask, 1); 
 			ImGui::RadioButton("SetArrow", &primitiveTask, 2); ImGui::SameLine();
 			ImGui::RadioButton("ShootArrow", &primitiveTask, 3);
+			ImGui::RadioButton("Avoiding", &primitiveTask, 4); ImGui::SameLine();
+			ImGui::RadioButton("FindDirectionAvoid", &primitiveTask, 5);
 			PrimitiveTaskType type = static_cast<PrimitiveTaskType>(primitiveTask);
 	
 			int count = static_cast<int>(m_domain.GetPrimitiveTasks().size());
@@ -1303,17 +1394,24 @@ ImGui::Combo("Name_of_BoneName",
 			{
 				switch (type)
 				{
-				case 0:
+				case PrimitiveTaskType::FindAttackPoint:
 					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::FindAttackPoint);
 					break;
-				case 1:
+				case PrimitiveTaskType::Move:
 					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::MoveRun);
 					break;
-				case 2:
+				case PrimitiveTaskType::SetArrow:
 					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::SetArrow);
 					break;
-				case 3:
+				case PrimitiveTaskType::ShootArrow:
 					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::Shoot);
+					break;
+				case PrimitiveTaskType::Avoiding:
+					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::Avoid);
+					break;
+				case PrimitiveTaskType::FindDirectionAvoid:
+					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::FindDirectionToAvoid);
+					break;
 				}
 			}
 
@@ -1326,6 +1424,7 @@ ImGui::Combo("Name_of_BoneName",
 			static int compoundTask = 0;
 			ImGui::RadioButton("Attack", &compoundTask, 0); ImGui::SameLine();
 			ImGui::RadioButton("PrepareAttack", &compoundTask, 1);
+			ImGui::RadioButton("Avoid", &compoundTask, 2);
 			CompoundTaskType type = static_cast<CompoundTaskType>(compoundTask);
 
 			int count = static_cast<int>(m_domain.GetCompoundTasks().size());
@@ -1356,7 +1455,9 @@ ImGui::Combo("Name_of_BoneName",
 			static int method = 0;
 			ImGui::RadioButton("AtkMethod", &method, 0); ImGui::SameLine();
 			ImGui::RadioButton("FindAPMethod", &method, 1);
-			ImGui::RadioButton("PrepareAtkMethod", &method, 2);
+			ImGui::RadioButton("PrepareAtkMethod", &method, 2); ImGui::SameLine();
+			ImGui::RadioButton("AvoidMethod", &method, 3);
+			ImGui::RadioButton("FindDAMethod", &method, 4);
 
 			int count = static_cast<int>(m_domain.GetMethods().size());
 			ImGui::InputInt("Methods Size", &count);
@@ -1377,7 +1478,9 @@ ImGui::Combo("Name_of_BoneName",
 			static int precondition = 0;
 			ImGui::RadioButton("AtkPrecondition", &precondition, 0); ImGui::SameLine();
 			ImGui::RadioButton("PrepareAtkPrecondition", &precondition, 1);
-			ImGui::RadioButton("TruePrecondition", &precondition, 2);
+			ImGui::RadioButton("TruePrecondition", &precondition, 2); ImGui::SameLine();
+			ImGui::RadioButton("AvoidPrecondition", &precondition, 3);
+			ImGui::RadioButton("FindDAPrecondition", &precondition, 4);
 
 			int count = static_cast<int>(m_domain.GetPreconditions().size());
 			ImGui::InputInt("Preconditions Size", &count);
@@ -1415,11 +1518,9 @@ ImGui::Combo("Name_of_BoneName",
 				}
 				if (currentTask == count)
 				{
-					m_currentPlanList = m_planRunner.UpdatePlan(m_worldState);
+					isExecute = false;
 					currentTask = 0;
 				}
-				if(ImGui::Button("Stop"))
-					isExecute = false;
 			}
 
 				ImGui::TreePop();

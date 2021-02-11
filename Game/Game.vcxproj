@@ -71,6 +71,10 @@
     <ClInclude Include="GameSource\AttackMethod.h" />
     <ClInclude Include="GameSource\AttackPrecondition.h" />
     <ClInclude Include="GameSource\AttackTask.h" />
+    <ClInclude Include="GameSource\AvoidMethod.h" />
+    <ClInclude Include="GameSource\AvoidTask.h" />
+    <ClInclude Include="GameSource\AvoidPrecondition.h" />
+    <ClInclude Include="GameSource\AvoidingTask.h" />
     <ClInclude Include="GameSource\Domain.h" />
     <ClInclude Include="GameSource\DomainConverter.h" />
     <ClInclude Include="GameSource\EnemyBehaviorNode.h" />
@@ -101,6 +105,9 @@
     <ClInclude Include="GameSource\EnemyWalkTask.h" />
     <ClInclude Include="GameSource\FindAPMethod.h" />
     <ClInclude Include="GameSource\FindAPTask.h" />
+    <ClInclude Include="GameSource\FindDAMethod.h" />
+    <ClInclude Include="GameSource\FindDAPrecondition.h" />
+    <ClInclude Include="GameSource\FindDATask.h" />
     <ClInclude Include="GameSource\HTNAllHeader.h" />
     <ClInclude Include="GameSource\MoveTask.h" />
     <ClInclude Include="GameSource\PrepareAttackMethod.h" />
