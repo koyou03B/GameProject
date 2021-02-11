@@ -4,7 +4,6 @@
 #include "Scene.h"
 #include "MetaAI.h"
 #include "Stage.h"
-#include "Stone.h"
 #include "UIAdominist.h"
 #include ".\LibrarySource\Fog.h"
 #include ".\LibrarySource\Camera.h"

@@ -1,6 +1,7 @@
 #pragma once
 #include "CharacterAI.h"
 #include "CharacterParameter.h"
+#include "Arrow.h"
 #include "Domain.h"
 #include "ArcherWorldState.h"
 #include "DomainConverter.h"
@@ -35,7 +36,7 @@ public:
 	bool Avoid();
 	bool Heal();
 	bool Revival();
-
+	inline std::unique_ptr<Arrow>& GetArrow() { return m_arrow; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -130,6 +131,7 @@ private:
 	float m_MoveOffset;
 	bool m_hasBlendAnim;
 	bool m_hasRotated;
+	bool m_canRun;
 	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
 
 	VECTOR3F m_attackPoint;
@@ -141,6 +143,7 @@ private:
 	CharacterParameter::DebugObjects		m_debugObjects;
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
+	std::unique_ptr<Arrow>					m_arrow;
 
 	ArcherWorldState						m_worldState;
 	Domain<ArcherWorldState, Archer>		m_domain;

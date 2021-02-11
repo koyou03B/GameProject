@@ -62,6 +62,11 @@ void Archer::Init()
 	m_statusParm.life = 12000;
 	m_stepParm.maxSpeed = m_stepParm.speed;
 	m_controlPoint.resize(8);
+	m_canRun = true;
+
+	auto& wepon = RunningMarket().FindProductConer(0);
+	std::unique_ptr<Arrow> arrow{ wepon.GiveProduct<Arrow>() };
+	m_arrow = std::move(arrow);
 }
 
 void Archer::Update(float& elapsedTime)
@@ -136,6 +141,7 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->_shaderON.specular = false;
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
+	m_arrow->Render(immediateContext);
 
 	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
 	m_debugObjects.debugObject.Render(immediateContext, scroll, true);
@@ -465,6 +471,7 @@ bool Archer::FindAttackPoint()
 	Collision collision;
 	float radius = 0.0f;
 	float minDistance = FLT_MAX;
+	VECTOR3F atkPos = {};
 	for (int i = 0; i < 8; ++i)
 	{
 		m_controlPoint[i].second.x = ePosition.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.9f);
@@ -492,11 +499,18 @@ bool Archer::FindAttackPoint()
 		if (!m_controlPoint[i].first && distance <= minDistance)
 		{
 			minDistance = distance;
-			m_attackPoint = m_controlPoint[i].second;
+			atkPos = m_controlPoint[i].second;
 		}
 	}
 
 #endif
+
+	float dist = ToDistVec3(atkPos - m_attackPoint);
+	if (dist > 10.0f)
+		m_attackPoint = atkPos;
+	else
+		m_canRun = false;
+
 	m_hasRotated = false;
 	m_moveParm.velocity = NormalizeVec3(m_attackPoint - m_transformParm.position);
 
@@ -540,6 +554,16 @@ bool Archer::FindAttackPoint()
 
 bool Archer::MoveRun()
 {
+	if (!m_canRun)
+	{
+		m_state = 0;
+		m_hasRotated = false;
+		m_blendAnimation.animationBlend.AddSampler(Animation::AIM, m_model);
+		m_hasBlendAnim = false;
+		m_canRun = true;
+		return true;
+	}
+
 	if (!m_hasRotated)
 		m_hasRotated = Rotate(m_attackPoint, 0.1f);
 
@@ -933,7 +957,6 @@ void Archer::ImGui(ID3D11Device* device)
 static int currentMesh = 2;
 ImGui::BulletText(u8"Mesh%d”Ô–Ú", currentMesh);
 
-
 static int currentBone = 0;
 
 ImGui::Combo("Name_of_BoneName",
@@ -1055,9 +1078,8 @@ ImGui::Combo("Name_of_BoneName",
 
 	}
 
-
 	//**************************************
-	// Status
+	// Move
 	//**************************************
 	if (ImGui::CollapsingHeader("Move"))
 	{
@@ -1138,6 +1160,7 @@ ImGui::Combo("Name_of_BoneName",
 		m_stepParm.speed.x = m_stepParm.speed.z = speed;
 
 	}
+
 	//**************************************
 	// Collision
 	//**************************************
@@ -1192,8 +1215,6 @@ ImGui::Combo("Name_of_BoneName",
 
 		if (m_debugObjects.debugObject.IsGeomety())
 		{
-
-
 			if (m_debugObjects.debugObject.GetInstance().size() > current)
 			{
 				auto& geomtry = m_debugObjects.debugObject.GetInstanceData(current);
@@ -1273,7 +1294,51 @@ ImGui::Combo("Name_of_BoneName",
 			}
 		}
 	}
-	
+
+	//**************************************
+	// Arrow
+	//**************************************
+	if (ImGui::CollapsingHeader("Arrow"))
+	{
+		m_statusParm.attackPoint = 10.0f;
+		VECTOR3F angle = m_transformParm.angle;
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+		FLOAT4X4 rotationM = {};
+		DirectX::XMStoreFloat4x4(&rotationM, R);
+		VECTOR3F zAxis = { rotationM._31,rotationM._32,rotationM._33 };
+		zAxis = NormalizeVec3(zAxis);
+
+		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[2].at(36);
+		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+		FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+		VECTOR3F position = { getBone._41,getBone._42,getBone._43 };
+
+		if (ImGui::Button("Create"))
+			m_arrow->PrepareForArrow(position, m_transformParm.angle, zAxis);
+
+		if (ImGui::CollapsingHeader("Update"))
+			m_arrow->Update(m_elapsedTime);
+		else
+		{
+			m_arrow->GetArrowParam()[0].first.position = position;
+			m_arrow->GetArrowParam()[0].first.angle = m_transformParm.angle;
+			m_arrow->GetArrowParam()[0].first.CreateWorld();
+		}
+		m_arrow->ImGui(device);
+
+		if (ImGui::CollapsingHeader("Rotation"))
+		{
+
+
+			m_transformParm.angle.y += 1.0f * 0.01745f;
+			m_transformParm.WorldUpdate();
+		}
+
+	}
+
+	//**************************************
+	// Function
+	//**************************************
 	if (ImGui::CollapsingHeader("Function"))
 	{
 		static bool activeFunction[6];

@@ -1,167 +1,112 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include "Market.h"
+#include "CharacterParameter.h"
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\StaticMesh.h"
 #include ".\LibrarySource\InstanceData.h"
 
-class Arrow
+struct ArrowParam
+{
+	VECTOR3F	speed = {};
+	VECTOR3F	velocity = {};
+	bool		isFlying = false;
+	float		attackPoint = 0.0f;
+	float		fallTime = 0.0f;
+
+	inline void Clear()
+	{
+		speed = {};
+		velocity = {};
+		isFlying = false;
+		attackPoint = 0.0f;
+		fallTime = 0.0f;
+	}
+
+	void ReadBinary()
+	{
+		if (PathFileExistsA((std::string("../Asset/Binary/Player/Archer/ArrowParam") + ".bin").c_str()))
+		{
+			std::ifstream ifs;
+			ifs.open((std::string("../Asset/Binary/Player/Archer/ArrowParam") + ".bin").c_str(), std::ios::binary);
+			cereal::BinaryInputArchive i_archive(ifs);
+			i_archive(*this);
+		}
+	}
+
+	void SaveBinary()
+	{
+		std::ofstream ofs;
+		ofs.open((std::string("../Asset/Binary/Player/Archer/Arrow") + ".bin").c_str(), std::ios::binary);
+		cereal::BinaryOutputArchive o_archive(ofs);
+		o_archive(*this);
+	}
+
+	template<class T>
+	void serialize(T& archive, const std::uint32_t version)
+	{
+		if (version >= 0)
+		{
+			archive
+			(
+				speed,
+				attackPoint
+			);
+		}
+	};
+};
+CEREAL_CLASS_VERSION(ArrowParam, 1);
+
+using  InstanceData = Source::InstanceData::InstanceData;
+
+class Arrow : public ObjectProduct
 {
 public:
 	Arrow() = default;
 	~Arrow() = default;
+	Arrow(const Arrow&) = delete;
 
-	virtual void Init() = 0;
+	void Init()override;
+	void Update(float& elapsedTime)override;
+	void Render(ID3D11DeviceContext* immediateContext) override;
 
-	virtual void Update() = 0;
+	void Clear();
+	void Reset(std::pair<InstanceData, ArrowParam>& stoneData);
+	void Release();
+	void PrepareForArrow(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& velocity);
 
-	virtual void Relase() = 0;
-
-	VECTOR3F& GetSpeed()										{ return m_speed; }
-	VECTOR3F& GetVelocity()										{ return m_velocity; }
-	float& GetAttack()											{ return m_attack; }
-	int GetTimer()												{ return m_timer; }
-	bool GetExit()												{ return m_isExit; }
-
-	void SetSpeed(const VECTOR3F& speed)						{ m_speed = speed; }
-	void SetVelocity(const VECTOR3F& velocity)					{ m_velocity = velocity; }
-	void SetAttack(const float& attack)							{ m_attack = attack; }
-	void SetTimer(const int& timer)								{ m_timer = timer; }
-	void SetExit(const bool& flg)								{ m_isExit = flg; }
-
-
-protected:
-	const float Gravity = -9.8f;
-
-	VECTOR3F m_speed;
-	VECTOR3F m_velocity;
-	float m_attack;
-	int m_timer;
-	bool m_isExit;
-};
-
-class NormalArrow : public Arrow
-{
-public:
-	NormalArrow() = default;
-	~NormalArrow() = default;
-
-	void Init();
-
-	void Update();
-
-	void Relase();
-
-	template<class T>
-	void serialize(T& archive)
-	{
-		archive
-		(
-			m_speed,
-			m_velocity,
-			m_attack,
-			m_timer
-		);
-	};
-};
-
-class StrongArrow : public Arrow
-{
-public:
-	StrongArrow() = default;
-	~StrongArrow() = default;
-
-	void Init();
-
-	void Update();
-
-	void Relase();
-
-	template<class T>
-	void serialize(T& archive)
-	{
-		archive
-		(
-			m_speed,
-			m_velocity,
-			m_attack,
-			m_timer,
-			m_maxArrow
-		);
-	};
-
-private:
-	int m_maxArrow;
-};
-
-class ArrowAdominist
-{
-public:
-	void Init();
-
-	void Update(float& elapsedTime) ;
-
-	void Render(ID3D11DeviceContext* immediateContext);
-
+	void SetArrowParameter();
 	void ImGui(ID3D11Device* device);
 
-	void Release()
-	{
-		if (m_model.unique())
-		{
-			m_model.reset();
-		}
-
-		if (!m_instanceData.empty())
-			m_instanceData.clear();
-	}
-
-	void ReleaseArrowParm()
-	{
-		if (!m_choisArrow) return;
-		m_choisArrow->Relase();
-		m_isShot = false;
-	}
-
-	std::shared_ptr<Arrow>& GetArrow() { return m_choisArrow; }
-	std::vector<Source::InstanceData::InstanceData>& GetInstanceData() { return m_instanceData; }
-	bool GetIsShot() { return m_isShot; }
-
-	void SetArrow(const VECTOR3F& position,const VECTOR3F& angle,const VECTOR3F& velocity);
-
-	void SetShot(bool isShot) { m_isShot = isShot; }
-
-	inline static ArrowAdominist& GetInstance()
-	{
-		static 	ArrowAdominist arrowAdomin;
-		return arrowAdomin;
-	}
+	const VECTOR3F& GetOffsetX() { return m_offsetX; }
+	const VECTOR3F& GetOffsetZ() { return m_offsetZ; }
+	std::vector<std::pair<InstanceData, ArrowParam>>& GetArrowParam() { return m_arrowData; }
 
 	template<class T>
-	void serialize(T& archive)
+	void serialize(T& archive, const std::uint32_t version)
 	{
-		archive
-		(
-			m_normalArrow,
-			m_strongArrow,
-			m_survivalTime,
-			m_scale
-		);
+		if (version >= 2)
+		{
+			archive
+			(
+				m_arrowFallPower,
+				m_arrowScale,
+				m_offsetX,
+				m_offsetZ
+			);
+		}
 	};
-
 private:
-	std::shared_ptr<Source::StaticMesh::StaticMesh> m_model;
+	float		m_arrowFallPower = 0.0f;
+	float		m_defineFallTime = 0.0f;
 
-	std::shared_ptr<NormalArrow> m_normalArrow;
-	std::shared_ptr<StrongArrow> m_strongArrow;
+	VECTOR3F	m_arrowScale = { 0.5f,0.5f,0.5f };
+	VECTOR3F	m_offsetX = {};
+	VECTOR3F	m_offsetZ = {};
+	CharacterParameter::Collision						m_collision;
+	std::vector<InstanceData>							m_renderData;
+	std::shared_ptr<Source::StaticMesh::StaticMesh>		m_model;
+	std::vector<std::pair<InstanceData, ArrowParam>>	m_arrowData;
 
-	std::shared_ptr<Arrow> m_choisArrow;
-	std::vector<Source::InstanceData::InstanceData> m_instanceData;
-
-	int m_survivalTime;
-	VECTOR3F m_scale = {.5f,.5f,.5f};
-	VECTOR3F m_target = {};
-	bool m_isShot = false;
 };
-
-#define ArrowInstamce ArrowAdominist::GetInstance()

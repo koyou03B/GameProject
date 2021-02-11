@@ -981,7 +981,7 @@ void Fighter::ImGui(ID3D11Device* device)
 	}
 
 	static int currentMesh = 0;
-	ImGui::BulletText(u8"Mesh%d�Ԗ�", currentMesh);
+	ImGui::BulletText(u8"Mesh%d", currentMesh);
 	
 
 	static int currentBone = 0;

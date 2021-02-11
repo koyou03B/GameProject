@@ -1,4 +1,5 @@
 #include "Arrow.h"
+#include "MessengTo.h"
 #include ".\LibrarySource\ModelData.h"
 
 #ifdef _DEBUG
@@ -7,64 +8,119 @@
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
+CEREAL_CLASS_VERSION(Arrow, 2);
 
-void NormalArrow::Init()
+void Arrow::Init()
 {
-	m_speed = {1.1f,1.0f,1.1f};
-	m_velocity = {0.0f,0.0f,1.0f};
-	m_attack = 0.0f;
-	m_timer = 0;
-	m_isExit = false;
-}
-
-void NormalArrow::Update()
-{
-//	m_velocity *= m_speed;
-	++m_timer;
-}
-
-void NormalArrow::Relase()
-{
-	m_velocity = {};
-	m_timer = 0;
-	m_isExit = false;
-}
-
-void StrongArrow::Init()
-{
-	m_speed = {};
-	m_velocity = {};
-	m_attack = 0.0f;
-	m_timer = 0;
-	m_isExit = false;
-	m_maxArrow = 0;
-}
-
-void StrongArrow::Update()
-{
-	m_velocity *= m_speed;
-	++m_timer;
-}
-
-void StrongArrow::Relase()
-{
-	m_velocity = {};
-	m_timer = 0;
-	m_isExit = false;
-}
-
-
-void ArrowAdominist::Init()
-{
+	Clear();
 	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::ARROW);
+	m_arrowData.resize(3);
+	m_renderData.resize(3);
+	SetArrowParameter();
+}
 
-	m_instanceData.resize(1);
+void Arrow::Update(float& elapsedTime)
+{
+	if (m_arrowData.empty()) return;
+	using CollisionType = CharacterParameter::Collision::CollisionType;
 
-	m_normalArrow = std::make_shared<NormalArrow>();
-	m_normalArrow->Init();
-	m_strongArrow = std::make_shared<StrongArrow>();
-	m_strongArrow->Init();
+	for (auto& arrow : m_arrowData)
+	{
+		if (arrow.second.isFlying)
+		{
+			VECTOR3F velocity = arrow.second.velocity;
+			VECTOR3F speed = arrow.second.speed;
+			arrow.second.fallTime += elapsedTime;
 
+			if(arrow.second.fallTime >= m_defineFallTime)
+				velocity.y -= m_arrowFallPower;
+			velocity *= speed;
+			arrow.first.position += velocity * elapsedTime;
+
+			arrow.first.CreateWorld();
+
+			m_collision.position[0] = arrow.first.position;
+			m_collision.position[1] = arrow.first.position - velocity * elapsedTime;
+			m_collision.scale = 1.0f;
+			m_collision.radius = 2.0f;
+			m_collision.collisionType = CollisionType::CAPSULE;
+			if (MESSENGER.AttackingMessage(static_cast<int>(1), m_collision))
+			{
+				Reset(arrow);
+				return;
+			}
+
+			if (arrow.first.position.y <= 0.0f)
+			{
+				Reset(arrow);
+			}
+		}
+	}
+}
+
+void Arrow::Render(ID3D11DeviceContext* immediateContext)
+{
+	int count = 0;
+	if (m_arrowData.empty()) return;
+	size_t size = m_arrowData.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		if (m_arrowData[i].second.isFlying)
+		{
+			++count;
+			m_renderData[i] = m_arrowData[i].first;
+		}
+		else
+			m_renderData[i].ClearData();
+	}
+	if (count != 0)
+		m_model->Render(Framework::GetContext(), m_renderData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+}
+
+void Arrow::Clear()
+{
+	if (!m_arrowData.empty())
+	{
+		for (auto& arrow : m_arrowData)
+		{
+			arrow.first.ClearData();
+			arrow.second.Clear();
+		}
+	}
+}
+
+void Arrow::Reset(std::pair<InstanceData, ArrowParam>& stoneData)
+{
+	stoneData.first.ClearData();
+	stoneData.second.isFlying = false;
+	stoneData.second.velocity = {};
+}
+
+void Arrow::Release()
+{
+	Clear();
+	m_model.reset();
+	m_renderData.clear();
+}
+
+void Arrow::PrepareForArrow(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& velocity)
+{
+	for (auto& arrow : m_arrowData)
+	{
+		if (arrow.second.isFlying) continue;
+		arrow.first.position = position;
+		arrow.first.angle = angle;
+		arrow.first.scale = m_arrowScale;
+		arrow.first.color = { 1.0f,1.0f,1.0f,1.0f };
+		arrow.first.CreateWorld();
+		arrow.second.velocity = velocity;
+		arrow.second.isFlying = true;
+		return;
+	}
+}
+
+void Arrow::SetArrowParameter()
+{
 	if (PathFileExistsA((std::string("../Asset/Binary/Player/Archer/Arrow") + ".bin").c_str()))
 	{
 		std::ifstream ifs;
@@ -72,66 +128,13 @@ void ArrowAdominist::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
+
+	//m_arrowData[0].second.ReadBinary();
+	//m_arrowData[1].second.ReadBinary();
+	//m_arrowData[2].second.ReadBinary();
 }
 
-void ArrowAdominist::Update(float& elapsedTime)
-{
-	if (m_instanceData.empty()) return;
-
-	if (!m_isShot) return;
-		m_choisArrow->Update();
-
-	for (auto& worldPram : m_instanceData)
-	{
-		VECTOR3F velocity = m_choisArrow->GetVelocity();
-		VECTOR3F speed = m_choisArrow->GetSpeed();
-
-		velocity *= speed;
-
-		worldPram.position += velocity * elapsedTime;
-
-		VECTOR3F distance = m_target - worldPram.position;
-		worldPram.angle.y = atan2f(distance.x, distance.z);
-
-		worldPram.CreateWorld();
-	}
-
-	if (m_survivalTime <= m_choisArrow->GetTimer())
-	{
-		m_choisArrow->Relase();
-		m_isShot = false;
-	}
-}
-
-void ArrowAdominist::Render(ID3D11DeviceContext* immediateContext)
-{
-	if (m_instanceData.empty()) return;
-	if (!m_choisArrow) return;
-	if (!m_choisArrow->GetExit()) return;
-
-	m_model->Render(Framework::GetContext(), m_instanceData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
-
-}
-
-void ArrowAdominist::SetArrow(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& target)
-{
-	m_instanceData[0].position = position;
-	m_instanceData[0].angle = angle;
-	m_instanceData[0].scale = m_scale;
-	m_instanceData[0].color = { 1.0f,1.0f,1.0f,1.0f };
-
-	m_choisArrow = m_normalArrow;
-
-	VECTOR3F distance = target - position;
-	m_instanceData[0].angle.y = atan2f(distance.x, distance.z);
-	m_choisArrow->SetVelocity(NormalizeVec3(distance));
-	m_choisArrow->SetExit(true);
-
-	m_target = target;
-	m_instanceData[0].CreateWorld();
-}
-
-void ArrowAdominist::ImGui(ID3D11Device* device)
+void Arrow::ImGui(ID3D11Device* device)
 {
 #if _DEBUG
 	ImGui::Begin("Arrow", nullptr, ImGuiWindowFlags_MenuBar);//メニューバーをつかうならこのBEGIN
@@ -152,59 +155,77 @@ void ArrowAdominist::ImGui(ID3D11Device* device)
 		ImGui::EndMenuBar();
 	}
 
-	if (ImGui::CollapsingHeader("Adominist"))
+	if (ImGui::CollapsingHeader("Scale"))
 	{
-		//************
-		// timer
-		//************
+		static float scale = m_arrowScale.x;
+		ImGui::SliderFloat("Scale", &scale, 0.001f, 10.0f);
+		m_arrowScale = { scale,scale,scale };
+		if (!m_arrowData.empty())
 		{
-			static int survivalTime = m_survivalTime;
-			ImGui::SliderInt("SurvivalTime", &survivalTime, 1, 100);
-			m_survivalTime = survivalTime;
-		}
-
-		//************
-		// Scale
-		//************
-		{
-			static float scale = m_scale.x;
-			ImGui::SliderFloat("Scale", &scale, 0.01f, 100.0f);
-			m_scale = { scale,scale,scale };
+			m_arrowData.begin()->first.scale = m_arrowScale;
+			m_arrowData.begin()->first.CreateWorld();
 		}
 	}
 
-	if (ImGui::CollapsingHeader("NormalArrow"))
+	if (ImGui::CollapsingHeader("Offset"))
 	{
-		//************
-		// Speed
-		//************
+		static int current = 0;
+		ImGui::RadioButton("Z-Axis", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton("X-Axis", &current, 1);
+
+		if (current == 0)
 		{
-			static float speed = m_normalArrow->GetSpeed().x;
-			ImGui::SliderFloat("ArrowSpeed", &speed, 1.0f, 200.0f);
-			VECTOR3F arrowSpeed = { speed,speed,speed };
-			m_normalArrow->SetSpeed(arrowSpeed);
+			VECTOR3F offset = m_offsetZ;
+			float offsetZ[] = { offset.x,offset.y,offset.z };
+			ImGui::SliderFloat3("Z-offset", offsetZ, -8.0f, 8.0f);
+			offset = { offsetZ[0],offsetZ[1],offsetZ[2] };
+			m_offsetZ = offset;
+		}
+		else
+		{
+			VECTOR3F offset = m_offsetX;
+			float offsetX[] = { offset.x,offset.y,offset.z };
+			ImGui::SliderFloat3("X-offset", offsetX, -7.0f, 7.0f);
+			offset = { offsetX[0],offsetX[1],offsetX[2] };
+			m_offsetX = offset;
 		}
 
-		//***********
-		// Attack
-		//***********
-		{
-			static float attack = 1.0f;
-			ImGui::SliderFloat("Attack", &attack, 1.0f, 20.0f);
-			m_normalArrow->SetAttack(attack);
-		}
 	}
 
-	//************
-	// timer
-	//************
-	//{
-	//	 int time = m_normalArrow->GetTimer();
-	//	ImGui::SliderInt("Time", &time, 1, 1000);
-	//}
+	if (!m_arrowData.empty())
+	{
+		static int current = 0;
+		ImGui::RadioButton("Zero", &current, 0); ImGui::SameLine();
+		ImGui::RadioButton("OWE", &current, 1); ImGui::SameLine();
+		ImGui::RadioButton("TWO", &current, 2);
+
+		auto& stone = m_arrowData.at(current);
+		if (ImGui::CollapsingHeader("Speed"))
+		{
+			static float speed = stone.second.speed.x;
+			ImGui::SliderFloat("Speed", &speed, 0.0f, 200.0f);
+			stone.second.speed = { speed,speed,speed };
+		}
+		if (ImGui::CollapsingHeader("FallPower"))
+		{
+			static float fallPower = m_arrowFallPower;
+			ImGui::SliderFloat("FallPower->", &fallPower, 0.0f, 20.0f);
+			m_arrowFallPower = fallPower;
+		}
+		if (ImGui::CollapsingHeader("DefainFallTime"))
+		{
+			static float dFallTime = m_defineFallTime;
+			ImGui::SliderFloat("DefainFallTime->", &dFallTime, 0.0f, 20.0f);
+			m_defineFallTime = dFallTime;
+		}
+		ImGui::Text("IsFly%d", stone.second.isFlying);
+
+		if (ImGui::Button("Reset"))
+			stone.first.position.y = -10.0f;
+
+		if (ImGui::Button("Save"))
+			m_arrowData.at(current).second.SaveBinary();
+	}
 	ImGui::End();
 #endif
 }
-
-
-

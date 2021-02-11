@@ -97,6 +97,7 @@ inline void Domain<TWorldState, TChara>::AllSet(DomainConverter& converter)
 
 	CompleteCompoundTask(CompoundTaskType::Attack);
 	CompleteCompoundTask(CompoundTaskType::PrepareAttack);
+	CompleteCompoundTask(CompoundTaskType::Avoid);
 }
 
 template<class TWorldState, class TChara>

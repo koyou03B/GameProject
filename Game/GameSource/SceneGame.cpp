@@ -1,5 +1,6 @@
 #include "SceneGame.h"
 #include "MessengTo.h"
+#include "Stone.h"
 #include "Arrow.h"
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\Framework.h"
@@ -11,7 +12,7 @@ bool Game::Initialize(ID3D11Device* device)
 //	RunningMarket().Closing();
 	auto& wepon = RunningMarket().AddProductConer(0);
 	wepon.AddProduct<Stone>();
-
+	wepon.AddProduct<Arrow>();
 
 	//**********************
 	// SceneConstantBuffer
