@@ -111,8 +111,6 @@ void Fighter::Update(float& elapsedTime)
 		m_collision[0].position[0] = { m_transformParm.position.x,getBone._42,m_transformParm.position.z };
 	}
 
-	if (m_statusParm.isExit == false)
-		MESSENGER.MessageFromPlayer(m_id, MessengType::TELL_DEAD);
 }
 
 void Fighter::Render(ID3D11DeviceContext* immediateContext)
@@ -122,6 +120,19 @@ void Fighter::Render(ID3D11DeviceContext* immediateContext)
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
 	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
 	m_debugObjects.debugObject.Render(immediateContext, scroll,true);
+}
+
+void Fighter::Release()
+{
+	m_blendAnimation.animationBlend.ReleaseAllSampler();
+
+	if (m_model)
+	{
+		if (m_model.unique())
+		{
+			m_model.reset();
+		}
+	}
 }
 
 void Fighter::Move(float& elapsedTime)
@@ -603,7 +614,7 @@ void Fighter::Attacking(Animation currentAnimation, Animation nextAnimations,
 		collision.position[0] = { bonePositions[0],bonePositions[1],bonePositions[2] };
 		m_statusParm.attackPoint = attack.attackPoint;
 
-		if (!attack.hasAttacked && MESSENGER.AttackingMessage(static_cast<int>(m_id), collision))
+		if (!attack.hasAttacked && MESSENGER.AttackingMessage(PlayerType::Fighter, collision))
 		{
 			attack.hasAttacked = true;
 			attack.speed = {};
@@ -749,7 +760,8 @@ VECTOR3F Fighter::GetInputDirection()
 	}
 	else
 	{
-		auto& enemy = MESSENGER.CallEnemyInstance(0);
+		CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
+
 		VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 		VECTOR3F direction = enemyPos - m_transformParm.position;
 		float dist = ToDistVec3(direction);
@@ -774,7 +786,8 @@ VECTOR3F Fighter::GetRotationAfterAngle(VECTOR2F vector,float turnSpeed)
 	float rot = 1.0f - dot;
 
 	float limit = turnSpeed;
-	auto& enemy = MESSENGER.CallEnemyInstance(0);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
+
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
 	float dist = ToDistVec3(enemyPos - m_transformParm.position);
@@ -937,13 +950,7 @@ bool Fighter::KnockBack()
 
 void Fighter::ChangeCharacter()
 {
-	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT) == 1)
-	{
-		m_changeParm.changeType = CharacterParameter::Change::PlayerType::ARCHER;
 
-		MESSENGER.MessageFromPlayer(m_id, MessengType::CHANGE_PLAYER);
-		m_input->ResetButton(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT);
-	}
 }
 
 void Fighter::ImGui(ID3D11Device* device)
@@ -1548,7 +1555,8 @@ void Fighter::ImGui(ID3D11Device* device)
 		ImGui::SliderFloat("DamageComparison", &m_damageParm.hitComparison, 0.0f, 100.0f);
 	}
 
-	auto& enemy = MESSENGER.CallEnemyInstance(0);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
+
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
 
 	float dist = ToDistVec3(enemyPos - m_transformParm.position);

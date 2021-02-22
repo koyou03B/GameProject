@@ -25,37 +25,24 @@ void Stage::Init()
 
 void Stage::Update(float& elapsedTime)
 {
-	auto players = MESSENGER.CallPlayersInstance();
-	auto enemys = MESSENGER.CallEnemysInstance();
-
-	for (auto& player : players)
+	int count = static_cast<int>(PlayerType::End);
+	count += static_cast<int>(EnemyType::End);
+	for (int i = 0; i < count; ++i)
 	{
-		Collision coll;
-		VECTOR3F pos = player->GetWorldTransform().position;
-		VECTOR2F target = { pos.x,pos.z };
-		if (coll.JudgeCircleAndpoint(m_circle, target))
+		CharacterAI* character = nullptr;
+		if (i == 0 || i == 1)
 		{
-			VECTOR2F distance;
-			distance.x = m_circle.position.x - target.x;
-			distance.y = m_circle.position.y - target.y;
-
-			float length = sqrtf(distance.x * distance.x + distance.y * distance.y);
-			float sub = m_circle.radius - length;
-			distance.x /= length;
-			distance.y /= length;
-			distance.x *= sub;
-			distance.y *= sub;
-			player->GetWorldTransform().position.x -= distance.x;
-			player->GetWorldTransform().position.z -= distance.y;
-			player->GetWorldTransform().WorldUpdate();
-
+			PlayerType type = static_cast<PlayerType>(i);
+			character = MESSENGER.CallPlayerInstance(type);
 		}
-	}
+		else
+		{
+			character = MESSENGER.CallEnemyInstance(EnemyType::Boss);
+		}
+		if (character == nullptr) continue;
 
-	for (auto& enemy : enemys)
-	{
 		Collision coll;
-		VECTOR3F pos = enemy->GetWorldTransform().position;
+		VECTOR3F pos = character->GetCollision().at(0).position[0];
 		VECTOR2F target = { pos.x,pos.z };
 		if (coll.JudgeCircleAndpoint(m_circle, target))
 		{
@@ -69,9 +56,9 @@ void Stage::Update(float& elapsedTime)
 			distance.y /= length;
 			distance.x *= sub;
 			distance.y *= sub;
-			enemy->GetWorldTransform().position.x -= distance.x;
-			enemy->GetWorldTransform().position.z -= distance.y;
-			enemy->GetWorldTransform().WorldUpdate();
+			character->GetWorldTransform().position.x -= distance.x;
+			character->GetWorldTransform().position.z -= distance.y;
+			character->GetWorldTransform().WorldUpdate();
 
 		}
 	}

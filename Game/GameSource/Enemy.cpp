@@ -74,6 +74,7 @@ void Enemy::Init()
 	m_stone = std::move(stone);
 
 #if _DEBUG
+	//m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
 	m_isAction = false;
 #else
 	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
@@ -94,7 +95,7 @@ void Enemy::Update(float& elapsedTime)
 			if (currentAnimationTime >= 169)
 			{
 				++m_moveState;
-				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
+				m_selectTask = m_behaviorTree.SearchOfActiveTask(0);
 			}
 		}
 		break;
@@ -108,7 +109,7 @@ void Enemy::Update(float& elapsedTime)
 					m_selectTask->GetParentNodeName() == "UnSpecialAttack")
 				m_behaviorTree.AddUseTask(m_selectTask);
 				m_selectTask.reset();
-				m_selectTask = m_behaviorTree.SearchOfActiveTask(m_id);
+				m_selectTask = m_behaviorTree.SearchOfActiveTask(0);
 			}
 
 			if (m_statusParm.life <= 0)
@@ -155,8 +156,7 @@ void Enemy::Update(float& elapsedTime)
 	FLOAT4X4 getBoneTransform = boneTransform * modelAxisTransform * m_transformParm.world;
 	m_collision[0].position[0] = { m_transformParm.position.x,getBoneTransform._42,m_transformParm.position.z };
 
-	if (m_statusParm.isExit == false)
-		MESSENGER.MessageFromEnemy(m_id, MessengType::TELL_DEAD);
+
 
 	if (KEYBOARD._keys[DIK_5] == 1)
 	{
@@ -177,6 +177,27 @@ void Enemy::Render(ID3D11DeviceContext* immediateContext)
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);	
 	m_stone->Render(immediateContext);
 	m_debugObjects.debugObject.Render(immediateContext, VECTOR4F(0, 0, 0, 0),true);
+}
+
+void Enemy::Release()
+{
+	//m_behaviorTree.Release();
+	//if (m_selectTask)
+	//{
+	//	m_selectTask.reset();
+	//}
+	//m_stone->Release();
+
+	m_blendAnimation.animationBlend.ReleaseAllSampler();
+
+	if (m_model)
+	{
+		if (m_model.unique())
+		{
+			m_model.reset();
+		}
+	}
+
 }
 
 void Enemy::ImGui(ID3D11Device* device)
@@ -214,11 +235,6 @@ void Enemy::ImGui(ID3D11Device* device)
 	}
 
 	ImGui::Text("askAttackFlg %d", m_messageParm.askAttack);
-
-	if (ImGui::Button("ASK_ATTACK"))
-	{
-		MESSENGER.MessageFromEnemy(m_id, MessengType::ASK_ATTACK);
-	}
 
 
 	static int currentMesh = 0;
@@ -549,15 +565,8 @@ void Enemy::ImGui(ID3D11Device* device)
 
 				ImGui::TextColored(ImVec4(1, 1, 1, 1), "------MaxDirection------");
 				{
-					auto& players = MESSENGER.CallPlayersInstance();
-					static int selectPlayer = 0;
-					int playerCount = static_cast<int>(players.size());
-					for (int i = 0; i < playerCount; ++i)
-					{
-						if (players[i]->GetChangeComand().isPlay)
-							selectPlayer = i;
-					}
-					VECTOR3F playerPosition = players[selectPlayer]->GetWorldTransform().position;
+					CharacterAI* player = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
+					VECTOR3F playerPosition = player->GetWorldTransform().position;
 					VECTOR3F directionToPlayer = playerPosition - m_transformParm.position;
 
 					float currentDirection = ToDistVec3(directionToPlayer);
@@ -568,6 +577,7 @@ void Enemy::ImGui(ID3D11Device* device)
 					ImGui::SliderFloat("MaxDirection", &direction, 0.0f, 100.0f);
 					if (ImGui::Button("SetDirection"))
 						selectNearNode->SetMaxDirection(direction);
+
 				}
 			}
 
@@ -884,9 +894,9 @@ void Enemy::ImGui(ID3D11Device* device)
 		}
 		ImGui::TextColored(ImVec4(1, 1, 1, 1), "------ViewFrontValue------");
 		{
-			auto& players = MESSENGER.CallPlayersInstance();
+			CharacterAI* player = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
 			int targetID = m_judgeElementPram.targetID;
-			VECTOR3F playerPosition = players[targetID]->GetWorldTransform().position;
+			VECTOR3F playerPosition = player->GetWorldTransform().position;
 			FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[currentMesh].at(currentBone);
 			FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 			FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;

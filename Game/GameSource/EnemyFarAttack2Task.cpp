@@ -171,7 +171,8 @@ bool EnemyFarAttack2Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo, 
 bool EnemyFarAttack2Task::JudgeLookTarget(Enemy* enemy)
 {
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 	VECTOR3F playerPos = player->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 
@@ -203,7 +204,8 @@ bool EnemyFarAttack2Task::JudgeLookTarget(Enemy* enemy)
 int EnemyFarAttack2Task::JudgeTurnChace(Enemy* enemy)
 {
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 
 	m_targetPosition = player->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
@@ -249,7 +251,8 @@ void EnemyFarAttack2Task::PrepareForStone(Enemy* enemy)
 		pos += xAxis * stone->GetOffsetX();
 
 		int targetID = enemy->GetJudgeElement().targetID;
-		auto& player = MESSENGER.CallPlayerInstance(targetID);
+		PlayerType type = static_cast<PlayerType>(targetID);
+		CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 		VECTOR3F playerPos = player->GetWorldTransform().position;
 		VECTOR3F normalizeDist = NormalizeVec3(playerPos - pos);
 		stone->PrepareForStone(pos, VECTOR3F(0.0f, 0.0f, 0.0f), normalizeDist);
@@ -265,7 +268,8 @@ void EnemyFarAttack2Task::TurningChase(Enemy* enemy)
 {
 	auto& enemyTransform = enemy->GetWorldTransform();
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 	VECTOR3F targetPosition = player->GetWorldTransform().position;
 	VECTOR3F targetDistance = targetPosition - enemyTransform.position;
 	VECTOR3F nVecToTarget = NormalizeVec3(targetDistance);
@@ -303,7 +307,8 @@ bool EnemyFarAttack2Task::IsTurnChase(Enemy* enemy)
 
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 	m_targetPosition = player->GetWorldTransform().position;
 	float direction = ToDistVec3(m_targetPosition - enemyPosition);
 	VECTOR3F normalizeDist = NormalizeVec3(m_targetPosition - enemyPosition);
@@ -344,19 +349,8 @@ uint32_t EnemyFarAttack2Task::JudgePriority(const int id, const VECTOR3F playerP
 {
 	if (m_isUsed) return minPriority;
 
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
-	//uint32_t exhaustion = enemy->GetEmotion().exhaustionParm.exhaustionCost;
-	//uint32_t maxExhaustion = enemy->GetEmotion().exhaustionParm.maxExhaustionCost;
-
-	//if (exhaustion > static_cast<uint32_t>(maxExhaustion * 0.65f))
-	//{
-	//	auto player = MESSENGER.CallPlayersInstance();
-	//	int targetID = enemy->GetJudgeElement().targetID;
-
-	//	uint32_t damageCount = enemy->GetJudgeElement().damageCount;
-	//	if (damageCount >= kDamageRatio)
-	//		return m_priority;
-	//}
+	EnemyType enemyType = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(enemyType);
 
 	VECTOR3F playerPosition = playerPos;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;

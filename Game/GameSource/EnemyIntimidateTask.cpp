@@ -77,7 +77,8 @@ bool EnemyIntimidateTask::JudgeAnimationRatio(Enemy* enemy, const int attackNo, 
 
 uint32_t EnemyIntimidateTask::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
 	//**************************
 	// MoveCost,AttackCost
 	//**************************

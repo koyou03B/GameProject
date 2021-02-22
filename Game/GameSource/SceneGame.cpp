@@ -9,127 +9,129 @@
 
 bool Game::Initialize(ID3D11Device* device)
 {
-//	RunningMarket().Closing();
+	#pragma region  Market
 	auto& wepon = RunningMarket().AddProductConer(0);
 	wepon.AddProduct<Stone>();
 	wepon.AddProduct<Arrow>();
+	#pragma endregion
 
-	//**********************
-	// SceneConstantBuffer
-	//**********************
-	{
-		m_sceneConstantBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>>(device);
-		m_sceneConstantBuffer->data.directionalLight.direction = { 0.0f, -1.0f, 1.0f, 0.0f };
-		m_sceneConstantBuffer->data.ambientColor = { 0.147f,0.147f,0.147f,1.0f };
-	}
+	#pragma region SceneConstantBuffer
+	m_sceneConstantBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>>(device);
+	m_sceneConstantBuffer->data.directionalLight.direction = { 0.0f, -1.0f, 1.0f, 0.0f };
+	m_sceneConstantBuffer->data.ambientColor = { 0.147f,0.147f,0.147f,1.0f };
+	#pragma endregion
 
-	//*********************
-	// MetaAI
-	//*********************
-	{
-		m_metaAI = std::make_shared<MetaAI>();
-		m_metaAI->Init();
-		m_stage = std::make_unique<Stage>();
-		m_stage->Init();
-		MESSENGER.GetInstance().SetMetaAI(m_metaAI);
+	#pragma region Shader
+	m_sceneEffect.ChoiceSceneEffect(device, SceneEffectType::SCREEN_FILTER);
+	m_sceneEffect.ChoiceSceneEffect(device, SceneEffectType::FOG);
+	#pragma endregion
 
-	}
+	#pragma region Object
+	m_metaAI = std::make_shared<MetaAI>();
+	m_metaAI->Init(device);
+	m_stage = std::make_unique<Stage>();
+	m_stage->Init();
+	MESSENGER.GetInstance().SetMetaAI(m_metaAI);
+	#pragma endregion
 
-	//*********************
-	// UI
-	//*********************
-	{
-		m_uiAdominist = std::make_shared<UIAdominist>();
-		m_uiAdominist->Init();
-		MESSENGER.GetInstance().SetUIAdominist(m_uiAdominist);
+	#pragma region UI
+	m_uiAdominist = std::make_shared<UIAdominist>();
+	m_uiAdominist->Init();
+	MESSENGER.GetInstance().SetUIAdominist(m_uiAdominist);
+	#pragma endregion
 
-	}
-	//*********************
-	// Camera
-	//*********************
-	{
-		Source::CameraControlle::CameraManager().GetInstance()->Initialize(device);
-
-		VECTOR3F distance = DistancePlayerToEnemy();
-		Source::CameraControlle::CameraManager().GetInstance()->SetOldDistance(distance);
-		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-		CharacterAI* player = m_metaAI->GetPlayCharacter();
-		VECTOR3F pos = player->GetWorldTransform().position;
-		pos.y = offsetY[0];
-		Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
-		Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-		Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
-		Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(0.0f);
-		Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(0.0f);
-		Source::CameraControlle::CameraManager().GetInstance()->SetRigth(VECTOR3F(0.0f, 0.0f, 0.0f));
-		CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
-		pos = enemy->GetWorldTransform().position;
-		pos.y = offsetY[1];
-		Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
-		Source::CameraControlle::CameraManager().GetInstance()->SetOldTarget(pos);
-
-		float tmp = 0;
-		Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
-	}
-
-	//*********************
-	// Shader
-	//*********************
-	{
-		m_frameBuffer[0] = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
-			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
+	#pragma region Camera
 	
-		m_frameBuffer[1] = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
-			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
-
-		m_frameBuffer[2] = std::make_unique<Source::FrameBuffer::FrameBuffer>(device, static_cast<int>(Framework::GetInstance().SCREEN_WIDTH), static_cast<int>(Framework::GetInstance().SCREEN_HEIGHT),
-			false/*enable_msaa*/, 1, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R24G8_TYPELESS);
-
-		m_fog = std::make_unique<Source::Fog::Fog>(device);
-
-		m_fog->ReadBinary();
-
-		m_screenFilter = std::make_unique<Source::ScreenFilter::ScreenFilter>(device);
-		m_screenFilter->_screenBuffer->data.screenColor = { 0.0f,0.0f,0.0f,1.0f };
-
-		m_vignette = std::make_unique<Source::Vignette::Vignette>(device);
-		m_vignette->ReadBinary();
-
-		m_vignetteTimer = 0.0f;
-	}
-
+	Source::CameraControlle::CameraManager().GetInstance()->Initialize(device);
+	VECTOR3F distance = DistancePlayerToEnemy();
+	Source::CameraControlle::CameraManager().GetInstance()->SetOldDistance(distance);
+	Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+	CharacterAI* player = m_metaAI->GetPlayerAdominist().GetSelectPlayer(PlayerType::Fighter);
+	VECTOR3F pos = player->GetWorldTransform().position;
+	pos.y = offsetY[0];
+	Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
+	Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
+	Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
+	Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(0.0f);
+	Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(0.0f);
+	Source::CameraControlle::CameraManager().GetInstance()->SetRigth(VECTOR3F(0.0f, 0.0f, 0.0f));
+	CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
+	pos = enemy->GetWorldTransform().position;
+	pos.y = offsetY[1];
+	Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
+	Source::CameraControlle::CameraManager().GetInstance()->SetOldTarget(pos);
+	float tmp = 0;
+	Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
+	
+	#pragma endregion
 
 	return true;
 }
 
 void Game::Update(float& elapsedTime)
-{	
-
-	if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode() !=
-		Source::CameraControlle::CameraManager().GetInstance()->CHANGE_OBJECT)
+{
+	
+	#pragma region Camera
 	{
-		//Camera
-		if (!m_metaAI->GetIsFinish(0) && !m_metaAI->GetIsFinish(1))
-		{
-			VECTOR3F distance = DistancePlayerToEnemy();
-			VECTOR3F rightVaule = CameraRightValue();
-			Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-			CharacterAI* player = m_metaAI->GetPlayCharacter();
-			VECTOR3F pos = player->GetWorldTransform().position;
-			pos.y = offsetY[0];
-			Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
-			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
-			pos = enemy->GetWorldTransform().position;
-			pos.y = offsetY[1];
-			Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
-			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+		VECTOR3F distance = DistancePlayerToEnemy();
+		VECTOR3F rightVaule = CameraRightValue();
+		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
+		CharacterAI* player = m_metaAI->GetPlayerAdominist().GetPlayPlayer();
+		VECTOR3F pos = player->GetWorldTransform().position;
+		pos.y = offsetY[0];
+		Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
+		CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
+		pos = enemy->GetWorldTransform().position;
+		pos.y = offsetY[1];
+		Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
+		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+	}
 
-		}
-		else if (m_metaAI->GetIsFinish(1))
+	#pragma endregion
+
+	#pragma region Update
+	
+	m_metaAI->Update(elapsedTime);
+	m_uiAdominist->Update(elapsedTime);
+	m_stage->Update(elapsedTime);
+	
+	#pragma endregion
+
+	#pragma region RayPick
+
+	//VECTOR4F eye = Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->GetEye();
+	//VECTOR3F start = { eye.x,eye.y,eye.z };
+	//VECTOR3F end = player->GetWorldTransform().position;
+	//end.y = eye.y;
+	//VECTOR3F intersection, hitNormal;
+	//int ret = m_stage->RayPick(
+	//	start,
+	//	end,
+	//	&intersection, &hitNormal);
+	//if (ret != -1)
+	//{
+	//	start.x = intersection.x;
+	//	start.y = intersection.y;
+	//	start.z = intersection.z;
+	//	Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->SetEye(start);
+	//}
+
+	#pragma endregion
+
+	#pragma region  EventFlow
+	switch (m_eventState)
+	{
+	case GameEvent::START:
+		if (m_sceneEffect.UpdateScreenFilter(0.05f, 1.0f))
+			m_eventState = GameEvent::FIGHT;
+		break;
+	case GameEvent::FIGHT:
+		if (m_metaAI->GetIsWinner())
 		{
+			m_eventState = GameEvent::WIN;
 			const float frontOffset = 5.0f;
 			const float yOffset = 70.0f;
-			CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
+			CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
 			enemy->GetWorldTransform().WorldUpdate();
 			FLOAT4X4 world = enemy->GetWorldTransform().world;
 			VECTOR3F front = { world._31,world._32,world._33 };
@@ -138,104 +140,47 @@ void Game::Update(float& elapsedTime)
 			VECTOR3F eye = (front + enemy->GetWorldTransform().position);
 			auto& camera = Source::CameraControlle::CameraManager().GetInstance()->GetCamera();
 			camera->SetEye(eye);
-			Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::CameraMode::END);		
-			Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
+			Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::CameraMode::END);
+
 		}
+		if (m_metaAI->GetIsLoaser())
+			m_eventState = GameEvent::LOSE;
 
-
-		//AllUpdate
-		{
-			m_metaAI->UpdateOfEnemys(elapsedTime);
-			m_metaAI->UpdateOfPlayers(elapsedTime);
-			m_uiAdominist->Update(elapsedTime);
-			m_stage->Update(elapsedTime);
-		}
-
-		//RayPick()
-		{
-			//VECTOR4F eye = Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->GetEye();
-			//VECTOR3F start = { eye.x,eye.y,eye.z };
-			//VECTOR3F end = player->GetWorldTransform().position;
-			//end.y = eye.y;
-			//VECTOR3F intersection, hitNormal;
-			//int ret = m_stage->RayPick(
-			//	start,
-			//	end,
-			//	&intersection, &hitNormal);
-			//if (ret != -1)
-			//{
-			//	start.x = intersection.x;
-			//	start.y = intersection.y;
-			//	start.z = intersection.z;
-			//	Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->SetEye(start);
-			//}
-		}
-	}
-	else
-		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
-
-	switch (m_eventState)
+		break;
+	case GameEvent::WIN:
 	{
-	case 0:
-		m_screenFilter->_screenBuffer->data.screenColor.x += 0.03f;
-		m_screenFilter->_screenBuffer->data.screenColor.y += 0.03f;
-		m_screenFilter->_screenBuffer->data.screenColor.z += 0.03f;
-		if (m_screenFilter->_screenBuffer->data.screenColor.x >= 1.0f)
-			++m_eventState;
-
-		break;
-	case 1:
-		if (MESSENGER.isVignette)
+		static float time = 0.0f;
+		time += elapsedTime;
+		if (time >= 2.0f)
 		{
-			m_vignetteTimer += elapsedTime;
-			if (m_vignetteTimer >= 0.15f)
+			if (m_sceneEffect.UpdateScreenFilter(0.01f, 0.0f))
 			{
-				m_vignetteTimer = 0.0f;
-				MESSENGER.isVignette = false;
-			}
-			else
-				m_vignette->_vignetteBuffer->data.darkness = 7.0f;
-		}
-		else
-		{
-			if (m_vignette->_vignetteBuffer->data.darkness > 0.0f)
-				m_vignette->_vignetteBuffer->data.darkness -= 0.5f;
-
-			if (m_vignette->_vignetteBuffer->data.darkness < 0.0f)
-				m_vignette->_vignetteBuffer->data.darkness = 0.0f;
-		}
-
-		if (m_metaAI->GetIsFinish(0) || m_metaAI->GetIsFinish(1))
-			++m_eventState;
-
-		break;
-	case 2:
-		{
-			static float time = 0.0f;
-			time += elapsedTime;
-			if (time >= 2.0f)
-			{
-				m_screenFilter->_screenBuffer->data.screenColor.x -= 0.01f;
-				m_screenFilter->_screenBuffer->data.screenColor.y -= 0.01f;
-				m_screenFilter->_screenBuffer->data.screenColor.z -= 0.01f;
-				if (m_screenFilter->_screenBuffer->data.screenColor.x <= 0.0f)
-				{
-					time = 0.0f;
-					if (m_metaAI->GetIsFinish(0))
-					{
-						SceneLabel label = SceneLabel::OVER;
-						ActivateScene.ChangeScene(label);
-					}
-					else if (m_metaAI->GetIsFinish(1))
-					{
-						SceneLabel label = SceneLabel::CLEAR;
-						ActivateScene.ChangeScene(label);
-					}
-				}
+				time = 0.0f;
+				SceneLabel label = SceneLabel::CLEAR;
+				ActivateScene.ChangeScene(label);
 			}
 		}
-		break;
 	}
+	break;
+	case GameEvent::LOSE:
+	{
+		static float time = 0.0f;
+		time += elapsedTime;
+		if (time >= 2.0f)
+		{
+			if (m_sceneEffect.UpdateScreenFilter(0.01f, 0.0f))
+			{
+				time = 0.0f;
+				SceneLabel label = SceneLabel::OVER;
+				ActivateScene.ChangeScene(label);
+			}
+		}
+	}
+	break;
+	}
+	#pragma endregion
+
+
 
 #if _DEBUG
 	if (KEYBOARD._keys[DIK_1] == 1)
@@ -250,58 +195,6 @@ void Game::Update(float& elapsedTime)
 		ActivateScene.ChangeScene(label);
 	}
 #endif
-//	if (GetEntityManager().FindEntity(2).HasComponent<StaticModel>())
-//	{
-//#if 0
-//		auto& terrain = GetEntityManager().FindEntity("TERRAIN").FindComponent<StaticModel>();
-//		auto& player = GetEntityManager().FindEntity("PLAYER").FindComponent<WorldTransform>();
-//		VECTOR3F position = player.GetTranslate();
-//		VECTOR3F intersection,hitNormal;
-//		FLOAT4X4 worldTransform = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-//		int ret = 0;
-//		const char* material_name = 0;
-//		const float raycast_lift_up = 10.0f;
-//		ret = terrain.RayPick(VECTOR3F(position.x, position.y + raycast_lift_up, position.z), VECTOR3F(position.x, position.y - raycast_lift_up, position.z),
-//			&intersection, &hitNormal);
-//
-//		if (ret != -1)
-//		{
-//
-//			position.x = intersection.x;
-//			position.y = intersection.y;
-//			position.z = intersection.z;
-//
-//			player.SetTranslate(position);
-//			player.WorldUpdate();
-//
-//		}
-//#else
-//		auto& staticModelWorldTrandform = GetEntityManager().FindEntity(2).FindComponent<StaticModel>().GetInstanceData();
-//		auto& staticModel = GetEntityManager().FindEntity(2).FindComponent<StaticModel>().GetStaticModel();
-//		auto& player = GetEntityManager().FindEntity(0).FindComponent<WorldTransform>();
-//		VECTOR3F position = player.GetTranslate();
-//		VECTOR3F intersection;
-//		int ret = 0;
-//		const char* material_name = 0;
-//		const float raycast_lift_up = 10.0f;
-//
-//
-//
-//		material_name = staticModel->RayTrianglesIntersectionDownward(VECTOR3F(position.x, position.y + raycast_lift_up, position.z),
-//			staticModelWorldTrandform.at(0).world,&intersection);
-//		if (material_name != "")
-//		{
-//			position.x = intersection.x;
-//			position.y = intersection.y;
-//			position.z = intersection.z;
-//
-//			player.SetTranslate(position);
-//			player.WorldUpdate();
-//		}
-//#endif
-//
-//	}
-
 
 }
 
@@ -310,40 +203,21 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 	VECTOR4F lightDirection(0, -1, 1, 0);
 
 	{
-		m_frameBuffer[0]->Clear(immediateContext);
-		m_frameBuffer[0]->Activate(immediateContext);
-
-		m_frameBuffer[1]->Clear(immediateContext);
-		m_frameBuffer[1]->Activate(immediateContext);
-
-		m_frameBuffer[2]->Clear(immediateContext);
-		m_frameBuffer[2]->Activate(immediateContext);
-
+		m_sceneEffect.ActivateEffect(immediateContext,SceneEffectType::SCREEN_FILTER);
+		m_metaAI->ActivateEffect(immediateContext, SceneEffectType::VIGNETTE);
+		m_sceneEffect.ActivateEffect(immediateContext, SceneEffectType::FOG);
 		m_sceneConstantBuffer->Activate(immediateContext, SLOT2, true, true);
 		Source::CameraControlle::CameraManager().GetInstance()->Activate(immediateContext);
 
 		m_stage->Render(immediateContext);
-
-		m_metaAI->RenderOfEnemy(immediateContext, 0);
-
-		m_metaAI->RenderOfPlayer(immediateContext, 0);
-		//Archer
-		m_metaAI->RenderOfPlayer(immediateContext, 1);
+		m_metaAI->Render(immediateContext);
 		
-		m_frameBuffer[2]->Deactivate(immediateContext);
-		m_fog->Blit(immediateContext, m_frameBuffer[2]->GetRenderTargetShaderResourceView().Get(), m_frameBuffer[2]->GetDepthStencilShaderResourceView().Get());
-
-		m_frameBuffer[1]->Deactivate(immediateContext);
-		m_vignette->Blit(immediateContext, m_frameBuffer[1]->GetRenderTargetShaderResourceView().Get(), nullptr);
-
+		m_sceneEffect.DeactivateEffect(immediateContext,SceneEffectType::FOG);
+		m_metaAI->DeactivateEffect(immediateContext, SceneEffectType::VIGNETTE);
+		
 		m_uiAdominist->Render(immediateContext);
-
-		m_frameBuffer[0]->Deactivate(immediateContext);
-		m_screenFilter->Blit(immediateContext, m_frameBuffer[0]->GetRenderTargetShaderResourceView().Get());
-
-		//Archer
-		//m_metaAI->RenderOfScope(immediateContext);
-
+		
+		m_sceneEffect.DeactivateEffect(immediateContext, SceneEffectType::SCREEN_FILTER);
 		Source::CameraControlle::CameraManager().GetInstance()->Deactivate(immediateContext);
 		m_sceneConstantBuffer->Deactivate(immediateContext);
 	}
@@ -422,7 +296,7 @@ void Game::ImGui()
 			//-----------
 			// Position
 			//-----------
-			CharacterAI* player = m_metaAI->GetPlayCharacter();
+			CharacterAI* player = m_metaAI->GetPlayerAdominist().GetPlayPlayer();
 			VECTOR3F playerPosition = player->GetWorldTransform().position;
 			float position[4] = { playerPosition.x, 0.0f, playerPosition.z, 20.0f };
 			ImGui::DragFloat4("Position", position, 0.1f);
@@ -450,115 +324,13 @@ void Game::ImGui()
 
 		}
 
-		if (ImGui::CollapsingHeader("Fog"))
+		if (ImGui::CollapsingHeader("PostEffect"))
 		{
-			ImGui::InputFloat("fogGlobalDensity", &m_fog->_fogBuffer->data.fogGlobalDensity, 0.0001f, 0.001f, "%.4f");
-			ImGui::InputFloat("fogHeightFalloff", &m_fog->_fogBuffer->data.fogHeightFallOff, 0.0001f, 0.001f, "%.4f");
-			ImGui::InputFloat("fogStartDepth", &m_fog->_fogBuffer->data.fogStartDepth, 0.1f, 1.0f);
-
-			ImGuiColorEditFlags flag = ImGuiColorEditFlags_Float; // 0 ~ 255表記ではなく、0.0 ~ 1.0表記にします。
-
-			ImGui::ColorEdit3("fogColor", reinterpret_cast<float*>(&m_fog->_fogBuffer->data.fogColor), flag);
-			ImGui::ColorEdit3("fogHighlightColor", reinterpret_cast<float*>(&m_fog->_fogBuffer->data.fogHighlightColor), flag);
-
-			ImGui::InputFloat("R", &m_fog->_fogBuffer->data.fogColor.x, 0.0f, 1.0f, "%f");
-			ImGui::InputFloat("G", &m_fog->_fogBuffer->data.fogColor.y, 0.0f, 1.0f, "%f");
-			ImGui::InputFloat("B", &m_fog->_fogBuffer->data.fogColor.z, 0.0f, 1.0f, "%f");
-
-			if (ImGui::Button("Save"))
-				m_fog->SaveBinary();
-		}
-
-		if (ImGui::CollapsingHeader("ScreenFilter"))
-		{
-			//--------------
-			// Bright(明度)
-			//--------------
-			static float bright = 0.0f;
-			ImGui::SliderFloat("Bright", &bright, -1.0f, 1.0f);
-			m_screenFilter->_screenBuffer->data.bright = bright;
-
-			//--------------
-			// Contrast(濃淡)
-			//--------------
-			static float contrast = 1.0f;
-			ImGui::SliderFloat("Contrast", &contrast, -1.0f, 1.0f);
-			m_screenFilter->_screenBuffer->data.contrast = contrast;
-
-			//-----------------
-			// Saturate(彩度)
-			//-----------------
-			static float saturate = 1.0f;
-			ImGui::SliderFloat("Saturate", &saturate, -1.0f, 1.0f);
-			m_screenFilter->_screenBuffer->data.saturate = saturate;
-
-			//--------
-			// Color
-			//--------
-			static float color[4] = { 1.f, 1.f, 1.f, 1.f };
-			ImGuiColorEditFlags flag = ImGuiColorEditFlags_Float; // 0 ~ 255表記ではなく、0.0 ~ 1.0表記にします。
-			ImGui::ColorEdit4("Color", color, flag);
-			m_screenFilter->_screenBuffer->data.screenColor = VECTOR4F(color[0], color[1], color[2], color[3]);
-
-		}
-
-		if (ImGui::CollapsingHeader("Vignette"))
-		{
-			//--------------
-			// Radius(半径)
-			//--------------
-			ImGui::SliderFloat("Radius", &m_vignette->_vignetteBuffer->data.radius, 0.0f, 10.0f);
-			
-
-			//--------------
-			// Smoothness
-			//--------------
-			ImGui::SliderFloat("Smoothness", &m_vignette->_vignetteBuffer->data.smoothness, 0.0f, 10.0f);
-
-
-			//-----------------
-			// Darkness
-			//-----------------
-			ImGui::SliderFloat("Darkness", &m_vignette->_vignetteBuffer->data.darkness, 0.0f, 10.0f);
-
-
-			//--------------
-			// AroundColor
-			//-------------
-			static float color[4] = { 1.f, 1.f, 1.f, 1.f };
-			ImGuiColorEditFlags flag = ImGuiColorEditFlags_Float; // 0 ~ 255表記ではなく、0.0 ~ 1.0表記にします。
-			ImGui::ColorEdit4("AroundColor", color, flag);
-			m_vignette->_vignetteBuffer->data.aroundColor = VECTOR4F(color[0], color[1], color[2], color[3]);
-
-
-			if (ImGui::Button("Save"))
-				m_vignette->SaveBinary();
+			m_sceneEffect.ImGui();
 		}
 
 		if (ImGui::CollapsingHeader("Camera"))
-		{
-			//ImGui::SliderFloat2("OffsetY", offsetY, 0.0f, 100.0f);
-			
-			//{
-			//	static float upOffset = {30.0f};
-			//	static float upYOffset = {};
-			//	static float rightOffset[3] = {};
-			//	ImGui::SliderFloat("UpOffset", &upOffset, 100.0f, -100.0f);
-			//	ImGui::SliderFloat("UpYOffset", &upYOffset, 100.0f, -100.0f);
-			//	ImGui::SliderFloat3("RightOffset", rightOffset, -100.0f, 100.0f);
-
-			//	CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
-			//	FLOAT4X4 world = enemy->GetWorldTransform().world;
-			//	VECTOR3F up = { world._31,world._32,world._33 };
-			//	up = NormalizeVec3(up);
-			//	up *= upOffset;
-			//	up.y = upYOffset;
-			//	up += enemy->GetWorldTransform().position;
-			//	auto& camera = Source::CameraControlle::CameraManager().GetInstance()->GetCamera();
-			//	camera->SetEye(up);
-			//	Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::END);
-			//}
-			
+		{			
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ
 			ImGui::SetNextWindowPos(ImVec2(1520, 0), ImGuiSetCond_Once);//ポジション
 			ImGui::Begin("CameraEditer");
@@ -571,51 +343,25 @@ void Game::ImGui()
 			m_uiAdominist->ImGui();
 		}
 
-		if (ImGui::CollapsingHeader("Player"))
+		if (ImGui::CollapsingHeader("MetaAI"))
 		{
-			auto& player = m_metaAI->GetPlayers();
+			if (ImGui::CollapsingHeader("Player"))
+			{
+				m_metaAI->ImGuiOfPlayer(Framework::GetInstance().GetDevice());
+			}
 
-			player[0]->ImGui(Framework::GetInstance().GetDevice());
-			player[1]->ImGui(Framework::GetInstance().GetDevice());
-#if 0
-			//Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-			////Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(player->GetCamera().focalLength);
-			//Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(player->GetCamera().heightAboveGround);
+			if (ImGui::CollapsingHeader("Enemy"))
+			{
+				m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice());
+			}
 
-			//VECTOR3F currentDistance = DistancePlayerToEnemy();
-			//currentDistance = NormalizeVec3(currentDistance);
+			if (ImGui::CollapsingHeader("Shader"))
+			{
+				m_metaAI->ImGuiOfShader();
+			}
 
-			//if (ImGui::Button("kkkk"))
-			//{
-
-			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CALL_HELP);
-			//}
-
-			//if (ImGui::Button("Saber"))
-			//{
-			//	//player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::SABER;
-			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
-			//}
-			//ImGui::SameLine();
-			//if (ImGui::Button("Archer"))
-			//{
-			//	player[0]->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::ARCHER;
-			//	MESSENGER.MessageFromPlayer(player[0]->GetID(), MessengType::CHANGE_PLAYER);
-			//}
-			//ImGui::SameLine();
-			//if (ImGui::Button("Fighter"))
-			//{
-			//	player->GetChangeComand().changeType = CharacterParameter::Change::PlayerType::FIGHTER;
-			//	MESSENGER.MessageFromPlayer(player->GetID(), MessengType::CHANGE_PLAYER);
-			//}
-#endif
 		}
 
-		if (ImGui::CollapsingHeader("Enemy"))
-		{
-			m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice(), 0);
-		}
 
 		if (ImGui::CollapsingHeader("Stage"))
 		{
@@ -631,7 +377,6 @@ void Game::Uninitialize()
 {
 	//GetEntityManager().Relese();
 	m_stage->Release();
-	MESSENGER.isVignette = false;
 	RunningMarket().Reset();
 	m_metaAI->Release();
 	m_uiAdominist->Release();
@@ -643,8 +388,8 @@ void Game::Uninitialize()
 
 VECTOR3F Game::DistancePlayerToEnemy()
 {
-	CharacterAI* player = m_metaAI->GetPlayCharacter();
-	CharacterAI* enemy = &(*m_metaAI->GetEnemys()[0]);
+	CharacterAI* player = m_metaAI->GetPlayerAdominist().GetPlayPlayer();
+	CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
 	VECTOR3F pos[2] = { player->GetWorldTransform().position ,enemy->GetWorldTransform().position };
 	pos[0].y = offsetY[0];
 	pos[1].y = offsetY[1];
@@ -654,7 +399,7 @@ VECTOR3F Game::DistancePlayerToEnemy()
 
 VECTOR3F Game::CameraRightValue()
 {
-	CharacterAI* player = m_metaAI->GetPlayCharacter();
+	CharacterAI* player = m_metaAI->GetPlayerAdominist().GetPlayPlayer();
 	//*****************
 	// Camera
 	//*****************

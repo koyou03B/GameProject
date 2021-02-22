@@ -15,7 +15,9 @@
 //**************************************************
 uint32_t EnemyWaitNode::JudgePriority(const int id)
 {
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
+
 
 	uint32_t moveCost   = enemy->GetJudgeElement().moveCount * enemy->GetEmotion().exhaustionParm.moveExhaustionCost;
 	uint32_t attackCost = enemy->GetJudgeElement().attackCount * enemy->GetEmotion().exhaustionParm.attackExhaustionCost;

@@ -7,8 +7,7 @@
 class Fighter : public CharacterAI
 {
 public:
-
-	Fighter() = default;
+	Fighter() { Init(); };
 	~Fighter() = default;
 
 	void Init() override;
@@ -16,6 +15,8 @@ public:
 	void Update(float& elapsedTime) override;
 
 	void Render(ID3D11DeviceContext* immediateContext) override;
+
+	void Release() override;
 
 	void ImGui(ID3D11Device* device) override;
 

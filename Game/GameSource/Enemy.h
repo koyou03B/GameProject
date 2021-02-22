@@ -23,6 +23,8 @@ public:
 
 	void Render(ID3D11DeviceContext* immediateContext) override;
 
+	void Release() override;
+
 	void ImGui(ID3D11Device* device) override;
 
 	void Impact() override {};

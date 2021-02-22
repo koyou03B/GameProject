@@ -167,7 +167,9 @@ bool EnemyNearSpecialAttack0Task::IsTurnChase(Enemy* enemy)
 int EnemyNearSpecialAttack0Task::JudgeTurnChace(Enemy* enemy)
 {
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
+
 
 	m_targetPosition = player->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
@@ -214,13 +216,14 @@ void EnemyNearSpecialAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
 		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
 		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
 
-		MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm);
+		MESSENGER.AttackingMessage(EnemyType::Boss, attackParm);
 	}
 }
 
 uint32_t EnemyNearSpecialAttack0Task::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
 	bool isWrath = enemy->GetEmotion().wrathParm.isWrath;
 	if (!isWrath)
 		return minPriority;

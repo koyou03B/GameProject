@@ -71,7 +71,10 @@ void EnemyNearAttack0Task::Run(Enemy* enemy)
 		if (!m_hasFinishedBlend)
 		{
 			m_hasFinishedBlend = JudgeBlendRatio(animation);
-			auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
+			int targetID = enemy->GetJudgeElement().targetID;
+			PlayerType type = static_cast<PlayerType>(targetID);
+			CharacterAI* player = MESSENGER.CallPlayerInstance(type);
+
 			m_targetPosition = player->GetWorldTransform().position;
 		}
 		else
@@ -220,7 +223,7 @@ void EnemyNearAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
 		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
 		float radius = attackParm.radius;
 		attackParm.radius = m_moveState == Action::CROSS_PUNCH ? 1.725f : radius;
-		if (!m_isHit && MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm))
+		if (!m_isHit && MESSENGER.AttackingMessage(EnemyType::Boss, attackParm))
 			m_isHit = true;
 		attackParm.radius = radius;
 	}
@@ -244,7 +247,8 @@ bool EnemyNearAttack0Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo,
 int EnemyNearAttack0Task::JudgeTurnChace(Enemy* enemy)
 {
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 
 	m_targetPosition = player->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
@@ -366,9 +370,8 @@ uint32_t EnemyNearAttack0Task::JudgePriority(const int id,const VECTOR3F playerP
 {
 	if (m_isUsed) return minPriority;
 
-	auto player = MESSENGER.CallPlayersInstance();
-
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
 
 	VECTOR3F playerPosition = playerPos;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;

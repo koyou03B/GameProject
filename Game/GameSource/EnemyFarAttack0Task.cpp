@@ -188,7 +188,7 @@ void EnemyFarAttack0Task::JudgeAttack(Enemy* enemy, const int attackNo)
 		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
 		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
 
-		if (!m_isHit && MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm))
+		if (!m_isHit && MESSENGER.AttackingMessage(EnemyType::Boss, attackParm))
 			m_isHit = true;
 	}
 }
@@ -219,7 +219,10 @@ void EnemyFarAttack0Task::BackFlipTurn(Enemy* enemy)
 		VECTOR3F targetPoint = enemyTransform.position + 
 			enemy->GetMove().velocity * enemy->GetElapsedTime();
 
-		auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
+		int targetID = enemy->GetJudgeElement().targetID;
+		PlayerType type = static_cast<PlayerType>(targetID);
+		CharacterAI* player = MESSENGER.CallPlayerInstance(type);
+
 		VECTOR3F targetDistance = enemyTransform.position - targetPoint;
 		VECTOR3F targetNormal = NormalizeVec3(targetDistance);
 		float targetDist = ToDistVec3(targetDistance);
@@ -253,7 +256,10 @@ void EnemyFarAttack0Task::BackFlipTurn(Enemy* enemy)
 	}
 	else
 	{
-		auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
+		int targetID = enemy->GetJudgeElement().targetID;
+		PlayerType type = static_cast<PlayerType>(targetID);
+		CharacterAI* player = MESSENGER.CallPlayerInstance(type);
+
 		VECTOR3F targetPosition = player->GetWorldTransform().position;
 		VECTOR3F targetDistance = targetPosition - enemyTransform.position;
 		VECTOR3F targetNormal = NormalizeVec3(targetDistance);
@@ -285,7 +291,9 @@ void EnemyFarAttack0Task::BackFlipTurn(Enemy* enemy)
 int EnemyFarAttack0Task::JudgeTurnChace(Enemy* enemy)
 {
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
+
 
 	m_targetPosition = player->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
@@ -345,7 +353,9 @@ void EnemyFarAttack0Task::JudgeVectorDirection(Enemy* enemy)
 	}
 
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
+
 	VECTOR3F playerPosition = player->GetWorldTransform().position;
 	axis = enemyPosition - playerPosition;
 	axis = NormalizeVec3(axis);
@@ -406,7 +416,10 @@ bool EnemyFarAttack0Task::AttackMove(Enemy* enemy)
 
 	if (!m_setTarget)
 	{	
-		auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
+		int targetID = enemy->GetJudgeElement().targetID;
+		PlayerType type = static_cast<PlayerType>(targetID);
+		CharacterAI* player = MESSENGER.CallPlayerInstance(type);
+
 		m_targetPosition = player->GetWorldTransform().position;
 		VECTOR3F targetDistance = m_targetPosition - enemyTransform.position;
 		m_nVecToTarget = NormalizeVec3(targetDistance);
@@ -465,13 +478,12 @@ uint32_t EnemyFarAttack0Task::JudgePriority(const int id, const VECTOR3F playerP
 {
 	if (m_isUsed) return minPriority;
 
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
 
 	uint32_t damageCount = enemy->GetJudgeElement().damageCount;
 	if (damageCount >= kDamageRatio)
 	{
-		auto player = MESSENGER.CallPlayersInstance();
-
 		VECTOR3F playerPosition = playerPos;
 		VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 

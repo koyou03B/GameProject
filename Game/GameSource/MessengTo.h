@@ -9,56 +9,28 @@ public:
 	MessengTo() = default;
 	~MessengTo() = default;
 
-	void MessageFromEnemy(const int id, MessengType type)
+	CharacterAI* CallEnemyInstance(const EnemyType type)
 	{
-		m_metaAI->DeterminationOfEnemy(id,type);
+		return m_metaAI->GetEnemyAdominist().GetSelectEnemy(type);
 	}
 
-	void MessageFromPlayer(const int id, MessengType type)
+	CharacterAI* CallPlayerInstance(const PlayerType type)
 	{
-		m_metaAI->DeterminationOfPlayer(id, type);
+		return m_metaAI->GetPlayerAdominist().GetSelectPlayer(type);
 	}
 
-	VECTOR3F CallScopePosition()
+	bool AttackingMessage(const PlayerType type,CharacterParameter::Collision& player)
 	{
-		return m_metaAI->GetScope()->GetWorldScreenPosition();
-	}
-
-	std::vector<std::shared_ptr<CharacterAI>>& CallEnemysInstance()
-	{
-		return m_metaAI->GetEnemys();
-	}
-
-	std::shared_ptr<CharacterAI>& CallEnemyInstance(const int id)
-	{
-		return m_metaAI->GetEnemys().at(id);
-	}
-
-	std::vector<std::shared_ptr<CharacterAI>>& CallPlayersInstance()
-	{
-		return m_metaAI->GetPlayers();
-	}
-
-	std::shared_ptr<CharacterAI>& CallPlayerInstance(const int id)
-	{
-		return m_metaAI->GetPlayers().at(id);
-	}
-
-	bool AttackingMessage(const int id,CharacterParameter::Collision& player)
-	{
-		if (m_metaAI->CollisionPlayerAttack(id, player))
+		if (m_metaAI->CollisionPlayerAttack(type, player))
 			return true;
 
 		return false;
 	}
 
-	bool EnemyAttackingMessage(const int id, CharacterParameter::Collision& enemy)
+	bool AttackingMessage(const EnemyType type, CharacterParameter::Collision& enemy)
 	{
-		if (m_metaAI->CollisionEnemyAttack(id, enemy))
-		{
-			isVignette = true;
+		if (m_metaAI->CollisionEnemyAttack(type, enemy))
 			return true;
-		}
 
 		return false;
 	}
@@ -85,7 +57,6 @@ public:
 		return messegeTo;
 	};
 
-	bool isVignette = false;
 private:
 	std::shared_ptr<MetaAI> m_metaAI;
 	std::shared_ptr<UIAdominist> m_uiAdominist;

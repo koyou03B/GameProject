@@ -44,7 +44,7 @@ void Stone::Update(float& elapsedTime)
 			m_collision.scale = 1.0f;
 			m_collision.radius = 1.5f;
 			m_collision.collisionType = CollisionType::SPHER;
-			if (MESSENGER.EnemyAttackingMessage(static_cast<int>(0), m_collision))
+			if (MESSENGER.AttackingMessage(EnemyType::Boss, m_collision))
 			{
 				Reset(stone);
 				return;

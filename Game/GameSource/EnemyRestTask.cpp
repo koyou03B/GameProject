@@ -39,11 +39,6 @@ void EnemyRestTask::Run(Enemy* enemy)
 			enemy->GetJudgeElement().damageCount = 0;
 			enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
 			enemy->GetEmotion().exhaustionParm.isExhaustion = false;
-			auto& players = MESSENGER.CallPlayersInstance();
-			for (auto& player : players)
-			{
-				player->GetJudgeElement().attackHitCount = 0;
-			}
 		}
 		animation.animationBlend.SetAnimationSpeed(1.0f);
 	}
@@ -67,7 +62,9 @@ bool EnemyRestTask::JudgeBlendRatio(CharacterParameter::BlendAnimation& animatio
 
 uint32_t EnemyRestTask::JudgePriority(const int id, const VECTOR3F playerPos) 
 {
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
+
 	if(enemy->GetEmotion().exhaustionParm.isExhaustion)
 		return m_priority;
 	

@@ -210,7 +210,7 @@ void EnemyNearAttack1Task::JudgeAttack(Enemy* enemy, const int attackNo)
 		attackParm.position[0] = { attackTransform._41,attackTransform._42,attackTransform._43 };
 		enemy->GetStatus().attackPoint = enemy->GetAttack(attackNo).attackPoint;
 
-		if (!m_isHit && MESSENGER.EnemyAttackingMessage(enemy->GetID(), attackParm))
+		if (!m_isHit && MESSENGER.AttackingMessage(EnemyType::Boss, attackParm))
 			m_isHit = true;
 	}
 }
@@ -233,7 +233,8 @@ bool EnemyNearAttack1Task::JudgeAnimationRatio(Enemy* enemy, const int attackNo,
 int EnemyNearAttack1Task::JudgeTurnChace(Enemy* enemy)
 {
 	int targetID = enemy->GetJudgeElement().targetID;
-	auto& player = MESSENGER.CallPlayerInstance(targetID);
+	PlayerType type = static_cast<PlayerType>(targetID);
+	CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 
 	m_targetPosition = player->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
@@ -318,8 +319,10 @@ void EnemyNearAttack1Task::AttackMove(Enemy* enemy)
 	if (currentAnimationTime >= kMoveTimer[0] && currentAnimationTime < kMoveTimer[1])
 	{
 		auto& enemyTransform = enemy->GetWorldTransform();
+		int targetID = enemy->GetJudgeElement().targetID;
+		PlayerType type = static_cast<PlayerType>(targetID);
+		CharacterAI* player = MESSENGER.CallPlayerInstance(type);
 
-		auto& player = MESSENGER.CallPlayerInstance(enemy->GetJudgeElement().targetID);
 		VECTOR3F targetPosition = player->GetWorldTransform().position;
 		VECTOR3F targetDistance = targetPosition - enemyTransform.position;
 		VECTOR3F targetNormal = NormalizeVec3(targetDistance);
@@ -357,8 +360,8 @@ uint32_t EnemyNearAttack1Task::JudgePriority(const int id, const VECTOR3F player
 {
 
 	if (m_isUsed) return minPriority;
-	auto player = MESSENGER.CallPlayersInstance();
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
 
 	VECTOR3F playerPosition = playerPos;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;

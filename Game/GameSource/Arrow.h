@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include "Market.h"
+#include "DebugObject.h"
 #include "CharacterParameter.h"
 #include ".\LibrarySource\Vector.h"
 #include ".\LibrarySource\StaticMesh.h"
@@ -38,7 +39,7 @@ struct ArrowParam
 	void SaveBinary()
 	{
 		std::ofstream ofs;
-		ofs.open((std::string("../Asset/Binary/Player/Archer/Arrow") + ".bin").c_str(), std::ios::binary);
+		ofs.open((std::string("../Asset/Binary/Player/Archer/ArrowParam") + ".bin").c_str(), std::ios::binary);
 		cereal::BinaryOutputArchive o_archive(ofs);
 		o_archive(*this);
 	}
@@ -79,34 +80,37 @@ public:
 	void SetArrowParameter();
 	void ImGui(ID3D11Device* device);
 
-	const VECTOR3F& GetOffsetX() { return m_offsetX; }
-	const VECTOR3F& GetOffsetZ() { return m_offsetZ; }
 	std::vector<std::pair<InstanceData, ArrowParam>>& GetArrowParam() { return m_arrowData; }
 
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 2)
+		if (version >= 0)
 		{
 			archive
 			(
 				m_arrowFallPower,
-				m_arrowScale,
-				m_offsetX,
+				m_arrowFallRotate,
+				m_defineFallTime,
+				m_defineResetLine,
+				m_defineFallRotate,
 				m_offsetZ
 			);
 		}
 	};
 private:
 	float		m_arrowFallPower = 0.0f;
+	float		m_arrowFallRotate = 0.0f;
 	float		m_defineFallTime = 0.0f;
+	float		m_defineResetLine = 0.0f;
+	float		m_defineFallRotate = 0.0f;
+	float		m_offsetZ = {};
 
 	VECTOR3F	m_arrowScale = { 0.5f,0.5f,0.5f };
-	VECTOR3F	m_offsetX = {};
-	VECTOR3F	m_offsetZ = {};
+
 	CharacterParameter::Collision						m_collision;
 	std::vector<InstanceData>							m_renderData;
 	std::shared_ptr<Source::StaticMesh::StaticMesh>		m_model;
 	std::vector<std::pair<InstanceData, ArrowParam>>	m_arrowData;
-
+	DebugObject m_debugObject;
 };

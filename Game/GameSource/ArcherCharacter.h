@@ -14,15 +14,13 @@ class Archer : public CharacterAI
 {
 public:
 
-	Archer() = default;
-	~Archer()
-	{
-		m_domain.Release();
-	};
+	Archer() { Init(); };
+	~Archer() = default;
 
 	void Init() override;
 	void Update(float& elapsedTime) override;
 	void Render(ID3D11DeviceContext* immediateContext) override;
+	void Release() override;
 	void ImGui(ID3D11Device* device) override;
 
 	void Impact() override;
@@ -68,9 +66,7 @@ public:
 		}
 	}
 private:
-	void Move(float& elapsedTime);
 
-	void ChangeCharacter();
 	bool KnockBack();
 	bool JudgeBlendRatio(const bool isLoop = true);
 	bool Rotate(VECTOR3F& target,const float turnSpeed, bool isLookEnemy = false);
@@ -126,12 +122,12 @@ private:
 	const float	kPredictionViewRangeE = 0.8f;
 
 	int m_state;
-	float m_padDeadLine;
 	float m_elapsedTime;
-	float m_MoveOffset;
 	bool m_hasBlendAnim;
 	bool m_hasRotated;
 	bool m_canRun;
+	bool m_isSetArrow;
+	bool m_hasShoot;
 	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
 
 	VECTOR3F m_attackPoint;

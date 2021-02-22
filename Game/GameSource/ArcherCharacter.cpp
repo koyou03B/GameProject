@@ -5,7 +5,6 @@
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\VectorCombo.h"
 
-
 #ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
 #include "..\External_libraries\imgui\imgui_impl_dx11.h"
@@ -31,10 +30,9 @@ void Archer::Init()
 	//m_model->_resource->AddAnimation("../Asset/Model/Actor/Players/Archer/Death.fbx", 60);
 	//Source::ModelData::fbxLoader().SaveActForBinary(Source::ModelData::ActorModel::Archer);
 
-	m_padDeadLine = 5000.0f;
 	m_elapsedTime = 0.0f;
 
-	m_transformParm.position = { 30.0f,0.0f,0.0f };
+	m_transformParm.position = { 30.0f,0.0f,-20.0f };
 	m_transformParm.angle = { 0.0f * 0.01745f, 0.0f * 0.01745f,0.0f * 0.017454f };
 	m_transformParm.scale = { 0.04f,0.04f,0.04f };
 	m_transformParm.WorldUpdate();
@@ -50,8 +48,8 @@ void Archer::Init()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
-	m_domain.AllSet(m_domainConverter);
 
+	m_domain.AllSet(m_domainConverter);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::FindAttackPoint)->SetOperator(&Archer::FindAttackPoint);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::Move)->SetOperator(&Archer::MoveRun);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::SetArrow)->SetOperator(&Archer::SetArrow);
@@ -59,69 +57,27 @@ void Archer::Init()
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::Avoiding)->SetOperator(&Archer::Avoid);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::FindDirectionAvoid)->SetOperator(&Archer::FindDirectionToAvoid);
 
-	m_statusParm.life = 12000;
+	m_statusParm.life = 120.0f;
 	m_stepParm.maxSpeed = m_stepParm.speed;
 	m_controlPoint.resize(8);
 	m_canRun = true;
-
+	m_isSetArrow = false;
 	auto& wepon = RunningMarket().FindProductConer(0);
 	std::unique_ptr<Arrow> arrow{ wepon.GiveProduct<Arrow>() };
 	m_arrow = std::move(arrow);
+	m_statusParm.attackPoint = 10.0f;
 }
 
 void Archer::Update(float& elapsedTime)
 {
 	m_elapsedTime = elapsedTime;
 
-	//if (m_changeParm.isPlay)
-	//{
-	//	m_input = PAD.GetPad(0);
-	//	if (m_input != nullptr)
-	//	{
-	//		Move(m_elapsedTime);
-	//	}
-	//}
-
-	//if (m_changeParm.isPlay)
-	//{
-	//	m_input = PAD.GetPad(0);
-	//	if (m_input != nullptr)
-	//	{
-	//		if (!KnockBack())
-	//		{
-	//			//***********************
-	//			// Movement in each mode
-	//			//***********************
-	//			if (m_mode != Mode::Aiming)
-	//			{
-	//				Move(m_elapsedTime);
-	//				Aim();
-	//				Step(m_elapsedTime);
-	//			}
-	//			else
-	//			{
-	//				Aiming();
-	//				AimMove(m_elapsedTime);
-	//				AimStep(m_elapsedTime);
-	//				Shot();
-	//			}
-	//		}
-	//		//***********************
-	//		// Common Movements
-	//		//***********************
-	//		ArrowInstamce.Update(elapsedTime);
-	//		ChangeCharacter();
-	//		RestAnimationIdle();
-	//	}
-	//}
-	//else
-	//{
-	//	m_input = PAD.GetPad(0);
-	//	//Step(m_elapsedTime);
-	//	//Attack(m_elapsedTime);
-	//	KnockBack();
-	//	RestAnimationIdle();
-	//}
+	if (m_hasShoot)
+	{
+		m_arrow->Update(m_elapsedTime);
+		if (!m_arrow->GetArrowParam().at(0).second.isFlying)
+			m_hasShoot = false;
+	}
 
 	//*********************
 	// Collision Detection
@@ -148,127 +104,15 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 	m_debugObjects.controlPoint.Render(immediateContext, scroll, false);
 }
 
-void Archer::Move(float& elapsedTime)
+void Archer::Release()
 {
-	if (m_input->StickDeadzoneLX(m_padDeadLine) || m_input->StickDeadzoneLY(m_padDeadLine))
+	m_blendAnimation.animationBlend.ReleaseAllSampler();
+	m_domain.Release();
+	if (m_model)
 	{
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		// Input direction of the PAD as 
-		// seen from camera space
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
-		view._14 = 0.0f;
-		view._24 = 0.0f;
-		view._34 = 0.0f;
-		view._41 = 0.0f;
-		view._42 = 0.0f;
-		view._43 = 0.0f;
-		view._44 = 1.0f;
-
-		DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view));
-		VECTOR3F stickVec(m_input->StickVectorLeft().x, 0.0f, m_input->StickVectorLeft().y);
-		DirectX::XMVECTOR vStickVex = DirectX::XMLoadFloat3(&stickVec);
-
-		VECTOR3F stickVector = {};
-		vStickVex = DirectX::XMVector4Transform(vStickVex, viewMatrix);
-		DirectX::XMStoreFloat3(&stickVector, vStickVex);
-
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		// Giving an acceleration value 
-		// to the direction of the stick
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		m_moveParm.velocity.x += stickVector.x * m_moveParm.accle.x;
-		m_moveParm.velocity.y += stickVector.y * m_moveParm.accle.y;
-		m_moveParm.velocity.z += stickVector.z * m_moveParm.accle.z;
-
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		// VectorLength be the speed
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		float speed = ToDistVec3(m_moveParm.velocity);
-
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		// Get the distance of the stick.
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		float leftX = m_input->GetStickLeftXValue();
-		float leftY = m_input->GetStickLeftYValue();
-		float distance = sqrtf(leftX * leftX + leftY * leftY) / 32767;
-
-		VECTOR3F vector = {};
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		// If it's faster than a deceleration.
-		//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-		if (speed > m_moveParm.decleleration)
+		if (m_model.unique())
 		{
-			//*-*-*-*-*-*-*-*-
-			//Get Directions
-			//*-*-*-*-*-*-*-*-
-			vector = m_moveParm.velocity / speed;
-
-			//*-*-*-*-*-*-*-*-*-*-*-*-
-			//If it's over max speed.
-			//*-*-*-*-*-*-*-*-*-*-*-*-
-			if (speed > m_moveParm.maxSpeed[1].x)
-				m_moveParm.velocity = vector * m_moveParm.maxSpeed[1].x;
-			else
-				m_moveParm.velocity -= vector * m_moveParm.decleleration;
-
-			m_transformParm.position += m_moveParm.velocity * elapsedTime;
-
-			VECTOR3F angle = m_transformParm.angle;
-
-			float dx = sinf(angle.y);
-			float dz = cosf(angle.y);
-			float dot = (vector.x * dx) + (vector.z * dz);
-			float rot = 1.0f - dot;
-
-			float limit = m_moveParm.turnSpeed;
-			if (rot > limit)
-				rot = limit;
-
-			float cross = (vector.x * dz) - (vector.z * dx);
-			if (cross > 0.0f)
-				angle.y += rot;
-			else
-				angle.y -= rot;
-
-			m_transformParm.angle = angle;
-			m_transformParm.WorldUpdate();
-		}
-		else
-			m_moveParm.velocity = {};
-	}
-	else
-	{
-		m_moveParm.speed = {};
-	}
-}
-
-void Archer::ChangeCharacter()
-{
-	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT) == 1)
-	{
-		m_changeParm.changeType = CharacterParameter::Change::PlayerType::FIGHTER;
-
-		MESSENGER.MessageFromPlayer(m_id, MessengType::CHANGE_PLAYER);
-
-		m_input->ResetButton(XINPUT_GAMEPAD_BUTTONS::PAD_RIGHT);
-
-		if (m_mode == Mode::Aiming)
-		{
-			MESSENGER.MessageFromPlayer(m_id, MessengType::SHIFT_AIM_MODE);
-			m_mode = Mode::Moving;
-			int samplerSize = static_cast<int>(m_blendAnimation.animationBlend.GetSampler().size());
-			if (samplerSize >= 2)
-			{
-				for (int i = 0; i < samplerSize; ++i)
-				{
-					m_blendAnimation.animationBlend.ResetAnimationSampler(i);
-					m_blendAnimation.animationBlend.ReleaseSampler(i);
-				}
-			}
-			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
-			m_animationType = Animation::IDLE;
-			m_blendAnimation.animationBlend.ChangeSampler(0, m_animationType,m_model);
+			m_model.reset();
 		}
 	}
 }
@@ -461,7 +305,7 @@ bool Archer::FindAttackPoint()
 	}
 
 #else
-	auto& enemy = MESSENGER.CallEnemyInstance(0);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
 	VECTOR3F ePosition = enemy->GetWorldTransform().position;
 	VECTOR3F angle = enemy->GetWorldTransform().angle;
 	VECTOR3F front = VECTOR3F(sinf(angle.y), 0.0f, cosf(angle.y));
@@ -472,15 +316,16 @@ bool Archer::FindAttackPoint()
 	float radius = 0.0f;
 	float minDistance = FLT_MAX;
 	VECTOR3F atkPos = {};
+	bool isSelectAtkPoint = false;
 	for (int i = 0; i < 8; ++i)
 	{
-		m_controlPoint[i].second.x = ePosition.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.9f);
-		m_controlPoint[i].second.z = ePosition.z + sinf(radius * 0.01745f) * (kSafeAreaRadius * 0.9f);
+		m_controlPoint[i].second.x = ePosition.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.6f);
+		m_controlPoint[i].second.z = ePosition.z + sinf(radius * 0.01745f) * (kSafeAreaRadius * 0.6f);
 		radius += 45.0f;
 
 		VECTOR3F normalizeDist = NormalizeVec3(m_controlPoint[i].second - ePosition);
 		float dot = DotVec3(front, normalizeDist);
-		if (dot >= 0)
+		if (dot >= 0.f)
 			m_controlPoint[i].first = true;
 		else
 			m_controlPoint[i].first = false;
@@ -490,7 +335,7 @@ bool Archer::FindAttackPoint()
 		stage.scale = 1.0f;
 
 		point.position = m_controlPoint[i].second;
-		point.radius = 2.0f;
+		point.radius = 1.0f;
 		point.scale = 1.0f;
 		if (!collision.JudgeSphereAndSphere(point, stage))
 			m_controlPoint[i].first = true;
@@ -500,11 +345,17 @@ bool Archer::FindAttackPoint()
 		{
 			minDistance = distance;
 			atkPos = m_controlPoint[i].second;
+			isSelectAtkPoint = true;
 		}
 	}
 
 #endif
+	
+	if (!isSelectAtkPoint)
+	{
+		atkPos = m_controlPoint[7].second;
 
+	}
 	float dist = ToDistVec3(atkPos - m_attackPoint);
 	if (dist > 10.0f)
 		m_attackPoint = atkPos;
@@ -596,6 +447,7 @@ bool Archer::MoveRun()
 			m_hasRotated = false;
 			m_blendAnimation.animationBlend.AddSampler(Animation::AIM, m_model);
 			m_hasBlendAnim = false;
+
 			return true;
 		}
 	}
@@ -605,7 +457,7 @@ bool Archer::MoveRun()
 
 bool Archer::SetArrow()
 {	
-	auto& enemy = MESSENGER.CallEnemyInstance(0);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
 	VECTOR3F ePosition = enemy->GetWorldTransform().position;
 	if (!m_hasBlendAnim)
 		m_hasBlendAnim = JudgeBlendRatio();
@@ -613,39 +465,67 @@ bool Archer::SetArrow()
 	if (!m_hasRotated)
 		m_hasRotated = Rotate(ePosition,0.3f,true);
 
-	if (m_hasRotated && m_hasBlendAnim)
-		return true;
+//	if(m_blendAnimation.animationBlend.GetSampler().size() == 1)
+	{
+		const int selectMesh = 2;
+		const int selectBone = 36;
+		FLOAT4X4 blendBone = m_blendAnimation.animationBlend._blendLocals[selectMesh].at(selectBone);
+		FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
+		FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
+		VECTOR3F position = { getBone._41,getBone._42,getBone._43 };
+		VECTOR3F angle = m_transformParm.angle;
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+		FLOAT4X4 rotationM = {};
+		DirectX::XMStoreFloat4x4(&rotationM, R);
+		VECTOR3F zAxis = { rotationM._31,rotationM._32,rotationM._33 };
+		zAxis = NormalizeVec3(zAxis);
+		if (!m_isSetArrow)
+		{
+			//DO_LIST
+			//ここで種類を選ぶ用にする
+			//そして、種類に応じたエフェクトを出す
+			m_arrow->PrepareForArrow(position, m_transformParm.angle, zAxis);
+			m_isSetArrow = true;
+		}
+		m_arrow->GetArrowParam()[0].first.position = position;
+		m_arrow->GetArrowParam()[0].first.angle = m_transformParm.angle;
+		m_arrow->GetArrowParam()[0].second.velocity = zAxis;
+		m_arrow->GetArrowParam()[0].first.CreateWorld();
+	}
 
+	if (m_hasRotated && m_hasBlendAnim)
+	{
+		m_isSetArrow = false;
+		return true;
+	}
 	return false;
 }
 
 bool Archer::Shoot()
 {
-	switch (m_state)
+	if (!m_hasShoot && !m_blendAnimation.animationBlend.SearchSampler(Animation::SHOOT))
 	{
-	case 0:
 		m_blendAnimation.animationBlend.ResetAnimationSampler(0);
 		m_blendAnimation.animationBlend.AddSampler(Animation::SHOOT, m_model);
 		m_hasBlendAnim = false;
-		++m_state;
-		break;
-	case 1:
-		if (!m_hasBlendAnim)
-			m_hasBlendAnim = JudgeBlendRatio(false);
-		else
-		{
-			m_state = 0;
-			m_hasBlendAnim = false;
-			return true;
-		}
-		break;
+		m_hasShoot = true;
 	}
+
+	if (!m_hasBlendAnim)
+		m_hasBlendAnim = JudgeBlendRatio(false);
+	else
+	{
+		m_state = 0;
+		m_hasBlendAnim = false;
+		return true;
+	}
+
 	return false;
 }
 
 bool Archer::FindDirectionToAvoid()
 {
-	auto& enemy = MESSENGER.CallEnemyInstance(0);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
 
 	std::vector<int> entryPointID;
 	Collision::Sphere stage,point,target;
@@ -1186,7 +1066,7 @@ ImGui::Combo("Name_of_BoneName",
 		}
 		else
 		{
-			auto& enemy = MESSENGER.CallEnemyInstance(0);
+			CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
 			cPosition = enemy->GetWorldTransform().position;
 		}
 
@@ -1300,7 +1180,6 @@ ImGui::Combo("Name_of_BoneName",
 	//**************************************
 	if (ImGui::CollapsingHeader("Arrow"))
 	{
-		m_statusParm.attackPoint = 10.0f;
 		VECTOR3F angle = m_transformParm.angle;
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
 		FLOAT4X4 rotationM = {};

@@ -1,7 +1,9 @@
 #pragma once
-#include <vector>
-#include "Scope.h"
-#include "CharacterAI.h"
+#include <d3d11.h>
+#include "SceneEffect.h"
+#include "PlayerAdominist.h"
+#include "EnemyAdominist.h"
+#include "CollisionJudge.h"
 #include "MessengType.h"
 #include ".\LibrarySource\Vector.h"
 
@@ -11,81 +13,35 @@ public:
 	MetaAI() = default;
 	~MetaAI() = default;
 
-	bool Init();
-
-	//******************************************************************************************
-	// Enemy
-	//******************************************************************************************
-	void UpdateOfEnemys(float& elapsedTime);
-
-	void RenderOfEnemy(ID3D11DeviceContext* immediateContext, uint16_t characterNomber);
-
-	void ImGuiOfEnemy(ID3D11Device* device, uint16_t characterNomber);
-
-	void AddEnemy(uint16_t& enemyID, std::shared_ptr<CharacterAI> enemy);
-
-	void DeterminationOfEnemy(int id, MessengType type);
-	//******************************************************************************************
-
-	//******************************************************************************************
-	// Player
-	//******************************************************************************************
-	void UpdateOfPlayers(float& elapsedTime);
-
-	void RenderOfPlayer(ID3D11DeviceContext* immediateContext, uint16_t characterNomber);
-
-	void ImGuiOfPlayer(ID3D11Device* device, uint16_t characterNomber);
-
-	void AddPlayer(uint16_t& playerID, std::shared_ptr<CharacterAI> player);
-
-	void DeterminationOfPlayer(int id, MessengType type);
-	//******************************************************************************************
-	
-	//************
-	// Scope
-	//************
-	void RenderOfScope(ID3D11DeviceContext* immediateContext);
-	void ImGuiOfScope(ID3D11Device* device);
-	//*****************
-	// Collision
-	//*****************
-	bool CollisionPlayerAttack(int id, CharacterParameter::Collision& collision);
-	bool CollisionEnemyAttack(int id, CharacterParameter::Collision& collision);
-	void CollisionPlayerAndEnemy(std::shared_ptr<CharacterAI>& player);
-
-	//****************
-	// Release
-	//****************
+	bool Init(ID3D11Device* device);
+	void Update(float& elapsedTime);
+	void Render(ID3D11DeviceContext* immediateContext);
+	void ActivateEffect(ID3D11DeviceContext* immediateContext, const SceneEffectType type);
+	void DeactivateEffect(ID3D11DeviceContext* immediateContext, const SceneEffectType type);
 	void Release();
-	void ReleaseCharacter();
 
-	//******************
-	// Getter
-	//******************
-	inline std::vector<std::shared_ptr<CharacterAI>>& GetEnemys() { return m_enemys; }
-	inline std::vector<std::shared_ptr<CharacterAI>>& GetPlayers() { return m_players; }
-	inline CharacterAI* GetPlayCharacter()
-	{
-		int i = 0;
-		for (i;i < m_playerID; ++i)
-		{
-			if (m_players[i]->GetChangeComand().isPlay)
-				break;
-		}
-		//Archer
-		return &(*m_players[i]);
-	};
-	inline std::unique_ptr<Scope>& GetScope() { return m_scope; }
-	inline bool GetIsFinish(const int charaID) { return m_isFinish[charaID]; }
+	void ImGuiOfPlayer(ID3D11Device* device);
+	void ImGuiOfEnemy(ID3D11Device* device);
+	void ImGuiOfShader();
+
+	bool CollisionPlayerAttack(PlayerType type, CharacterParameter::Collision& collision);
+	bool CollisionEnemyAttack(EnemyType id, CharacterParameter::Collision& collision);
+	void CollisionObject();
+
+	PlayerAdominist& GetPlayerAdominist() { return m_playerAdominist; }
+	EnemyAdominist& GetEnemyAdominist()	  { return m_enemyAdominist; }
+
+	bool GetIsWinner() { return m_isWinner; }
+	bool GetIsLoaser() { return m_isLoaser; }
+
 private:
-	bool m_isFinish[2] = {false,false};
-	uint16_t m_enemyID = -1;
-	uint16_t m_playerID = -1;
+	bool m_isWinner;
+	bool m_isLoaser;
+	SceneEffect m_sceneEffect;
 
-	std::vector<std::shared_ptr<CharacterAI>> m_enemys;
-	std::vector<std::shared_ptr<CharacterAI>> m_players;
-
-	std::unique_ptr<Scope> m_scope;
+	PlayerAdominist m_playerAdominist;
+	EnemyAdominist  m_enemyAdominist;
+	CollisionJudge  m_collisionjudge;
 };
 
 

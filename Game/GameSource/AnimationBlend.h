@@ -103,8 +103,13 @@ public:
 		}
 	}
 
-	void ReleaseAllSampler(int samplerNum)
+	void ReleaseAllSampler()
 	{
+		int count = static_cast<int>(m_samplers.size());
+		for (int i = 0; i < count; ++i)
+		{
+			ResetAnimationSampler(i);
+		}
 		m_samplers.clear();
 	}
 

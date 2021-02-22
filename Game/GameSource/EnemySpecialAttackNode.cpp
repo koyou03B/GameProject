@@ -2,7 +2,9 @@
 
 uint32_t EnemySpecialAttackNode::JudgePriority(const int id)
 {
-	std::shared_ptr<CharacterAI> enemy = MESSENGER.CallEnemyInstance(id);
+	EnemyType type = static_cast<EnemyType>(id);
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(type);
+
 	bool isWrath = enemy->GetEmotion().wrathParm.isWrath;
 
 	if (isWrath)

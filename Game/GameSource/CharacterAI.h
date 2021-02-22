@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <d3d11.h>
-#include "State.h"
 #include "AIParameter.h"
 #include "CharacterParameter.h"
 #include ".\LibrarySource\Input.h"
@@ -31,16 +30,7 @@ public:
 
 	virtual void Impact() = 0;
 
-	virtual void Release()
-	{
-		if (m_model)
-		{
-			if (m_model.unique())
-			{
-				m_model.reset();
-			}
-		}
-	};
+	virtual void Release() = 0;
 
 	virtual void ImGui(ID3D11Device* device) = 0;
 
@@ -58,7 +48,6 @@ public:
 	inline AIParameter::JudgeElement& GetJudgeElement() { return m_judgeElementPram; }
 	inline AIParameter::StandardValue& GetStandardValue() { return m_standardValuePram; }
 	inline void SetID(int id) { m_id = id; }
-	inline void SetState(State* state) { m_state = state; }
 	inline void SetCharacter(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> model) { m_model = model; }
 
 protected:
@@ -76,8 +65,5 @@ protected:
 	AIParameter::Emotion						m_emotionParm;
 	AIParameter::JudgeElement					m_judgeElementPram;
 	AIParameter::StandardValue					m_standardValuePram;
-
-
-	State* m_state;
 
 };

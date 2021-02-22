@@ -14,8 +14,8 @@ void Arrow::Init()
 {
 	Clear();
 	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::ARROW);
-	m_arrowData.resize(3);
-	m_renderData.resize(3);
+	m_arrowData.resize(10);
+	m_renderData.resize(10);
 	SetArrowParameter();
 }
 
@@ -32,25 +32,37 @@ void Arrow::Update(float& elapsedTime)
 			VECTOR3F speed = arrow.second.speed;
 			arrow.second.fallTime += elapsedTime;
 
-			if(arrow.second.fallTime >= m_defineFallTime)
-				velocity.y -= m_arrowFallPower;
+			if (arrow.second.fallTime >= m_defineFallTime)
+			{
+				velocity.y -= sinf(m_arrowFallPower * 0.01745f);
+				arrow.first.angle.x += sinf(m_arrowFallRotate * 0.01745f);
+
+				if (arrow.first.angle.x >= m_defineFallRotate)
+					arrow.first.angle.x = m_defineFallRotate;
+			}
 			velocity *= speed;
 			arrow.first.position += velocity * elapsedTime;
 
 			arrow.first.CreateWorld();
+			VECTOR3F angle = arrow.first.angle;
+			DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+			FLOAT4X4 rotationM = {};
+			DirectX::XMStoreFloat4x4(&rotationM, R);
+			VECTOR3F zAxis = { rotationM._31,rotationM._32,rotationM._33 };
+			zAxis = NormalizeVec3(zAxis);
 
-			m_collision.position[0] = arrow.first.position;
-			m_collision.position[1] = arrow.first.position - velocity * elapsedTime;
+			m_collision.position[0] = arrow.first.position + zAxis * m_offsetZ;
+			m_collision.position[1] = m_collision.position[0] - velocity * elapsedTime;
 			m_collision.scale = 1.0f;
-			m_collision.radius = 2.0f;
+			m_collision.radius = arrow.first.scale.x;
 			m_collision.collisionType = CollisionType::CAPSULE;
-			if (MESSENGER.AttackingMessage(static_cast<int>(1), m_collision))
+			if (MESSENGER.AttackingMessage(PlayerType::Archer, m_collision))
 			{
 				Reset(arrow);
 				return;
 			}
 
-			if (arrow.first.position.y <= 0.0f)
+			if (arrow.first.position.y <= m_defineResetLine)
 			{
 				Reset(arrow);
 			}
@@ -75,6 +87,11 @@ void Arrow::Render(ID3D11DeviceContext* immediateContext)
 	}
 	if (count != 0)
 		m_model->Render(Framework::GetContext(), m_renderData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+
+
+	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
+	m_debugObject.Render(immediateContext, scroll, true);
+
 }
 
 void Arrow::Clear()
@@ -94,6 +111,7 @@ void Arrow::Reset(std::pair<InstanceData, ArrowParam>& stoneData)
 	stoneData.first.ClearData();
 	stoneData.second.isFlying = false;
 	stoneData.second.velocity = {};
+	stoneData.second.fallTime = 0.0f;
 }
 
 void Arrow::Release()
@@ -115,6 +133,7 @@ void Arrow::PrepareForArrow(const VECTOR3F& position, const VECTOR3F& angle, con
 		arrow.first.CreateWorld();
 		arrow.second.velocity = velocity;
 		arrow.second.isFlying = true;
+		arrow.second.ReadBinary();
 		return;
 	}
 }
@@ -128,10 +147,6 @@ void Arrow::SetArrowParameter()
 		cereal::BinaryInputArchive i_archive(ifs);
 		i_archive(*this);
 	}
-
-	//m_arrowData[0].second.ReadBinary();
-	//m_arrowData[1].second.ReadBinary();
-	//m_arrowData[2].second.ReadBinary();
 }
 
 void Arrow::ImGui(ID3D11Device* device)
@@ -167,31 +182,6 @@ void Arrow::ImGui(ID3D11Device* device)
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Offset"))
-	{
-		static int current = 0;
-		ImGui::RadioButton("Z-Axis", &current, 0); ImGui::SameLine();
-		ImGui::RadioButton("X-Axis", &current, 1);
-
-		if (current == 0)
-		{
-			VECTOR3F offset = m_offsetZ;
-			float offsetZ[] = { offset.x,offset.y,offset.z };
-			ImGui::SliderFloat3("Z-offset", offsetZ, -8.0f, 8.0f);
-			offset = { offsetZ[0],offsetZ[1],offsetZ[2] };
-			m_offsetZ = offset;
-		}
-		else
-		{
-			VECTOR3F offset = m_offsetX;
-			float offsetX[] = { offset.x,offset.y,offset.z };
-			ImGui::SliderFloat3("X-offset", offsetX, -7.0f, 7.0f);
-			offset = { offsetX[0],offsetX[1],offsetX[2] };
-			m_offsetX = offset;
-		}
-
-	}
-
 	if (!m_arrowData.empty())
 	{
 		static int current = 0;
@@ -206,18 +196,42 @@ void Arrow::ImGui(ID3D11Device* device)
 			ImGui::SliderFloat("Speed", &speed, 0.0f, 200.0f);
 			stone.second.speed = { speed,speed,speed };
 		}
+
 		if (ImGui::CollapsingHeader("FallPower"))
 		{
 			static float fallPower = m_arrowFallPower;
-			ImGui::SliderFloat("FallPower->", &fallPower, 0.0f, 20.0f);
+			ImGui::SliderFloat("FallPower->", &fallPower, 0.0f, 10.0f);
 			m_arrowFallPower = fallPower;
 		}
+
+		if (ImGui::CollapsingHeader("FallRotate"))
+		{
+			static float fallRotate = m_arrowFallRotate;
+			ImGui::SliderFloat("FallRotate->", &fallRotate, 0.0f, 10.0f);
+			m_arrowFallRotate = fallRotate;
+		}
+
 		if (ImGui::CollapsingHeader("DefainFallTime"))
 		{
 			static float dFallTime = m_defineFallTime;
 			ImGui::SliderFloat("DefainFallTime->", &dFallTime, 0.0f, 20.0f);
 			m_defineFallTime = dFallTime;
 		}
+
+		if (ImGui::CollapsingHeader("DefainResetLine"))
+		{
+			static float dResetLine = m_defineResetLine;
+			ImGui::SliderFloat("DefainResetLine->", &dResetLine, 0.0f, 20.0f);
+			m_defineResetLine = dResetLine;
+		}
+
+		if (ImGui::CollapsingHeader("DefainFallRotate"))
+		{
+			static float dFallRotate = m_defineFallRotate;
+			ImGui::SliderFloat("DefainFallRotate->", &dFallRotate, 0.0f, 20.0f);
+			m_defineFallRotate = dFallRotate;
+		}
+
 		ImGui::Text("IsFly%d", stone.second.isFlying);
 
 		if (ImGui::Button("Reset"))
@@ -225,6 +239,39 @@ void Arrow::ImGui(ID3D11Device* device)
 
 		if (ImGui::Button("Save"))
 			m_arrowData.at(current).second.SaveBinary();
+
+		if (ImGui::Button("Debug"))
+		{
+			auto primitive = std::make_unique<Source::GeometricPrimitive::GeometricSphere>(device, "");
+			m_debugObject.AddGeometricPrimitive(std::move(primitive));
+			m_debugObject.AddInstanceData(m_arrowData[0].first.position, m_arrowData[0].first.angle, 
+				m_arrowData[0].first.scale, VECTOR4F(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+
+		if (ImGui::CollapsingHeader("DebugObject"))
+		{
+			static float scale = m_debugObject.GetInstanceData(0).scale.x;
+			ImGui::SliderFloat("Scale", &scale, 0.0f, 10.0f);
+			if (ImGui::Button("ScaleChange"))
+			{
+				m_debugObject.GetInstanceData(0).scale = { scale ,scale ,scale };
+				m_debugObject.GetInstanceData(0).CreateWorld();
+			}
+
+			VECTOR3F angle = m_debugObject.GetInstanceData(0).angle;
+			DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+			FLOAT4X4 rotationM = {};
+			DirectX::XMStoreFloat4x4(&rotationM, R);
+			VECTOR3F zAxis = { rotationM._31,rotationM._32,rotationM._33 };
+			zAxis = NormalizeVec3(zAxis);
+			ImGui::SliderFloat("Z", &m_offsetZ, -10.0f, 10.0f);
+			if (ImGui::Button("Position"))
+			{
+				m_debugObject.GetInstanceData(0).position += zAxis * m_offsetZ;
+				m_debugObject.GetInstanceData(0).CreateWorld();
+			}
+
+		}
 	}
 	ImGui::End();
 #endif

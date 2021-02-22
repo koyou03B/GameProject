@@ -159,9 +159,6 @@
     <Filter Include="Sources\Object\GameObj\Arrow">
       <UniqueIdentifier>{6d09ba99-f576-4766-8039-9f04cd6ae608}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Object\GameObj\Scope">
-      <UniqueIdentifier>{2366ef6f-7695-443f-9e15-98ed91896bdf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Object\GameObj\Stage">
       <UniqueIdentifier>{c5fccd82-89c1-4a19-89d5-728a4ec34740}</UniqueIdentifier>
     </Filter>
@@ -219,6 +216,15 @@
     <Filter Include="Headers\HTN\Domain">
       <UniqueIdentifier>{468ea852-359b-4268-a538-90df144e6517}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\Characters\Parameter">
+      <UniqueIdentifier>{ab712409-9e6a-4567-a0fd-cac3999ff32b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Shader">
+      <UniqueIdentifier>{7b11f30e-a447-48ae-8d86-3ec30f4b094a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Shader">
+      <UniqueIdentifier>{b0827100-a834-4a24-a174-6dce739c15bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -238,9 +244,6 @@
     </ClCompile>
     <ClCompile Include="GameSource\SceneTutorial.cpp">
       <Filter>Sources\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSource\SaberCharacter.cpp">
-      <Filter>Sources\Characters\Player</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\AnimationBlending.cpp">
       <Filter>Sources\Blend\AnimationBlending</Filter>
@@ -268,9 +271,6 @@
     </ClCompile>
     <ClCompile Include="GameSource\Collision.cpp">
       <Filter>Sources\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSource\Scope.cpp">
-      <Filter>Sources\Object\GameObj\Scope</Filter>
     </ClCompile>
     <ClCompile Include="GameSource\Arrow.cpp">
       <Filter>Sources\Object\GameObj\Arrow</Filter>
@@ -353,6 +353,18 @@
     <ClCompile Include="GameSource\UIAdominist.cpp">
       <Filter>Sources\Object\GameObj\UI</Filter>
     </ClCompile>
+    <ClCompile Include="GameSource\PlayerAdominist.cpp">
+      <Filter>Sources\Characters\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EnemyAdominist.cpp">
+      <Filter>Sources\Characters\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\CollisionJudge.cpp">
+      <Filter>Sources\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\SceneEffect.cpp">
+      <Filter>Sources\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -373,9 +385,6 @@
     <ClInclude Include="GameSource\SceneTutorial.h">
       <Filter>Headers\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\SaberCharacter.h">
-      <Filter>Headers\Characters\Player</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\AnimationBlend.h">
       <Filter>Headers\Blend\AnimationBlending</Filter>
     </ClInclude>
@@ -384,9 +393,6 @@
     </ClInclude>
     <ClInclude Include="GameSource\PartialBlendAnimation.h">
       <Filter>Headers\Blend\PartialAnimationsBlending</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\CharacterParameter.h">
-      <Filter>Headers\Characters</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\DebugObject.h">
       <Filter>Headers\Collision</Filter>
@@ -403,20 +409,11 @@
     <ClInclude Include="GameSource\MetaAI.h">
       <Filter>Headers\Characters</Filter>
     </ClInclude>
-    <ClInclude Include="GameSource\CharacterAI.h">
-      <Filter>Headers\Characters</Filter>
-    </ClInclude>
     <ClInclude Include="GameSource\MessengType.h">
       <Filter>Headers\Messeng</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\MessengTo.h">
       <Filter>Headers\Messeng</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\State.h">
-      <Filter>Headers\Characters</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\FighterState.h">
-      <Filter>Headers\Characters\Player</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\Collision.h">
       <Filter>Headers\Collision</Filter>
@@ -465,9 +462,6 @@
     </ClInclude>
     <ClInclude Include="GameSource\EnemyFarAttack1Task.h">
       <Filter>Headers\BehaviorTree\Enemy\Task\Attack\Far</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\AIParameter.h">
-      <Filter>Headers\Characters\Enemy</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\EnemyRootNode.h">
       <Filter>Headers\BehaviorTree\Enemy\Node</Filter>
@@ -591,6 +585,33 @@
     </ClInclude>
     <ClInclude Include="GameSource\FindDAMethod.h">
       <Filter>Headers\HTN\Metod</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\PlayerAdominist.h">
+      <Filter>Headers\Characters\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EnemyAdominist.h">
+      <Filter>Headers\Characters\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\CharacterParameter.h">
+      <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AIParameter.h">
+      <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\CharacterAI.h">
+      <Filter>Headers\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\CollisionJudge.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SceneEffect.h">
+      <Filter>Headers\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\WorldAnalyzer.h">
+      <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\KnowledgeMaterial.h">
+      <Filter>Headers\Characters\Parameter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
