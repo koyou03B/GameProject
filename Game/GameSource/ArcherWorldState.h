@@ -16,6 +16,6 @@ public:
     ArcherWorldState() = default;
     ~ArcherWorldState() = default;
 public:
-    bool isSetArrow = false;
+    bool _isSetArrow = false;
 
 };

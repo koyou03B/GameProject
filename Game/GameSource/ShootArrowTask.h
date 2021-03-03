@@ -22,15 +22,15 @@ private:
     bool IsSatisfiedPreConditions(const TWorldState& currentState) override
     {
         //–î‚Í”Ô‚¦‚Ä‚¢‚ÄUŒ‚€”õ‚Å‚«‚½
-        return  currentState.isSetArrow == true &&
-            currentState.canPrepareAttack == true;
+        return  currentState._isSetArrow == true &&
+            currentState._canPrepareAttack == true;
     }
 
     void ApplyEffectsToWorldState(TWorldState& previousState) override
     {
         //–î‚Í‚È‚¢‚Å‚·UŒ‚€”õ‚à‚µ‚Ä‚Ü‚¹‚ñ
-        previousState.isSetArrow = false;
-        previousState.canPrepareAttack = false;
-        previousState.canAttack = true;
+        previousState._isSetArrow = false;
+        previousState._canPrepareAttack = false;
+        previousState._canAttack = true;
     }
 };

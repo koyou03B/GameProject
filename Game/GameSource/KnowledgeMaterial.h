@@ -2,16 +2,17 @@
 
 enum class DistanceLv
 {
-	NEAR,			//‹ß‚¢
-	FAR				//‰“‚¢
+	NEAR_AWAY,			//‹ß‚¢
+	FAR_WAY				//‰“‚¢
 };
-enum class hitPointLv
+enum class HitPointLv
 {
-	UNINJURED,		//–³
-	MINOR_INJURY,	//Œy
-//	MODERATE,		//’†
-	SEVERE_WOUND,	//d
 	FATAL,			//’v–½“I
+	SEVERE_WOUND,	//d
+//	MODERATE,		//’†
+	MINOR_INJURY,	//Œy
+	UNINJURED,		//–³
+	END
 };
 enum class SkillLv
 {

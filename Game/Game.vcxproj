@@ -19,9 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameSource\AgentAI.cpp" />
     <ClCompile Include="GameSource\AnimationBlending.cpp" />
     <ClCompile Include="GameSource\ArcherCharacter.cpp" />
+    <ClCompile Include="GameSource\ArchersGameMaker.cpp" />
     <ClCompile Include="GameSource\Arrow.cpp" />
+    <ClCompile Include="GameSource\Blackboard.cpp" />
     <ClCompile Include="GameSource\Collision.cpp" />
     <ClCompile Include="GameSource\CollisionJudge.cpp" />
     <ClCompile Include="GameSource\DebugObject.cpp" />
@@ -65,9 +68,12 @@
     <ClCompile Include="GameSource\Stone.cpp" />
     <ClCompile Include="GameSource\TitleObjectAdominist.cpp" />
     <ClCompile Include="GameSource\UIAdominist.cpp" />
+    <ClCompile Include="GameSource\WorldAnalyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameSource\AgentAI.h" />
     <ClInclude Include="GameSource\AIParameter.h" />
+    <ClInclude Include="GameSource\ArchersGamemaker.h" />
     <ClInclude Include="GameSource\ArcherWorldState.h" />
     <ClInclude Include="GameSource\Arrow.h" />
     <ClInclude Include="GameSource\AttackMethod.h" />
@@ -77,6 +83,7 @@
     <ClInclude Include="GameSource\AvoidTask.h" />
     <ClInclude Include="GameSource\AvoidPrecondition.h" />
     <ClInclude Include="GameSource\AvoidingTask.h" />
+    <ClInclude Include="GameSource\Blackboard.h" />
     <ClInclude Include="GameSource\CollisionJudge.h" />
     <ClInclude Include="GameSource\Domain.h" />
     <ClInclude Include="GameSource\DomainConverter.h" />
@@ -112,6 +119,10 @@
     <ClInclude Include="GameSource\FindDAMethod.h" />
     <ClInclude Include="GameSource\FindDAPrecondition.h" />
     <ClInclude Include="GameSource\FindDATask.h" />
+    <ClInclude Include="GameSource\GameMaker.h" />
+    <ClInclude Include="GameSource\HealMethod.h" />
+    <ClInclude Include="GameSource\HealPrecondition.h" />
+    <ClInclude Include="GameSource\HealTask.h" />
     <ClInclude Include="GameSource\HTNAllHeader.h" />
     <ClInclude Include="GameSource\KnowledgeMaterial.h" />
     <ClInclude Include="GameSource\MoveTask.h" />
@@ -119,6 +130,7 @@
     <ClInclude Include="GameSource\PrepareAttackMethod.h" />
     <ClInclude Include="GameSource\PrepareAttackPrecondition.h" />
     <ClInclude Include="GameSource\PrepareAttackTask.h" />
+    <ClInclude Include="GameSource\RecoverTask.h" />
     <ClInclude Include="GameSource\SceneEffect.h" />
     <ClInclude Include="GameSource\SetArrowTask.h" />
     <ClInclude Include="GameSource\ShootArrowTask.h" />

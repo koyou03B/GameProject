@@ -8,12 +8,15 @@
 
 #include "AvoidingTask.h"
 #include "FindDATask.h"
+
+#include "HealTask.h"
 #pragma endregion
 
 #pragma region CompoundTask
 #include "AttackTask.h"
 #include "PrepareAttackTask.h"
 #include "AvoidTask.h"
+#include "RecoverTask.h"
 #pragma endregion
 
 #pragma region Method
@@ -22,6 +25,7 @@
 #include "PrepareAttackMethod.h"
 #include "AvoidMethod.h"
 #include "FindDAMethod.h"
+#include "HealMethod.h"
 #pragma endregion
 
 #pragma region Precondition
@@ -29,4 +33,5 @@
 #include "PrepareAttackPrecondition.h"
 #include "AvoidPrecondition.h"
 #include "FindDAPrecondition.h"
+#include "HealPrecondition.h"
 #pragma endregion

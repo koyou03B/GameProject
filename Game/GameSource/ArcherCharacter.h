@@ -1,12 +1,10 @@
 #pragma once
-#include "CharacterAI.h"
-#include "CharacterParameter.h"
 #include "Arrow.h"
-#include "Domain.h"
+#include "AgentAI.h"
+#include "CharacterAI.h"
+#include "HTN/TaskBase.h"
 #include "ArcherWorldState.h"
-#include "DomainConverter.h"
-#include "HTN/PlanRunner.h"
-
+#include "CharacterParameter.h"
 #include ".\LibrarySource\Vector.h"
 
 
@@ -21,6 +19,7 @@ public:
 	void Update(float& elapsedTime) override;
 	void Render(ID3D11DeviceContext* immediateContext) override;
 	void Release() override;
+	void WriteBlackboard(CharacterAI* target) override;
 	void ImGui(ID3D11Device* device) override;
 
 	void Impact() override;
@@ -34,11 +33,16 @@ public:
 	bool Avoid();
 	bool Heal();
 	bool Revival();
+	
 	inline std::unique_ptr<Arrow>& GetArrow() { return m_arrow; }
+	inline ArcherWorldState& GetWorldState() { return m_worldState; }
+	inline std::vector<TaskBase<ArcherWorldState, Archer>*>& GetPlanList() { return m_currentPlanList; }
+	inline float& GetPlayerCreditLv() { return m_playerCreditLv; }
+	inline bool& GetCanRecover() { return m_canRecover; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 1)
+		if (version >= 5)
 		{
 			archive
 			(
@@ -48,14 +52,13 @@ public:
 				m_cameraParm,
 				m_stepParm,
 				m_collision,
-				m_domainConverter
+				m_agentAI
 			);
 		}
 		else
 		{
 			archive
 			(
-				m_blendAnimation,
 				m_attackParm,
 				m_statusParm,
 				m_moveParm,
@@ -70,6 +73,8 @@ private:
 	bool KnockBack();
 	bool JudgeBlendRatio(const bool isLoop = true);
 	bool Rotate(VECTOR3F& target,const float turnSpeed, bool isLookEnemy = false);
+	void ActiveWriteTimer();
+	void ActiveRecoverTimer();
 	void SerialVersionUpdate(uint32_t version)
 	{
 		m_statusParm.serialVersion = version;
@@ -122,12 +127,19 @@ private:
 	const float	kPredictionViewRangeE = 0.8f;
 
 	int m_state;
+	int m_currentTask;
 	float m_elapsedTime;
+	float m_writeTimer;
+	float m_recoverTimer;
+	float m_maxRecoverTimer;
+	float m_maxWriteTimer;
+	float m_playerCreditLv;
 	bool m_hasBlendAnim;
 	bool m_hasRotated;
 	bool m_canRun;
 	bool m_isSetArrow;
 	bool m_hasShoot;
+	bool m_canRecover;
 	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
 
 	VECTOR3F m_attackPoint;
@@ -141,9 +153,7 @@ private:
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 	std::unique_ptr<Arrow>					m_arrow;
 
+	AgentAI									m_agentAI;
 	ArcherWorldState						m_worldState;
-	Domain<ArcherWorldState, Archer>		m_domain;
-	DomainConverter							m_domainConverter;
-	PlanRunner<ArcherWorldState, Archer>	m_planRunner;
 	std::vector<TaskBase<ArcherWorldState, Archer>*> m_currentPlanList;
 };

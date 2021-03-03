@@ -60,8 +60,6 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 	CharacterAI* enemy = m_enemyAdominist.GetSelectEnemy(EnemyType::Boss);
 	if (m_collisionjudge.JudgeAttack(enemy->GetCollision().at(0), collision))
 	{
-		
-		Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f, 0.5f);
 		uint32_t& atkHitCount = player->GetJudgeElement().attackHitCount;
 		uint32_t& damageCount = enemy->GetJudgeElement().damageCount;
 		float& attackPoint    = player->GetStatus().attackPoint;
@@ -71,6 +69,8 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 		++atkHitCount;
 		enemyLife -= attackPoint;
 
+		if(type != PlayerType::Archer)
+			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f, 0.5f);
 		MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife,UIActLabel::LIFE_E, 0);
 
 		if (enemyLife <= 0)
@@ -129,6 +129,13 @@ bool MetaAI::CollisionEnemyAttack(EnemyType type, CharacterParameter::Collision&
 			}
 			player->Impact();
 			m_sceneEffect.StartVignette();
+
+			if (playerType == PlayerType::Fighter)
+			{
+				m_playerAdominist.WriteBlackboard(player);
+			}
+
+
 			return true;
 		}
 	}

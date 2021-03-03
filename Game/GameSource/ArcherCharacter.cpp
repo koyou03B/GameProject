@@ -11,7 +11,7 @@
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
-CEREAL_CLASS_VERSION(Archer, 1);
+CEREAL_CLASS_VERSION(Archer, 5);
 
 void Archer::Init()
 {
@@ -49,14 +49,7 @@ void Archer::Init()
 		i_archive(*this);
 	}
 
-	m_domain.AllSet(m_domainConverter);
-	m_domain.GetPrimitiveTask(PrimitiveTaskType::FindAttackPoint)->SetOperator(&Archer::FindAttackPoint);
-	m_domain.GetPrimitiveTask(PrimitiveTaskType::Move)->SetOperator(&Archer::MoveRun);
-	m_domain.GetPrimitiveTask(PrimitiveTaskType::SetArrow)->SetOperator(&Archer::SetArrow);
-	m_domain.GetPrimitiveTask(PrimitiveTaskType::ShootArrow)->SetOperator(&Archer::Shoot);
-	m_domain.GetPrimitiveTask(PrimitiveTaskType::Avoiding)->SetOperator(&Archer::Avoid);
-	m_domain.GetPrimitiveTask(PrimitiveTaskType::FindDirectionAvoid)->SetOperator(&Archer::FindDirectionToAvoid);
-
+	m_currentPlanList = m_agentAI.Init(this);
 	m_statusParm.life = 120.0f;
 	m_stepParm.maxSpeed = m_stepParm.speed;
 	m_controlPoint.resize(8);
@@ -66,6 +59,14 @@ void Archer::Init()
 	std::unique_ptr<Arrow> arrow{ wepon.GiveProduct<Arrow>() };
 	m_arrow = std::move(arrow);
 	m_statusParm.attackPoint = 10.0f;
+	m_writeTimer = 0.0f;
+	m_recoverTimer = 0.0f;
+
+	m_maxWriteTimer = 0.0f;
+	m_maxRecoverTimer = 6.0f;
+	m_currentTask = 0;
+	m_canRecover = true;
+	m_worldState._canRecover = true;
 }
 
 void Archer::Update(float& elapsedTime)
@@ -79,6 +80,27 @@ void Archer::Update(float& elapsedTime)
 			m_hasShoot = false;
 	}
 
+	//if (!m_currentPlanList.empty())
+	//{
+	//	int count = static_cast<int>(m_currentPlanList.size());
+	//	for (m_currentTask; m_currentTask < count;)
+	//	{
+	//		if (m_currentPlanList.at(m_currentTask)->ExecuteOperator(this))
+	//			++m_currentTask;
+	//		else
+	//			break;
+
+	//	}
+	//	if (m_currentTask == count)
+	//	{
+	//		m_currentTask = 0;
+	//		m_currentPlanList.clear();
+	//		m_currentPlanList = m_agentAI.OperationFlowStart(this);
+	//	}
+	//}
+
+	ActiveWriteTimer();
+	ActiveRecoverTimer();
 	//*********************
 	// Collision Detection
 	//*********************
@@ -87,6 +109,7 @@ void Archer::Update(float& elapsedTime)
 	FLOAT4X4 modelAxisTransform = m_model->_resource->axisSystemTransform;
 	FLOAT4X4 getBone = blendBone * modelAxisTransform * m_transformParm.world;
 	m_collision[0].position[0] = { getBone._41,getBone._42,getBone._43 };
+
 }
 
 void Archer::Render(ID3D11DeviceContext* immediateContext)
@@ -107,7 +130,7 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 void Archer::Release()
 {
 	m_blendAnimation.animationBlend.ReleaseAllSampler();
-	m_domain.Release();
+	m_agentAI.Release();
 	if (m_model)
 	{
 		if (m_model.unique())
@@ -115,6 +138,11 @@ void Archer::Release()
 			m_model.reset();
 		}
 	}
+}
+
+void Archer::WriteBlackboard(CharacterAI* target)
+{
+	m_agentAI.SavePerception(this, target);
 }
 
 void Archer::RestAnimationIdle()
@@ -245,6 +273,29 @@ bool Archer::Rotate(VECTOR3F& target, const float turnSpeed, bool isLookEnemy)
 	return false;
 }
 
+void Archer::ActiveWriteTimer()
+{
+	m_writeTimer += m_elapsedTime;
+	if (m_writeTimer > m_maxWriteTimer)
+	{
+		CharacterAI* target = MESSENGER.CallEnemyInstance(EnemyType::Boss);
+		WriteBlackboard(target);
+		target = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
+		WriteBlackboard(target);
+		m_writeTimer = 0.0f;
+	}
+}
+
+void Archer::ActiveRecoverTimer()
+{
+	if (!m_canRecover)
+	{
+		m_recoverTimer += m_elapsedTime;
+		if (m_recoverTimer > m_maxRecoverTimer)
+			m_canRecover = true;
+	}
+}
+
 bool Archer::FindAttackPoint()
 {
 #if 0
@@ -313,6 +364,7 @@ bool Archer::FindAttackPoint()
 
 	Collision::Sphere stage, point;
 	Collision collision;
+	int selectNo = 0;
 	float radius = 0.0f;
 	float minDistance = FLT_MAX;
 	VECTOR3F atkPos = {};
@@ -346,6 +398,7 @@ bool Archer::FindAttackPoint()
 			minDistance = distance;
 			atkPos = m_controlPoint[i].second;
 			isSelectAtkPoint = true;
+			selectNo = i;
 		}
 	}
 
@@ -354,7 +407,7 @@ bool Archer::FindAttackPoint()
 	if (!isSelectAtkPoint)
 	{
 		atkPos = m_controlPoint[7].second;
-
+		selectNo = 7;
 	}
 	float dist = ToDistVec3(atkPos - m_attackPoint);
 	if (dist > 10.0f)
@@ -380,6 +433,10 @@ bool Archer::FindAttackPoint()
 				color.x = 0.0f;
 				color.z = 1.0f;
 			}
+			if (selectNo == i)
+			{
+				color = VECTOR4F(0.0f, 1.0f, 0.0f, 1.0f);
+			}
 			m_debugObjects.controlPoint.AddInstanceData(m_controlPoint.at(i).second, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
 				VECTOR3F(2.0f, 2.0f, 2.0f), color);
 		}
@@ -393,6 +450,10 @@ bool Archer::FindAttackPoint()
 			{
 				color.x = 0.0f;
 				color.z = 1.0f;
+			}
+			if (selectNo == i)
+			{
+				color = VECTOR4F(0.0f, 1.0f, 0.0f, 1.0f);
 			}
 			m_debugObjects.controlPoint.GetInstanceData(i).position = m_controlPoint.at(i).second;
 			m_debugObjects.controlPoint.GetInstanceData(i).color = color;
@@ -415,8 +476,7 @@ bool Archer::MoveRun()
 		return true;
 	}
 
-	if (!m_hasRotated)
-		m_hasRotated = Rotate(m_attackPoint, 0.1f);
+	m_hasRotated = Rotate(m_attackPoint, 0.1f);
 
 	switch (m_state)
 	{
@@ -436,7 +496,8 @@ bool Archer::MoveRun()
 	break;
 	case 1:
 	{
-		VECTOR3F vector = m_moveParm.velocity * m_moveParm.accle;
+		VECTOR3F front = VECTOR3F(sinf(m_transformParm.angle.y), 0.0f, cosf(m_transformParm.angle.y));
+		VECTOR3F vector = front * m_moveParm.accle;
 		m_transformParm.position += vector * m_elapsedTime;
 		m_transformParm.WorldUpdate();
 
@@ -679,7 +740,8 @@ bool Archer::Avoid()
 
 bool Archer::Heal()
 {
-	return false;
+	m_canRecover = false;
+	return true;
 }
 
 bool Archer::Revival()
@@ -1311,166 +1373,13 @@ ImGui::Combo("Name_of_BoneName",
 	//**************************************
 	// Domain
 	//**************************************
-	if (ImGui::CollapsingHeader("HTN"))
+	if (ImGui::CollapsingHeader("Gamemaker"))
 	{
-		ImGui::SetNextTreeNodeOpen(false, ImGuiSetCond_Once);
-		if (ImGui::TreeNode("PrimitiveTask"))
-		{
-			static int primitiveTask = 0;
-			ImGui::RadioButton("FindAttackPoint", &primitiveTask, 0); ImGui::SameLine();
-			ImGui::RadioButton("Move", &primitiveTask, 1); 
-			ImGui::RadioButton("SetArrow", &primitiveTask, 2); ImGui::SameLine();
-			ImGui::RadioButton("ShootArrow", &primitiveTask, 3);
-			ImGui::RadioButton("Avoiding", &primitiveTask, 4); ImGui::SameLine();
-			ImGui::RadioButton("FindDirectionAvoid", &primitiveTask, 5);
-			PrimitiveTaskType type = static_cast<PrimitiveTaskType>(primitiveTask);
-	
-			int count = static_cast<int>(m_domain.GetPrimitiveTasks().size());
-			ImGui::InputInt("PrimitiveTasks Size", &count);
-
-			if (ImGui::Button("SetPrimitiveTask"))
-			{
-				m_domain.SetPrimitiveTask(type);
-				m_domainConverter.AddPrimitivetaskType(type);
-			}
-
-			if (ImGui::Button("Set Operator"))
-			{
-				switch (type)
-				{
-				case PrimitiveTaskType::FindAttackPoint:
-					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::FindAttackPoint);
-					break;
-				case PrimitiveTaskType::Move:
-					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::MoveRun);
-					break;
-				case PrimitiveTaskType::SetArrow:
-					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::SetArrow);
-					break;
-				case PrimitiveTaskType::ShootArrow:
-					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::Shoot);
-					break;
-				case PrimitiveTaskType::Avoiding:
-					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::Avoid);
-					break;
-				case PrimitiveTaskType::FindDirectionAvoid:
-					m_domain.GetPrimitiveTask(type)->SetOperator(&Archer::FindDirectionToAvoid);
-					break;
-				}
-			}
-
-			ImGui::TreePop();
-		}
-
-		ImGui::SetNextTreeNodeOpen(false, ImGuiSetCond_Once);
-		if (ImGui::TreeNode("CompoundTask"))
-		{
-			static int compoundTask = 0;
-			ImGui::RadioButton("Attack", &compoundTask, 0); ImGui::SameLine();
-			ImGui::RadioButton("PrepareAttack", &compoundTask, 1);
-			ImGui::RadioButton("Avoid", &compoundTask, 2);
-			CompoundTaskType type = static_cast<CompoundTaskType>(compoundTask);
-
-			int count = static_cast<int>(m_domain.GetCompoundTasks().size());
-			ImGui::InputInt("CompoundTasks Size", &count);
-
-			if (ImGui::Button("SetCompoundTask"))
-			{
-				m_domain.SetCompoundTask(type);
-				m_domainConverter.AddCompoundTaskType(type);
-			}
-			ImGui::SameLine();
-
-			if (ImGui::Button("Complete Task"))
-				m_domain.CompleteCompoundTask(type);
-
-			if (ImGui::Button("Select RootTask"))
-			{
-				auto task = m_domain.GetCompoundTask(type);
-				m_planRunner.SetRootTask(task);
-			}
-
-			ImGui::TreePop();
-		}
-
-		ImGui::SetNextTreeNodeOpen(false, ImGuiSetCond_Once);
-		if (ImGui::TreeNode("Method"))
-		{
-			static int method = 0;
-			ImGui::RadioButton("AtkMethod", &method, 0); ImGui::SameLine();
-			ImGui::RadioButton("FindAPMethod", &method, 1);
-			ImGui::RadioButton("PrepareAtkMethod", &method, 2); ImGui::SameLine();
-			ImGui::RadioButton("AvoidMethod", &method, 3);
-			ImGui::RadioButton("FindDAMethod", &method, 4);
-
-			int count = static_cast<int>(m_domain.GetMethods().size());
-			ImGui::InputInt("Methods Size", &count);
-
-			if (ImGui::Button("SetMethod"))
-			{
-				MethodType type = static_cast<MethodType>(method);
-				m_domain.SetMethod(type);
-				m_domainConverter.AddMethodType(type);
-			}
-
-			ImGui::TreePop();
-		}
-
-		ImGui::SetNextTreeNodeOpen(false, ImGuiSetCond_Once);
-		if (ImGui::TreeNode("Precondition"))
-		{
-			static int precondition = 0;
-			ImGui::RadioButton("AtkPrecondition", &precondition, 0); ImGui::SameLine();
-			ImGui::RadioButton("PrepareAtkPrecondition", &precondition, 1);
-			ImGui::RadioButton("TruePrecondition", &precondition, 2); ImGui::SameLine();
-			ImGui::RadioButton("AvoidPrecondition", &precondition, 3);
-			ImGui::RadioButton("FindDAPrecondition", &precondition, 4);
-
-			int count = static_cast<int>(m_domain.GetPreconditions().size());
-			ImGui::InputInt("Preconditions Size", &count);
-
-			if (ImGui::Button("SetPrecondition"))
-			{
-				PreconditionType type = static_cast<PreconditionType>(precondition);
-				m_domain.SetPrecondition(type);
-				m_domainConverter.AddPreconditionType(type);
-			}
-
-			ImGui::TreePop();
-		}
-
-		ImGui::SetNextTreeNodeOpen(false, ImGuiSetCond_Once);
-		if (ImGui::TreeNode("Planner"))
-		{
-			static bool isExecute = false;
-			if (ImGui::Button("Planning"))
-				m_currentPlanList = m_planRunner.UpdatePlan(m_worldState);
-			if (ImGui::Button("Execute"))
-				isExecute = !isExecute;
-			if (isExecute)
-			{
-				size_t count = m_currentPlanList.size();
-				static size_t currentTask = 0;
-				ImGui::Text("CurrentTask %d", static_cast<int>(currentTask));
-				for (currentTask; currentTask < count;)
-				{
-					if (m_currentPlanList.at(currentTask)->ExecuteOperator(this))
-						++currentTask;
-					else
-						break;
-
-				}
-				if (currentTask == count)
-				{
-					isExecute = false;
-					currentTask = 0;
-				}
-			}
-
-				ImGui::TreePop();
-		}
-
+		m_agentAI.ImGui(this);
 	}
+
+	ImGui::Text("m_canRecover->%d", m_canRecover);
+	
 #endif
 	ImGui::End();
 

@@ -8,6 +8,7 @@ enum class PrimitiveTaskType
 	ShootArrow,
 	Avoiding,
 	FindDirectionAvoid,
+	Recover,
 	PTaskEnd
 };
 
@@ -16,6 +17,7 @@ enum class CompoundTaskType
 	Attack,
 	PrepareAttack,
 	Avoid,
+	Recover,//Ç‹ÇæçÏÇ¡ÇƒÇ»Ç¢
 	CTaskEnd
 };
 
@@ -26,6 +28,7 @@ enum class  MethodType
 	PrepareAtkMethod,
 	AvoidMethod,
 	FindDAMethod,
+	RecoverMethod,
 	MethodEnd
 };
 
@@ -36,5 +39,6 @@ enum class PreconditionType
 	TruePrecondition,
 	AvoidPrecondition,
 	FindDAPrecondition,
+	RecoverPrecondition,
 	PreconditionEnd
 };

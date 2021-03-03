@@ -6,6 +6,6 @@ class AvoidPrecondition : public PreconditionBase<TWorldState>
 {
     bool CheckPreCondition(TWorldState& state) override
     {
-        return state.canFindDirectionToAvoid == true;
+        return state._canFindDirectionToAvoid == true;
     }
 };

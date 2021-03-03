@@ -2,10 +2,10 @@
 #include "HTN\PreconditionBase.h"
 
 template<class TWorldState>
-class AttackPrecondition : public PreconditionBase<TWorldState>
+class HealPrecondition : public PreconditionBase<TWorldState>
 {
     bool CheckPreCondition(TWorldState& state) override
     {
-        return state._canPrepareAttack == true;
+        return state._canRecover == true;
     }
 };

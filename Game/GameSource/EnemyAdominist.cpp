@@ -6,6 +6,7 @@ void EnemyAdominist::Init()
 	int select = static_cast<int>(EnemyType::Boss);
 	m_enemys[select] = std::make_unique<Enemy>();
 	m_enemys[select]->Init();
+	m_enemys[select]->SetID(Character::ENEMY);
 }
 
 void EnemyAdominist::Update(float& elapsedTime)

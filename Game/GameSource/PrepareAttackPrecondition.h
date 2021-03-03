@@ -6,7 +6,7 @@ class PrepareAttackPrecondition : public PreconditionBase<TWorldState>
 {
     bool CheckPreCondition(TWorldState& state) override
     {
-        return state.canPrepareAttack == false &&
-            state.canAttack == false;
+        return state._canPrepareAttack == false &&
+            state._canAttack == false;
     }
 };

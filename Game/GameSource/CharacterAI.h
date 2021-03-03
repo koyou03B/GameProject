@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <d3d11.h>
+#include "WorldState.h"
 #include "AIParameter.h"
 #include "CharacterParameter.h"
 #include ".\LibrarySource\Input.h"
@@ -14,7 +15,12 @@
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
-
+enum class Character
+{
+	PLAYER,
+	ENEMY,
+	END
+};
 class CharacterAI
 {
 public:
@@ -23,18 +29,15 @@ public:
 	virtual ~CharacterAI() = default;
 
 	virtual void Init() = 0;
-
 	virtual void Update(float& elapsedTime) = 0;
-
 	virtual void Render(ID3D11DeviceContext* immediateContext) = 0;
-
 	virtual void Impact() = 0;
-
+	virtual void WriteBlackboard(CharacterAI* target) {};
 	virtual void Release() = 0;
 
 	virtual void ImGui(ID3D11Device* device) = 0;
 
-	inline int GetID() { return m_id; }
+	inline Character GetID() { return m_id; }
 	inline std::shared_ptr<Source::SkinnedMesh::SkinnedMesh>& GetModel() { return m_model; }
 	inline CharacterParameter::WorldTransform& GetWorldTransform() { return m_transformParm; }
 	inline CharacterParameter::Status& GetStatus() { return m_statusParm; }
@@ -47,11 +50,12 @@ public:
 	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
 	inline AIParameter::JudgeElement& GetJudgeElement() { return m_judgeElementPram; }
 	inline AIParameter::StandardValue& GetStandardValue() { return m_standardValuePram; }
-	inline void SetID(int id) { m_id = id; }
+	inline void SetID(Character id) { m_id = id; }
 	inline void SetCharacter(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> model) { m_model = model; }
 
 protected:
-	int m_id = -1;
+
+	Character m_id;
 	std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> m_model;
 
 	CharacterParameter::WorldTransform			m_transformParm;
@@ -65,5 +69,4 @@ protected:
 	AIParameter::Emotion						m_emotionParm;
 	AIParameter::JudgeElement					m_judgeElementPram;
 	AIParameter::StandardValue					m_standardValuePram;
-
 };

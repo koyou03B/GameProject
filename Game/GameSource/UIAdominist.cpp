@@ -145,6 +145,11 @@ void UIData::FindValue(float value,const int id)
 	if (id >= static_cast<int>(m_spriteParam.size())) return;
 	auto& data = m_spriteParam.at(id);
 	m_updateValue = data.maxTexSizeX * (1.0f - value);
+	if (m_updateValue > data.maxTexSizeX)
+		m_updateValue = data.maxTexSizeX;
+	if (m_updateValue < 0.0f)
+		m_updateValue = 0.0f;
+
 	m_instanceNo = id;
 	m_updateTime = 0.0f;
 }
@@ -472,7 +477,7 @@ void UIAdominist::ImGui()
 		float maxSize = selectUI == 0 ? 100.0f : 700.0f;
 		static float currentSize = 0.0f;;
 		static float damageOffset = 10.0f;
-		ImGui::SliderFloat("DamageValue", &damageOffset, 1.0f, maxSize);
+		ImGui::SliderFloat("DamageValue", &damageOffset, -maxSize, maxSize);
 		if(ImGui::Button("Size"))
 			currentSize = selectUI == 0 ? 100.0f : 700.0f;
 		ImGui::Text("CurrentSize->", currentSize);

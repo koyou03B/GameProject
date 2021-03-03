@@ -42,6 +42,7 @@ private:
 	void CompleteAttackTask();
 	void CompletePrepareAttackTask();
 	void CompleteAvoidTask();
+	void CompleteRecoverTask();
 private:
 	std::map < PrimitiveTaskType,
 		std::shared_ptr<PrimitiveTask<TWorldState, TChara>>> m_primitiveTasks;
@@ -66,6 +67,10 @@ inline void Domain<TWorldState, TChara>::CompleteCompoundTask(const CompoundTask
 		break;
 	case CompoundTaskType::Avoid:
 		CompleteAvoidTask();
+		break;
+	case CompoundTaskType::Recover:
+		CompleteRecoverTask();
+		break;
 	}
 }
 
@@ -98,6 +103,7 @@ inline void Domain<TWorldState, TChara>::AllSet(DomainConverter& converter)
 	CompleteCompoundTask(CompoundTaskType::Attack);
 	CompleteCompoundTask(CompoundTaskType::PrepareAttack);
 	CompleteCompoundTask(CompoundTaskType::Avoid);
+	CompleteCompoundTask(CompoundTaskType::Recover);
 }
 
 template<class TWorldState, class TChara>
@@ -109,19 +115,17 @@ inline void Domain<TWorldState, TChara>::Release()
 	int prCount = static_cast<int>(PreconditionType::PreconditionEnd);
 	int count = std::max({ ptCount, ctCount, meCount, prCount });
 
-	for (int i = 0; i < count; ++i)
-	{
-		if (ptCount > i)
-			m_primitiveTasks.find(static_cast<PrimitiveTaskType>(i))->second.reset();
-		if (prCount > i)
-			m_preconditions.find(static_cast<PreconditionType>(i))->second.reset();
-		if (meCount > i)
-			m_methods.find(static_cast<MethodType>(i))->second.reset();
-		if (ctCount > i)
-			m_compoundTasks.find(static_cast<CompoundTaskType>(i))->second.reset();
-
-
-	}
+	//for (int i = 0; i < count; ++i)
+	//{
+	//	if (ptCount > i)
+	//		m_primitiveTasks.find(static_cast<PrimitiveTaskType>(i))->second.reset();
+	//	if (prCount > i)
+	//		m_preconditions.find(static_cast<PreconditionType>(i))->second.reset();
+	//	if (meCount > i)
+	//		m_methods.find(static_cast<MethodType>(i))->second.reset();
+	//	if (ctCount > i)
+	//		m_compoundTasks.find(static_cast<CompoundTaskType>(i))->second.reset();
+	//}
 	m_primitiveTasks.clear();
 	m_compoundTasks.clear();
 	m_methods.clear();
@@ -192,6 +196,8 @@ inline void Domain<TWorldState, TChara>::SetPrimitiveTask(const PrimitiveTaskTyp
 	case PrimitiveTaskType::FindDirectionAvoid:
 		task = std::make_shared<FindDATask<TWorldState, TChara>>();
 		break;
+	case PrimitiveTaskType::Recover:
+		task = std::make_shared<HealTask<TWorldState, TChara>>();
 	}
 	m_primitiveTasks.insert(std::make_pair(type, task));
 }
@@ -210,6 +216,9 @@ inline void Domain<TWorldState, TChara>::SetCompoundTask(const CompoundTaskType 
 		break;
 	case CompoundTaskType::Avoid:
 		task = std::make_shared<AvoidTask<TWorldState, TChara>>();
+		break;
+	case CompoundTaskType::Recover:
+		task = std::make_shared<RecoverTask<TWorldState, TChara>>();
 		break;
 	}
 	m_compoundTasks.insert(std::make_pair(type, task));
@@ -236,6 +245,9 @@ inline void Domain<TWorldState, TChara>::SetMethod(const MethodType type)
 	case MethodType::FindDAMethod:
 		method = std::make_shared<FindDAMethod<TWorldState, TChara>>();
 		break;
+	case MethodType::RecoverMethod:
+		method = std::make_shared<HealMethod<TWorldState, TChara>>();
+		break;
 	}
 	m_methods.insert(std::make_pair(type, method));
 
@@ -261,6 +273,9 @@ inline void Domain<TWorldState, TChara>::SetPrecondition(const PreconditionType 
 		break;
 	case PreconditionType::FindDAPrecondition:
 		precondition = std::make_shared<FindDAPrecondition<TWorldState>>();
+		break;
+	case PreconditionType::RecoverPrecondition:
+		precondition = std::make_shared<HealPrecondition<TWorldState>>();
 		break;
 	}
 	m_preconditions.insert(std::make_pair(type, precondition));
@@ -329,5 +344,19 @@ inline void Domain<TWorldState, TChara>::CompleteAvoidTask()
 	avoidTask->AddMethod(avoidMethod);
 	avoidTask->AddMethod(findDAMethod);
 
+}
+
+template<class TWorldState, class TChara>
+inline void Domain<TWorldState, TChara>::CompleteRecoverTask()
+{
+	auto recoverTask = GetCompoundTask(CompoundTaskType::Recover);
+
+	auto healTask = GetPrimitiveTask(PrimitiveTaskType::Recover);
+	auto healPrecondition = GetPrecondition(PreconditionType::RecoverPrecondition);
+	auto healMethod = GetMethod(MethodType::RecoverMethod);
+	healMethod->AddSubTask(healTask);
+	healMethod->AddPrecondition(healPrecondition);
+
+	recoverTask->AddMethod(healMethod);
 }
 

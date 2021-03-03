@@ -6,8 +6,11 @@ void PlayerAdominist::Init()
 {
 	int select = static_cast<int>(PlayerType::Fighter);
 	m_players[select] = std::make_unique<Fighter>();
+	m_players[select]->SetID(Character::PLAYER);
 	select = static_cast<int>(PlayerType::Archer);
 	m_players[select] = std::make_unique<Archer>();
+	m_players[select]->SetID(Character::PLAYER);
+
 }
 
 void PlayerAdominist::Update(float& elapsedTime)
@@ -35,6 +38,12 @@ void PlayerAdominist::Release()
 	{
 		m_players[i]->Release();
 	}
+}
+
+void PlayerAdominist::WriteBlackboard(CharacterAI* target)
+{
+	int select = static_cast<int>(PlayerType::Archer);
+	m_players[select]->WriteBlackboard(target);
 }
 
 void PlayerAdominist::ImGui(ID3D11Device* device)

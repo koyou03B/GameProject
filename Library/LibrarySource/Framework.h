@@ -226,8 +226,8 @@ public:
 				float mspf = 1000.0f / fps;
 				std::ostringstream outs;
 				outs.precision(6);
-				//outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
-				outs << "REGION MATE";
+				outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
+				//outs << "REGION MATE";
 				SetWindowTextA(m_hwnd, outs.str().c_str());
 
 				// Reset for next average.

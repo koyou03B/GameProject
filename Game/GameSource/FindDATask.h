@@ -28,7 +28,7 @@ private:
     void ApplyEffectsToWorldState(TWorldState& previousState) override
     {
         //çUåÇPointî≠å©
-        previousState.canFindDirectionToAvoid = true;
-        previousState.canAvoid = true;
+        previousState._canFindDirectionToAvoid = true;
+        previousState._canAvoid = true;
     }
 };

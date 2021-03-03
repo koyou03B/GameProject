@@ -22,12 +22,12 @@ private:
     bool IsSatisfiedPreConditions(const TWorldState& currentState) override
     {
         //UŒ‚€”õ‚Å‚«‚½?
-        return currentState.canPrepareAttack == true;
+        return currentState._canPrepareAttack == true;
     }
 
     void ApplyEffectsToWorldState(TWorldState& previousState) override
     {
         //–î‚ğ”Ô‚¦‚½
-        previousState.isSetArrow = true;
+        previousState._isSetArrow = true;
     }
 };

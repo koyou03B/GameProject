@@ -23,13 +23,13 @@ private:
     bool IsSatisfiedPreConditions(const TWorldState& currentState) override
     {
         //”ð‚¯‚é•ûŒü‚ðŒ©‚Â‚¯‚Ä‚é
-        return currentState.canAvoid == true;
+        return currentState._canAvoid == true;
     }
 
     void ApplyEffectsToWorldState(TWorldState& previousState) override
     {
         //”ð‚¯‚é•ûŒü‚Í‚à‚¤‚¢‚ç‚È‚¢
-       previousState.canFindDirectionToAvoid = false;
-       previousState.canAvoid = false;
+       previousState._canFindDirectionToAvoid = false;
+       previousState._canAvoid = false;
     }
 };

@@ -1,33 +1,33 @@
 #pragma once
-#include "HTN/PrimitiveTask.h"
+#pragma once
+#include "HTN\PrimitiveTask.h"
 
 template<class TWorldState, class TChara>
-class FindAPTask :public PrimitiveTask<TWorldState, TChara>
+class HealTask :public PrimitiveTask<TWorldState, TChara>
 {
 public:
-    FindAPTask()
+    HealTask()
     {
         this->m_taskType = TaskType::Primitive;
-        this->m_taskName = "FindAttackPointTask";
+        this->m_taskName = "HealTask";
     }
-    FindAPTask(PrimitiveTask<TWorldState, TChara>::ActFunc func)
+    HealTask(PrimitiveTask<TWorldState, TChara>::ActFunc func)
     {
         this->m_taskType = TaskType::Primitive;
-        this->m_taskName = "FindAttackPointTask";
+        this->m_taskName = "HealTask";
         this->SetOperator(func);
     }
-    ~FindAPTask() = default;
+    ~HealTask() = default;
 
 private:
     bool IsSatisfiedPreConditions(const TWorldState& currentState) override
     {
-        //í‚ÉOK‚ğ•Ô‚·‚Ì‚à‘I‘ğˆ‚Ìˆê‚Â
         return  true;
     }
 
     void ApplyEffectsToWorldState(TWorldState& previousState) override
     {
-        //UŒ‚Point”­Œ©
-        previousState._canFindAttackPoint = true;
+        //‰ñ•œ‚Å‚«‚½
+        previousState._canRecover = false;
     }
 };

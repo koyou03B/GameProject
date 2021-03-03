@@ -225,6 +225,9 @@
     <Filter Include="Sources\Shader">
       <UniqueIdentifier>{b0827100-a834-4a24-a174-6dce739c15bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Characters\Parameter">
+      <UniqueIdentifier>{2255ddb3-a9e2-406b-b95d-a0a865478d1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSource\Scene.cpp">
@@ -364,6 +367,18 @@
     </ClCompile>
     <ClCompile Include="GameSource\SceneEffect.cpp">
       <Filter>Sources\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\WorldAnalyzer.cpp">
+      <Filter>Sources\Characters\Parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\ArchersGameMaker.cpp">
+      <Filter>Sources\Characters\Parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\AgentAI.cpp">
+      <Filter>Sources\Characters\Parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\Blackboard.cpp">
+      <Filter>Sources\Characters\Parameter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -612,6 +627,30 @@
     </ClInclude>
     <ClInclude Include="GameSource\KnowledgeMaterial.h">
       <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\GameMaker.h">
+      <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\ArchersGamemaker.h">
+      <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Blackboard.h">
+      <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AgentAI.h">
+      <Filter>Headers\Characters\Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\HealTask.h">
+      <Filter>Headers\HTN\Task\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\HealPrecondition.h">
+      <Filter>Headers\HTN\PreCondition</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\HealMethod.h">
+      <Filter>Headers\HTN\Metod</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\RecoverTask.h">
+      <Filter>Headers\HTN\Task\Compound</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

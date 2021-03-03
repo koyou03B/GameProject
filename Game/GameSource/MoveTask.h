@@ -22,13 +22,13 @@ private:
     bool IsSatisfiedPreConditions(const TWorldState& currentState) override
     {
         //攻撃ポイント見つけてる
-        return currentState.canFindAttackPoint == true;
+        return currentState._canFindAttackPoint == true;
     }
 
     void ApplyEffectsToWorldState(TWorldState& previousState) override
     {
         //攻撃準備完了,攻撃ポイントはもういらない
-        previousState.canPrepareAttack = true;
-        previousState.canFindAttackPoint = false;
+        previousState._canPrepareAttack = true;
+        previousState._canFindAttackPoint = false;
     }
 };
