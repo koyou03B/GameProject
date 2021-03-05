@@ -14,6 +14,7 @@ namespace Source
 			{ TextureLabel::OVER,		"../Asset/Texture/Over/OVER_LOG.png","",1U },
 			{ TextureLabel::FIGHTER,	"../Asset/Texture/Game/FighterName.png","",1U },
 			{ TextureLabel::JUGGERNAUT,	"../Asset/Texture/Game/EnemyName.png","",1U },
+			{ TextureLabel::ARCHER,		"../Asset/Texture/Game/ArcherName.png","",1U },
 			{ TextureLabel::P_LIFE,		"../Asset/Texture/Game/PlayerLife.png","",2U },
 			{ TextureLabel::E_LIFE,		"../Asset/Texture/Game/EnemyLife.png","",1U },
 			{ TextureLabel::P_LIFE_GAGE,"../Asset/Texture/Game/LifeGage.png","",1U },

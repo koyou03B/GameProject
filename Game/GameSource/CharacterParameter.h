@@ -147,7 +147,43 @@ public:
 					frameCount
 				);
 			}
+		}
+	};
 
+	struct Recover
+	{
+		bool isPlayer;
+		float healValue[2];
+		float recoverMaxTime[2];
+		float standardLv;
+
+		uint32_t serialVersion = 0;
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version)
+		{
+
+			if (serialVersion <= version)
+			{
+				archive
+				(
+					healValue[0],
+					healValue[1],
+					recoverMaxTime[0],
+					recoverMaxTime[1],
+					standardLv
+				);
+			}
+			else
+			{
+				archive
+				(
+					healValue[0],
+					healValue[1],
+					recoverMaxTime[0],
+					recoverMaxTime[1],
+					standardLv
+				);
+			}
 		}
 	};
 
@@ -198,7 +234,6 @@ public:
 
 		}
 	};
-
 
 	struct Effect
 	{
@@ -402,7 +437,6 @@ public:
 		}
 	};
 
-
 	struct DebugObjects
 	{
 		DebugObject debugObject;
@@ -420,7 +454,6 @@ public:
 			return std::make_unique<Source::GeometricPrimitive::GeometricCapsule>(device,fileName);
 		}
 	};
-
 };
 
 CEREAL_CLASS_VERSION(CharacterParameter::Status, 12);

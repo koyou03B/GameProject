@@ -124,6 +124,21 @@ void AgentAI::CreatePerception(Archer* mySelf)
 	DistanceLv distLv = enemyLog.m_workingMemory.GetDinstanceLv();
 	PerceptionOfDistance(worldState, distLv,true);
 
+	int myHpLv = 0;
+	float targetHp = mySelf->GetStatus().life;
+	float targetMaxHp = mySelf->GetStatus().maxLife;
+	float hpRatio = targetHp / targetMaxHp;
+	int maxHpLv = static_cast<int>(HitPointLv::END);
+	const float divisionHp = 1.0f / maxHpLv;
+	float minHp = 0.0f;
+	for (int i = 0; i < maxHpLv; ++i)
+	{
+		if (minHp < hpRatio && hpRatio <= minHp + divisionHp)
+			myHpLv = i;
+
+		minHp += divisionHp;
+	}
+
 	#pragma endregion
 
 	//‘«‚µ‚Ä8ˆÈã(8‚Í“K“–)‚È‚ç‰ñ•œ‚·‚é
@@ -139,6 +154,16 @@ void AgentAI::CreatePerception(Archer* mySelf)
 		if (mySelf->GetCanRecover())
 		{
 			m_gameMaker.SetRootTask(CompoundTaskType::Recover);
+			mySelf->GetRecoverParm().isPlayer = true;
+			return;
+		}
+	}
+	else if (myHpLv < 1)
+	{
+		if (mySelf->GetCanRecover())
+		{
+			m_gameMaker.SetRootTask(CompoundTaskType::Recover);
+			mySelf->GetRecoverParm().isPlayer = false;
 			return;
 		}
 	}

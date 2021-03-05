@@ -1555,6 +1555,19 @@ void Fighter::ImGui(ID3D11Device* device)
 		ImGui::SliderFloat("DamageComparison", &m_damageParm.hitComparison, 0.0f, 100.0f);
 	}
 
+	if (ImGui::CollapsingHeader("Life1"))
+	{
+		static float damageOffset = 0.0f;
+		ImGui::SliderFloat("DamageValue", &damageOffset, 0, m_statusParm.maxLife);
+
+		if (ImGui::Button("Update"))
+		{
+			m_statusParm.life -= damageOffset;
+			MESSENGER.MessageToLifeUpdate(m_statusParm.life, m_statusParm.maxLife,
+				UIActLabel::LIFE_P, 0);
+		}
+	}
+
 	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
 
 	VECTOR3F enemyPos = enemy->GetWorldTransform().position;

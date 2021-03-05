@@ -53,6 +53,7 @@ enum UIStaticLabel
 	COMMAND_F,
 	NAME_F,
 	NAME_E,
+	NAME_A,
 	ENDS
 };
 

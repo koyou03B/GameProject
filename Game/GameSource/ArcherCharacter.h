@@ -36,13 +36,14 @@ public:
 	
 	inline std::unique_ptr<Arrow>& GetArrow() { return m_arrow; }
 	inline ArcherWorldState& GetWorldState() { return m_worldState; }
+	inline CharacterParameter::Recover& GetRecoverParm() { return m_recoverParm; }
 	inline std::vector<TaskBase<ArcherWorldState, Archer>*>& GetPlanList() { return m_currentPlanList; }
 	inline float& GetPlayerCreditLv() { return m_playerCreditLv; }
 	inline bool& GetCanRecover() { return m_canRecover; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 5)
+		if (version >= 6)
 		{
 			archive
 			(
@@ -52,7 +53,8 @@ public:
 				m_cameraParm,
 				m_stepParm,
 				m_collision,
-				m_agentAI
+				m_agentAI,
+				m_recoverParm
 			);
 		}
 		else
@@ -64,7 +66,8 @@ public:
 				m_moveParm,
 				m_cameraParm,
 				m_stepParm,
-				m_collision
+				m_collision,
+				m_agentAI
 			);
 		}
 	}
@@ -81,6 +84,7 @@ private:
 		m_moveParm.serialVersion = version;
 		m_cameraParm.serialVersion = version;
 		m_stepParm.serialVersion = version;
+		m_recoverParm.serialVersion = version;
 
 		for (auto& atk : m_attackParm)
 		{
@@ -131,8 +135,8 @@ private:
 	float m_elapsedTime;
 	float m_writeTimer;
 	float m_recoverTimer;
-	float m_maxRecoverTimer;
-	float m_maxWriteTimer;
+	float m_recoverMaxTimer;
+	float m_writeMaxTimer;
 	float m_playerCreditLv;
 	bool m_hasBlendAnim;
 	bool m_hasRotated;
@@ -148,6 +152,7 @@ private:
 	
 	Source::Input::Input*					m_input;
 	CharacterParameter::Step				m_stepParm;
+	CharacterParameter::Recover				m_recoverParm;
 	CharacterParameter::DebugObjects		m_debugObjects;
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	std::vector<CharacterParameter::Attack>	m_attackParm;

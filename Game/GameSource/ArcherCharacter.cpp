@@ -11,7 +11,7 @@
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 #endif
-CEREAL_CLASS_VERSION(Archer, 5);
+CEREAL_CLASS_VERSION(Archer, 6);
 
 void Archer::Init()
 {
@@ -50,7 +50,7 @@ void Archer::Init()
 	}
 
 	m_currentPlanList = m_agentAI.Init(this);
-	m_statusParm.life = 120.0f;
+	m_statusParm.life = 100.0f;
 	m_stepParm.maxSpeed = m_stepParm.speed;
 	m_controlPoint.resize(8);
 	m_canRun = true;
@@ -62,11 +62,12 @@ void Archer::Init()
 	m_writeTimer = 0.0f;
 	m_recoverTimer = 0.0f;
 
-	m_maxWriteTimer = 0.0f;
-	m_maxRecoverTimer = 6.0f;
+	m_writeMaxTimer = 0.0f;
+	m_recoverMaxTimer = 6.0f;
 	m_currentTask = 0;
 	m_canRecover = true;
 	m_worldState._canRecover = true;
+	m_statusParm.maxLife = m_statusParm.life;
 }
 
 void Archer::Update(float& elapsedTime)
@@ -276,7 +277,7 @@ bool Archer::Rotate(VECTOR3F& target, const float turnSpeed, bool isLookEnemy)
 void Archer::ActiveWriteTimer()
 {
 	m_writeTimer += m_elapsedTime;
-	if (m_writeTimer > m_maxWriteTimer)
+	if (m_writeTimer > m_writeMaxTimer)
 	{
 		CharacterAI* target = MESSENGER.CallEnemyInstance(EnemyType::Boss);
 		WriteBlackboard(target);
@@ -291,7 +292,7 @@ void Archer::ActiveRecoverTimer()
 	if (!m_canRecover)
 	{
 		m_recoverTimer += m_elapsedTime;
-		if (m_recoverTimer > m_maxRecoverTimer)
+		if (m_recoverTimer > m_recoverMaxTimer)
 			m_canRecover = true;
 	}
 }
@@ -741,6 +742,49 @@ bool Archer::Avoid()
 bool Archer::Heal()
 {
 	m_canRecover = false;
+	int selectCharacter = 0;
+	float targetHp,targetMaxHp = 0.0f;
+	if (m_recoverParm.isPlayer)
+	{
+		CharacterAI* target = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
+		targetHp = target->GetStatus().life;
+		targetMaxHp = target->GetStatus().maxLife;
+		selectCharacter = 0;
+	}
+	else
+	{
+		targetHp = m_statusParm.life;
+		targetMaxHp = m_statusParm.maxLife;
+		selectCharacter = 1;
+	}
+
+	float hpRatio = targetHp / targetMaxHp;
+	float healValue = 0.0f;
+	if (m_recoverParm.standardLv > hpRatio)
+	{
+		healValue = m_recoverParm.healValue[1];
+		m_recoverMaxTimer = m_recoverParm.recoverMaxTime[1];
+	}
+	else
+	{
+		healValue = m_recoverParm.healValue[0];
+		m_recoverMaxTimer = m_recoverParm.recoverMaxTime[0];
+	}
+
+	MESSENGER.MessageToLifeUpdate(targetHp + healValue, targetMaxHp,
+		UIActLabel::LIFE_P, selectCharacter);
+
+	if (m_recoverParm.isPlayer)
+	{
+		CharacterAI* target = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
+		float& hp = target->GetStatus().life;
+		hp += healValue;
+	}
+	else
+	{
+		m_statusParm.life += healValue;
+	}
+
 	return true;
 }
 
@@ -1377,6 +1421,34 @@ ImGui::Combo("Name_of_BoneName",
 	{
 		m_agentAI.ImGui(this);
 	}
+
+	if (ImGui::CollapsingHeader("Recover"))
+	{
+		ImGui::SliderFloat2("HealValue", m_recoverParm.healValue, 0.0f, m_statusParm.maxLife);
+		ImGui::SliderFloat2("RecoverMaxTime", m_recoverParm.recoverMaxTime, 0.0f, 10.0f);
+		ImGui::SliderFloat("StandardLv", &m_recoverParm.standardLv, 0.0f, 1.0f);
+		if (ImGui::Button("Player"))
+			m_recoverParm.isPlayer = true;
+		ImGui::SameLine();
+		if (ImGui::Button("Archer"))
+			m_recoverParm.isPlayer = false;
+
+	}
+
+
+	if (ImGui::CollapsingHeader("Life"))
+	{
+		static float damageOffset = 0.0f;
+		ImGui::SliderFloat("DamageValue", &damageOffset, 0, m_statusParm.maxLife);
+
+		if (ImGui::Button("Update"))
+		{
+			m_statusParm.life -= damageOffset;
+			MESSENGER.MessageToLifeUpdate(m_statusParm.life, m_statusParm.maxLife,
+				UIActLabel::LIFE_P, 1);
+		}
+	}
+
 
 	ImGui::Text("m_canRecover->%d", m_canRecover);
 	

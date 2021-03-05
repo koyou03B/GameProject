@@ -71,48 +71,35 @@ void UIData::ImGui()
 		ImGui::EndMenuBar();
 	}
 
-	size_t size = m_spriteParam.size();
-	for (size_t i = 0; i < size;)
+	int size = static_cast<int>(m_spriteParam.size());
+	static int select = 0;
+	ImGui::SliderInt("Select", &select, 0, size-1);
+
+	auto& param = m_spriteParam.at(select);
+
+	if (ImGui::CollapsingHeader("Position"))
 	{
-		auto& param = m_spriteParam.at(i);
+		float pos[] = { param.position.x,param.position.y };
+		ImGui::SliderFloat2("Position ->", pos, 0.0f, 1980.0f);
+		param.position = { pos[0],pos[1] };
+	}
 
-		if (ImGui::CollapsingHeader("Position"))
-		{
-			float pos[] = { param.position.x,param.position.y };
-			ImGui::SliderFloat2("Position ->", pos, 0.0f, 1980.0f);
-			param.position = { pos[0],pos[1] };
-		}
+	if (ImGui::CollapsingHeader("Scale"))
+	{
+		float scale[] = { param.scale.x,param.scale.y };
+		ImGui::SliderFloat2("Scale ->", scale, 0.0f, 1980.0f);
+		param.scale = { scale[0],scale[1] };
+	}
 
-		if (ImGui::CollapsingHeader("Scale"))
-		{
-			float scale[] = { param.scale.x,param.scale.y };
-			ImGui::SliderFloat2("Scale ->", scale, 0.0f, 1980.0f);
-			param.scale = { scale[0],scale[1] };
-		}
-
-		if (ImGui::CollapsingHeader("TexSize"))
-		{
-			float texSize[] = { param.texSize.x,param.texSize.y };
-			ImGui::SliderFloat2("TexSize ->", texSize, 0.0f, 1980.0f);
-			param.texSize = { texSize[0],texSize[1] };
-		}
-
-		if (i < (size - 1))
-		{
-			if (ImGui::Button("Next"))
-			{
-				++i;
-			}
-		}
-
-		if (i != 0)
-		{
-			if (ImGui::Button("Back"))
-			{
-				--i;
-			}
-		}
-		break;
+	if (ImGui::CollapsingHeader("TexSize"))
+	{
+		float texSize[] = { param.texSize.x,param.texSize.y };
+		ImGui::SliderFloat2("TexSize ->", texSize, 0.0f, 1980.0f);
+		param.texSize = { texSize[0],texSize[1] };
+	}
+	if (ImGui::Button("Add"))
+	{
+		m_spriteParam.push_back(param);
 	}
 	ImGui::End();
 
@@ -169,6 +156,9 @@ void UIData::SetSpriteS(UIStaticLabel label)
 		break;
 	case NAME_E:
 		m_sprite = TEXTURELOADER.GetTexture(Source::SpriteLoad::TextureLabel::JUGGERNAUT);
+		break;
+	case NAME_A:
+		m_sprite = TEXTURELOADER.GetTexture(Source::SpriteLoad::TextureLabel::ARCHER);
 		break;
 	}
 	SpriteParam param;
@@ -232,6 +222,9 @@ void UIAdominist::Init()
 	data.Init(EnumToStringS(UIStaticLabel::NAME_E));
 	m_uiStaticData.insert(std::make_pair(UIStaticLabel::NAME_E, data));
 
+	data.SetSpriteS(UIStaticLabel::NAME_A);
+	data.Init(EnumToStringS(UIStaticLabel::NAME_A));
+	m_uiStaticData.insert(std::make_pair(UIStaticLabel::NAME_A, data));
 }
 
 void UIAdominist::Update(float& elapsedTime)
@@ -321,11 +314,11 @@ void UIAdominist::ImGui()
 		{
 			static int selectUI = 2;
 			if (labelType == 0)
-				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0END\0\0");
+				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0NAME_A\0END\0\0");
 			else
 				ImGui::Combo("UI_NAME", &selectUI, "LIFE_P\0LIFE_E\0END\0\0");
 			
-			if (selectUI != 4 && labelType == 0 || selectUI != 2 && labelType == 1)
+			if (selectUI != 5 && labelType == 0 || selectUI != 2 && labelType == 1)
 			{
 				ImGui::BulletText("Have you selected UI?"); ImGui::SameLine();
 				if (ImGui::Button("Yes"))
@@ -403,7 +396,7 @@ void UIAdominist::ImGui()
 			}
 			else
 			{
-				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0END\0\0");
+				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0NAME_A\0END\0\0");
 				ImGui::Text("Have you selected UI?");
 				static bool hasStarted = false;
 				if (ImGui::Button("Yes"))
@@ -482,10 +475,14 @@ void UIAdominist::ImGui()
 			currentSize = selectUI == 0 ? 100.0f : 700.0f;
 		ImGui::Text("CurrentSize->", currentSize);
 
+		static int select = 0;
+		ImGui::SliderInt("PorA", &select, 0, 1);
+
+
 		if (ImGui::Button("RUN"))
 		{
 			currentSize -= damageOffset;
-			LifeUpdate(static_cast<UIActLabel>(selectUI), (maxSize - currentSize) / maxSize, 0);
+			LifeUpdate(static_cast<UIActLabel>(selectUI), (maxSize - currentSize) / maxSize, select);
 		}
 	}
 

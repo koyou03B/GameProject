@@ -17,6 +17,8 @@ void ArchersGameMaker::Init()
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::ShootArrow)->SetOperator(&Archer::Shoot);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::Avoiding)->SetOperator(&Archer::Avoid);
 	m_domain.GetPrimitiveTask(PrimitiveTaskType::FindDirectionAvoid)->SetOperator(&Archer::FindDirectionToAvoid);
+	m_domain.GetPrimitiveTask(PrimitiveTaskType::Recover)->SetOperator(&Archer::Heal);
+
 }
 
 void ArchersGameMaker::Release()

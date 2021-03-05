@@ -17,6 +17,7 @@ namespace Source
 			OVER,
 			FIGHTER,
 			JUGGERNAUT,
+			ARCHER,
 			P_LIFE,
 			E_LIFE,
 			P_LIFE_GAGE,
