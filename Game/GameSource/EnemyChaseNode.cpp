@@ -9,36 +9,53 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 {
 	EnemyType enemyType = static_cast<EnemyType>(id);
 	CharacterAI* enemy = MESSENGER.CallEnemyInstance(enemyType);
+	CharacterAI* fighter = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
+	CharacterAI* archer = MESSENGER.CallPlayerInstance(PlayerType::Archer);
+
+	uint32_t fighterAttackHitCount = 0;
+	uint32_t archerAttackHitCount = 0;
+	VECTOR3F playerPosition = {};
 	int targetID = enemy->GetJudgeElement().targetID;
 	PlayerType playerType = static_cast<PlayerType>(targetID);
-	CharacterAI* player = MESSENGER.CallPlayerInstance(playerType);
 
-	uint32_t targetAttackHitCount = player->GetJudgeElement().attackHitCount;
-
-	int count = static_cast<int>(PlayerType::End);
-	for (int i = 0; i < count; ++i)
+	if (fighter)
 	{
-		if (i != targetID)
+		fighterAttackHitCount = fighter->GetJudgeElement().attackHitCount;
+		if (playerType == PlayerType::Fighter)
+			playerPosition = fighter->GetWorldTransform().position;
+	}
+	if (archer)
+	{
+		archerAttackHitCount = archer->GetJudgeElement().attackHitCount;
+		if (playerType == PlayerType::Archer)
+			playerPosition = archer->GetWorldTransform().position;
+	}
+
+	if (fighterAttackHitCount >= archerAttackHitCount)
+	{
+	//	enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Fighter);
+		if (playerType != PlayerType::Fighter)
 		{
-			playerType = static_cast<PlayerType>(i);
-			CharacterAI* otherPlayer = MESSENGER.CallPlayerInstance(playerType);
-			uint32_t attackHitCount = otherPlayer->GetJudgeElement().attackHitCount;
-			if (targetAttackHitCount < attackHitCount)
-			{
-				enemy->GetJudgeElement().targetID = i;
-				return m_priority;
-			}
+			enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Fighter);
+			return m_priority;
+		}
+	}
+	else
+	{
+	//	enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Archer);
+		if (playerType != PlayerType::Archer)
+		{
+			enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Archer);
+			return m_priority;
 		}
 	}
 
-	VECTOR3F playerPosition = player->GetWorldTransform().position;
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
-
 	float distance = ToDistVec3(playerPosition - enemyPosition);
 
 	if (distance >= m_maxDirection)
 	{
-		++m_selectCount;
+//		++m_selectCount;
 		return m_priority;
 	}
 

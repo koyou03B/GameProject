@@ -13,10 +13,6 @@ void EnemyRestTask::Run(Enemy* enemy)
 		m_taskState = TASK_STATE::START;
 		animation.animationBlend.AddSampler(1, enemy->GetModel());
 		animation.animationBlend.ResetAnimationFrame();
-		enemy->GetJudgeElement().moveCount = 0;
-		enemy->GetJudgeElement().attackCount = 0;
-		enemy->GetJudgeElement().damageCount = 0;
-		enemy->GetEmotion().exhaustionParm.exhaustionCost = 0;
 		animation.animationBlend.SetAnimationSpeed(2.0f);
 		m_restTime = 0;
 		++m_moveState;

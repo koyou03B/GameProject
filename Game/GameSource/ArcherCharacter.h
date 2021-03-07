@@ -7,6 +7,36 @@
 #include "CharacterParameter.h"
 #include ".\LibrarySource\Vector.h"
 
+struct AttackArrow
+{
+	float m_useArrowTimer;
+	float m_useArrowMaxTimer;
+	float m_attackPoint[2];
+	ArrowType m_arrowType;
+
+	void UpdateTime(float& elapsedTime);
+
+	template<class T>
+	void serialize(T& archive, const std::uint32_t version)
+	{
+		if (version >= 0)
+		{
+			archive
+			(
+				m_useArrowMaxTimer,
+				m_attackPoint[0], m_attackPoint[1]
+			);
+		}
+		else
+		{
+			archive
+			(
+				m_useArrowMaxTimer,
+				m_attackPoint[0], m_attackPoint[1]
+			);
+		}
+	}
+};
 
 class Archer : public CharacterAI
 {
@@ -43,7 +73,7 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 6)
+		if (version >= 8)
 		{
 			archive
 			(
@@ -54,7 +84,10 @@ public:
 				m_stepParm,
 				m_collision,
 				m_agentAI,
-				m_recoverParm
+				m_recoverParm,
+				m_attackArrow,
+				m_blendAnimation,
+				m_damageParm
 			);
 		}
 		else
@@ -67,7 +100,9 @@ public:
 				m_cameraParm,
 				m_stepParm,
 				m_collision,
-				m_agentAI
+				m_agentAI,
+				m_recoverParm,
+				m_attackArrow
 			);
 		}
 	}
@@ -157,6 +192,7 @@ private:
 	CharacterParameter::BlendAnimation		m_blendAnimation;
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 	std::unique_ptr<Arrow>					m_arrow;
+	AttackArrow                             m_attackArrow;
 
 	AgentAI									m_agentAI;
 	ArcherWorldState						m_worldState;

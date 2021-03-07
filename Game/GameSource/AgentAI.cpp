@@ -155,6 +155,7 @@ void AgentAI::CreatePerception(Archer* mySelf)
 		{
 			m_gameMaker.SetRootTask(CompoundTaskType::Recover);
 			mySelf->GetRecoverParm().isPlayer = true;
+			mySelf->GetWorldState()._canRecover = true;
 			return;
 		}
 	}
@@ -164,6 +165,7 @@ void AgentAI::CreatePerception(Archer* mySelf)
 		{
 			m_gameMaker.SetRootTask(CompoundTaskType::Recover);
 			mySelf->GetRecoverParm().isPlayer = false;
+			mySelf->GetWorldState()._canRecover = true;
 			return;
 		}
 	}

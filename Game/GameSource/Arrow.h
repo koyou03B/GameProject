@@ -8,6 +8,14 @@
 #include ".\LibrarySource\StaticMesh.h"
 #include ".\LibrarySource\InstanceData.h"
 
+enum class ArrowType
+{
+	NORMAL,
+	STRONG,
+	END
+};
+
+
 struct ArrowParam
 {
 	VECTOR3F	speed = {};
