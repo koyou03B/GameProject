@@ -74,8 +74,8 @@ void Enemy::Init()
 	m_stone = std::move(stone);
 
 #if _DEBUG
-	//m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
-	m_isAction = false;
+//	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
+//	m_isAction = true;
 #else
 	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
 	m_isAction = true;

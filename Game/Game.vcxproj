@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="GameSource\AgentAI.cpp" />
     <ClCompile Include="GameSource\AnimationBlending.cpp" />
+    <ClCompile Include="GameSource\AnimationData.cpp" />
     <ClCompile Include="GameSource\ArcherCharacter.cpp" />
     <ClCompile Include="GameSource\ArchersGameMaker.cpp" />
     <ClCompile Include="GameSource\Arrow.cpp" />
@@ -28,6 +29,8 @@
     <ClCompile Include="GameSource\Collision.cpp" />
     <ClCompile Include="GameSource\CollisionJudge.cpp" />
     <ClCompile Include="GameSource\DebugObject.cpp" />
+    <ClCompile Include="GameSource\Effect.cpp" />
+    <ClCompile Include="GameSource\EffectData.cpp" />
     <ClCompile Include="GameSource\Enemy.cpp" />
     <ClCompile Include="GameSource\EnemyAdominist.cpp" />
     <ClCompile Include="GameSource\EnemyBehaviorNode.cpp" />
@@ -87,6 +90,9 @@
     <ClInclude Include="GameSource\CollisionJudge.h" />
     <ClInclude Include="GameSource\Domain.h" />
     <ClInclude Include="GameSource\DomainConverter.h" />
+    <ClInclude Include="GameSource\AnimationData.h" />
+    <ClInclude Include="GameSource\Effect.h" />
+    <ClInclude Include="GameSource\EffectData.h" />
     <ClInclude Include="GameSource\EnemyAdominist.h" />
     <ClInclude Include="GameSource\EnemyBehaviorNode.h" />
     <ClInclude Include="GameSource\EnemyBehaviorTask.h" />
@@ -138,7 +144,6 @@
     <ClInclude Include="GameSource\WorldAnalyzer.h" />
     <ClInclude Include="GameSource\WorldState.h" />
     <ClInclude Include="GameSource\Market.h" />
-    <ClInclude Include="GameSource\Scope.h" />
     <ClInclude Include="GameSource\AnimationBlend.h" />
     <ClInclude Include="GameSource\ArcherCharacter.h" />
     <ClInclude Include="GameSource\CharacterAI.h" />

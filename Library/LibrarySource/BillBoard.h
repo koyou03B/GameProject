@@ -18,6 +18,7 @@ namespace Source
 			~BillBoard() = default;
 
 			void Begin(ID3D11DeviceContext* immediateContext);
+			void TileCutRender(ID3D11DeviceContext* immediateContext,VECTOR2F texPos, VECTOR2F texSize);
 			void Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection,
 				const FLOAT4X4& view, const VECTOR3F& position, float scale, const VECTOR3F& angle, const VECTOR4F& color);
 			void End(ID3D11DeviceContext* immediateContext);

@@ -63,7 +63,36 @@ namespace Source
 			immediateContext->PSSetSamplers(0, 1, Framework::GetSamplerState(Framework::SS_WRAP));
 		}
 
-		void BillBoard::Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection, const FLOAT4X4& view, const VECTOR3F& position, float scale, const VECTOR3F& angle, const VECTOR4F& color)
+		void BillBoard::TileCutRender(ID3D11DeviceContext* immediateContext,VECTOR2F texPos, VECTOR2F texSize)
+		{
+			HRESULT hr = S_OK;
+
+			D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
+			D3D11_MAPPED_SUBRESOURCE mapped_buffer;
+			hr = immediateContext->Map(m_vertexBuffer.Get(), 0, map, 0, &mapped_buffer);
+			if (FAILED(hr))
+				assert(!"Map Miss (BillBoard)");
+
+			Vertex* vertices = static_cast<Vertex*>(mapped_buffer.pData);
+			vertices[0].position = VECTOR3F(-0.5f, +0.5f, 0.0f);
+			vertices[1].position = VECTOR3F(+0.5f, +0.5f, 0.0f);
+			vertices[2].position = VECTOR3F(-0.5f, -0.5f, 0.0f);
+			vertices[3].position = VECTOR3F(+0.5f, -0.5f, 0.0f);
+
+			vertices[0].texcoord.x = (texPos.x + texSize.x) / m_texture2dDesc.Width;
+			vertices[0].texcoord.y = (texPos.y) / m_texture2dDesc.Height;
+			vertices[1].texcoord.x = (texPos.x) / m_texture2dDesc.Width;
+			vertices[1].texcoord.y = (texPos.y) / m_texture2dDesc.Height;
+			vertices[2].texcoord.x = (texPos.x + texSize.x) / m_texture2dDesc.Width;
+			vertices[2].texcoord.y = (texPos.y + texSize.y) / m_texture2dDesc.Height;
+			vertices[3].texcoord.x = (texPos.x) / m_texture2dDesc.Width;
+			vertices[3].texcoord.y = (texPos.y + texSize.y) / m_texture2dDesc.Height;
+
+			immediateContext->Unmap(m_vertexBuffer.Get(), 0);
+		}
+
+		void BillBoard::Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection, const FLOAT4X4& view, 
+			const VECTOR3F& position, float scale, const VECTOR3F& angle, const VECTOR4F& color)
 		{
 			//World Matrix
 			DirectX::XMMATRIX W;

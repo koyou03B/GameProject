@@ -80,27 +80,27 @@ void Archer::Update(float& elapsedTime)
 			m_hasShoot = false;
 	}
 
-	//if (!m_currentPlanList.empty())
-	//{
+	if (!m_currentPlanList.empty() && !m_statusParm.isDamage)
+	{
 
-	//	int taskCount = static_cast<int>(m_currentPlanList.size());
-	//	for (int i = m_currentTask; i != taskCount;)
-	//	{
-	//		if (m_currentPlanList[i]->ExecuteOperator(this))
-	//		{
-	//			++m_currentTask;
-	//			i = m_currentTask;
-	//		}
-	//		else
-	//			break;
-	//	}
+		int taskCount = static_cast<int>(m_currentPlanList.size());
+		for (int i = m_currentTask; i != taskCount;)
+		{
+			if (m_currentPlanList[i]->ExecuteOperator(this))
+			{
+				++m_currentTask;
+				i = m_currentTask;
+			}
+			else
+				break;
+		}
 
-	//	if (m_currentTask == taskCount)
-	//	{
-	//		m_currentPlanList = m_agentAI.OperationFlowStart(this);
-	//		m_currentTask = 0;
-	//	}
-	//}
+		if (m_currentTask == taskCount)
+		{
+			m_currentPlanList = m_agentAI.OperationFlowStart(this);
+			m_currentTask = 0;
+		}
+	}
 	KnockBack();
 	ActiveWriteTimer();
 	ActiveRecoverTimer();
@@ -183,11 +183,11 @@ void Archer::Impact()
 	{
 		if (m_damageParm.hasBigDamaged)
 		{
-			m_blendAnimation.animationBlend.AddSampler(Animation::HIT, m_model);
+			m_blendAnimation.animationBlend.AddSampler(Animation::HITBIG, m_model);
 		}
 		else
 		{
-			m_blendAnimation.animationBlend.AddSampler(Animation::HITBIG, m_model);
+			m_blendAnimation.animationBlend.AddSampler(Animation::HIT, m_model);
 		}
 	}
 	else
@@ -259,11 +259,15 @@ bool Archer::KnockBack()
 			{
 				m_statusParm.isDamage = false;
 				m_animationType = Animation::IDLE;
-				m_blendAnimation.animationBlend._blendRatio = 0.0f;
+				m_blendAnimation.animationBlend._blendRatio = 0.f;
 				m_blendAnimation.animationBlend.ResetAnimationFrame();
 				m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
 				m_currentPlanList = m_agentAI.OperationFlowStart(this);
 				m_currentTask = 0;
+				m_state = 0;
+				m_hasRotated = false;
+				m_hasBlendAnim = false;
+				m_canRun = true;
 			}
 		}
 		else
@@ -303,7 +307,7 @@ bool Archer::KnockBack()
 
 bool Archer::JudgeBlendRatio(const bool isLoop)
 {
-	m_blendAnimation.animationBlend._blendRatio += kBlendValue;
+	m_blendAnimation.animationBlend._blendRatio += m_blendAnimation.idleBlendRtio;
 	if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)//magicNumber
 	{
 		m_blendAnimation.animationBlend._blendRatio = 0.0f;
@@ -568,7 +572,9 @@ bool Archer::MoveRun()
 		}
 		else
 		{
-			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+			if (!m_blendAnimation.animationBlend.SearchSampler(Animation::HIT) &&
+				!m_blendAnimation.animationBlend.SearchSampler(Animation::HITBIG))
+				m_blendAnimation.animationBlend.ResetAnimationSampler(0);
 			m_blendAnimation.animationBlend.AddSampler(Animation::RUN, m_model);
 		}
 	}
@@ -634,10 +640,10 @@ bool Archer::SetArrow()
 			m_arrow->PrepareForArrow(position, m_transformParm.angle, zAxis);
 			m_isSetArrow = true;
 		}
-		//m_arrow->GetArrowParam()[0].first.position = position;
-		//m_arrow->GetArrowParam()[0].first.angle = m_transformParm.angle;
-		//m_arrow->GetArrowParam()[0].second.velocity = zAxis;
-		//m_arrow->GetArrowParam()[0].first.CreateWorld();
+		m_arrow->GetArrowParam()[0].first.position = position;
+		m_arrow->GetArrowParam()[0].first.angle = m_transformParm.angle;
+		m_arrow->GetArrowParam()[0].second.velocity = zAxis;
+		m_arrow->GetArrowParam()[0].first.CreateWorld();
 	}
 
 	if (m_hasRotated && m_hasBlendAnim)
@@ -1560,7 +1566,8 @@ ImGui::Combo("Name_of_BoneName",
 	}
 
 	ImGui::Text("m_canRecover->%d", m_canRecover);
-	
+
+	ImGui::SliderFloat("BlendRatio", &m_blendAnimation.animationBlend._blendRatio, 0.0f, 1.0f);
 #endif
 	ImGui::End();
 

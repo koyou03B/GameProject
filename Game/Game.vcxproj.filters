@@ -171,9 +171,6 @@
     <Filter Include="Headers\Objects\GameObject\Arrow">
       <UniqueIdentifier>{606e1fd7-e951-40a0-8257-e4604c7b54b1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\Objects\GameObject\Aim">
-      <UniqueIdentifier>{b9c5c44f-b43c-46e3-8860-52d6e913cca6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Headers\Objects\GameObject\Stage">
       <UniqueIdentifier>{7f1cfc50-751d-40d0-bb73-c62e80e33e54}</UniqueIdentifier>
     </Filter>
@@ -227,6 +224,12 @@
     </Filter>
     <Filter Include="Sources\Characters\Parameter">
       <UniqueIdentifier>{2255ddb3-a9e2-406b-b95d-a0a865478d1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Effect">
+      <UniqueIdentifier>{0e078e91-7a17-4873-8964-b72c6e7dd902}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Effect">
+      <UniqueIdentifier>{000e1267-76b8-4340-800b-4e6553751aae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -380,6 +383,15 @@
     <ClCompile Include="GameSource\Blackboard.cpp">
       <Filter>Sources\Characters\Parameter</Filter>
     </ClCompile>
+    <ClCompile Include="GameSource\AnimationData.cpp">
+      <Filter>Sources\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\EffectData.cpp">
+      <Filter>Sources\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSource\Effect.cpp">
+      <Filter>Sources\Effect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -432,9 +444,6 @@
     </ClInclude>
     <ClInclude Include="GameSource\Collision.h">
       <Filter>Headers\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSource\Scope.h">
-      <Filter>Headers\Objects\GameObject\Aim</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\Arrow.h">
       <Filter>Headers\Objects\GameObject\Arrow</Filter>
@@ -651,6 +660,15 @@
     </ClInclude>
     <ClInclude Include="GameSource\RecoverTask.h">
       <Filter>Headers\HTN\Task\Compound</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\AnimationData.h">
+      <Filter>Headers\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\EffectData.h">
+      <Filter>Headers\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\Effect.h">
+      <Filter>Headers\Effect</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
