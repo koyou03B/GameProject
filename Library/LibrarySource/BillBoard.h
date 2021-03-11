@@ -22,6 +22,8 @@ namespace Source
 			void Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection,
 				const FLOAT4X4& view, const VECTOR3F& position, float scale, const VECTOR3F& angle, const VECTOR4F& color);
 			void End(ID3D11DeviceContext* immediateContext);
+
+			ID3D11ShaderResourceView* GetShaderResourceView() { return m_shaderResourceView.Get(); }
 		private:
 			struct Vertex
 			{

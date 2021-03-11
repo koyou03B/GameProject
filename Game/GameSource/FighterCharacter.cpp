@@ -1576,6 +1576,9 @@ void Fighter::ImGui(ID3D11Device* device)
 
 	ImGui::SliderFloat("Dist", &dist, 0.0f, 100.0f);
 
+	float postion[] = { m_transformParm.position.x,m_transformParm.position.y,m_transformParm.position.z };
+	ImGui::InputFloat3("ThisPosition", postion);
+
 	ImGui::End();
 #endif
 }

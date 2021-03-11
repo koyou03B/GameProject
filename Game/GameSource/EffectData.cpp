@@ -3,10 +3,13 @@
 
 LoadEffectTexture loadTexture[] =
 {
-	{ EffectTextureLabel::GREEN_SPLASH,		"../Asset/Texture/Title/TITLE.png"},
-	{ EffectTextureLabel::WHITE_SPLASH,		"../Asset/Texture/Clear/CLEAR_LOG.png"},
-	{ EffectTextureLabel::GREEN_WHITE_SPLASH,		"../Asset/Texture/Over/OVER_LOG.png"},
-	{ EffectTextureLabel::RED_SPLASH,	"../Asset/Texture/Game/FighterName.png"},
+	{ EffectTextureLabel::GREEN_SPLASH,		"../Asset/Texture/Effect/0.png"},
+	{ EffectTextureLabel::WHITE_SPLASH,		"../Asset/Texture/Effect/1.png"},
+	{ EffectTextureLabel::GREEN_WHITE_SPLASH,"../Asset/Texture/Effect/4.png"},
+	{ EffectTextureLabel::RED_SPLASH,	"../Asset/Texture/Effect/2.png"},
+	{ EffectTextureLabel::BLUE_RED_IMPACT,"../Asset/Texture/Effect/58.png"},
+	{ EffectTextureLabel::BLUE_RED_SPLASH,"../Asset/Texture/Effect/62.png"},
+
 };
 
 void EffectTextureLoader::LoadEffectTexture(const EffectTextureLabel label)

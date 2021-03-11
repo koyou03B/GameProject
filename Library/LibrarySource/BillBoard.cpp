@@ -56,7 +56,7 @@ namespace Source
 
 			immediateContext->PSSetShaderResources(0, 1, m_shaderResourceView.GetAddressOf());
 
-			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ADD), nullptr, 0xFFFFFFFF);
 
 			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_TRUE), 1);
 			immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CULL_BACK));
@@ -111,9 +111,9 @@ namespace Source
 
 			//Extract view's transelate component
 			FLOAT4X4 inverse_view = view;
-			inverse_view._21 = 0.0f;
-			inverse_view._22 = 1.0f;
-			inverse_view._23 = 0.0f;
+			//inverse_view._21 = 0.0f;
+			//inverse_view._22 = 1.0f;
+			//inverse_view._23 = 0.0f;
 			inverse_view._41 = 0.0f; inverse_view._42 = 0.0f; inverse_view._43 = 0.0f; inverse_view._44 = 1.0f;
 			DirectX::XMMATRIX inverse_view_matrix;
 			inverse_view_matrix = DirectX::XMLoadFloat4x4(&inverse_view);

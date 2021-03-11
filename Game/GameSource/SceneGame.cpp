@@ -65,6 +65,9 @@ bool Game::Initialize(ID3D11Device* device)
 	
 	#pragma endregion
 
+
+
+
 	return true;
 }
 
@@ -94,7 +97,6 @@ void Game::Update(float& elapsedTime)
 	m_metaAI->Update(elapsedTime);
 	m_uiAdominist->Update(elapsedTime);
 	m_stage->Update(elapsedTime);
-	
 	#pragma endregion
 
 	#pragma region RayPick
@@ -215,6 +217,7 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 		m_sceneEffect.DeactivateEffect(immediateContext,SceneEffectType::FOG);
 		m_metaAI->DeactivateEffect(immediateContext, SceneEffectType::VIGNETTE);
 		
+		m_metaAI->RenderOfEffect(immediateContext);
 		m_uiAdominist->Render(immediateContext);
 		
 		m_sceneEffect.DeactivateEffect(immediateContext, SceneEffectType::SCREEN_FILTER);
@@ -341,8 +344,8 @@ void Game::ImGui()
 		if (ImGui::CollapsingHeader("UI"))
 		{
 			m_uiAdominist->ImGui();
-		}
-
+		}	
+		
 		if (ImGui::CollapsingHeader("MetaAI"))
 		{
 			if (ImGui::CollapsingHeader("Player"))
@@ -355,6 +358,11 @@ void Game::ImGui()
 				m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice());
 			}
 
+			if (ImGui::CollapsingHeader("Effect"))
+			{
+				m_metaAI->ImGuiOfEffect();
+			}
+			
 			if (ImGui::CollapsingHeader("Shader"))
 			{
 				m_metaAI->ImGuiOfShader();

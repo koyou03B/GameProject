@@ -80,27 +80,27 @@ void Archer::Update(float& elapsedTime)
 			m_hasShoot = false;
 	}
 
-	if (!m_currentPlanList.empty() && !m_statusParm.isDamage)
-	{
+	//if (!m_currentPlanList.empty() && !m_statusParm.isDamage)
+	//{
 
-		int taskCount = static_cast<int>(m_currentPlanList.size());
-		for (int i = m_currentTask; i != taskCount;)
-		{
-			if (m_currentPlanList[i]->ExecuteOperator(this))
-			{
-				++m_currentTask;
-				i = m_currentTask;
-			}
-			else
-				break;
-		}
+	//	int taskCount = static_cast<int>(m_currentPlanList.size());
+	//	for (int i = m_currentTask; i != taskCount;)
+	//	{
+	//		if (m_currentPlanList[i]->ExecuteOperator(this))
+	//		{
+	//			++m_currentTask;
+	//			i = m_currentTask;
+	//		}
+	//		else
+	//			break;
+	//	}
 
-		if (m_currentTask == taskCount)
-		{
-			m_currentPlanList = m_agentAI.OperationFlowStart(this);
-			m_currentTask = 0;
-		}
-	}
+	//	if (m_currentTask == taskCount)
+	//	{
+	//		m_currentPlanList = m_agentAI.OperationFlowStart(this);
+	//		m_currentTask = 0;
+	//	}
+	//}
 	KnockBack();
 	ActiveWriteTimer();
 	ActiveRecoverTimer();

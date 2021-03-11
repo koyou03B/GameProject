@@ -392,6 +392,9 @@
     <ClCompile Include="GameSource\Effect.cpp">
       <Filter>Sources\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="GameSource\SampleEffects.cpp">
+      <Filter>Sources\Effect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSource\Scene.h">
@@ -668,6 +671,9 @@
       <Filter>Headers\Effect</Filter>
     </ClInclude>
     <ClInclude Include="GameSource\Effect.h">
+      <Filter>Headers\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSource\SampleEffects.h">
       <Filter>Headers\Effect</Filter>
     </ClInclude>
   </ItemGroup>

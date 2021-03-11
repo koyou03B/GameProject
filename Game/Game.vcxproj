@@ -60,6 +60,7 @@
     <ClCompile Include="GameSource\MetaAI.cpp" />
     <ClCompile Include="GameSource\PartialBlendAnimation.cpp" />
     <ClCompile Include="GameSource\PlayerAdominist.cpp" />
+    <ClCompile Include="GameSource\SampleEffects.cpp" />
     <ClCompile Include="GameSource\Scene.cpp" />
     <ClCompile Include="GameSource\SceneClear.cpp" />
     <ClCompile Include="GameSource\SceneGame.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="GameSource\PrepareAttackPrecondition.h" />
     <ClInclude Include="GameSource\PrepareAttackTask.h" />
     <ClInclude Include="GameSource\RecoverTask.h" />
+    <ClInclude Include="GameSource\SampleEffects.h" />
     <ClInclude Include="GameSource\SceneEffect.h" />
     <ClInclude Include="GameSource\SetArrowTask.h" />
     <ClInclude Include="GameSource\ShootArrowTask.h" />

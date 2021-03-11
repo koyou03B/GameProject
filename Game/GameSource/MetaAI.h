@@ -1,5 +1,6 @@
 #pragma once
 #include <d3d11.h>
+#include "Effect.h"
 #include "SceneEffect.h"
 #include "PlayerAdominist.h"
 #include "EnemyAdominist.h"
@@ -16,12 +17,15 @@ public:
 	bool Init(ID3D11Device* device);
 	void Update(float& elapsedTime);
 	void Render(ID3D11DeviceContext* immediateContext);
+	void RenderOfEffect(ID3D11DeviceContext* immediateContext);
+
 	void ActivateEffect(ID3D11DeviceContext* immediateContext, const SceneEffectType type);
 	void DeactivateEffect(ID3D11DeviceContext* immediateContext, const SceneEffectType type);
 	void Release();
 
 	void ImGuiOfPlayer(ID3D11Device* device);
 	void ImGuiOfEnemy(ID3D11Device* device);
+	void ImGuiOfEffect();
 	void ImGuiOfShader();
 
 	bool CollisionPlayerAttack(PlayerType type, CharacterParameter::Collision& collision);
@@ -42,6 +46,8 @@ private:
 	PlayerAdominist m_playerAdominist;
 	EnemyAdominist  m_enemyAdominist;
 	CollisionJudge  m_collisionjudge;
+	EffectAdominist m_effectManager;
+
 };
 
 

@@ -1,12 +1,31 @@
+#include <iostream>
+#include <random>
+#include <iomanip>
 #include "Effect.h"
+#include "SampleEffects.h"
 
 void BaseEffect::Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection, const FLOAT4X4& view)
 {
 	VECTOR3F position = {};
-	position.x = m_position.x - m_animData.tileSize.x * 0.5f;
-	position.y = m_position.y - m_animData.tileSize.y * 0.5f;
+	position.x = m_position.x - (m_animData.tileSize.x * m_scale) * 0.5f;
+	position.y = m_position.y - (m_animData.tileSize.y * m_scale) * 0.5f;
 	position.z = m_position.z;
-	m_animData.Render(immediateContext, projection,view,position,m_scale,m_angle,m_color);
+	m_animData.Render(immediateContext, projection,view, m_position,m_scale,m_angle,m_color);
+}
+
+void BaseEffect::Reset()
+{
+	SecureZeroMemory(&m_animData, sizeof(m_animData));
+	m_tileCount = {};
+	m_position = {};
+	m_angle = {};
+	m_color = {};
+	m_animRota = 0;
+	m_scale = 0.0f;
+	m_animFrame = 0.0f;
+	m_isEnd = false;
+	m_isLooping = false;
+
 }
 
 void BaseEffect::AnimationUpdate(float& elapsedTime)
@@ -14,8 +33,9 @@ void BaseEffect::AnimationUpdate(float& elapsedTime)
 	float duration = m_animData.endTime / m_animData.tileMaxCount;
 	
 	m_animFrame += elapsedTime;
-	if (m_animFrame > m_animData.endTime)
+	if (m_animRota >= m_animData.tileMaxCount)
 	{
+		m_animRota = 0;
 		m_animFrame = 0.0f;
 		m_tileCount = {};
 		m_animData.tilePosition = {};
@@ -26,13 +46,15 @@ void BaseEffect::AnimationUpdate(float& elapsedTime)
 	if (m_animFrame > duration)
 	{
 		uint32_t xtileSize = static_cast<uint32_t>(m_animData.tileCount.x) - 1;
-		if (m_tileCount.x > xtileSize)
+		if (m_tileCount.x >= xtileSize)
 		{
 			m_tileCount.x = 0;
 			++m_tileCount.y;
 		}
 		else
 			++m_tileCount.x;
+		m_animFrame = 0.0f;
+		++m_animRota;
 	}
 
 	VECTOR2F tilePosition = {};
@@ -42,52 +64,126 @@ void BaseEffect::AnimationUpdate(float& elapsedTime)
 
 }
 
-void EffectManager::Init()
+void EffectAdominist::Init()
 {
 	m_sampleEffect.clear();
 	m_selectedEffect.clear();
-
-	if (PathFileExistsA(std::string("../Asset/Binary/Effect/SampleEffect.bin").c_str()))
-	{
-		std::ifstream ifs;
-		ifs.open(std::string("../Asset/Binary/Effect/SampleEffect.bin").c_str(), std::ios::binary);
-		cereal::BinaryInputArchive i_archive(ifs);
-		i_archive(*this);
-	}
+	m_selectSmapleEffect = 0;
+	m_isSampleActive = false;
+	m_sampleEffect.push_back(std::make_unique<AttackEffect>());
 }
 
-void EffectManager::Update(float& elapsedTime)
+void EffectAdominist::Update(float& elapsedTime)
 {
+	if (m_isSampleActive)
+	{
+		for (auto& effect : m_sampleEffect)
+		{
+			if(!effect->GetIsEnd())
+			effect->Update(elapsedTime);
+		}
+	}
+
 	for (auto& effect : m_selectedEffect)
 	{
 		effect->Update(elapsedTime);
 	}
+
+	m_selectedEffect.erase(std::remove_if(m_selectedEffect.begin(), m_selectedEffect.end(),
+		[](const std::unique_ptr<BaseEffect>& effect)
+		{
+			if (effect->GetIsEnd())
+			{
+				effect->SetIsEnd(false);
+				return true;
+			}
+			return false;
+		}), m_selectedEffect.end());
 }
 
-void EffectManager::Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection, const FLOAT4X4& view)
+void EffectAdominist::Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection, const FLOAT4X4& view)
 {
+	if (m_isSampleActive)
+	{
+		for (auto& effect : m_sampleEffect)
+		{
+			effect->Render(immediateContext, projection, view);
+		}
+	}
+
+
 	for (auto& effect : m_selectedEffect)
 	{
 		effect->Render(immediateContext, projection, view);
 	}
 }
 
-void EffectManager::Clear()
+void EffectAdominist::Clear()
 {
 	m_sampleEffect.clear();
 	m_selectedEffect.clear();
 }
 
-void EffectManager::ImGui()
+void EffectAdominist::ImGui()
 {
+	ImGui::Begin("EffectManager");
+
+	static bool isDebug = false;
+	int sampleCount = static_cast<int>(m_sampleEffect.size());
+	ImGui::DragInt("Select Sample Count", &sampleCount, 1.0f,sampleCount, sampleCount);
+	ImGui::DragInt("Select Sample", &m_selectSmapleEffect, 0, sampleCount);
+	if(ImGui::Button("SampleRender"))
+		m_isSampleActive = true;
+	ImGui::SameLine();
+
+	if (ImGui::Button("Debug Active"))
+	{
+		isDebug = true;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Debug DeActive"))
+	{
+		isDebug = false;
+		m_isSampleActive = false;
+	}
+
+	if (isDebug)
+	{
+		m_sampleEffect.at(m_selectSmapleEffect)->ImGui();
+	}
+
+
+	ImGui::End();
 }
 
-void EffectManager::AddEffect(BaseEffect& effect)
+void EffectAdominist::AddEffect(BaseEffect* effect)
 {
-	m_sampleEffect.push_back(std::make_shared<BaseEffect>(effect));
+//	m_sampleEffect.push_back(std::make_shared<BaseEffect>(effect));
 }
 
-void EffectManager::SelectEffect(const EffectType& type, const int count)
+void EffectAdominist::SelectEffect(const EffectType& type, const VECTOR3F& position,const int count)
 {
-	m_selectedEffect.push_back(m_sampleEffect.at(type));
+	VECTOR3F effectPos = position;
+	std::random_device rd;
+	std::default_random_engine eng(rd());
+	std::uniform_real_distribution<float> distr(-.5f, .5f);
+	for (int i = 0; i < count; ++i)
+	{
+		switch (type)
+		{
+		case EffectType::FighterAttack:
+			AttackEffect effect;
+			memcpy(&effect, m_sampleEffect.at(type).get(), sizeof(AttackEffect));
+			m_selectedEffect.push_back(std::make_unique<AttackEffect>(effect));
+
+			break;
+		}
+
+		m_selectedEffect.back()->SetPosition(effectPos);
+		srand((unsigned)time(NULL));
+		effectPos.x += distr(eng);
+		effectPos.y += distr(eng);
+	}
+	std::sort(m_selectedEffect.begin(), m_selectedEffect.end(), m_operatDepth);
+
 }

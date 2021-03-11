@@ -6,6 +6,8 @@ bool MetaAI::Init(ID3D11Device* device)
 {
 	m_playerAdominist.Init();
 	m_enemyAdominist.Init();
+	m_effectManager.Init();
+
 	m_sceneEffect.ChoiceSceneEffect(device, SceneEffectType::VIGNETTE);
 
 	return true;
@@ -15,14 +17,23 @@ void MetaAI::Update(float& elapsedTime)
 {
 	m_enemyAdominist.Update(elapsedTime);
 	m_playerAdominist.Update(elapsedTime);
-	CollisionObject();
+	CollisionObject();	
+	m_effectManager.Update(elapsedTime);
 	m_sceneEffect.UpdateVignette(1.5f, 7.0f, 0.5f, elapsedTime);
+
 }
 
 void MetaAI::Render(ID3D11DeviceContext* immediateContext)
 {
 	m_enemyAdominist.Render(immediateContext);
 	m_playerAdominist.Render(immediateContext);
+}
+
+void MetaAI::RenderOfEffect(ID3D11DeviceContext* immediateContext)
+{
+	FLOAT4X4 projection = Source::CameraControlle::CameraManager().GetInstance()->GetProjection();
+	FLOAT4X4 view = Source::CameraControlle::CameraManager().GetInstance()->GetView();
+	m_effectManager.Render(immediateContext, projection, view);
 }
 
 void MetaAI::ActivateEffect(ID3D11DeviceContext* immediateContext, const SceneEffectType type)
@@ -43,6 +54,11 @@ void MetaAI::ImGuiOfPlayer(ID3D11Device* device)
 void MetaAI::ImGuiOfEnemy(ID3D11Device* device)
 {
 	m_enemyAdominist.ImGui(device);
+}
+
+void MetaAI::ImGuiOfEffect()
+{
+	m_effectManager.ImGui();
 }
 
 void MetaAI::ImGuiOfShader()
@@ -69,9 +85,12 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 		++atkHitCount;
 		enemyLife -= attackPoint;
 
-		if(type != PlayerType::Archer)
+		if (type != PlayerType::Archer)
+		{
 			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f, 0.5f);
-		MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife,UIActLabel::LIFE_E, 0);
+			m_effectManager.SelectEffect(EffectType::FighterAttack, collision.position[0],1);
+		}
+		MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife, UIActLabel::LIFE_E, 0);
 
 		if (enemyLife <= 0)
 		{

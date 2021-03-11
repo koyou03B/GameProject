@@ -6,6 +6,12 @@
 #include <Shlwapi.h>
 #include "AnimationData.h"
 
+#ifdef _DEBUG
+#include "..\External_libraries\imgui\imgui.h"
+#include "..\External_libraries\imgui\imgui_impl_dx11.h"
+#include "..\External_libraries\imgui\imgui_impl_win32.h"
+#include "..\External_libraries\imgui\imgui_internal.h"
+#endif
 #undef max
 #undef min
 #include<cereal/types/memory.hpp>
@@ -22,11 +28,13 @@ public:
 	virtual void Render(ID3D11DeviceContext* immediateContext, const FLOAT4X4& projection,const FLOAT4X4& view);
 	virtual void ImGui() = 0;
 
+	void Reset();
 	void AnimationUpdate(float& elapsedTime);
 
 	inline VECTOR3F& GetPosition() { return m_position; }
 	inline VECTOR3F& GetAngle() { return m_angle; }
 	inline VECTOR4F& GetColor() { return m_color; }
+	inline int& GetAnimRota() { return m_animRota; }
 	inline float& GetScale() { return m_scale; }
 	inline float& GetAnimFrame() { return m_animFrame; }
 	inline bool& GetIsEnd() { return m_isEnd; }
@@ -40,24 +48,7 @@ public:
 	void SetIsEnd(const bool& isEnd) { m_isEnd = isEnd; }
 	void SetIsLooping(const bool& isLooping) { m_isLooping = isLooping; }
 
-	template<class T>
-	void serialize(T& archive, const std::uint32_t version)
-	{
-		if (version >= 0)
-		{
-			archive
-			(
-				m_animData
-			);
-		}
-		else
-		{
-			archive
-			(
-				m_animData
-			);
-		}
-	}
+
 
 protected:
 	AnimationData m_animData;
@@ -65,6 +56,7 @@ protected:
 	VECTOR3F m_position;
 	VECTOR3F m_angle;
 	VECTOR4F m_color;
+	int m_animRota;
 	float m_scale;
 	float m_animFrame;
 	bool m_isEnd;
@@ -80,11 +72,23 @@ enum EffectType
 	EffectEND
 };
 
-class EffectManager
+class OperatDepth
 {
 public:
-	EffectManager() = default;
-	~EffectManager() = default;
+	bool operator() (std::unique_ptr<BaseEffect>& effect1, std::unique_ptr<BaseEffect>& effect2)
+	{
+		float depth1 = effect1->GetPosition().z;
+		float depth2 = effect2->GetPosition().z;
+
+		return (depth1 > depth2) ? true : false;
+	}
+};
+
+class EffectAdominist
+{
+public:
+	EffectAdominist() = default;
+	~EffectAdominist() = default;
 
 	void Init();
 	void Update(float& elapsedTime);
@@ -92,28 +96,14 @@ public:
 	void Clear();
 	void ImGui();
 
-	void AddEffect(BaseEffect& effect);
-	void SelectEffect(const EffectType& type, const int count);
+	void AddEffect(BaseEffect* effect);
+	void SelectEffect(const EffectType& type,const VECTOR3F& postion, const int count);
 
-	template<class T>
-	void serialize(T& archive, const std::uint32_t version)
-	{
-		if (version >= 0)
-		{
-			archive
-			(
-				m_sampleEffect
-			);
-		}
-		else
-		{
-			archive
-			(
-				m_sampleEffect
-			);
-		}
-	}
 private:
-	std::vector<std::shared_ptr<BaseEffect>> m_sampleEffect;
-	std::vector<std::shared_ptr<BaseEffect>> m_selectedEffect;
+	std::vector<std::unique_ptr<BaseEffect>> m_sampleEffect;
+	std::vector<std::unique_ptr<BaseEffect>> m_selectedEffect;
+	OperatDepth m_operatDepth;
+	int m_selectSmapleEffect;
+	VECTOR2F m_postionOffset;
+	bool m_isSampleActive;
 };
