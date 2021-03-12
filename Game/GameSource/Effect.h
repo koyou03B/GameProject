@@ -30,7 +30,7 @@ public:
 
 	void Reset();
 	void AnimationUpdate(float& elapsedTime);
-
+	void ImGuiOfAnimData();
 	inline VECTOR3F& GetPosition() { return m_position; }
 	inline VECTOR3F& GetAngle() { return m_angle; }
 	inline VECTOR4F& GetColor() { return m_color; }

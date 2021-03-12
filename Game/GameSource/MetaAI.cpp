@@ -27,6 +27,7 @@ void MetaAI::Render(ID3D11DeviceContext* immediateContext)
 {
 	m_enemyAdominist.Render(immediateContext);
 	m_playerAdominist.Render(immediateContext);
+
 }
 
 void MetaAI::RenderOfEffect(ID3D11DeviceContext* immediateContext)
@@ -83,14 +84,18 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 		float enemyMaxLife    = enemy->GetStatus().maxLife;
 		++damageCount;
 		++atkHitCount;
-		enemyLife -= attackPoint;
+	//	enemyLife -= attackPoint;
 
 		if (type != PlayerType::Archer)
 		{
 			Source::CameraControlle::CameraManager::GetInstance()->SetVibration(0.5f, 0.5f);
-			m_effectManager.SelectEffect(EffectType::FighterAttack, collision.position[0],1);
+			VECTOR3F effectPos = collision.position[0];
+			VECTOR3F judgeNormal = NormalizeVec3(effectPos - player->GetWorldTransform().position);
+			float offseZ = player->GetWorldTransform().position.z + judgeNormal.z * 5.0f;
+			effectPos.z = offseZ;
+			m_effectManager.SelectEffect(EffectType::FighterAttack, effectPos,1);
 		}
-		MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife, UIActLabel::LIFE_E, 0);
+	//	MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife, UIActLabel::LIFE_E, 0);
 
 		if (enemyLife <= 0)
 		{

@@ -8,7 +8,7 @@ LoadEffectTexture loadTexture[] =
 	{ EffectTextureLabel::GREEN_WHITE_SPLASH,"../Asset/Texture/Effect/4.png"},
 	{ EffectTextureLabel::RED_SPLASH,	"../Asset/Texture/Effect/2.png"},
 	{ EffectTextureLabel::BLUE_RED_IMPACT,"../Asset/Texture/Effect/58.png"},
-	{ EffectTextureLabel::BLUE_RED_SPLASH,"../Asset/Texture/Effect/62.png"},
+	{ EffectTextureLabel::BLUE_RED_SPLASH,"../Asset/Texture/Effect/66.png"},
 
 };
 

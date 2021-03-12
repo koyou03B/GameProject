@@ -56,7 +56,7 @@ namespace Source
 
 			immediateContext->PSSetShaderResources(0, 1, m_shaderResourceView.GetAddressOf());
 
-			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ADD), nullptr, 0xFFFFFFFF);
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_ALPHA), nullptr, 0xFFFFFFFF);
 
 			immediateContext->OMSetDepthStencilState(Framework::GetDephtStencilState(Framework::DS_TRUE), 1);
 			immediateContext->RSSetState(Framework::GetRasterizerState(Framework::RS_CULL_BACK));
@@ -133,7 +133,7 @@ namespace Source
 
 			m_billBoardPS->Deactivate(immediateContext);
 			m_billBoardVS->Deactivate(immediateContext);
-
+			immediateContext->OMSetBlendState(Framework::GetBlendState(Framework::BS_NONE), nullptr, 0xFFFFFFFF);
 		}
 
 	}

@@ -64,6 +64,37 @@ void BaseEffect::AnimationUpdate(float& elapsedTime)
 
 }
 
+void BaseEffect::ImGuiOfAnimData()
+{
+	int tileCount[] = { static_cast<int>(m_animData.tileCount.x),static_cast<int>(m_animData.tileCount.y) };
+	float tileSize[] = { m_animData.tileSize.x,m_animData.tileSize.y };
+	float tilePosition[] = { m_animData.tilePosition.x,m_animData.tilePosition.y };
+	ImGui::InputFloat("EndTime", &m_animData.endTime);
+	ImGui::InputInt2("TileCount", tileCount);
+	m_animData.tileCount = { static_cast<float>(tileCount[0]),static_cast<float>(tileCount[1]) };
+	ImGui::InputInt("MaxTileCount", &m_animData.tileMaxCount);
+	ImGui::InputFloat2("TileSize", tileSize);
+	m_animData.tileSize = { tileSize[0],tileSize[1] };
+	ImGui::InputFloat2("TilePosition", tilePosition);
+	m_animData.tilePosition = { tilePosition[0] * tileSize[0],tilePosition[1] * tileSize[1] };
+
+	int label = static_cast<int>(m_animData.label);
+	ImGui::Combo("EffectLabel", &label, "GREEN_SPLASH\0WHITE_SPLASH\0GREEN_WHITE_SPLASH\0RED_SPLASH\0BLUE_RED_IMPACT\0BLUE_RED_SPLASH\0\0");
+	m_animData.label = static_cast<EffectTextureLabel>(label);
+	if (ImGui::Button("Texture"))
+	{
+		EffectTextureLoader::GetInstance()->LoadEffectTexture(m_animData.label);
+	}
+	auto billBorad = EffectTextureLoader::GetInstance()->GetBillBoard(m_animData.label);
+	if (billBorad)
+	{
+		ImGui::Begin("EffectTexture");
+		auto texture = billBorad->GetShaderResourceView();
+		ImGui::Image((void*)texture, ImVec2(300, 300));
+		ImGui::End();
+	}
+}
+
 void EffectAdominist::Init()
 {
 	m_sampleEffect.clear();
@@ -166,7 +197,10 @@ void EffectAdominist::SelectEffect(const EffectType& type, const VECTOR3F& posit
 	VECTOR3F effectPos = position;
 	std::random_device rd;
 	std::default_random_engine eng(rd());
-	std::uniform_real_distribution<float> distr(-.5f, .5f);
+	std::uniform_real_distribution<float> distrX(-1.5f, 1.5f);
+	std::uniform_real_distribution<float> distrY(-1.0f, 1.0f);
+	std::uniform_real_distribution<float> distrZ(-0.5f, 0.5f);
+
 	for (int i = 0; i < count; ++i)
 	{
 		switch (type)
@@ -181,8 +215,9 @@ void EffectAdominist::SelectEffect(const EffectType& type, const VECTOR3F& posit
 
 		m_selectedEffect.back()->SetPosition(effectPos);
 		srand((unsigned)time(NULL));
-		effectPos.x += distr(eng);
-		effectPos.y += distr(eng);
+		effectPos.x += distrX(eng);
+		//effectPos.y += distrY(eng);
+		//effectPos.z += distrZ(eng);
 	}
 	std::sort(m_selectedEffect.begin(), m_selectedEffect.end(), m_operatDepth);
 

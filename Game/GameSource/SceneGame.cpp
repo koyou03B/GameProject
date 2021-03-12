@@ -213,11 +213,10 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 
 		m_stage->Render(immediateContext);
 		m_metaAI->Render(immediateContext);
-		
+		m_metaAI->RenderOfEffect(immediateContext);
+
 		m_sceneEffect.DeactivateEffect(immediateContext,SceneEffectType::FOG);
 		m_metaAI->DeactivateEffect(immediateContext, SceneEffectType::VIGNETTE);
-		
-		m_metaAI->RenderOfEffect(immediateContext);
 		m_uiAdominist->Render(immediateContext);
 		
 		m_sceneEffect.DeactivateEffect(immediateContext, SceneEffectType::SCREEN_FILTER);

@@ -14,7 +14,16 @@ public:
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
-		if (version >= 1)
+		if (version >= 2)
+		{
+			archive
+			(
+				m_animData,
+				m_color,
+				m_scaleOffset
+			);
+		}
+		else
 		{
 			archive
 			(
@@ -23,14 +32,11 @@ public:
 				m_scale
 			);
 		}
-		else
-		{
-			archive
-			(
-				m_animData
-			);
-		}
 	}
 private:
+	int m_state;
+	float m_timer;
+	float m_scaleAdd;
+	float m_scaleOffset;
 	bool m_isActive;
 };
