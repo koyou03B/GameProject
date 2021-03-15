@@ -95,7 +95,7 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 			effectPos.z = offseZ;
 			m_effectManager.SelectEffect(EffectType::FighterAttack, effectPos,1);
 		}
-	//	MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife, UIActLabel::LIFE_E, 0);
+		MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife, UIActLabel::LIFE_E, 0);
 
 		if (enemyLife <= 0)
 		{
@@ -220,6 +220,11 @@ void MetaAI::Release()
 {
 	m_playerAdominist.Release();
 	m_enemyAdominist.Release();
+}
+
+void MetaAI::ActivateEnemy()
+{
+	m_enemyAdominist.Active();
 }
 
 

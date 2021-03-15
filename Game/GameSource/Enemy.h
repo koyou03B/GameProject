@@ -25,6 +25,8 @@ public:
 
 	void Release() override;
 
+	bool JudgeBlendRatio();
+
 	void ImGui(ID3D11Device* device) override;
 
 	void Impact() override {};
@@ -129,5 +131,4 @@ private:
 	uint32_t m_signalFrame[4] = {};
 	int m_moveState;
 	float m_elapsedTime;
-	bool m_isAction;
 };

@@ -37,6 +37,7 @@ private:
 	enum GameEvent
 	{
 		START,
+		TUTORIAL,
 		FIGHT,
 		WIN,
 		LOSE

@@ -18,7 +18,7 @@ namespace Source
 			{ TextureLabel::P_LIFE,		"../Asset/Texture/Game/PlayerLife.png","",2U },
 			{ TextureLabel::E_LIFE,		"../Asset/Texture/Game/EnemyLife.png","",1U },
 			{ TextureLabel::P_LIFE_GAGE,"../Asset/Texture/Game/LifeGage.png","",1U },
-			{ TextureLabel::COMMAND,	"../Asset/Texture/Game/Command.png","",1U },
+			{ TextureLabel::COMMAND,	"../Asset/Texture/Game/Command4.png","",1U },
 			{ TextureLabel::EFFECT0,	"../Asset/Texture/Effect/fire.png","",1U },
 			{ TextureLabel::SCOPE,		"../Asset/Texture/Scope/Scope.png" ,"",1U },
 		};

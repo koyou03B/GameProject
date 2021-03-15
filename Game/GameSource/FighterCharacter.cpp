@@ -64,7 +64,7 @@ void Fighter::Init()
 	m_blendAnimation.samplerSize = 2;
 	m_adjustAnimation = false;
 	m_moveParm.velocity = {};
-
+	
 	VECTOR3F scale = { 0.8f,0.8f,0.8f };
 	VECTOR3F bonePosition = { 0,0,0 };
 
@@ -278,6 +278,7 @@ void Fighter::Step(float& elapsedTime)
 	if (m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_A) == 1 &&
 		!m_statusParm.isAttack || m_stepParm.isStep)
 	{
+		m_tutorialCommand[0] = true;
 		m_blendAnimation.animationBlend.SetAnimationSpeed(1.6f);
 		Stepping(elapsedTime);
 	}
@@ -427,6 +428,7 @@ void Fighter::Attack(float& elapsedTime)
 	{
 		if (m_attackType != Fighter::AttackType::LeftDushKick)
 		{
+			m_tutorialCommand[1] = true;
 			m_animationType = Fighter::Animation::LEFT_KICK;
 			m_attackType = Fighter::AttackType::LeftKick;
 			if (m_moveParm.isMove)
@@ -440,6 +442,7 @@ void Fighter::Attack(float& elapsedTime)
 	else if (m_moveParm.isRun && m_input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_Y) == 1 &&
 		!m_statusParm.isAttack && !m_stepParm.isStep)
 	{
+		m_tutorialCommand[2] = true;
 		m_animationType = Fighter::Animation::LEFT_DUSH_KICK;
 		m_attackType = Fighter::AttackType::LeftDushKick;
 		if (m_moveParm.isMove)

@@ -5,9 +5,9 @@ LoadEffectTexture loadTexture[] =
 {
 	{ EffectTextureLabel::GREEN_SPLASH,		"../Asset/Texture/Effect/0.png"},
 	{ EffectTextureLabel::WHITE_SPLASH,		"../Asset/Texture/Effect/1.png"},
-	{ EffectTextureLabel::GREEN_WHITE_SPLASH,"../Asset/Texture/Effect/4.png"},
-	{ EffectTextureLabel::RED_SPLASH,	"../Asset/Texture/Effect/2.png"},
-	{ EffectTextureLabel::BLUE_RED_IMPACT,"../Asset/Texture/Effect/58.png"},
+	{ EffectTextureLabel::GREEN_WHITE_SPLASH,"../Asset/Texture/Effect/69.png"},
+	{ EffectTextureLabel::RED_SPLASH,	"../Asset/Texture/Effect/68.png"},
+	{ EffectTextureLabel::BLUE_RED_IMPACT,"../Asset/Texture/Effect/67.png"},
 	{ EffectTextureLabel::BLUE_RED_SPLASH,"../Asset/Texture/Effect/66.png"},
 
 };

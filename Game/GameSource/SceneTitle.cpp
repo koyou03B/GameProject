@@ -25,7 +25,7 @@ bool Title::Initialize(ID3D11Device* device)
 		VECTOR3F target = { -1.110f,3.6087f,9.350f };
 		Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->SetEye(eye);
 		Source::CameraControlle::CameraManager().GetInstance()->GetCamera()->SetFocus(target);
-		Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::CameraMode::ORBIT);
+		Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::CameraMode::MONITOR);
 		float tmp = 0;
 		Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
 	}

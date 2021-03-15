@@ -8,7 +8,7 @@ void AttackEffect::Init()
 	m_scaleOffset = 1.0f;
 	m_state = 0;
 	m_timer = 0.0f;
-	m_scale = 3.0f;
+	m_scale = 7.0f;
 	if (PathFileExistsA(std::string("../Asset/Binary/Effect/AttackEffect.bin").c_str()))
 	{
 		std::ifstream ifs;
@@ -25,13 +25,11 @@ void AttackEffect::Update(float& elapsedTime)
 	//	AnimationUpdate(elapsedTime);
 	if (m_isActive)
 	{
-		m_scale += sinf(m_scaleOffset*0.01745f);
-		m_scaleOffset += 10.0f;
-		if (m_scale >= 7.0f)
-			m_scale = 7.0f;
+		m_scale += sinf(-m_scaleOffset*0.01745f);
+		m_scaleOffset += 1.0f;
 
 		m_timer += elapsedTime;
-		if (m_timer >= 0.45f)
+		if (m_timer >= 0.30f)
 		{
 			m_isEnd = true;
 			m_timer = 0.0f;

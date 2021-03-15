@@ -95,6 +95,7 @@ float ToDistVec2(const VECTOR2F v);
 VECTOR2F NormalizeVec2(const VECTOR2F v);
 VECTOR2F ConvertVec2(const float conv, const VECTOR2F v);
 VECTOR2F LerpVec2(VECTOR2F lerpStart, VECTOR2F lerpEnd, float value);
+VECTOR2F SphereLinearVec2(VECTOR2F start, VECTOR2F end, float t);
 VECTOR2F SphereLinearVec2(VECTOR2F origin, VECTOR2F start, VECTOR2F end, float t);
 float CrossVec2(const VECTOR2F v1, const VECTOR2F v2);
 float DotVec2(const VECTOR2F v1, const VECTOR2F v2);

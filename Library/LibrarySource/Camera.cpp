@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Input.h"
 #include "Framework.h"
 namespace Source
 {
@@ -6,8 +7,8 @@ namespace Source
 	{
 		void Camera::Initialize()
 		{
-			m_eye = VECTOR4F(0.0f, 0.0f, -10.0f, 1.0f);
-			m_focus = VECTOR4F(0.0f, 0.0f, 1.0f, 1.0f);
+			m_eye = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
+			m_focus = VECTOR4F(0.0f, 0.0f, 0.0f, 1.0f);
 
 			m_up = VECTOR4F(0.0f, 1.0f, 0.0f, 1.0f);
 			m_right = VECTOR4F(1.0f, 0.0f, .0f, 1.0f);
@@ -15,18 +16,131 @@ namespace Source
 
 			m_oldCursor = VECTOR2F(0.0f, 0.0f);
 			m_newCursor = VECTOR2F(0.0f, 0.0f);
+			m_oldDirection = {};
+			m_oldFocus = {};
 
 			m_fov = 30 * 0.01745f;
 			m_aspect = 0.0f;
 			m_nearZ = 0.1f;
-			m_farZ = 50000.0f;
+			m_farZ = 5000.0f;
 
 			m_rotateX = 0.0f;
 			m_rotateY = 0.0f;
 			m_distance = 0.0f;
+			m_lerpValue = 0.0f;
 
 			m_speed = 0.0f;
-		}	
+			m_focalLength = 40.0f;
+			m_heightAboveGround = 10.0f;
+
+			Reset(VECTOR3F(sinf(0.0f), 0.0f, cosf(0.0f)), m_focalLength, m_heightAboveGround);
+		}
+		void Camera::Reset(const VECTOR3F& direction, const float& focalLength, const float& heightAboveGround)
+		{
+			m_eye.x = m_focus.x - direction.x * focalLength;
+			m_eye.y = m_focus.y - direction.y * focalLength + heightAboveGround;
+			m_eye.z = m_focus.z - direction.z * focalLength;
+			m_eye.w = 1.0f;
+		}
+
+		bool Camera::LockON(VECTOR3F& target, float& elapsedTimie)
+		{
+			VECTOR3F focus = { m_focus.x,m_focus.y,m_focus.z };
+			VECTOR3F eye = { m_eye.x,m_eye.y,m_eye.z };
+			static float timer = 0.0f;
+			switch (m_state)
+			{
+			case 0:
+				//Playerを基準にしていたfocus,向きを取得
+				m_oldDirection = NormalizeVec3(eye - focus);
+				m_distance = ToDistVec3(eye - focus);
+				timer = 0.0f;
+				++m_state;
+			break;
+			case 1:
+
+				//targetとfocus(Player)の向き
+				VECTOR3F direction = NormalizeVec3(focus - target);
+				//プレイヤー向きと敵向きで線形補間
+				VECTOR3F nDistance = SphereLinearVec3(m_oldDirection, direction, m_lerpValue);
+				m_eye.x = m_focus.x + nDistance.x * m_distance;
+				m_eye.y = m_focus.y + nDistance.y * m_distance;
+				m_eye.z = m_focus.z + nDistance.z * m_distance;
+				if (m_lerpValue > 1.0f)
+				{
+					timer += elapsedTimie;
+					if (timer > 1.0f)
+					{
+						m_lerpValue = 0;
+						m_state = 0;
+						return true;
+					}
+				}
+				else
+					m_lerpValue += 0.07f;
+			}
+
+			return false;
+		}
+
+		bool Camera::Vibrate(float& elapsedTime)
+		{
+			switch (m_state)
+			{
+			case 0:
+				m_oldFocus = m_oldFocus;
+				++m_state;
+				break;
+			case 1:
+				if (m_vibrateTimer < 0.0f)
+				{
+				//	m_focus = m_oldFocus;
+					return true;
+				}
+
+				m_vibrateTimer -= elapsedTime;
+
+				float dx = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
+				float dy = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
+				float dz = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
+
+				m_focus.x += dx;
+				m_focus.y += dy;
+				m_focus.z += dz;
+
+				break;
+			}
+			return false;
+		}
+
+		void Camera::OrbitCamera(float& elapsedTimie)
+		{
+			float yOffset, xOffset = 0.0f;
+			Source::Input::Input* input = PAD.GetPad(0);
+			if (!input) return;
+
+			yOffset = input->StickDeadzoneRX(3000) ? input->StickVectorRight().x : 0.0f;
+			xOffset = input->StickDeadzoneRY(3000) ? input->StickVectorRight().y : 0.0f;
+			float sensitivityY = 2.0f * elapsedTimie;
+			float sensitivityX = 2.0f * elapsedTimie;
+
+			DirectX::XMVECTOR CP = DirectX::XMLoadFloat4(&m_eye);
+			DirectX::XMVECTOR CF = DirectX::XMLoadFloat4(&m_focus);
+			DirectX::XMVECTOR CX, CY, CZ;
+			CY = DirectX::XMVectorSet(0, 1, 0, 0);
+			using namespace DirectX;
+			CZ = DirectX::XMVector3Normalize(CF - CP);
+			CX = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(CY, CZ));
+			DirectX::XMMATRIX RY = DirectX::XMMatrixRotationAxis(CY, yOffset * sensitivityY);
+			DirectX::XMMATRIX RX = DirectX::XMMatrixRotationAxis(CX, xOffset * sensitivityX);
+			CP = m_focalLength * DirectX::XMVector3Normalize(DirectX::XMVector3Transform(CP - CF, RX * RY)) + CF;
+			VECTOR4F eye, focus;
+			DirectX::XMStoreFloat4(&eye, CP);
+			if (eye.y < 7.0f) eye.y = 7.0f;
+			if (eye.y > 44.0f) eye.y = 44.0f;
+
+			m_eye = eye;
+		}
 
 		void Camera::DebugCamera()
 		{
@@ -122,155 +236,43 @@ namespace Source
 		void CameraManager::Initialize(ID3D11Device* device)
 		{
 			m_constantsBuffer = std::make_unique<Source::ConstantBuffer::ConstantBuffer<ShaderConstants>>(device);
-
-			m_angle = VECTOR3F(0.0f, 0.0f, 0.0f);
-			m_direction = VECTOR3F(0.0f,0.0f,0.0f);
-			m_oldDirection = VECTOR3F(0.0f, 0.0f, 0.0f);
-			m_object = VECTOR3F(0.0f, 0.0f, 0.0f);
-
-			m_target = VECTOR3F(0.0f, 0.0f, 0.0f);
-			m_oldTarget = VECTOR3F(0.0f, 0.0f, 0.0f);
-			m_length = VECTOR3F(0.0f, 15.0f, 50.0f);
-
-			m_focalLength = 50.0f;
-			m_heightAboveGround = 15.0f;
-			m_value = 1.0f;
 			m_nowFreeMode = false;
-			m_vibrateTimer = 0.0f;
-			m_mode = CameraMode::LOCK_ON;
+			m_mode = CameraMode::ORBIT;
 			m_camera = std::make_unique<Camera>();
 			m_camera->Initialize();
 		}
 
 		void CameraManager::Update(float& elapsedTime)
 		{
-#if 0
-			if (m_nowChangeTarget)
-			{
-				m_camera->MoveEye(m_eye);
-			}
-			else
-			{
-				Source::Input::Input input = PAD.GetPad(0);
-				if (input.StickDeadzoneRX(0.7f))
-				{
-					m_angle.y += 0.005f * (input.GetStickRxValue());
-					if (m_angle.y > DirectX::XM_PI)
-					{
-						m_angle.y -= DirectX::XM_2PI;
-					}
-				}
-
-				m_direction = VECTOR4F(sinf(m_angle.y), 0.f, cosf(m_angle.y), 1.f);
-
-				if (!m_nowFreeMode)
-					m_camera->Reset(m_target, m_direction, m_focalLength, m_heightAboveGround);
-				else
-					m_camera->DebugCamera();
-			}
-#else
 			switch (m_mode)
 			{
-			case CameraManager::LOCK_ON:
-				LockON();	
-				Vibrate(elapsedTime);
-				//m_camera->DebugCamera();
+			case CameraMode::LOCK_ON:
+				if (m_camera->LockON(m_lockOnTarget,elapsedTime))
+					m_mode = CameraMode::ORBIT;
 				break;
-			case CameraManager::CHANGE_OBJECT:
-				ChangeObject();
+			case CameraMode::ORBIT:
+				m_camera->OrbitCamera(elapsedTime);
 				break;
-			case CameraManager::ORBIT:
-				m_direction = VECTOR3F(sinf(m_angle.y), 0.f, cosf(m_angle.y));
-			//	m_camera->Reset(m_target, m_direction, m_focalLength, m_heightAboveGround);
-			//	m_camera->DebugCamera();
+			case CameraMode::VIBRATION:
+				if (m_camera->Vibrate(elapsedTime))
+					m_mode = CameraMode::ORBIT;
 				break;
-			case CameraManager::FREE:
+			case CameraMode::FREE:
 				m_camera->DebugCamera();
+				break;
+			case CameraMode::MONITOR:
 				break;
 			default:
 				break;
 			}
 
-
-#endif
-		}
-
-		void CameraManager::LockON()
-		{
-			m_direction = NormalizeVec3(m_direction);
-
-			VECTOR3F n_Vec = LerpVec3(m_oldDirection, m_direction, 1.0f);
-			m_eye.x = m_object.x + n_Vec.x * m_length.x ;
-			m_eye.y = m_object.y + n_Vec.y * m_length.y + m_heightAboveGround;
-			m_eye.z = m_object.z + n_Vec.z * m_length.z;
-
-			m_eye += m_right;
-			m_camera->SetEye(m_eye);
-			
-			m_target = LerpVec3(m_oldTarget, m_target, 1.0f);
-			m_camera->SetFocus(m_target);
-
-			m_oldDirection = m_direction;
-			m_oldTarget = m_target;
-		}
-
-		void CameraManager::ChangeObject()
-		{
-#if 0
-			m_value = 0.02;
-			VECTOR3F n_Vec = SphereLinearVec3(m_oldTarget,m_oldDirection, m_direction, m_value);
-			m_eye = m_oldTarget + n_Vec * m_focalLength;
-			m_eye.y += m_heightAboveGround;
-			m_camera->SetEye(m_eye);
-
-			m_oldDirection = m_eye - m_oldTarget;
-			if (m_oldDirection == m_direction)
+			Source::Input::Input* input = PAD.GetPad(0);
+			if (!input) return;
+			if (input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER))
 			{
-				m_value = 0.6f;
-				m_direction = NormalizeVec3(m_direction);
-				m_oldDirection = m_direction;
 				m_mode = CameraMode::LOCK_ON;
+				m_tutorialCommand = true;
 			}
-
-#else
-
-			if (m_eye == m_nextEye)
-			{
-				m_value = 1.0f;
-				m_mode = CameraMode::LOCK_ON;
-
-				return;
-			}
-
-			m_eye = LerpVec3(m_eye, m_nextEye, m_value);
-			m_camera->SetEye(m_eye);
-
-
-			m_value += 0.0025f;
-			if (m_value >= 1.0f) m_value = 1.0f;
-#endif
-		}
-
-		void CameraManager::Vibrate(float elapsedTime)
-		{
-			if (m_vibrateTimer > 0)
-			{
-				m_vibrateTimer -= elapsedTime;
-
-			//	DirectX::XMFLOAT3 focus;
-
-				float dx = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
-				float dy = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
-				float dz = (rand() % 3 - 1) * m_vibrateRange * m_vibrateTimer;
-
-				m_target.x+= dx;
-				m_target.y+= dy;
-				m_target.z+= dz;
-
-				m_camera->SetFocus(m_target);
-			}
-
-
 		}
 
 		void CameraManager::Activate(ID3D11DeviceContext* immediateContext)
@@ -304,30 +306,6 @@ namespace Source
 			m_constantsBuffer->Activate(immediateContext, SLOT1, true, true);
 		}
 
-		FLOAT4X4& CameraManager::GetCreateView()
-		{
-			DirectX::XMVECTOR E = DirectX::XMLoadFloat4(&m_camera->GetEye());
-			DirectX::XMVECTOR F = DirectX::XMLoadFloat4(&m_camera->GetFocus());
-			DirectX::XMVECTOR U = DirectX::XMLoadFloat4(&m_camera->GetUp());
-			DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(E, F, U);
-			DirectX::XMStoreFloat4x4(&m_constantsBuffer->data.view, V);
-
-			return m_constantsBuffer->data.view;
-		}
-		FLOAT4X4& CameraManager::GetCreateProjection()
-		{
-			D3D11_VIEWPORT viewport;
-			UINT num_viewports = 1;
-			Framework::GetContext()->RSGetViewports(&num_viewports, &viewport);
-			float aspectRatio = viewport.Width / viewport.Height;
-
-			m_camera->SetAspect(aspectRatio);
-			DirectX::XMMATRIX P = DirectX::XMMatrixPerspectiveFovLH(m_camera->GetFov(), m_camera->GetAspect(), m_camera->GetNearZ(), m_camera->GetFarZ());
-			DirectX::XMStoreFloat4x4(&m_constantsBuffer->data.projection, P);
-
-			return m_constantsBuffer->data.projection;
-		}
-
 		void CameraManager::Editor()
 		{
 #ifdef _DEBUG
@@ -339,39 +317,25 @@ namespace Source
 
 				if (ImGui::Checkbox("CameraFree", &m_nowFreeMode))
 				{
-					if (!isCameraFreeMode)
-					{
-						target = m_target;
-					}
 					m_mode = CameraMode::FREE;
 				}
 				if (isCameraFreeMode && !m_nowFreeMode)
 				{
-					Initialize(Framework::GetInstance().GetDevice());
-					Reset(target, m_direction, m_focalLength, m_heightAboveGround);
+					m_mode = CameraMode::ORBIT;
+				}
+				if (ImGui::Button("LockOn"))
+				{
+					m_mode = CameraMode::LOCK_ON;
+				}
+				if (ImGui::Button("Vibration"))
+				{
+					m_mode = CameraMode::VIBRATION;
+					SetVibration(0.5f, 0.5f);
 				}
 			}
 
 			if (ImGui::CollapsingHeader("Camera_Config"))
 			{
-				if (ImGui::TreeNode(u8"視点要請"))
-				{
-					float focalLength = m_focalLength;
-					float heightAboveGround = m_heightAboveGround;
-					ImGui::InputFloat(u8"focalLength", &focalLength, 1.0f, 1.0f);
-					ImGui::InputFloat(u8"heightAboveGround", &heightAboveGround, 1.0f, 1.0f);
-					CameraManager::GetInstance()->Reset(m_target, m_direction, focalLength, heightAboveGround);
-					ImGui::TreePop();
-				};
-				if (ImGui::TreeNode(u8"カメラポジション"))
-				{
-					VECTOR4F pos = m_camera->GetEye();
-					float eye[] = { pos.x,pos.y,pos.z,pos.z };
-					ImGui::SliderFloat4(u8"画角", eye, 0.00f, 3.14f);
-
-					ImGui::Text("%d", m_nowChangeTarget);
-					ImGui::TreePop();
-				};
 				if (ImGui::TreeNode(u8"画角調整"))
 				{
 					float fov = m_camera->GetFov();
@@ -389,26 +353,19 @@ namespace Source
 					m_camera->SetFarZ(farZ);
 					ImGui::TreePop();
 				};
-				if (ImGui::TreeNode(u8"カメラシェイク"))
-				{
-					static float timer = 0;
-					static float range = 0;
-					ImGui::InputFloat(u8"timer", &timer, 1.0f, 5.0f);
-					ImGui::InputFloat(u8"range", &range, 1.0f, 10.0f);
-					if (ImGui::Button("Set"))
-						SetVibration(range, timer);
-					ImGui::TreePop();
-				}
 			}
-			ImGuiStyle& style = ImGui::GetStyle();
-			style.Colors[ImGuiCol_Separator] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-			ImGui::Separator();
-			ImGui::Separator();
-			ImGui::BulletText("angle : %f", m_angle);
-			ImGui::BulletText("focalLength : %f", m_focalLength);
-			ImGui::BulletText("heightAboveGround : %f", m_heightAboveGround);
 
 #endif // !USE_IMGUI
+		}
+
+		void CameraManager::SetFocus(VECTOR3F& focus)
+		{
+			m_camera->SetFocus(focus);
+		}
+		void CameraManager::SetVibration(const float& vibrateRange, const float& vibrateTimer)
+		{
+			m_camera->SetVibration(vibrateRange, vibrateTimer);
+			m_mode = CameraMode::VIBRATION;
 		}
 	}
 }

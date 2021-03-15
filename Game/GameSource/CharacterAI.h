@@ -50,9 +50,10 @@ public:
 	inline AIParameter::Emotion& GetEmotion() { return m_emotionParm; }
 	inline AIParameter::JudgeElement& GetJudgeElement() { return m_judgeElementPram; }
 	inline AIParameter::StandardValue& GetStandardValue() { return m_standardValuePram; }
+	inline bool* GetTutorialCommand() { return m_tutorialCommand; }
 	inline void SetID(Character id) { m_id = id; }
 	inline void SetCharacter(std::shared_ptr<Source::SkinnedMesh::SkinnedMesh> model) { m_model = model; }
-
+	inline void SetActive() { m_active = true; }
 protected:
 
 	Character m_id;
@@ -69,4 +70,6 @@ protected:
 	AIParameter::Emotion						m_emotionParm;
 	AIParameter::JudgeElement					m_judgeElementPram;
 	AIParameter::StandardValue					m_standardValuePram;
+	bool m_tutorialCommand[3] = {false,false,false};
+	bool m_active = false;
 };

@@ -2,6 +2,10 @@
 #include <vector>
 #include "Vector.h"
 
+#undef max
+#undef min
+#include<cereal/cereal.hpp>
+#include<cereal/archives/binary.hpp>
 namespace Source
 {
 	namespace InstanceData
@@ -35,6 +39,22 @@ namespace Source
 				color = {};
 				world = {};
 			}
+
+			template<class T>
+			void serialize(T& archive, const std::uint32_t version)
+			{
+				if (version >= 0)
+				{
+					archive
+					(
+						position,
+						scale,
+						angle,
+						color,
+						world
+					);
+				}
+			};
 		};
 	}
 }

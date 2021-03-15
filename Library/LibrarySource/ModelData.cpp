@@ -7,7 +7,6 @@ namespace Source
 		//	{ TEXNO::,"Data/Texture/.png","../Asset/Texture/Noise.png",1U },
 		LoadActorModel actorModel[] =
 		{
-			{ ActorModel::Saber,	"../Asset/Model/Actor/Test/player_motion_tex.fbx", 60},
 			{ ActorModel::Archer,	"../Asset/Model/Actor/Players/Archer/Archer.fbx", 60},
 			{ ActorModel::Fighter,	"../Asset/Model/Actor/Players/Fighter/Fighter.fbx",   60},
 			{ ActorModel::ENEMY,	"../Asset/Model/Actor/Enemy/Juggernaut.fbx", 60},
@@ -18,7 +17,7 @@ namespace Source
 			{ StaticModel::STAGE,	"../Asset/Model/Static/Stage/Casul.fbx"},
 			{ StaticModel::ARROW,	"../Asset/Model/Static/Arrow/Arrow.fbx"},
 			{ StaticModel::STONE,	"../Asset/Model/Static/Stone/untitled.fbx"},
-
+			{ StaticModel::FENCE,	"../Asset/Model/Static/Stage/fence.fbx"},
 		};
 
 		void FbxLoader::SaveActForBinary(ActorModel modelNo)

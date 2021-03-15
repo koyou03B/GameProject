@@ -41,28 +41,14 @@ bool Game::Initialize(ID3D11Device* device)
 	#pragma endregion
 
 	#pragma region Camera
-	
-	Source::CameraControlle::CameraManager().GetInstance()->Initialize(device);
-	VECTOR3F distance = DistancePlayerToEnemy();
-	Source::CameraControlle::CameraManager().GetInstance()->SetOldDistance(distance);
-	Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
 	CharacterAI* player = m_metaAI->GetPlayerAdominist().GetSelectPlayer(PlayerType::Fighter);
-	VECTOR3F pos = player->GetWorldTransform().position;
-	pos.y = offsetY[0];
-	Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
-	Source::CameraControlle::CameraManager().GetInstance()->SetLength(player->GetCamera().lenght);
-	Source::CameraControlle::CameraManager().GetInstance()->SetValue(player->GetCamera().value);
-	Source::CameraControlle::CameraManager().GetInstance()->SetFocalLength(0.0f);
-	Source::CameraControlle::CameraManager().GetInstance()->SetHeightAboveGround(0.0f);
-	Source::CameraControlle::CameraManager().GetInstance()->SetRigth(VECTOR3F(0.0f, 0.0f, 0.0f));
-	CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
-	pos = enemy->GetWorldTransform().position;
-	pos.y = offsetY[1];
-	Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
-	Source::CameraControlle::CameraManager().GetInstance()->SetOldTarget(pos);
+	VECTOR3F position = player->GetWorldTransform().position;
+	position.y = offsetY[0];
+	Source::CameraControlle::CameraManager().GetInstance()->Initialize(device);
+	Source::CameraControlle::CameraManager().GetInstance()->SetFocus(position);
 	float tmp = 0;
 	Source::CameraControlle::CameraManager().GetInstance()->Update(tmp);
-	
+
 	#pragma endregion
 
 
@@ -76,17 +62,18 @@ void Game::Update(float& elapsedTime)
 	
 	#pragma region Camera
 	{
-		VECTOR3F distance = DistancePlayerToEnemy();
-		VECTOR3F rightVaule = CameraRightValue();
-		Source::CameraControlle::CameraManager().GetInstance()->SetDistance(distance);
-		CharacterAI* player = m_metaAI->GetPlayerAdominist().GetPlayPlayer();
-		VECTOR3F pos = player->GetWorldTransform().position;
-		pos.y = offsetY[0];
-		Source::CameraControlle::CameraManager().GetInstance()->SetObject(pos);
-		CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
-		pos = enemy->GetWorldTransform().position;
-		pos.y = offsetY[1];
-		Source::CameraControlle::CameraManager().GetInstance()->SetTarget(pos);
+		CharacterAI* player = m_metaAI->GetPlayerAdominist().GetSelectPlayer(PlayerType::Fighter);
+		VECTOR3F position = player->GetWorldTransform().position;
+		position.y = offsetY[0];
+		Source::CameraControlle::CameraManager().GetInstance()->SetFocus(position);
+		if (Source::CameraControlle::CameraManager().GetInstance()->GetCameraMode()==
+			Source::CameraControlle::CameraManager::CameraMode::LOCK_ON)
+		{
+			CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
+			VECTOR3F position = enemy->GetWorldTransform().position;
+			position.y = offsetY[1];
+			Source::CameraControlle::CameraManager().GetInstance()->SetLockOnTarget(position);
+		}
 		Source::CameraControlle::CameraManager().GetInstance()->Update(elapsedTime);
 	}
 
@@ -125,8 +112,51 @@ void Game::Update(float& elapsedTime)
 	{
 	case GameEvent::START:
 		if (m_sceneEffect.UpdateScreenFilter(0.05f, 1.0f))
+		{
+		#ifdef _DEBUG
 			m_eventState = GameEvent::FIGHT;
+		#else
+			m_eventState = GameEvent::TUTORIAL;
+
+		#endif // _DUBUG
+
+		}
 		break;
+	case GameEvent::TUTORIAL:
+	{
+		CharacterAI* player = m_metaAI->GetPlayerAdominist().GetSelectPlayer(PlayerType::Fighter);
+		bool tutorialComand[4] = { player->GetTutorialCommand()[0],player->GetTutorialCommand()[1],player->GetTutorialCommand()[2],false };
+		tutorialComand[3] = Source::CameraControlle::CameraManager().GetInstance()->GetTutorialCommand();
+		int checkCommand = 0;
+		for (int i = 0; i < 4; ++i)
+		{
+			if (tutorialComand[i])
+			{
+				++checkCommand;
+				CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
+				VECTOR3F position = enemy->GetWorldTransform().position;
+				position.y = offsetY[1];
+				Source::CameraControlle::CameraManager().GetInstance()->SetLockOnTarget(position);
+			}
+		}
+		if (checkCommand == 4)
+		{
+			Source::CameraControlle::CameraManager().GetInstance()->SetCameraMode(Source::CameraControlle::CameraManager::CameraMode::LOCK_ON);
+			if (m_stage->FanceBreak(elapsedTime))
+			{
+				m_eventState = GameEvent::FIGHT;
+				m_metaAI->ActivateEnemy();
+				return;
+			}
+		}
+
+		if (player->GetWorldTransform().position.z > -3.0f)
+		{
+			player->GetWorldTransform().position.z = -3.0f;
+			player->GetWorldTransform().WorldUpdate();
+		}
+	}
+	break;
 	case GameEvent::FIGHT:
 		if (m_metaAI->GetIsWinner())
 		{
@@ -332,7 +362,11 @@ void Game::ImGui()
 		}
 
 		if (ImGui::CollapsingHeader("Camera"))
-		{			
+		{	
+			CharacterAI* enemy = m_metaAI->GetEnemyAdominist().GetSelectEnemy(EnemyType::Boss);
+			VECTOR3F position = enemy->GetWorldTransform().position;
+			position.y = offsetY[1];
+			Source::CameraControlle::CameraManager().GetInstance()->SetLockOnTarget(position);
 			ImGui::SetNextWindowSize(ImVec2(400, Framework::GetInstance().SCREEN_HEIGHT), ImGuiSetCond_Once);//サイズ
 			ImGui::SetNextWindowPos(ImVec2(1520, 0), ImGuiSetCond_Once);//ポジション
 			ImGui::Begin("CameraEditer");

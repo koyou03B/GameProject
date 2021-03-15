@@ -3,24 +3,35 @@
 
 void Stage::Init()
 {
-	VECTOR3F translate = { 0.0f,0.0f,0.0f };
-	VECTOR3F angle = { 0.0f * 0.01745f, 90.0f * 0.01745f,0.0f * 0.017454f };
-	VECTOR3F scale = { 13.0f,13.0f,13.0f };
-	
-	AddInstanceData(translate, angle, scale, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
-	m_model = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::STAGE);
-	Source::ModelData::fbxLoader().SaveStaticForBinary(Source::ModelData::StaticModel::STAGE);
+	m_position = { 0.0f,0.0f,0.0f };
+	m_angle = { 0.0f * 0.01745f, 90.0f * 0.01745f,0.0f * 0.017454f };
+	m_scale = { 13.0f,13.0f,13.0f };
+	DirectX::XMMATRIX S, R, T;
+	S = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+	R = DirectX::XMMatrixRotationRollPitchYaw(m_angle.x, m_angle.y, m_angle.z);
+	T = DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+	DirectX::XMMATRIX W = S * R * T;
+	DirectX::XMStoreFloat4x4(&m_world, W);
+	AddInstanceData(m_position, m_angle, m_scale, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+	m_model[0] = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::STAGE);
+	m_model[1] = Source::ModelData::fbxLoader().GetStaticModel(Source::ModelData::StaticModel::FENCE);
+//	Source::ModelData::fbxLoader().SaveStaticForBinary(Source::ModelData::StaticModel::STAGE);
+//	Source::ModelData::fbxLoader().SaveStaticForBinary(Source::ModelData::StaticModel::FENCE);
+
 	//m_model->_shaderON.normalMap = true;
 
 	m_circle.radius = 81.0f;
 	m_circle.position = {};
 	m_circle.scale = 1.0f;
-
-	//m_meshNames.emplace_back("Arena1_PVPdoor");
-	//m_meshNames.emplace_back("QU_gargoyle01_b (3)");
-	//m_meshNames.emplace_back("QU_gargoyle01_b (4)");
-	//m_meshNames.emplace_back("QU_gargoyle01_b (5)");
-	//m_meshNames.emplace_back("QU_gargoyle01_b (6)");
+	m_state = 0;
+	m_timer = .0f;
+	if (PathFileExistsA((std::string("../Asset/Binary/Stage/fence.bin")).c_str()))
+	{
+		std::ifstream ifs;
+		ifs.open((std::string("../Asset/Binary/Stage/fence.bin")).c_str(), std::ios::binary);
+		cereal::BinaryInputArchive i_archive(ifs);
+		i_archive(*this);
+	}
 }
 
 void Stage::Update(float& elapsedTime)
@@ -64,12 +75,58 @@ void Stage::Update(float& elapsedTime)
 	}
 }
 
+bool Stage::FanceBreak(float& elapsedTime)
+{
+	switch (m_state)
+	{
+	case 0:
+	{
+		m_timer += elapsedTime;
+		if (m_timer >= 2.0f)
+		{
+			++m_state;
+		}
+		
+			float dx = (rand() % 3 - 1) * 0.5f;
+			float dz = (rand() % 3 - 1) * 0.5f;
+
+			for (auto& data : m_instanceData)
+			{
+				data.position.x += dx;
+				data.CreateWorld();
+			}
+		}
+		break;
+	case 1:
+		for (auto& data : m_instanceData)
+		{
+			data.position.y -= 2.0f;
+			data.CreateWorld();
+		}
+		if (m_instanceData.back().position.y < -24.0f)
+		{
+			m_instanceData.clear();
+			return true;
+		}
+		break;
+	}
+
+	return false;
+
+}
+
 void Stage::Render(ID3D11DeviceContext* immediateContext)
 {
+	m_model[0]->Render(Framework::GetContext(), m_world,VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+
+#ifdef _DEBUG
+#else
 	if (!m_instanceData.empty())
 	{
-		m_model->Render(Framework::GetContext(), m_instanceData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+		m_model[1]->Render(Framework::GetContext(), m_instanceData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
+
 	}
+#endif
 }
 
 int Stage::RayPick(const VECTOR3F& startPosition, const VECTOR3F& endPosition,
@@ -82,7 +139,7 @@ int Stage::RayPick(const VECTOR3F& startPosition, const VECTOR3F& endPosition,
 
 	int matIndex = -1;
 	// オブジェクト空間でのレイに変換 
-	FLOAT4X4 world = m_instanceData.begin()->world * m_model->_resource->axisSystemTransform;
+	FLOAT4X4 world = m_instanceData.begin()->world * m_model[0]->_resource->axisSystemTransform;
 	DirectX::XMMATRIX worldtransform = DirectX::XMLoadFloat4x4(&world);
 
 	//逆行列化
@@ -103,7 +160,7 @@ int Stage::RayPick(const VECTOR3F& startPosition, const VECTOR3F& endPosition,
 	DirectX::XMStoreFloat3(&start, localStart);
 	DirectX::XMStoreFloat3(&end, localEnd);
 
-	int ret = m_model->RayPick(start, end, &hitPosition, &hitNormal, &outdistance, m_meshNames);
+	int ret = m_model[0]->RayPick(start, end, &hitPosition, &hitNormal, &outdistance, m_meshNames);
 	if (ret != -1)
 	{
 		DirectX::XMVECTOR localposition = DirectX::XMLoadFloat3(&hitPosition);
@@ -138,13 +195,13 @@ void Stage::ImGui()
 		if (ImGui::BeginMenu("File"))//ファイルの中には
 		{
 
-			//if (ImGui::MenuItem("Save"))//データの保存とか
-			//{
-			//	std::ofstream ofs;
-			//	ofs.open((std::string("./Data/Bin/player") + ".bin").c_str(), std::ios::binary);
-			//	cereal::BinaryOutputArchive o_archive(ofs);
-			//	o_archive(*this);
-			//}
+			if (ImGui::MenuItem("Save"))//データの保存とか
+			{
+				std::ofstream ofs;
+				ofs.open((std::string("../Asset/Binary/Stage/fence.bin")).c_str(), std::ios::binary);
+				cereal::BinaryOutputArchive o_archive(ofs);
+				o_archive(*this);
+			}
 
 			ImGui::EndMenu();
 		}
@@ -153,12 +210,23 @@ void Stage::ImGui()
 
 	if (!m_instanceData.empty())
 	{
-		auto& data = m_instanceData[0];
-		float scale = data.scale.x;
-		ImGui::SliderFloat("Scale", &scale, 0.001f, 100.0f);
-
-		data.scale = VECTOR3F(scale, scale, scale);
+		int count = static_cast<int>(m_instanceData.size());
+		static int select = 0;
+		ImGui::SliderInt("Select", &select,0, count-1);
+		auto& data = m_instanceData[select];
+		float position[] = { data.position.x,data.position.y,data.position.z };
+		float scale[] = { data.scale.x,data.scale.y,data.scale.z };
+		float angle[] = { data.angle.x,data.angle.y,data.angle.z };
+		ImGui::SliderFloat3("Position", position, -100.0f, 100.0f);
+		ImGui::SliderFloat3("Angle", angle,0.0f, 180 * 0.01745f);
+		ImGui::SliderFloat3("Scale", scale, 0.0f, 50.0f);
+		data.position = { position[0],position[1],position[2] };
+		data.scale = { scale[0],scale[1],scale[2] };
+		data.angle = { angle[0],angle[1],angle[2] };
 		data.CreateWorld();
+
+		if(ImGui::Button("Add"))
+			AddInstanceData(m_position, m_angle, m_scale, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
 
 	}
 
@@ -168,4 +236,16 @@ void Stage::ImGui()
 #endif
 
 
+}
+
+void Stage::AddInstanceData(const VECTOR3F& position, const VECTOR3F& angle, const VECTOR3F& scale, const VECTOR4F& color)
+{
+	Source::InstanceData::InstanceData data;
+	data.position = position;
+	data.angle = angle;
+	data.scale = scale;
+	data.color = color;
+	data.CreateWorld();
+
+	m_instanceData.emplace_back(data);
 }

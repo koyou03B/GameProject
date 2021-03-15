@@ -85,17 +85,30 @@ void Enemy::Init()
 void Enemy::Update(float& elapsedTime)
 {
 	m_elapsedTime = elapsedTime;
-	if (m_isAction)
+	if (m_active)
 	{
 		switch (m_moveState)
 		{
 		case 0:
 		{
-			uint32_t currentAnimationTime = m_blendAnimation.animationBlend.GetAnimationTime(0);
-			if (currentAnimationTime >= 169)
+			if (!m_blendAnimation.animationBlend.SearchSampler(Animation::WRATH))
 			{
-				++m_moveState;
-				m_selectTask = m_behaviorTree.SearchOfActiveTask(0);
+				m_blendAnimation.animationBlend.ResetAnimationFrame();
+				m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+				m_blendAnimation.animationBlend.AddSampler(Animation::WRATH,m_model);
+			}
+			else
+			{
+				bool hasAnimation = JudgeBlendRatio();
+				if (hasAnimation)
+				{
+					uint32_t currentAnimationTime = m_blendAnimation.animationBlend.GetAnimationTime(0);
+					if (currentAnimationTime >= 169)
+					{
+						++m_moveState;
+						m_selectTask = m_behaviorTree.SearchOfActiveTask(0);
+					}
+				}
 			}
 		}
 		break;
@@ -123,6 +136,7 @@ void Enemy::Update(float& elapsedTime)
 				}
 				m_blendAnimation.animationBlend.ChangeSampler(0, Animation::DIE, m_model);
 				m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+				m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
 				++m_moveState;
 			}
 			break;
@@ -156,17 +170,6 @@ void Enemy::Update(float& elapsedTime)
 	FLOAT4X4 getBoneTransform = boneTransform * modelAxisTransform * m_transformParm.world;
 	m_collision[0].position[0] = { m_transformParm.position.x,getBoneTransform._42,m_transformParm.position.z };
 
-
-
-	if (KEYBOARD._keys[DIK_5] == 1)
-	{
-		m_blendAnimation.animationBlend.ResetAnimationFrame();
-		m_blendAnimation.animationBlend.ResetAnimationSampler(0);
-		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
-		m_isAction = true;
-
-	}
-
 }
 
 void Enemy::Render(ID3D11DeviceContext* immediateContext)
@@ -177,6 +180,25 @@ void Enemy::Render(ID3D11DeviceContext* immediateContext)
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);	
 	m_stone->Render(immediateContext);
 	m_debugObjects.debugObject.Render(immediateContext, VECTOR4F(0, 0, 0, 0),true);
+}
+
+bool Enemy::JudgeBlendRatio()
+{
+	m_blendAnimation.animationBlend._blendRatio += 0.1f;
+	if (m_blendAnimation.animationBlend._blendRatio >= m_blendAnimation.blendRatioMax)//magicNumber
+	{
+		m_blendAnimation.animationBlend._blendRatio = 0.0f;
+		size_t samplerSize = m_blendAnimation.animationBlend.GetSampler().size();
+		for (size_t i = 0; i < samplerSize; ++i)
+		{
+			m_blendAnimation.animationBlend.ReleaseSampler(0);
+		}
+		m_blendAnimation.animationBlend.FalseAnimationLoop(0);
+
+		return true;
+	}
+
+	return false;
 }
 
 void Enemy::Release()
@@ -1307,10 +1329,10 @@ void Enemy::ImGui(ID3D11Device* device)
 	if (ImGui::Button("ActiveBehaviorTree"))
 	{
 		m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
-		m_isAction = true;
+		m_active = true;
 	}
 	if (ImGui::Button("DeActiveBehaviorTree"))
-		m_isAction = false;
+		m_active = false;
 	ImGui::End();
 
 

@@ -31,6 +31,34 @@ VECTOR2F LerpVec2(VECTOR2F lerpStart, VECTOR2F lerpEnd, float value)
 	return outPosition;
 }
 
+VECTOR2F SphereLinearVec2(VECTOR2F start, VECTOR2F end, float t)
+{
+	// 2ÉxÉNÉgÉãä‘ÇÃäpìxÅiâsäpë§Åj
+	float angle = acosf(DotVec2(start, end));
+	if (!std::isfinite(angle))
+		angle = 0.0f;
+	// sinÉ∆
+	float SinTh = sinf(angle);
+
+	// ï‚ä‘åWêî
+	float Ps = sinf(angle * (1.0f - t));
+	float Pe = sinf(angle * t);
+
+	VECTOR2F out;
+	if (angle == 0.0f)
+	{
+		out.x = 0.0f;
+		out.y = 0.0f;
+	}
+	else
+	{
+		out.x = (Ps * start.x + Pe * end.x) / SinTh;
+		out.y = (Ps * start.y + Pe * end.y) / SinTh;
+	}
+
+	return out;
+}
+
 VECTOR2F SphereLinearVec2(VECTOR2F origin, VECTOR2F start, VECTOR2F end, float t)
 {
 	VECTOR2F sphereLinerStart = NormalizeVec2(start - origin);

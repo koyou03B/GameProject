@@ -11,7 +11,6 @@ namespace Source
 	{
 		enum class ActorModel
 		{
-			Saber,
 			Archer,
 			Fighter,
 			ENEMY,
@@ -23,6 +22,7 @@ namespace Source
 			STAGE,
 			ARROW,
 			STONE,
+			FENCE,
 			END,
 		};
 

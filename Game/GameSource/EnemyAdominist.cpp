@@ -36,6 +36,11 @@ void EnemyAdominist::Release()
 	}
 }
 
+void EnemyAdominist::Active()
+{
+	m_enemys[0]->SetActive();
+}
+
 void EnemyAdominist::ImGui(ID3D11Device* device)
 {
 	int select = static_cast<int>(EnemyType::Boss);
