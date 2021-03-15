@@ -22,8 +22,7 @@ namespace Source
 			E_LIFE,
 			P_LIFE_GAGE,
 			COMMAND,
-			EFFECT0,
-			SCOPE,
+			COMMAND_MASK,
 			END,
 		};
 

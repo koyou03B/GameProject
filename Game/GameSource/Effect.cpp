@@ -102,6 +102,8 @@ void EffectAdominist::Init()
 	m_selectSmapleEffect = 0;
 	m_isSampleActive = false;
 	m_sampleEffect.push_back(std::make_unique<AttackEffect>());
+	m_sampleEffect.push_back(std::make_unique<ArrowHitEffect>());
+
 }
 
 void EffectAdominist::Update(float& elapsedTime)
@@ -206,11 +208,19 @@ void EffectAdominist::SelectEffect(const EffectType& type, const VECTOR3F& posit
 		switch (type)
 		{
 		case EffectType::FighterAttack:
+		{
 			AttackEffect effect;
 			memcpy(&effect, m_sampleEffect.at(type).get(), sizeof(AttackEffect));
 			m_selectedEffect.push_back(std::make_unique<AttackEffect>(effect));
-
-			break;
+		}
+		break;
+		case EffectType::ArrowAttack:
+		{
+			ArrowHitEffect effect;
+			memcpy(&effect, m_sampleEffect.at(type).get(), sizeof(ArrowHitEffect));
+			m_selectedEffect.push_back(std::make_unique<ArrowHitEffect>(effect));
+		}
+		break;
 		}
 
 		m_selectedEffect.back()->SetPosition(effectPos);

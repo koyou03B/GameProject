@@ -72,39 +72,41 @@ void Archer::Init()
 void Archer::Update(float& elapsedTime)
 {
 	m_elapsedTime = elapsedTime;
-
-	if (m_hasShoot)
+	if (m_active)
 	{
-		m_arrow->Update(m_elapsedTime);
-		if (!m_arrow->GetArrowParam().at(0).second.isFlying)
-			m_hasShoot = false;
+		if (m_hasShoot)
+		{
+			m_arrow->Update(m_elapsedTime);
+			if (!m_arrow->GetArrowParam().at(0).second.isFlying)
+				m_hasShoot = false;
+		}
+
+		if (!m_currentPlanList.empty() && !m_statusParm.isDamage)
+		{
+
+			int taskCount = static_cast<int>(m_currentPlanList.size());
+			for (int i = m_currentTask; i != taskCount;)
+			{
+				if (m_currentPlanList[i]->ExecuteOperator(this))
+				{
+					++m_currentTask;
+					i = m_currentTask;
+				}
+				else
+					break;
+			}
+
+			if (m_currentTask == taskCount)
+			{
+				m_currentPlanList = m_agentAI.OperationFlowStart(this);
+				m_currentTask = 0;
+			}
+		}
+		KnockBack();
+		ActiveWriteTimer();
+		ActiveRecoverTimer();
+		m_attackArrow.UpdateTime(elapsedTime);
 	}
-
-	//if (!m_currentPlanList.empty() && !m_statusParm.isDamage)
-	//{
-
-	//	int taskCount = static_cast<int>(m_currentPlanList.size());
-	//	for (int i = m_currentTask; i != taskCount;)
-	//	{
-	//		if (m_currentPlanList[i]->ExecuteOperator(this))
-	//		{
-	//			++m_currentTask;
-	//			i = m_currentTask;
-	//		}
-	//		else
-	//			break;
-	//	}
-
-	//	if (m_currentTask == taskCount)
-	//	{
-	//		m_currentPlanList = m_agentAI.OperationFlowStart(this);
-	//		m_currentTask = 0;
-	//	}
-	//}
-	KnockBack();
-	ActiveWriteTimer();
-	ActiveRecoverTimer();
-	m_attackArrow.UpdateTime(elapsedTime);
 	//*********************
 	// Collision Detection
 	//*********************
@@ -686,7 +688,7 @@ bool Archer::FindDirectionToAvoid()
 	stage.radius = 81.0f;
 	stage.scale = 1.0f;
 
-	point.radius = 5.0f;
+	point.radius = 1.0f;
 	point.scale = 1.0f;
 
 	target.position = enemy->GetWorldTransform().position;
@@ -708,8 +710,8 @@ bool Archer::FindDirectionToAvoid()
 	float radius = 0.0f;
 	for (int i = 0; i < 6; ++i)
 	{
-		m_controlPoint[i].second.x = m_transformParm.position.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.6f);
-		m_controlPoint[i].second.z = m_transformParm.position.z + sinf(radius * 0.01745f) * (kSafeAreaRadius * 0.6f);
+		m_controlPoint[i].second.x = m_transformParm.position.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.7f);
+		m_controlPoint[i].second.z = m_transformParm.position.z + sinf(radius * 0.01745f) * (kSafeAreaRadius * 0.7f);
 		radius += angleOffset;
 		point.position = m_controlPoint[i].second;
 
@@ -1565,8 +1567,8 @@ ImGui::Combo("Name_of_BoneName",
 		ImGui::SliderFloat("UseArrowMaxTimer", &m_attackArrow.m_useArrowMaxTimer, 0.0f, 10.0f);
 	}
 
+	ImGui::Checkbox("Active", &m_active);
 	ImGui::Text("m_canRecover->%d", m_canRecover);
-
 	ImGui::SliderFloat("BlendRatio", &m_blendAnimation.animationBlend._blendRatio, 0.0f, 1.0f);
 #endif
 	ImGui::End();

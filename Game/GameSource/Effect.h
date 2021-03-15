@@ -66,8 +66,8 @@ protected:
 enum EffectType
 {
 	FighterAttack,
-	ArrowAura,
 	ArrowAttack,
+	ArrowAura,
 	EnemyAttack,
 	EffectEND
 };

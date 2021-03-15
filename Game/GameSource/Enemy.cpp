@@ -1313,6 +1313,7 @@ void Enemy::ImGui(ID3D11Device* device)
 		m_stone->ImGui(device);
 	}
 
+	ImGui::Checkbox("Active", &m_active);
 
 	float posX = m_transformParm.position.x;
 	float posZ = m_transformParm.position.z;

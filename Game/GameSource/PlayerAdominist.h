@@ -21,6 +21,7 @@ public :
 	void Update(float& elapsedTime);
 	void Render(ID3D11DeviceContext* immediateContext);
 	void Release();
+	void Active();
 	void WriteBlackboard(CharacterAI* target);
 	void ImGui(ID3D11Device* device);
 

@@ -94,7 +94,7 @@ namespace Source
 			case 1:
 				if (m_vibrateTimer < 0.0f)
 				{
-				//	m_focus = m_oldFocus;
+					m_state = 0;
 					return true;
 				}
 
@@ -268,7 +268,7 @@ namespace Source
 
 			Source::Input::Input* input = PAD.GetPad(0);
 			if (!input) return;
-			if (input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER))
+			if (m_mode == CameraMode::ORBIT && input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER))
 			{
 				m_mode = CameraMode::LOCK_ON;
 				m_tutorialCommand = true;

@@ -54,6 +54,7 @@ enum UIStaticLabel
 	NAME_F,
 	NAME_E,
 	NAME_A,
+	COMMAND_MASK,
 	ENDS
 };
 
@@ -75,10 +76,13 @@ public:
 	void Release();
 	void ImGui();
 
-	void LifeUpdate(float elapsedTime);
+	void LifeUpdate(float& elapsedTime);
+	void MaskUpdate(float& elapsedTime);
 
 	bool GetHasUpdate() { return m_hasUpdate; }
 	void SetHasUpdate(const bool isUpdate) { m_hasUpdate = isUpdate; }
+	void SetHasMaskUpdate(const int id,const bool isUpdate) { m_hasMaskUpdate[id] = isUpdate; }
+
 	void FindValue(float value,const int id);
 
 	void SetSpriteS(UIStaticLabel label);
@@ -99,7 +103,11 @@ private:
 	bool m_hasUpdate=false;
 	float m_updateValue = 0.0f;
 	float m_updateTime = 0.0f;
+	float m_sinOffset[4] = {0.0f};
 	int m_instanceNo = 0;
+	bool m_hasMaskUpdate[4] = { false,false,false,false };
+	bool m_hasMask[4] = { false,false,false,false };
+
 };
 #define STR(var) #var 
 class UIAdominist
@@ -121,6 +129,15 @@ public:
 		{
 			object->second.SetHasUpdate(true);
 			object->second.FindValue(updateValue, id);
+		}
+	}
+
+	void MaskUpdate(const UIStaticLabel& label, const int id)
+	{
+		std::map<UIStaticLabel, UIData>::iterator object = m_uiStaticData.find(label);
+		if (object != m_uiStaticData.end())
+		{
+			object->second.SetHasMaskUpdate(id,true);
 		}
 	}
 
@@ -150,6 +167,12 @@ private:
 			break;
 		case NAME_E:
 			return STR(NAME_E);
+			break;
+		case NAME_A:
+			return STR(NAME_A);
+			break;
+		case COMMAND_MASK:
+			return STR(COMMAND_MASK);
 			break;
 		}
 

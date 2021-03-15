@@ -40,6 +40,12 @@ void PlayerAdominist::Release()
 	}
 }
 
+void PlayerAdominist::Active()
+{
+	int select = static_cast<int>(PlayerType::Archer);
+	m_players[select]->SetActive();
+}
+
 void PlayerAdominist::WriteBlackboard(CharacterAI* target)
 {
 	int select = static_cast<int>(PlayerType::Archer);

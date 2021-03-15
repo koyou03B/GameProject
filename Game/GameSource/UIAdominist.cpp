@@ -101,13 +101,17 @@ void UIData::ImGui()
 	{
 		m_spriteParam.push_back(param);
 	}
+	if (ImGui::Button("Del"))
+	{
+		m_spriteParam.pop_back();
+	}
 	ImGui::End();
 
 #endif
 
 }
 
-void UIData::LifeUpdate(float elapsedTime)
+void UIData::LifeUpdate(float& elapsedTime)
 {	
 	auto& data = m_spriteParam.at(m_instanceNo);
 	m_updateTime += elapsedTime;
@@ -125,6 +129,50 @@ void UIData::LifeUpdate(float elapsedTime)
 	data.texSize.x = data.texSize.x - (data.texSize.x - m_updateValue) * offset;
 	data.scale.x = data.texSize.x;
 
+}
+
+void UIData::MaskUpdate(float& elapsedTime)
+{
+	if (m_spriteParam.empty()) return ;
+	if (m_hasMask[0] && m_hasMask[1] && m_hasMask[2] && m_hasMask[3])
+	{
+		int end = 0;
+		for (int i = 0; i < 4; ++i)
+		{
+			auto& mask = m_spriteParam[i];
+			mask.scale.y -= 10.0f;
+			if (mask.scale.y <= 0.0f)
+			{
+				++end;
+			}
+		}
+		if(end == 4)
+			m_spriteParam.clear();
+	}
+	else
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			auto& mask = m_spriteParam[i];
+			if (m_hasMaskUpdate[i])
+			{
+				mask.scale.x += 20.0f;
+				if (mask.scale.x >= mask.maxTexSizeX)
+				{
+					mask.scale.x = mask.maxTexSizeX;
+					m_hasMask[i] = true;
+				}
+			}
+			else
+			{
+				mask.scale.x += sinf(m_sinOffset[i] * 0.01745f);
+				m_sinOffset[i] += 8.0f;
+				if (m_sinOffset[i] > 360.0f)
+					m_sinOffset[i] -= 360.0f;
+
+			}
+		}
+	}
 }
 
 void UIData::FindValue(float value,const int id)
@@ -159,6 +207,9 @@ void UIData::SetSpriteS(UIStaticLabel label)
 		break;
 	case NAME_A:
 		m_sprite = TEXTURELOADER.GetTexture(Source::SpriteLoad::TextureLabel::ARCHER);
+		break;
+	case COMMAND_MASK:
+		m_sprite = TEXTURELOADER.GetTexture(Source::SpriteLoad::TextureLabel::COMMAND_MASK);
 		break;
 	}
 	SpriteParam param;
@@ -225,6 +276,10 @@ void UIAdominist::Init()
 	data.SetSpriteS(UIStaticLabel::NAME_A);
 	data.Init(EnumToStringS(UIStaticLabel::NAME_A));
 	m_uiStaticData.insert(std::make_pair(UIStaticLabel::NAME_A, data));
+
+	data.SetSpriteS(UIStaticLabel::COMMAND_MASK);
+	data.Init(EnumToStringS(UIStaticLabel::COMMAND_MASK));
+	m_uiStaticData.insert(std::make_pair(UIStaticLabel::COMMAND_MASK, data));
 }
 
 void UIAdominist::Update(float& elapsedTime)
@@ -234,6 +289,12 @@ void UIAdominist::Update(float& elapsedTime)
 	{
 		if (param.second.GetHasUpdate())
 			param.second.LifeUpdate(elapsedTime);
+	}
+
+	std::map<UIStaticLabel, UIData>::iterator object = m_uiStaticData.find(UIStaticLabel::COMMAND_MASK);
+	if (object != m_uiStaticData.end())
+	{
+		object->second.MaskUpdate(elapsedTime);
 	}
 }
 
@@ -314,11 +375,11 @@ void UIAdominist::ImGui()
 		{
 			static int selectUI = 2;
 			if (labelType == 0)
-				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0NAME_A\0END\0\0");
+				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0NAME_A\0COMMAND_MASK\0END\0\0");
 			else
 				ImGui::Combo("UI_NAME", &selectUI, "LIFE_P\0LIFE_E\0END\0\0");
 			
-			if (selectUI != 5 && labelType == 0 || selectUI != 2 && labelType == 1)
+			if (selectUI != 6 && labelType == 0 || selectUI != 2 && labelType == 1)
 			{
 				ImGui::BulletText("Have you selected UI?"); ImGui::SameLine();
 				if (ImGui::Button("Yes"))
@@ -396,7 +457,7 @@ void UIAdominist::ImGui()
 			}
 			else
 			{
-				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0NAME_A\0END\0\0");
+				ImGui::Combo("UI_NAME", &selectUI, "LIFE_GAGE\0COMMAND_F\0NAME_F\0NAME_E\0NAME_A\0COMMAND_MASK\0END\0\0");
 				ImGui::Text("Have you selected UI?");
 				static bool hasStarted = false;
 				if (ImGui::Button("Yes"))

@@ -84,7 +84,7 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 		float enemyMaxLife    = enemy->GetStatus().maxLife;
 		++damageCount;
 		++atkHitCount;
-	//	enemyLife -= attackPoint;
+		enemyLife -= attackPoint;
 
 		if (type != PlayerType::Archer)
 		{
@@ -94,6 +94,15 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 			float offseZ = player->GetWorldTransform().position.z + judgeNormal.z * 5.0f;
 			effectPos.z = offseZ;
 			m_effectManager.SelectEffect(EffectType::FighterAttack, effectPos,1);
+		}
+		else
+		{
+			VECTOR3F effectPos = collision.position[0];
+			float offsetY = effectPos.y+0.5f;
+			VECTOR3F judgeNormal = NormalizeVec3(enemy->GetWorldTransform().position - effectPos);
+			effectPos = effectPos + judgeNormal * 2.2f;
+			effectPos.y = offsetY;
+			m_effectManager.SelectEffect(EffectType::ArrowAttack, effectPos, 1);
 		}
 		MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife, UIActLabel::LIFE_E, 0);
 
@@ -224,6 +233,7 @@ void MetaAI::Release()
 
 void MetaAI::ActivateEnemy()
 {
+	m_playerAdominist.Active();
 	m_enemyAdominist.Active();
 }
 
