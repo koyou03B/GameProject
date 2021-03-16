@@ -21,7 +21,7 @@ public:
 	
 	inline void SetCreditLv(const float& credit) { this->m_creditLv = credit; }
 private:
-	const float	kSafeAreaRadius = 30.0f;
+	const float	kSafeAreaRadius = 20.0f;
 
 	DistanceLv	m_distanceLv;
 	HitPointLv	m_hpLv;

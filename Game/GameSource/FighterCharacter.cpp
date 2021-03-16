@@ -1570,14 +1570,9 @@ void Fighter::ImGui(ID3D11Device* device)
 				UIActLabel::LIFE_P, 0);
 		}
 	}
+	ImGui::Text("attackHitCount->%d", m_judgeElementPram.attackHitCount);
 
 	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
-
-	VECTOR3F enemyPos = enemy->GetWorldTransform().position;
-
-	float dist = ToDistVec3(enemyPos - m_transformParm.position);
-
-	ImGui::SliderFloat("Dist", &dist, 0.0f, 100.0f);
 
 	float postion[] = { m_transformParm.position.x,m_transformParm.position.y,m_transformParm.position.z };
 	ImGui::InputFloat3("ThisPosition", postion);

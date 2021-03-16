@@ -62,11 +62,18 @@ void Archer::Init()
 	m_writeTimer = 0.0f;
 	m_recoverTimer = 0.0f;
 
-	m_writeMaxTimer = 0.0f;
+	m_playerCreditLv = 1.0f;
+	m_writeMaxTimer = 1.0f;
 	m_recoverMaxTimer = 6.0f;
+	m_goalTimer = 0.0f;
+	m_goalMaxTimer = 2.5f;
 	m_currentTask = 0;
+	m_shootCount = 0;
+	m_selectPoint = 0;
 	m_canRecover = true;
+	m_damageParm.maxSpeed = m_damageParm.speed;
 	m_statusParm.maxLife = m_statusParm.life;
+//	m_selectMovePoint.resize(4);
 }
 
 void Archer::Update(float& elapsedTime)
@@ -85,28 +92,22 @@ void Archer::Update(float& elapsedTime)
 		{
 
 			int taskCount = static_cast<int>(m_currentPlanList.size());
-			for (int i = m_currentTask; i != taskCount;)
+			if (m_currentPlanList[m_currentTask]->ExecuteOperator(this))
 			{
-				if (m_currentPlanList[i]->ExecuteOperator(this))
-				{
-					++m_currentTask;
-					i = m_currentTask;
-				}
-				else
-					break;
+				++m_currentTask;
 			}
-
-			if (m_currentTask == taskCount)
+			if (m_currentTask >= taskCount)
 			{
 				m_currentPlanList = m_agentAI.OperationFlowStart(this);
 				m_currentTask = 0;
 			}
 		}
-		KnockBack();
 		ActiveWriteTimer();
 		ActiveRecoverTimer();
 		m_attackArrow.UpdateTime(elapsedTime);
 	}
+	KnockBack();
+
 	//*********************
 	// Collision Detection
 	//*********************
@@ -126,7 +127,8 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 	VECTOR4F color{ 1.0f,1.0f,1.0f,1.0f };
 	m_model->_shaderON.specular = false;
 	m_model->Render(immediateContext, m_transformParm.world, color, localTransforms);
-	m_arrow->Render(immediateContext);
+	if (m_hasShoot)
+		m_arrow->Render(immediateContext);
 
 	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
 	m_debugObjects.debugObject.Render(immediateContext, scroll, true);
@@ -262,14 +264,20 @@ bool Archer::KnockBack()
 				m_statusParm.isDamage = false;
 				m_animationType = Animation::IDLE;
 				m_blendAnimation.animationBlend._blendRatio = 0.f;
+				m_damageParm.speed = m_damageParm.maxSpeed;
 				m_blendAnimation.animationBlend.ResetAnimationFrame();
 				m_blendAnimation.animationBlend.SetAnimationSpeed(1.0f);
 				m_currentPlanList = m_agentAI.OperationFlowStart(this);
+				m_selectMovePoint.clear();
 				m_currentTask = 0;
 				m_state = 0;
+				m_selectPoint = 0;
+				m_stepParm.speed = m_stepParm.maxSpeed;
 				m_hasRotated = false;
 				m_hasBlendAnim = false;
 				m_canRun = true;
+				return true;
+
 			}
 		}
 		else
@@ -284,7 +292,7 @@ bool Archer::KnockBack()
 	// Move backwards
 	//*******************
 	{
-		VECTOR3F deceleration = m_damageParm.hasBigDamaged ? m_damageParm.deceleration : m_damageParm.deceleration * 4.0f;
+		VECTOR3F deceleration = m_damageParm.hasBigDamaged ? m_damageParm.deceleration : m_damageParm.deceleration * 3.0f;
 		m_damageParm.speed -= deceleration;
 		if (m_damageParm.speed.x <= 0.0f)
 			m_damageParm.speed = { 0.0f,0.0f,0.0f };
@@ -294,12 +302,12 @@ bool Archer::KnockBack()
 		FLOAT4X4 rotationM = {};
 		DirectX::XMStoreFloat4x4(&rotationM, R);
 		VECTOR3F front = { rotationM._31,rotationM._32,rotationM._33 };
+		VECTOR3F velocity = {};
+		velocity.x = front.x * (m_damageParm.speed.x) * -1.0f;
+		velocity.y = 0.0f;
+		velocity.z = front.z * (m_damageParm.speed.z) * -1.0f;
 
-		m_moveParm.velocity.x = front.x * (m_damageParm.speed.x) * -1.0f;
-		m_moveParm.velocity.y = 0.0f;
-		m_moveParm.velocity.z = front.z * (m_damageParm.speed.z) * -1.0f;
-
-		m_transformParm.position += m_moveParm.velocity * m_elapsedTime;
+		m_transformParm.position += velocity * m_elapsedTime;
 		m_transformParm.WorldUpdate();
 	}
 
@@ -361,7 +369,7 @@ bool Archer::Rotate(VECTOR3F& target, const float turnSpeed, bool isLookEnemy)
 void Archer::ActiveWriteTimer()
 {
 	m_writeTimer += m_elapsedTime;
-	if (m_writeTimer > m_writeMaxTimer)
+	if (m_writeTimer >= m_writeMaxTimer)
 	{
 		CharacterAI* target = MESSENGER.CallEnemyInstance(EnemyType::Boss);
 		WriteBlackboard(target);
@@ -448,6 +456,12 @@ bool Archer::FindAttackPoint()
 	front = NormalizeVec3(front);
 
 	Collision::Sphere stage, point;
+
+	stage.position = {};
+	stage.radius = 81.0f;
+	stage.scale = 1.0f;
+	point.radius = m_collision[0].scale;
+	point.scale = 1.0f;
 	Collision collision;
 	int selectNo = 0;
 	float radius = 0.0f;
@@ -467,13 +481,9 @@ bool Archer::FindAttackPoint()
 		else
 			m_controlPoint[i].first = false;
 
-		stage.position = {};
-		stage.radius = 81.0f;
-		stage.scale = 1.0f;
 
 		point.position = m_controlPoint[i].second;
-		point.radius = 1.0f;
-		point.scale = 1.0f;
+
 		if (!collision.JudgeSphereAndSphere(point, stage))
 			m_controlPoint[i].first = true;
 
@@ -491,17 +501,60 @@ bool Archer::FindAttackPoint()
 	
 	if (!isSelectAtkPoint)
 	{
-		atkPos = m_controlPoint[7].second;
-		selectNo = 7;
+		atkPos = m_controlPoint[3].second;
+		selectNo = 3;
 	}
-	float dist = ToDistVec3(atkPos - m_attackPoint);
+
+	float dist = ToDistVec3(atkPos - m_transformParm.position);
 	if (dist > 10.0f)
-		m_attackPoint = atkPos;
+		m_selectMovePoint.emplace_back(atkPos);
 	else
 		m_canRun = false;
 
+	if (m_shootCount == 4)
+	{
+		m_canRun = true;
+		m_shootCount = 0;
+		int count = static_cast<int>(m_controlPoint.size());
+		for (int i = 1; i <= 3; ++i)
+		{
+			int num = i + selectNo;
+			if (num >= count)
+			{
+				num -= count;
+			}
+			VECTOR3F position = m_controlPoint[num].second;
+			point.position = position;
+
+			if (collision.JudgeSphereAndSphere(point, stage))
+				m_selectMovePoint.emplace_back(position);
+		}
+
+		if (m_selectMovePoint.size() != 3)
+		{
+			m_selectMovePoint.clear();
+			for (int i = 1; i <= 3; ++i)
+			{
+				int num = selectNo - i;
+				if (num < 0)
+				{
+					num += count;
+				}
+				VECTOR3F position = m_controlPoint[num].second;
+				point.position = position;
+
+				if (collision.JudgeSphereAndSphere(point, stage))
+					m_selectMovePoint.emplace_back(position);
+			}
+		}
+
+		if(m_selectMovePoint.empty())
+			m_selectMovePoint.emplace_back(atkPos);
+
+	}
+
 	m_hasRotated = false;
-	m_moveParm.velocity = NormalizeVec3(m_attackPoint - m_transformParm.position);
+//	m_moveParm.velocity = NormalizeVec3(m_selectMovePoint.back() - m_transformParm.position);
 
 #if _DEBUG
 	m_debugObjects.controlPoint.GetInstance().clear();
@@ -561,45 +614,70 @@ bool Archer::MoveRun()
 		return true;
 	}
 
-	m_hasRotated = Rotate(m_attackPoint, 0.1f);
-
-	switch (m_state)
+	if (m_blendAnimation.animationBlend.SearchSampler(Animation::RUN))
 	{
-	case 0:
-	{
-		if (m_blendAnimation.animationBlend.SearchSampler(Animation::RUN))
-		{
-			if (JudgeBlendRatio())
-				++m_state;
-		}
-		else
-		{
-			if (!m_blendAnimation.animationBlend.SearchSampler(Animation::HIT) &&
-				!m_blendAnimation.animationBlend.SearchSampler(Animation::HITBIG))
-				m_blendAnimation.animationBlend.ResetAnimationSampler(0);
-			m_blendAnimation.animationBlend.AddSampler(Animation::RUN, m_model);
-		}
+		if (JudgeBlendRatio())
+			++m_state;
 	}
-	break;
-	case 1:
+	else
 	{
-		VECTOR3F front = VECTOR3F(sinf(m_transformParm.angle.y), 0.0f, cosf(m_transformParm.angle.y));
-		VECTOR3F vector = front * m_moveParm.accle;
-		m_transformParm.position += vector * m_elapsedTime;
-		m_transformParm.WorldUpdate();
+		if (!m_blendAnimation.animationBlend.SearchSampler(Animation::HIT) &&
+			!m_blendAnimation.animationBlend.SearchSampler(Animation::HITBIG) &&
+			!m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+		m_blendAnimation.animationBlend.AddSampler(Animation::RUN, m_model);
+	}
 
-		float distance = ToDistVec3(m_attackPoint - m_transformParm.position);
-		if (distance <= 1.0f)
+	CharacterAI* enemy = MESSENGER.CallEnemyInstance(EnemyType::Boss);
+	float distance = ToDistVec3(enemy->GetWorldTransform().position - m_transformParm.position);
+	int count = static_cast<int>(m_selectMovePoint.size());
+	if (distance < kSafeAreaRadius * 0.5f || count == 0)
+	{
+		m_currentPlanList = m_agentAI.OperationFlowStart(this);
+		m_hasBlendAnim = false;
+		m_selectPoint = 0;
+		m_goalTimer = 0.0f;
+		m_currentTask = 0;
+		m_selectMovePoint.clear();
+		return false;
+	}
+
+	VECTOR3F goal = m_selectMovePoint.at(m_selectPoint);
+	m_hasRotated = Rotate(goal, 0.15f);
+	VECTOR3F front = VECTOR3F(sinf(m_transformParm.angle.y), 0.0f, cosf(m_transformParm.angle.y));
+	VECTOR3F vector = front * m_moveParm.accle;
+	m_transformParm.position += vector * m_elapsedTime;
+	m_transformParm.WorldUpdate();
+	
+	m_goalTimer += m_elapsedTime;
+	distance = ToDistVec3(goal - m_transformParm.position);
+	if (distance <= 2.0f)
+	{
+		m_state = 0;
+		m_hasRotated = false;
+		++m_selectPoint;
+		m_goalTimer = 0.0f;
+		if (m_selectPoint >= count)
 		{
-			m_state = 0;
-			m_hasRotated = false;
 			m_blendAnimation.animationBlend.AddSampler(Animation::AIM, m_model);
 			m_hasBlendAnim = false;
-
+			m_selectPoint = 0;
+			m_selectMovePoint.clear();
 			return true;
 		}
 	}
+
+	if (m_goalTimer > m_goalMaxTimer)
+	{
+		m_currentPlanList = m_agentAI.OperationFlowStart(this);
+		m_hasBlendAnim = false;
+		m_selectPoint = 0;
+		m_goalTimer = 0.0f;
+		m_currentTask = 0;
+		m_selectMovePoint.clear();
+		return false;
 	}
+
 	return false;
 }
 
@@ -629,9 +707,6 @@ bool Archer::SetArrow()
 		zAxis = NormalizeVec3(zAxis);
 		if (!m_isSetArrow)
 		{
-			//DO_LIST
-			//ここで種類を選ぶ用にする
-			//そして、種類に応じたエフェクトを出す
 		if(m_attackArrow.m_arrowType == ArrowType::NORMAL)
 			m_statusParm.attackPoint = m_attackArrow.m_attackPoint[0];
 		else
@@ -672,6 +747,7 @@ bool Archer::Shoot()
 	{
 		m_state = 0;
 		m_hasBlendAnim = false;
+		++m_shootCount;
 		return true;
 	}
 
@@ -757,7 +833,7 @@ bool Archer::FindDirectionToAvoid()
 				color = VECTOR4F(0.0f, 1.0f, 0.0f, 1.0f);
 			}
 			m_debugObjects.controlPoint.AddInstanceData(m_controlPoint.at(i).second, VECTOR3F(0.0f * 0.01745f, 180.0f * 0.01745f, 0.0f * 0.017454f),
-				VECTOR3F(5.0f, 5.0f, 5.0f), color);
+				VECTOR3F(2.0f, 2.0f, 2.0f), color);
 		}
 	}
 	else
@@ -780,7 +856,9 @@ bool Archer::FindDirectionToAvoid()
 		}
 	}
 #endif
-
+	if (m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
+		m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+	m_blendAnimation.animationBlend.SetAnimationSpeed(1.6f);
 	return true;
 }
 
@@ -801,21 +879,19 @@ bool Archer::Avoid()
 	m_transformParm.position += velocity * m_elapsedTime;
 	m_transformParm.WorldUpdate();
 
-	if (!m_stepParm.isStep)
+	if (m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
 	{
-		if (m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
-		{
-			if (JudgeBlendRatio(false))
-				m_stepParm.isStep = true;
-		}
-		else
-		{
-			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
-			m_blendAnimation.animationBlend.AddSampler(Animation::DIVE, m_model);
-			m_blendAnimation.animationBlend.SetAnimationSpeed(1.6f);
-		}
+		m_hasBlendAnim = JudgeBlendRatio(false);
 	}
 	else
+	{
+		if (!m_blendAnimation.animationBlend.SearchSampler(Animation::HIT) &&
+			!m_blendAnimation.animationBlend.SearchSampler(Animation::HITBIG))
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+		m_blendAnimation.animationBlend.AddSampler(Animation::DIVE, m_model);
+	}
+
+	if (m_hasBlendAnim)
 	{
 		uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
 		if (currentAnimationFrame == m_stepParm.frameCount)
@@ -834,56 +910,77 @@ bool Archer::Avoid()
 
 bool Archer::Heal()
 {
-	m_canRecover = false;
-	int selectCharacter = 0;
-	float targetHp,targetMaxHp = 0.0f;
-
-	if (m_recoverParm.isPlayer)
+	if (!m_blendAnimation.animationBlend.SearchSampler(Animation::HEAL))
 	{
-		CharacterAI* target = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
-		targetHp = target->GetStatus().life;
-		targetMaxHp = target->GetStatus().maxLife;
-		selectCharacter = 0;
+		if (!m_blendAnimation.animationBlend.SearchSampler(Animation::HIT) &&
+			!m_blendAnimation.animationBlend.SearchSampler(Animation::HITBIG) &&
+			!m_blendAnimation.animationBlend.SearchSampler(Animation::DIVE))
+			m_blendAnimation.animationBlend.ResetAnimationSampler(0);
+		m_blendAnimation.animationBlend.AddSampler(Animation::HEAL, m_model);
+		m_canRecover = false;
+		m_recoverTimer = 0.0f;
+
+		int selectCharacter = 0;
+		float targetHp, targetMaxHp = 0.0f;
+		CharacterAI* target = nullptr;
+		if (m_recoverParm.isPlayer)
+		{
+			target = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
+			targetHp = target->GetStatus().life;
+			targetMaxHp = target->GetStatus().maxLife;
+			selectCharacter = 0;
+		}
+		else
+		{
+			targetHp = m_statusParm.life;
+			targetMaxHp = m_statusParm.maxLife;
+			selectCharacter = 1;
+		}
+
+		float hpRatio = targetHp / targetMaxHp;
+		float healValue = 0.0f;
+		if (m_recoverParm.standardLv > hpRatio)
+		{
+			healValue = m_recoverParm.healValue[1];
+			m_recoverMaxTimer = m_recoverParm.recoverMaxTime[1];
+		}
+		else
+		{
+			healValue = m_recoverParm.healValue[0];
+			m_recoverMaxTimer = m_recoverParm.recoverMaxTime[0];
+		}
+
+		MESSENGER.MessageToLifeUpdate(targetHp + healValue, targetMaxHp,
+			UIActLabel::LIFE_P, selectCharacter);
+
+		if (m_recoverParm.isPlayer)
+		{
+			float& hp = target->GetStatus().life;
+			hp += healValue;
+			if (hp > targetMaxHp)
+				hp = targetMaxHp;
+		}
+		else
+		{
+			m_statusParm.life += healValue;
+			if (m_statusParm.life > targetMaxHp)
+				m_statusParm.life = targetMaxHp;
+		}
+
 	}
 	else
 	{
-		targetHp = m_statusParm.life;
-		targetMaxHp = m_statusParm.maxLife;
-		selectCharacter = 1;
+		bool hasAnimation = JudgeBlendRatio(false);
+		if (hasAnimation)
+		{
+			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
+			if (currentAnimationFrame == 110)
+
+			return true;
+		}
 	}
 
-	float hpRatio = targetHp / targetMaxHp;
-	float healValue = 0.0f;
-	if (m_recoverParm.standardLv > hpRatio)
-	{
-		healValue = m_recoverParm.healValue[1];
-		m_recoverMaxTimer = m_recoverParm.recoverMaxTime[1];
-	}
-	else
-	{
-		healValue = m_recoverParm.healValue[0];
-		m_recoverMaxTimer = m_recoverParm.recoverMaxTime[0];
-	}
-
-	MESSENGER.MessageToLifeUpdate(targetHp + healValue, targetMaxHp,
-		UIActLabel::LIFE_P, selectCharacter);
-
-	if (m_recoverParm.isPlayer)
-	{
-		CharacterAI* target = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
-		float& hp = target->GetStatus().life;
-		hp += healValue;
-		if (hp > targetMaxHp)
-			hp = targetMaxHp;
-	}
-	else
-	{
-		m_statusParm.life += healValue;
-		if (m_statusParm.life > targetMaxHp)
-			m_statusParm.life = targetMaxHp;
-	}
-
-	return true;
+	return false;
 }
 
 bool Archer::Revival()
@@ -1521,8 +1618,8 @@ ImGui::Combo("Name_of_BoneName",
 	}
 
 	//**************************************
-// Life
-//**************************************
+	// Life
+	//**************************************
 	if (ImGui::CollapsingHeader("Damage"))
 	{
 		float accel = m_damageParm.deceleration.x;
@@ -1567,7 +1664,28 @@ ImGui::Combo("Name_of_BoneName",
 		ImGui::SliderFloat("UseArrowMaxTimer", &m_attackArrow.m_useArrowMaxTimer, 0.0f, 10.0f);
 	}
 
+	if (ImGui::CollapsingHeader("Active View"))
+	{
+		ImGui::BulletText(u8"現在のやることリスト");
+		for (auto& task : m_currentPlanList)
+		{
+			ImGui::BulletText("%s", task->GetTaskName().data());
+		}
+		int currentTask = m_currentTask >= m_currentPlanList.size() ? m_currentTask - 1: m_currentTask;
+		ImGui::BulletText(u8"現在やっているタスク->%s", m_currentPlanList[currentTask]->GetTaskName().data());
+
+		for (auto& point : m_selectMovePoint)
+		{
+			float position[] = { point.x,point.y,point.z };
+			ImGui::InputFloat3("Point", position);
+		}
+		ImGui::InputFloat("GoalTImer", &m_goalTimer);
+		ImGui::BulletText(u8"目的地->%d", m_selectPoint);
+	}
+
+
 	ImGui::Checkbox("Active", &m_active);
+	ImGui::Text("attackHitCount->%d", m_judgeElementPram.attackHitCount);
 	ImGui::Text("m_canRecover->%d", m_canRecover);
 	ImGui::SliderFloat("BlendRatio", &m_blendAnimation.animationBlend._blendRatio, 0.0f, 1.0f);
 #endif

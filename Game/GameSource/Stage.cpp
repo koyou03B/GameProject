@@ -120,7 +120,11 @@ void Stage::Render(ID3D11DeviceContext* immediateContext)
 	m_model[0]->Render(Framework::GetContext(), m_world,VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
 
 #ifdef _DEBUG
+	if (!m_instanceData.empty())
+	{
+		m_model[1]->Render(Framework::GetContext(), m_instanceData, VECTOR4F(1.0f, 1.0f, 1.0f, 1.0f));
 
+	}
 #else
 	if (!m_instanceData.empty())
 	{

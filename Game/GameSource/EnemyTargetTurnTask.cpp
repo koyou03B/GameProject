@@ -7,7 +7,7 @@ void EnemyTargetTurnTask::Run(Enemy* enemy)
 	CharacterAI* fighter = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
 	CharacterAI* archer = MESSENGER.CallPlayerInstance(PlayerType::Archer);
 	fighter->GetJudgeElement().attackHitCount = 0;
-	fighter->GetJudgeElement().attackHitCount = 0;
+	archer->GetJudgeElement().attackHitCount = 0;
 	m_taskState = TASK_STATE::END;
 	//uint32_t fighterAttackHitCount = 0;
 	//uint32_t archerAttackHitCount = 0;

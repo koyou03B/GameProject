@@ -31,23 +31,37 @@ uint32_t EnemyChaseNode::JudgePriority(const int id)
 			playerPosition = archer->GetWorldTransform().position;
 	}
 
-	if (fighterAttackHitCount >= archerAttackHitCount)
+	if (!m_isUse)
 	{
-	//	enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Fighter);
-		if (playerType != PlayerType::Fighter)
+		fighter->GetJudgeElement().attackHitCount = 0;
+		archer->GetJudgeElement().attackHitCount = 0;
+		if (fighterAttackHitCount > archerAttackHitCount)
 		{
-			enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Fighter);
-			return m_priority;
+			//	enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Fighter);
+			if (playerType != PlayerType::Fighter)
+			{
+				enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Fighter);
+
+				m_isUse = true;
+				return m_priority;
+			}
+		}
+		else
+		{
+			//	enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Archer);
+			if (playerType != PlayerType::Archer)
+			{
+				enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Archer);
+				m_isUse = true;
+				return m_priority;
+			}
 		}
 	}
 	else
 	{
-	//	enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Archer);
-		if (playerType != PlayerType::Archer)
-		{
-			enemy->GetJudgeElement().targetID = static_cast<int>(PlayerType::Archer);
-			return m_priority;
-		}
+		m_isUse = false;
+		fighter->GetJudgeElement().attackHitCount = 0;
+		archer->GetJudgeElement().attackHitCount = 0;
 	}
 
 	VECTOR3F enemyPosition = enemy->GetWorldTransform().position;

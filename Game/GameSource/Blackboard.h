@@ -10,6 +10,8 @@ public:
 	Blackboard() = default;
 	~Blackboard() = default;
 
+	void ImGui();
+
 public:
 	struct MemoryLog
 	{

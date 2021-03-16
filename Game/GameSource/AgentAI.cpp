@@ -1,6 +1,7 @@
 #include "AgentAI.h"
 #include "MessengTo.h"
 #include "ArcherCharacter.h"
+#include "WorldAnalyzer.h"
 
 std::vector<TaskBase<ArcherWorldState, Archer>*> AgentAI::Init(Archer* mySelf)
 {
@@ -23,14 +24,33 @@ void AgentAI::SavePerception(CharacterAI* mySelf, CharacterAI* target)
 {
 	m_worldAnalyser.Analyze(mySelf, target);
 	int id = static_cast<int>(target->GetID());
-	m_blackboard.m_memoryLog[id].m_longTermMemory.push_back(m_worldAnalyser);
-	size_t count = m_blackboard.m_memoryLog[id].m_longTermMemory.size();
+	m_blackboard.m_memoryLog[id].m_longTermMemory.erase(std::remove_if(m_blackboard.m_memoryLog[id].m_longTermMemory.
+		begin(), m_blackboard.m_memoryLog[id].m_longTermMemory.end(),
+		[](WorldAnalyzer& memory)
+		{
+			float mCredit = memory.GetCreditLv();
+			float credit = mCredit - (1.0f / 5.0f);
 
+			if (credit <= 0.0f)
+			{
+				return true;
+			}
+			memory.SetCreditLv(credit);
+
+			return false;
+
+		}), m_blackboard.m_memoryLog[id].m_longTermMemory.end());
+
+	m_blackboard.m_memoryLog[id].m_longTermMemory.push_back(m_worldAnalyser);
+	int count = static_cast<int>(m_blackboard.m_memoryLog[id].m_longTermMemory.size());
 	//6は変える
-	if (count > 6)
+	if (count > 5)
 	{
-		auto data = m_blackboard.m_memoryLog[id].m_longTermMemory.begin();
-		m_blackboard.m_memoryLog[id].m_longTermMemory.erase(data);
+		count -= 5;
+		for (int i = 0; i < count; ++i)
+		{
+			m_blackboard.m_memoryLog[id].m_longTermMemory.pop_back();
+		}
 	}
 }
 
@@ -42,6 +62,7 @@ void AgentAI::Release()
 void AgentAI::ImGui(Archer* archer)
 {
 	m_gameMaker.ImGui(archer);
+	m_blackboard.ImGui();
 }
 
 void AgentAI::CreatePerception(Archer* mySelf)
@@ -65,29 +86,32 @@ void AgentAI::CreatePerception(Archer* mySelf)
 	//それ以上のものを取り出して
 	for (int i = 0; i < 2; ++i)
 	{
-		auto begin = i == 0 ? playerLog.m_longTermMemory.begin() : enemyLog.m_longTermMemory.begin();
-		auto end   = i == 0 ? playerLog.m_longTermMemory.end() : enemyLog.m_longTermMemory.end();
+		auto& select = i == 0 ? playerLog.m_longTermMemory : enemyLog.m_longTermMemory;
 
-		while (begin != end)
-		{
-			if (begin->GetCreditLv() <= 0.4f)
+		select.erase(std::remove_if(select.begin(),select.end(),
+			[](WorldAnalyzer& memory)
 			{
-				if (i == 0)
-					begin = playerLog.m_longTermMemory.erase(begin);
-				else
-					begin = enemyLog.m_longTermMemory.erase(begin);
-			}
-			else
-				++begin;
-		}
+				float mCredit = memory.GetCreditLv();
+				if (mCredit <= 0.4f)
+					return true;
+				return false;
+
+			}), select.end());
 	}
 
 	ArcherWorldState worldState = mySelf->GetWorldState();
 	worldState.MeterReset();
+	if(playerLog.m_longTermMemory.size() == 0 || enemyLog.m_longTermMemory.size() == 0)
+		m_gameMaker.SetRootTask(CompoundTaskType::Attack);
+
+
 	#pragma region Player
 	{
+
 		auto begin = playerLog.m_longTermMemory.begin();
 		auto end = playerLog.m_longTermMemory.end();
+		VECTOR3F position = begin->GetPosition();
+		float movePosition = 0.0f;
 		for (begin; begin != end; ++begin)
 		{
 			//プレイヤーのHP状況を判断
@@ -95,11 +119,23 @@ void AgentAI::CreatePerception(Archer* mySelf)
 			PerceptionOfRecover(worldState, hpLv);
 			#pragma region 後で
 			//位置がどれだけ動いてるかを判断+敵の最終の距離
-			//離れてるかつ動いてないならプレイヤーの信頼度を下げる
+			//動いてないならプレイヤーの信頼度を下げる
 			//逆なら上げる(上限STARTやから減ってたら上がる)
+			movePosition = ToDistVec3(begin->GetPosition() - position);
+			position = begin->GetPosition();
 			#pragma endregion
 		}
 
+		if (movePosition < 2.5f)
+		{
+			float& cred = mySelf->GetPlayerCreditLv();
+			cred-=0.1f;
+		}
+		else
+		{
+			float& cred = mySelf->GetPlayerCreditLv();
+			cred += 0.05f;
+		}
 
 	}
 	#pragma endregion
@@ -143,7 +179,7 @@ void AgentAI::CreatePerception(Archer* mySelf)
 
 	//足して8以上(8は適当)なら回復する
 	//が、プレイヤーの信頼度が低いなら8から12らへん
-	int recoverMaxMeter = mySelf->GetPlayerCreditLv() < 0.5f ? 12 : 8;
+	int recoverMaxMeter = mySelf->GetPlayerCreditLv() < 0.5f ? 11 : 7;
 
 	//最終的に回復が8,12以上なら回復
 	//攻撃が5以上なら
@@ -159,7 +195,7 @@ void AgentAI::CreatePerception(Archer* mySelf)
 			return;
 		}
 	}
-	else if (myHpLv < 1)
+	else if (myHpLv < static_cast<int>(HitPointLv::MINOR_INJURY))
 	{
 		if (mySelf->GetCanRecover())
 		{
@@ -170,13 +206,17 @@ void AgentAI::CreatePerception(Archer* mySelf)
 		}
 	}
 
-	int avoidMaxMeter = 8;
+	int avoidMaxMeter = 7;
 	if (worldState._avoidMeter > avoidMaxMeter)
+	{
 		m_gameMaker.SetRootTask(CompoundTaskType::Avoid);
+	}
 
-	int atkMaxMeter = 5;
+	int atkMaxMeter = 6;
 	if (worldState._attackMeter > atkMaxMeter)
 		m_gameMaker.SetRootTask(CompoundTaskType::Attack);
+
+
 
 }
 
@@ -211,11 +251,11 @@ void AgentAI::PerceptionOfDistance(ArcherWorldState& worldState, const DistanceL
 	switch (hpLv)
 	{
 	case DistanceLv::NEAR_AWAY:
-		worldState._avoidMeter += 2;
+		worldState._avoidMeter += 3;
 		worldState._attackMeter += 1;
 		break;
 	case DistanceLv::FAR_WAY:
-		worldState._attackMeter += 3;
+		worldState._attackMeter += 2;
 		worldState._recoverMeter += 1;
 		worldState._avoidMeter += 1;
 

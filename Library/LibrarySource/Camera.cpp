@@ -68,13 +68,14 @@ namespace Source
 				m_eye.z = m_focus.z + nDistance.z * m_distance;
 				if (m_lerpValue > 1.0f)
 				{
-					timer += elapsedTimie;
-					if (timer > 1.0f)
-					{
-						m_lerpValue = 0;
-						m_state = 0;
-						return true;
-					}
+					m_lerpValue = 0;
+					m_state = 0;
+					return true;
+					//timer += elapsedTimie;
+					//if (timer > 1.0f)
+					//{
+
+					//}
 				}
 				else
 					m_lerpValue += 0.07f;

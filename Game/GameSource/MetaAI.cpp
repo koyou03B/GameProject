@@ -103,6 +103,7 @@ bool MetaAI::CollisionPlayerAttack(PlayerType type, CharacterParameter::Collisio
 			effectPos = effectPos + judgeNormal * 2.2f;
 			effectPos.y = offsetY;
 			m_effectManager.SelectEffect(EffectType::ArrowAttack, effectPos, 1);
+			atkHitCount += 1;
 		}
 		MESSENGER.MessageToLifeUpdate(enemyLife, enemyMaxLife, UIActLabel::LIFE_E, 0);
 

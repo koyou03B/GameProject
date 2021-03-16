@@ -167,11 +167,17 @@ private:
 
 	int m_state;
 	int m_currentTask;
+	int m_shootCount;
+	int m_selectPoint;
 	float m_elapsedTime;
 	float m_writeTimer;
 	float m_recoverTimer;
 	float m_recoverMaxTimer;
 	float m_writeMaxTimer;
+	float m_goalTimer;
+	float m_goalMaxTimer;
+	float m_avoidTimer;
+	float m_avoidMaxTimer;
 	float m_playerCreditLv;
 	bool m_hasBlendAnim;
 	bool m_hasRotated;
@@ -179,9 +185,9 @@ private:
 	bool m_isSetArrow;
 	bool m_hasShoot;
 	bool m_canRecover;
+	bool m_canAvoid;
 	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
-
-	VECTOR3F m_attackPoint;
+	std::vector<VECTOR3F> m_selectMovePoint;
 	VECTOR3F m_avoidPoint;
 	VECTOR3F m_safeAreaSclae;
 	
