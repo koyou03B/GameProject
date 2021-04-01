@@ -206,7 +206,7 @@ void AgentAI::CreatePerception(Archer* mySelf)
 		}
 	}
 
-	int avoidMaxMeter = 7;
+	int avoidMaxMeter = 9;
 	if (worldState._avoidMeter > avoidMaxMeter)
 	{
 		m_gameMaker.SetRootTask(CompoundTaskType::Avoid);

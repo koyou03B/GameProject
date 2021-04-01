@@ -49,7 +49,6 @@ public:
 	void SetIsLooping(const bool& isLooping) { m_isLooping = isLooping; }
 
 
-
 protected:
 	AnimationData m_animData;
 	UVECTOR2 m_tileCount;
@@ -67,6 +66,7 @@ enum EffectType
 {
 	FighterAttack,
 	ArrowAttack,
+	Heal,
 	ArrowAura,
 	EnemyAttack,
 	EffectEND
@@ -97,7 +97,7 @@ public:
 	void ImGui();
 
 	void AddEffect(BaseEffect* effect);
-	void SelectEffect(const EffectType& type,const VECTOR3F& postion, const int count);
+	void SelectEffect(const EffectType& type,const VECTOR3F& postion, const int count,const int id = 0);
 
 private:
 	std::vector<std::unique_ptr<BaseEffect>> m_sampleEffect;

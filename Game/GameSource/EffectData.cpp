@@ -3,13 +3,9 @@
 
 LoadEffectTexture loadTexture[] =
 {
-	{ EffectTextureLabel::GREEN_SPLASH,		"../Asset/Texture/Effect/0.png"},
-	{ EffectTextureLabel::WHITE_SPLASH,		"../Asset/Texture/Effect/1.png"},
-	{ EffectTextureLabel::GREEN_WHITE_SPLASH,"../Asset/Texture/Effect/69.png"},
-	{ EffectTextureLabel::RED_SPLASH,	"../Asset/Texture/Effect/68.png"},
-	{ EffectTextureLabel::BLUE_RED_IMPACT,"../Asset/Texture/Effect/67.png"},
-	{ EffectTextureLabel::BLUE_RED_SPLASH,"../Asset/Texture/Effect/66.png"},
-
+	{ EffectTextureLabel::Heal_Effect,		"../Asset/Texture/Effect/Heal.png"},
+	{ EffectTextureLabel::P_Effect,	"../Asset/Texture/Effect/P_Effect.png"},
+	{ EffectTextureLabel::A_Effect,"../Asset/Texture/Effect/A_Effect.png"},
 };
 
 void EffectTextureLoader::LoadEffectTexture(const EffectTextureLabel label)

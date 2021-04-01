@@ -39,6 +39,7 @@ std::vector<TaskBase<ArcherWorldState, Archer>*> ArchersGameMaker::SearchBehavio
 
 void ArchersGameMaker::ImGui(Archer* archer)
 {
+#ifdef _DEBUG
 	ImGui::Begin("HTN");
 	if (ImGui::CollapsingHeader("HTN"))
 	{
@@ -209,4 +210,5 @@ void ArchersGameMaker::ImGui(Archer* archer)
 
 	}
 	ImGui::End();
+#endif
 }

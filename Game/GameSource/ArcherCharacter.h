@@ -169,6 +169,7 @@ private:
 	int m_currentTask;
 	int m_shootCount;
 	int m_selectPoint;
+	int m_selectCharacter;
 	float m_elapsedTime;
 	float m_writeTimer;
 	float m_recoverTimer;
@@ -185,11 +186,13 @@ private:
 	bool m_isSetArrow;
 	bool m_hasShoot;
 	bool m_canRecover;
+	bool m_onEffect;
 	bool m_canAvoid;
 	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
 	std::vector<VECTOR3F> m_selectMovePoint;
 	VECTOR3F m_avoidPoint;
 	VECTOR3F m_safeAreaSclae;
+	VECTOR3F m_recoverTarget;
 	
 	Source::Input::Input*					m_input;
 	CharacterParameter::Step				m_stepParm;

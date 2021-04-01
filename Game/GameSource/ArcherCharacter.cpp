@@ -61,7 +61,8 @@ void Archer::Init()
 	m_statusParm.attackPoint = 10.0f;
 	m_writeTimer = 0.0f;
 	m_recoverTimer = 0.0f;
-
+	m_recoverTarget = {};
+	m_selectCharacter = 0;
 	m_playerCreditLv = 1.0f;
 	m_writeMaxTimer = 1.0f;
 	m_recoverMaxTimer = 6.0f;
@@ -70,6 +71,7 @@ void Archer::Init()
 	m_currentTask = 0;
 	m_shootCount = 0;
 	m_selectPoint = 0;
+	m_onEffect = false;
 	m_canRecover = true;
 	m_damageParm.maxSpeed = m_damageParm.speed;
 	m_statusParm.maxLife = m_statusParm.life;
@@ -920,7 +922,6 @@ bool Archer::Heal()
 		m_canRecover = false;
 		m_recoverTimer = 0.0f;
 
-		int selectCharacter = 0;
 		float targetHp, targetMaxHp = 0.0f;
 		CharacterAI* target = nullptr;
 		if (m_recoverParm.isPlayer)
@@ -928,13 +929,15 @@ bool Archer::Heal()
 			target = MESSENGER.CallPlayerInstance(PlayerType::Fighter);
 			targetHp = target->GetStatus().life;
 			targetMaxHp = target->GetStatus().maxLife;
-			selectCharacter = 0;
+			m_selectCharacter = 0;
+			m_recoverTarget = target->GetWorldTransform().position;
 		}
 		else
 		{
 			targetHp = m_statusParm.life;
 			targetMaxHp = m_statusParm.maxLife;
-			selectCharacter = 1;
+			m_selectCharacter = 1;
+			m_recoverTarget = m_transformParm.position;
 		}
 
 		float hpRatio = targetHp / targetMaxHp;
@@ -951,7 +954,7 @@ bool Archer::Heal()
 		}
 
 		MESSENGER.MessageToLifeUpdate(targetHp + healValue, targetMaxHp,
-			UIActLabel::LIFE_P, selectCharacter);
+			UIActLabel::LIFE_P, m_selectCharacter);
 
 		if (m_recoverParm.isPlayer)
 		{
@@ -974,9 +977,17 @@ bool Archer::Heal()
 		if (hasAnimation)
 		{
 			uint32_t  currentAnimationFrame = m_blendAnimation.animationBlend.GetAnimationTime(0);
-			if (currentAnimationFrame == 110)
+			if (!m_onEffect)
+			{
+				MESSENGER.MessageToRecoverEffect(m_recoverTarget, 1, m_selectCharacter);
+				m_onEffect = true;
+			}
 
-			return true;
+			if (currentAnimationFrame == 110)
+			{
+				m_onEffect = false;
+				return true;
+			}
 		}
 	}
 
@@ -1521,7 +1532,7 @@ ImGui::Combo("Name_of_BoneName",
 	//**************************************
 	if (ImGui::CollapsingHeader("Function"))
 	{
-		static bool activeFunction[6];
+		static bool activeFunction[7];
 		if (ImGui::Button("Search"))
 			activeFunction[0] = true;
 		if (activeFunction[0])
@@ -1606,6 +1617,14 @@ ImGui::Combo("Name_of_BoneName",
 		{
 			if ((Avoid()))
 				activeFunction[5] = false;
+		}
+		if (ImGui::Button("Recover"))
+			activeFunction[6] = true;
+
+		if (activeFunction[6])
+		{
+			if ((Heal()))
+				activeFunction[6] = false;
 		}
 	}
 

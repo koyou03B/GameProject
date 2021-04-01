@@ -60,22 +60,20 @@ namespace Source
 			case 1:
 
 				//targetとfocus(Player)の向き
-				VECTOR3F direction = NormalizeVec3(focus - target);
+				VECTOR3F direction = NormalizeVec3(eye - target);
 				//プレイヤー向きと敵向きで線形補間
 				VECTOR3F nDistance = SphereLinearVec3(m_oldDirection, direction, m_lerpValue);
-				m_eye.x = m_focus.x + nDistance.x * m_distance;
-				m_eye.y = m_focus.y + nDistance.y * m_distance;
-				m_eye.z = m_focus.z + nDistance.z * m_distance;
+				if (ToDistVec3(nDistance) != 0.0f)
+				{
+					m_eye.x = m_focus.x + nDistance.x * m_distance;
+					m_eye.y = m_focus.y + nDistance.y * m_distance;
+					m_eye.z = m_focus.z + nDistance.z * m_distance;
+				}
 				if (m_lerpValue > 1.0f)
 				{
 					m_lerpValue = 0;
 					m_state = 0;
 					return true;
-					//timer += elapsedTimie;
-					//if (timer > 1.0f)
-					//{
-
-					//}
 				}
 				else
 					m_lerpValue += 0.07f;
@@ -252,8 +250,17 @@ namespace Source
 					m_mode = CameraMode::ORBIT;
 				break;
 			case CameraMode::ORBIT:
+			{
 				m_camera->OrbitCamera(elapsedTime);
-				break;
+				Source::Input::Input* input = PAD.GetPad(0);
+				if (!input) return;
+				if (m_mode == CameraMode::ORBIT && input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER))
+				{
+					m_mode = CameraMode::LOCK_ON;
+					m_tutorialCommand = true;
+				}
+			}
+			break;
 			case CameraMode::VIBRATION:
 				if (m_camera->Vibrate(elapsedTime))
 					m_mode = CameraMode::ORBIT;
@@ -267,13 +274,7 @@ namespace Source
 				break;
 			}
 
-			Source::Input::Input* input = PAD.GetPad(0);
-			if (!input) return;
-			if (m_mode == CameraMode::ORBIT && input->GetButtons(XINPUT_GAMEPAD_BUTTONS::PAD_RSHOULDER))
-			{
-				m_mode = CameraMode::LOCK_ON;
-				m_tutorialCommand = true;
-			}
+
 		}
 
 		void CameraManager::Activate(ID3D11DeviceContext* immediateContext)

@@ -4,12 +4,9 @@
 
 enum EffectTextureLabel
 {
-	GREEN_SPLASH,
-	WHITE_SPLASH,
-	GREEN_WHITE_SPLASH,
-	RED_SPLASH,
-	BLUE_RED_IMPACT,
-	BLUE_RED_SPLASH,
+	Heal_Effect,
+	P_Effect,
+	A_Effect,
 	END
 };
 

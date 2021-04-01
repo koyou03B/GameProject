@@ -162,10 +162,10 @@ bool MetaAI::CollisionEnemyAttack(EnemyType type, CharacterParameter::Collision&
 				m_isLoaser = true;
 			}
 			player->Impact();
-			m_sceneEffect.StartVignette();
 
 			if (playerType == PlayerType::Fighter)
 			{
+				m_sceneEffect.StartVignette();
 				m_playerAdominist.WriteBlackboard(player);
 			}
 
@@ -230,6 +230,11 @@ void MetaAI::Release()
 {
 	m_playerAdominist.Release();
 	m_enemyAdominist.Release();
+}
+
+void MetaAI::ActiveRecoverEffect(const VECTOR3F postion, const int count, const int targetID)
+{
+	m_effectManager.SelectEffect(EffectType::Heal, postion, count, targetID);
 }
 
 void MetaAI::ActivateEnemy()

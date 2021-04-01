@@ -23,6 +23,7 @@ public:
 	void DeactivateEffect(ID3D11DeviceContext* immediateContext, const SceneEffectType type);
 	void Release();
 
+	void ActiveRecoverEffect(const VECTOR3F postion, const int count,const int targetID);
 	void ActivateEnemy();
 
 	void ImGuiOfPlayer(ID3D11Device* device);

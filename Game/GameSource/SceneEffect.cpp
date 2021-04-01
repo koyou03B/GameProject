@@ -118,6 +118,7 @@ void SceneEffect::VignetteEffect::Update(const float targetTime, const float tar
 
 void SceneEffect::ImGui()
 {
+#ifdef _DEBUG
 	ImGui::Begin("Scene Effect");
 
 	if (m_fog.fog)
@@ -216,4 +217,5 @@ void SceneEffect::ImGui()
 	}
 
 	ImGui::End();
+#endif
 }

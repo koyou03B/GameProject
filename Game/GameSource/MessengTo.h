@@ -41,6 +41,11 @@ public:
 		m_uiAdominist->LifeUpdate(label, (maxHP - currentHP) / maxHP, id);
 	}
 
+	void MessageToRecoverEffect(const VECTOR3F position, const int count,const int targetID)
+	{
+		m_metaAI->ActiveRecoverEffect(position, count, targetID);
+	}
+
 	inline void SetMetaAI(const std::shared_ptr<MetaAI>& metaAI)
 	{
 		m_metaAI = metaAI;

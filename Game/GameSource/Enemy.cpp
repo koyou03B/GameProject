@@ -77,8 +77,8 @@ void Enemy::Init()
 //	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
 //	m_isAction = true;
 #else
-	m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
-	m_isAction = true;
+	//m_blendAnimation.animationBlend.ChangeSampler(0, Animation::WRATH, m_model);
+	//m_isAction = true;
 #endif
 }
 

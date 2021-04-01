@@ -17,6 +17,7 @@ void Blackboard::MemoryLog::CreditDown()
 
 void Blackboard::ImGui()
 {
+#ifdef _DEBUG
 	ImGui::Begin("Blackboard");
 	int count = static_cast<int>(m_memoryLog[0].m_longTermMemory.size());
 	for (int i = 0; i < count; ++i)
@@ -32,4 +33,5 @@ void Blackboard::ImGui()
 		ImGui::Text(u8"“G %d”Ô–Ú %f", i, credit);
 	}
 	ImGui::End();
+#endif
 }

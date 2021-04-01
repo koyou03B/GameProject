@@ -66,6 +66,7 @@ void BaseEffect::AnimationUpdate(float& elapsedTime)
 
 void BaseEffect::ImGuiOfAnimData()
 {
+#ifdef _DEBUG
 	int tileCount[] = { static_cast<int>(m_animData.tileCount.x),static_cast<int>(m_animData.tileCount.y) };
 	float tileSize[] = { m_animData.tileSize.x,m_animData.tileSize.y };
 	float tilePosition[] = { m_animData.tilePosition.x,m_animData.tilePosition.y };
@@ -79,7 +80,7 @@ void BaseEffect::ImGuiOfAnimData()
 	m_animData.tilePosition = { tilePosition[0] * tileSize[0],tilePosition[1] * tileSize[1] };
 
 	int label = static_cast<int>(m_animData.label);
-	ImGui::Combo("EffectLabel", &label, "GREEN_SPLASH\0WHITE_SPLASH\0GREEN_WHITE_SPLASH\0RED_SPLASH\0BLUE_RED_IMPACT\0BLUE_RED_SPLASH\0\0");
+	ImGui::Combo("EffectLabel", &label, "Heal_Effect\0P_Effect\0A_Effect\0\0");
 	m_animData.label = static_cast<EffectTextureLabel>(label);
 	if (ImGui::Button("Texture"))
 	{
@@ -93,6 +94,7 @@ void BaseEffect::ImGuiOfAnimData()
 		ImGui::Image((void*)texture, ImVec2(300, 300));
 		ImGui::End();
 	}
+#endif
 }
 
 void EffectAdominist::Init()
@@ -103,6 +105,7 @@ void EffectAdominist::Init()
 	m_isSampleActive = false;
 	m_sampleEffect.push_back(std::make_unique<AttackEffect>());
 	m_sampleEffect.push_back(std::make_unique<ArrowHitEffect>());
+	m_sampleEffect.push_back(std::make_unique<HealEffect>());
 
 }
 
@@ -159,6 +162,7 @@ void EffectAdominist::Clear()
 
 void EffectAdominist::ImGui()
 {
+#ifdef _DEBUG
 	ImGui::Begin("EffectManager");
 
 	static bool isDebug = false;
@@ -187,6 +191,7 @@ void EffectAdominist::ImGui()
 
 
 	ImGui::End();
+#endif
 }
 
 void EffectAdominist::AddEffect(BaseEffect* effect)
@@ -194,14 +199,14 @@ void EffectAdominist::AddEffect(BaseEffect* effect)
 //	m_sampleEffect.push_back(std::make_shared<BaseEffect>(effect));
 }
 
-void EffectAdominist::SelectEffect(const EffectType& type, const VECTOR3F& position,const int count)
+void EffectAdominist::SelectEffect(const EffectType& type, const VECTOR3F& position,const int count,const int id)
 {
 	VECTOR3F effectPos = position;
-	std::random_device rd;
-	std::default_random_engine eng(rd());
-	std::uniform_real_distribution<float> distrX(-1.5f, 1.5f);
-	std::uniform_real_distribution<float> distrY(-1.0f, 1.0f);
-	std::uniform_real_distribution<float> distrZ(-0.5f, 0.5f);
+	//std::random_device rd;
+	//std::default_random_engine eng(rd());
+	//std::uniform_real_distribution<float> distrX(-1.5f, 1.5f);
+	//std::uniform_real_distribution<float> distrY(-1.0f, 1.0f);
+	//std::uniform_real_distribution<float> distrZ(-0.5f, 0.5f);
 
 	for (int i = 0; i < count; ++i)
 	{
@@ -221,11 +226,18 @@ void EffectAdominist::SelectEffect(const EffectType& type, const VECTOR3F& posit
 			m_selectedEffect.push_back(std::make_unique<ArrowHitEffect>(effect));
 		}
 		break;
+		case EffectType::Heal:
+		{
+			HealEffect effect;
+			memcpy(&effect, m_sampleEffect.at(type).get(), sizeof(HealEffect));
+			effect.SetTargetID(id);
+			m_selectedEffect.push_back(std::make_unique<HealEffect>(effect));
+		}
 		}
 
 		m_selectedEffect.back()->SetPosition(effectPos);
-		srand((unsigned)time(NULL));
-		effectPos.x += distrX(eng);
+		//srand((unsigned)time(NULL));
+		//effectPos.x += distrX(eng);
 		//effectPos.y += distrY(eng);
 		//effectPos.z += distrZ(eng);
 	}
