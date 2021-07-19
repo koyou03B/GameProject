@@ -108,39 +108,42 @@ void AgentAI::CreatePerception(Archer* mySelf)
 	#pragma region Player
 	{
 
-		auto begin = playerLog.m_longTermMemory.begin();
-		auto end = playerLog.m_longTermMemory.end();
-		VECTOR3F position = begin->GetPosition();
-		float movePosition = 0.0f;
-		for (begin; begin != end; ++begin)
+		if (playerLog.m_longTermMemory.size() != 0)
 		{
-			//プレイヤーのHP状況を判断
-			HitPointLv hpLv = begin->GetHpLv();
-			PerceptionOfRecover(worldState, hpLv);
-			#pragma region 後で
-			//位置がどれだけ動いてるかを判断+敵の最終の距離
-			//動いてないならプレイヤーの信頼度を下げる
-			//逆なら上げる(上限STARTやから減ってたら上がる)
-			movePosition = ToDistVec3(begin->GetPosition() - position);
-			position = begin->GetPosition();
-			#pragma endregion
-		}
+			auto begin = playerLog.m_longTermMemory.begin();
+			auto end = playerLog.m_longTermMemory.end();
+			VECTOR3F position = begin->GetPosition();
+			float movePosition = 0.0f;
+			for (begin; begin != end; ++begin)
+			{
+				//プレイヤーのHP状況を判断
+				HitPointLv hpLv = begin->GetHpLv();
+				PerceptionOfRecover(worldState, hpLv);
+#pragma region 後で
+				//位置がどれだけ動いてるかを判断+敵の最終の距離
+				//動いてないならプレイヤーの信頼度を下げる
+				//逆なら上げる(上限STARTやから減ってたら上がる)
+				movePosition = ToDistVec3(begin->GetPosition() - position);
+				position = begin->GetPosition();
+#pragma endregion
+			}
 
-		if (movePosition < 2.5f)
-		{
-			float& cred = mySelf->GetPlayerCreditLv();
-			cred-=0.1f;
+			if (movePosition < 2.5f)
+			{
+				float& cred = mySelf->GetPlayerCreditLv();
+				cred -= 0.1f;
+			}
+			else
+			{
+				float& cred = mySelf->GetPlayerCreditLv();
+				cred += 0.05f;
+			}
 		}
-		else
-		{
-			float& cred = mySelf->GetPlayerCreditLv();
-			cred += 0.05f;
-		}
-
 	}
 	#pragma endregion
 
 	#pragma region Enemy
+	if(enemyLog.m_longTermMemory.size() != 0)
 	{
 		auto begin = enemyLog.m_longTermMemory.begin();
 		auto end = enemyLog.m_longTermMemory.end();
@@ -206,13 +209,20 @@ void AgentAI::CreatePerception(Archer* mySelf)
 		}
 	}
 
-	int avoidMaxMeter = 9;
+	int avoidMaxMeter = 7;
+	int atkMaxMeter = 6;
+	if (m_gameMaker.GetRootTaskType() == CompoundTaskType::Avoid)
+	{
+		avoidMaxMeter = 12;
+		atkMaxMeter = 1;
+	}
+
 	if (worldState._avoidMeter > avoidMaxMeter)
 	{
 		m_gameMaker.SetRootTask(CompoundTaskType::Avoid);
 	}
 
-	int atkMaxMeter = 6;
+
 	if (worldState._attackMeter > atkMaxMeter)
 		m_gameMaker.SetRootTask(CompoundTaskType::Attack);
 
@@ -251,8 +261,8 @@ void AgentAI::PerceptionOfDistance(ArcherWorldState& worldState, const DistanceL
 	switch (hpLv)
 	{
 	case DistanceLv::NEAR_AWAY:
-		worldState._avoidMeter += 3;
-		worldState._attackMeter += 1;
+		worldState._avoidMeter += 2;
+		//worldState._attackMeter += 1;
 		break;
 	case DistanceLv::FAR_WAY:
 		worldState._attackMeter += 2;

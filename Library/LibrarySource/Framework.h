@@ -15,13 +15,11 @@
 #include "SoundData.h"
 #include "..\Game\\GameSource\Scene.h"
 
-#ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
 #include "..\External_libraries\imgui\imgui_impl_dx11.h"
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wparam, LPARAM lparam);
-#endif
 
 class Framework
 {
@@ -48,8 +46,8 @@ private:
 	bool CreateSamplerState();
 
 public:
-	const float SCREEN_WIDTH = 1920;
-	const float SCREEN_HEIGHT = 1080;
+	 float SCREEN_WIDTH = 1920.0f;
+	 float SCREEN_HEIGHT = 1080.0f;
 
 	Framework() = default;
 	Framework(HWND hwnd, HINSTANCE hinstance) :m_hwnd(hwnd), m_hinstance(hinstance)
@@ -63,13 +61,14 @@ public:
 		//Source::Texture::ReleaseAllCachedTextures();
 		m_swapChain->SetFullscreenState(FALSE, nullptr);
 		
-	}
+	}	
+void SetViewPort(float width, float height);
 	int Run()
 	{
 		MSG msg = {};
 		if (!Initialize()) return 0;
 
-#ifdef _DEBUG
+#if 1 //_DEBUG
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 
@@ -104,7 +103,7 @@ public:
 			}
 		}
 
-#ifdef _DEBUG
+#if 1 // _DEBUG
 		ImGui_ImplDX11_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
@@ -115,7 +114,7 @@ public:
 
 	LRESULT CALLBACK HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-#ifdef _DEBUG
+#if 1// _DEBUG
 		if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam))
 		{
 			return 1;
@@ -170,6 +169,7 @@ public:
 		return 0;
 	}
 
+
 	static Framework& GetInstance(HWND hwnd = nullptr, HINSTANCE ins = nullptr)
 	{
 		static Framework instance(hwnd, ins);
@@ -204,7 +204,6 @@ public:
 		void Render(float elapsedTime/*Elapsed seconds from last frame*/);
 
 		bool InitDevice();
-		void SetViewPort(int width, int height);
 		bool InitializeRenderTarget();
 
 

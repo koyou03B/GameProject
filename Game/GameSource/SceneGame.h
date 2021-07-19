@@ -11,12 +11,10 @@
 #include ".\LibrarySource\Constants.h"
 #include ".\LibrarySource\ConstantBuffer.h"
 
-#ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
 #include "..\External_libraries\imgui\imgui_impl_dx11.h"
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
-#endif
 
 
 class Game : public Scene
@@ -43,6 +41,8 @@ private:
 		LOSE
 	};
 private:
+	static constexpr float DEBUG_WIDTH = 1600.0f;
+
 	std::unique_ptr<Source::ConstantBuffer::ConstantBuffer<Source::Constants::SceneConstants>> m_sceneConstantBuffer;
 
 	VECTOR3F scale = { 1.0f, 1.0f, 1.0f };
@@ -59,4 +59,7 @@ private:
 	GameEvent m_eventState = START;
 	float m_vignetteTimer = 0.0f;
 	bool m_isAct = 0;
+
+	float m_debugAspectW = 0.0f;
+	bool m_isDebug = false;
 };

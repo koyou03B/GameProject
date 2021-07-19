@@ -61,7 +61,7 @@ public:
 #if _DEBUG
         m_isDebugMode = true;
 #else
-        m_isDebugMode = false;
+        m_isDebugMode = true;
 #endif
     }
     ~SceneManager() 

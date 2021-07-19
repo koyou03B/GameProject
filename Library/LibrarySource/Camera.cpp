@@ -29,12 +29,15 @@ namespace Source
 			m_distance = 0.0f;
 			m_lerpValue = 0.0f;
 
-			m_speed = 0.0f;
+			m_speed = 2.0f;
 			m_focalLength = 40.0f;
 			m_heightAboveGround = 10.0f;
 
+
+
 			Reset(VECTOR3F(sinf(0.0f), 0.0f, cosf(0.0f)), m_focalLength, m_heightAboveGround);
 		}
+
 		void Camera::Reset(const VECTOR3F& direction, const float& focalLength, const float& heightAboveGround)
 		{
 			m_eye.x = m_focus.x - direction.x * focalLength;
@@ -73,6 +76,7 @@ namespace Source
 				{
 					m_lerpValue = 0;
 					m_state = 0;
+
 					return true;
 				}
 				else
@@ -114,6 +118,8 @@ namespace Source
 
 		void Camera::OrbitCamera(float& elapsedTimie)
 		{
+
+#if  1
 			float yOffset, xOffset = 0.0f;
 			Source::Input::Input* input = PAD.GetPad(0);
 			if (!input) return;
@@ -132,6 +138,7 @@ namespace Source
 			CX = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(CY, CZ));
 			DirectX::XMMATRIX RY = DirectX::XMMatrixRotationAxis(CY, yOffset * sensitivityY);
 			DirectX::XMMATRIX RX = DirectX::XMMatrixRotationAxis(CX, xOffset * sensitivityX);
+
 			CP = m_focalLength * DirectX::XMVector3Normalize(DirectX::XMVector3Transform(CP - CF, RX * RY)) + CF;
 			VECTOR4F eye, focus;
 			DirectX::XMStoreFloat4(&eye, CP);
@@ -139,6 +146,55 @@ namespace Source
 			if (eye.y > 44.0f) eye.y = 44.0f;
 
 			m_eye = eye;
+
+#else
+			Source::Input::Input* input = PAD.GetPad(0);
+			if (!input) return;
+
+			if (input->StickDeadzoneRX(3000))
+			{
+				m_cameraHAngle += input->GetStickRXValue() * m_speed;
+				if (m_cameraHAngle >= 180.0f)
+					m_cameraHAngle -= 360.0f;
+				if (m_cameraHAngle <= -180.0f)
+					m_cameraHAngle += 360.0f;
+			}
+			if (input->StickDeadzoneRY(3000))
+			{
+				m_cameraVAngle += input->GetStickRYValue() * m_speed;
+				if (m_cameraVAngle >= 80.0f)
+					m_cameraVAngle = 80.0f;
+				if (m_cameraVAngle <= 0.0f)
+					m_cameraVAngle = 0.0f;
+			}
+
+			// ƒJƒƒ‰‚ÌˆÊ’u‚ÍƒJƒƒ‰‚Ì…•½Šp“x‚Æ‚’¼Šp“x‚©‚çŽZo
+			VECTOR3F tempPosition1;
+			VECTOR3F tempPosition2;
+			VECTOR3F cameraPosition;
+			VECTOR3F cameraLookAtPosition;
+
+			cameraLookAtPosition = { m_focus.x,m_focus.y,m_focus.z };
+			// Å‰‚É‚’¼Šp“x‚ð”½‰f‚µ‚½ˆÊ’u‚ðŽZo
+			float sinParam  =  ::sinf(m_cameraVAngle / 180.0f * 3.14f);
+			float cosParam = ::cosf(m_cameraVAngle / 180.0f * 3.14f);
+			tempPosition1.x = 0.0f;
+			tempPosition1.y = sinParam * m_focalLength;
+			tempPosition1.z = -cosParam * m_focalLength;
+			// ŽŸ‚É…•½Šp“x‚ð”½‰f‚µ‚½ˆÊ’u‚ðŽZo
+			sinParam  = ::sinf(m_cameraHAngle / 180.0f  * 3.14f);
+			cosParam = ::cosf(m_cameraHAngle / 180.0f * 3.14f);
+			tempPosition2.x = cosParam * tempPosition1.x - sinParam * tempPosition1.z;
+			tempPosition2.y = tempPosition1.y;
+			tempPosition2.z = sinParam * tempPosition1.x + cosParam * tempPosition1.z;
+			// ŽZo‚µ‚½À•W‚É’Ž‹“_‚ÌˆÊ’u‚ð‰ÁŽZ‚µ‚½‚à‚Ì‚ªƒJƒƒ‰‚ÌˆÊ’u
+			cameraPosition = tempPosition2 + cameraLookAtPosition;
+
+			m_eye.x = cameraPosition.x;
+			m_eye.y = cameraPosition.y;
+			m_eye.z = cameraPosition.z;
+
+#endif
 		}
 
 		void Camera::DebugCamera()

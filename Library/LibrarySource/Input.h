@@ -142,6 +142,9 @@ namespace Source
 			inline float& GetStickLeftXValue() { return m_stickLeftXValue; }
 			inline float& GetStickLeftYValue() { return m_stickLeftYValue; }
 
+			inline const float GetStickRXValue() const { return static_cast<float>(m_stickRightXValue / 32767.f); }
+			inline const float GetStickRYValue() const { return static_cast<float>(m_stickRightYValue / 32767.f); }
+
 			int GetButtons(XINPUT_GAMEPAD_BUTTONS command) { return m_buttons[command]; }
 			void ResetButton(XINPUT_GAMEPAD_BUTTONS command) { m_buttons[command] = -1; }
 			bool GetButtons()
@@ -160,6 +163,8 @@ namespace Source
 			int m_userIndex = -1;
 			float m_stickLeftXValue;
 			float m_stickLeftYValue;
+			float m_stickRightXValue;
+			float m_stickRightYValue;
 			int m_vibrationTimer;
 			UVECTOR2 m_vibration;
 		};
@@ -196,6 +201,8 @@ namespace Source
 
 			VECTOR2F StickVectorLeft() override;
 			VECTOR2F StickVectorRight() override;
+
+
 
 		private:
 			XINPUT_STATE m_xPad = {};

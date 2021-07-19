@@ -51,7 +51,7 @@ public:
 	void Release() override;
 	void WriteBlackboard(CharacterAI* target) override;
 	void ImGui(ID3D11Device* device) override;
-
+	void ReleaseAdjust();
 	void Impact() override;
 	void RestAnimationIdle();
 
@@ -188,6 +188,7 @@ private:
 	bool m_canRecover;
 	bool m_onEffect;
 	bool m_canAvoid;
+	bool m_isAdjust;
 	std::vector<std::pair<bool,VECTOR3F>> m_controlPoint;
 	std::vector<VECTOR3F> m_selectMovePoint;
 	VECTOR3F m_avoidPoint;
@@ -206,4 +207,5 @@ private:
 	AgentAI									m_agentAI;
 	ArcherWorldState						m_worldState;
 	std::vector<TaskBase<ArcherWorldState, Archer>*> m_currentPlanList;
+	std::vector<std::string> m_taskNames;
 };

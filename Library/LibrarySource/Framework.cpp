@@ -5,6 +5,7 @@
 
 bool Framework::Initialize()
 {
+
 	InitDevice();
 	InitializeRenderTarget();
 	CreateRasterizerState();
@@ -134,6 +135,8 @@ bool Framework::InitializeRenderTarget()
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 
+	//SCREEN_WIDTH = 1080.0f;
+	//SCREEN_HEIGHT = 1080.0f;
 	SetViewPort((int)SCREEN_WIDTH, (int)SCREEN_HEIGHT);
 
 	return true;
@@ -558,10 +561,10 @@ bool Framework::CreateBlendState()
 //------------------------------------------------
 //	Viewport Settings
 //------------------------------------------------
-void Framework::SetViewPort(int width, int height)
+void Framework::SetViewPort(float width, float height)
 {
-	m_viewPort.Width = (FLOAT)width;
-	m_viewPort.Height = (FLOAT)height;
+	m_viewPort.Width  =static_cast<float>(width);
+	m_viewPort.Height =static_cast<float>(height);
 	m_viewPort.MinDepth = 0.0f;
 	m_viewPort.MaxDepth = 1.0f;
 	m_viewPort.TopLeftX = 0;
@@ -572,12 +575,11 @@ void Framework::SetViewPort(int width, int height)
 
 void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 {
-#ifdef _DEBUG
+#if 1 //_DEBUG
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-#endif
-
+# endif
 	SoundTrack.Update();
 	KEYBOARD.GetKeyStateAll();
 	MOUSE.MouseState(m_hwnd);
@@ -710,7 +712,7 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	ActivateScene.Render(m_deviceContext.Get(),elapsedTime);
 
-#ifdef _DEBUG
+#if 1 //_DEBUG
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 #endif

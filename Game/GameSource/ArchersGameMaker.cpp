@@ -28,6 +28,7 @@ void ArchersGameMaker::Release()
 
 void ArchersGameMaker::SetRootTask(const CompoundTaskType& type)
 {
+	m_taskType = type;
 	auto task = m_domain.GetCompoundTask(type);
 	m_planRunner.SetRootTask(task);
 }

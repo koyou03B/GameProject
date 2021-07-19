@@ -53,7 +53,6 @@ bool Game::Initialize(ID3D11Device* device)
 
 
 
-
 	return true;
 }
 
@@ -69,7 +68,7 @@ void Game::Update(float& elapsedTime)
 	m_stage->Update(elapsedTime);
 	#pragma endregion
 
-#pragma region Camera
+	#pragma region Camera
 	{
 		if (m_eventState != GameEvent::WIN)
 		{
@@ -231,7 +230,19 @@ void Game::Update(float& elapsedTime)
 	}
 	#pragma endregion
 
+#if RELEASE
+#pragma region Aspect
+	if (KEYBOARD._keys[DIK_0] == 1)
+	{
+		m_isDebug = !m_isDebug;
+		float height = Framework::GetInstance().SCREEN_HEIGHT;
+		float width = Framework::GetInstance().SCREEN_WIDTH;
+		m_debugAspectW = m_isDebug ? DEBUG_WIDTH : width;
 
+		Framework::GetInstance().SetViewPort(m_debugAspectW, height);
+	}
+#pragma endregion
+#endif
 
 #if _DEBUG
 	if (KEYBOARD._keys[DIK_1] == 1)
@@ -276,7 +287,7 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 
 void Game::ImGui()
 {
-#ifdef _DEBUG
+#if _DEBUG
 	ImGui::Begin("SCENE_GAME");
 	static int chois = 0;
 	std::vector<std::string> sceneList = { "Title","Tutorial","Game","Over","Clear" };
@@ -430,6 +441,23 @@ void Game::ImGui()
 	}
 
 	ImGui::End();
+
+#else 
+	if (m_isDebug)
+	{
+		ImGui::SetNextWindowPos(ImVec2(DEBUG_WIDTH, 0.0f));
+		ImGui::Begin("SCENE_GAME");
+		if (ImGui::CollapsingHeader(u8"–¡•û"))
+		{
+			m_metaAI->ImGuiOfPlayer(Framework::GetInstance().GetDevice());
+		}
+
+		//if (ImGui::CollapsingHeader("Enemy"))
+		//{
+		//	m_metaAI->ImGuiOfEnemy(Framework::GetInstance().GetDevice());
+		//}
+		ImGui::End();
+	}
 #endif
 }
 
@@ -444,6 +472,9 @@ void Game::Uninitialize()
 	Source::Shader::ReleaseAllCachedVertexShaders();
 	Source::Shader::ReleaseAllCachedPixelShaders();
 	Source::Texture::ReleaseAllCachedTextures();
+	float height = Framework::GetInstance().SCREEN_HEIGHT;
+	float width = Framework::GetInstance().SCREEN_WIDTH;
+	Framework::GetInstance().SetViewPort(width, height);
 }
 
 VECTOR3F Game::DistancePlayerToEnemy()

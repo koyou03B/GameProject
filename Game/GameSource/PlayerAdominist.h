@@ -34,7 +34,7 @@ public :
 
 	CharacterAI* GetPlayPlayer()
 	{
-		int select = static_cast<int>(PlayerType::Fighter);
+		int select = static_cast<int>(PlayerType::Archer);
 		return m_players[select].get();
 	}
 

@@ -73,6 +73,9 @@ namespace Source
 			float m_focalLength = 0.0f;
 			float m_heightAboveGround = 0.0f;
 			float m_lerpValue = 0.0f;
+
+			float m_cameraHAngle = 0.0f;
+			float m_cameraVAngle = 0.0f;
 		};
 
 		class CameraManager

@@ -21,6 +21,7 @@ public:
 	void Release();
 
 	void SetRootTask(const CompoundTaskType& type);
+	const CompoundTaskType& GetRootTaskType() { return m_taskType; }
 	std::vector<TaskBase<ArcherWorldState, Archer>*> SearchBehaviorTask(ArcherWorldState& worldState);
 	void ImGui(Archer* arccher);
 
@@ -47,5 +48,6 @@ private:
 	DomainConverter							m_domainConverter;
 	Domain<ArcherWorldState, Archer>		m_domain;
 	PlanRunner<ArcherWorldState, Archer>	m_planRunner;
+	CompoundTaskType									m_taskType;
 };
 

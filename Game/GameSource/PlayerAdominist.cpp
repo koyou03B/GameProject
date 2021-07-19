@@ -54,9 +54,13 @@ void PlayerAdominist::WriteBlackboard(CharacterAI* target)
 
 void PlayerAdominist::ImGui(ID3D11Device* device)
 {
+#if _DEBUG
 	int no = static_cast<int>(PlayerType::Fighter);
 	m_players[no]->ImGui(device);
 	no = static_cast<int>(PlayerType::Archer);
 	m_players[no]->ImGui(device);
-
+#else  //elif RELEASE
+	int no = static_cast<int>(PlayerType::Archer);
+	m_players[no]->ImGui(device);
+#endif
 }

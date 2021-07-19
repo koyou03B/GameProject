@@ -5,12 +5,10 @@
 #include ".\LibrarySource\ModelData.h"
 #include ".\LibrarySource\VectorCombo.h"
 
-#ifdef _DEBUG
 #include "..\External_libraries\imgui\imgui.h"
 #include "..\External_libraries\imgui\imgui_impl_dx11.h"
 #include "..\External_libraries\imgui\imgui_impl_win32.h"
 #include "..\External_libraries\imgui\imgui_internal.h"
-#endif
 CEREAL_CLASS_VERSION(Archer, 8);
 
 void Archer::Init()
@@ -71,6 +69,7 @@ void Archer::Init()
 	m_currentTask = 0;
 	m_shootCount = 0;
 	m_selectPoint = 0;
+	m_isAdjust = false;
 	m_onEffect = false;
 	m_canRecover = true;
 	m_damageParm.maxSpeed = m_damageParm.speed;
@@ -81,6 +80,7 @@ void Archer::Init()
 void Archer::Update(float& elapsedTime)
 {
 	m_elapsedTime = elapsedTime;
+//	m_active = false;
 	if (m_active)
 	{
 		if (m_hasShoot)
@@ -134,7 +134,10 @@ void Archer::Render(ID3D11DeviceContext* immediateContext)
 
 	VECTOR4F scroll{ 0.0f, 0.0f, 0.0f, 0.0f };
 	m_debugObjects.debugObject.Render(immediateContext, scroll, true);
-	m_debugObjects.controlPoint.Render(immediateContext, scroll, false);
+
+	if(m_isAdjust)
+		m_debugObjects.controlPoint.Render(Framework::GetInstance().GetContext(), scroll, false);
+
 }
 
 void Archer::Release()
@@ -470,6 +473,9 @@ bool Archer::FindAttackPoint()
 	float minDistance = FLT_MAX;
 	VECTOR3F atkPos = {};
 	bool isSelectAtkPoint = false;
+	
+	//敵から半径45離れた地点に8個の攻撃地点を配置
+	//そして選択
 	for (int i = 0; i < 8; ++i)
 	{
 		m_controlPoint[i].second.x = ePosition.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.6f);
@@ -501,64 +507,73 @@ bool Archer::FindAttackPoint()
 
 #endif
 	
+	//選択されなかったときは3番を選ぶ
 	if (!isSelectAtkPoint)
 	{
-		atkPos = m_controlPoint[3].second;
-		selectNo = 3;
+		int num  = rand() % 8;
+		atkPos = m_controlPoint[num].second;
+		selectNo = num;
 	}
 
+	//選んだポイントが近いのなら走らなくていい
 	float dist = ToDistVec3(atkPos - m_transformParm.position);
 	if (dist > 10.0f)
 		m_selectMovePoint.emplace_back(atkPos);
 	else
 		m_canRun = false;
 
-	if (m_shootCount == 4)
-	{
-		m_canRun = true;
-		m_shootCount = 0;
-		int count = static_cast<int>(m_controlPoint.size());
-		for (int i = 1; i <= 3; ++i)
-		{
-			int num = i + selectNo;
-			if (num >= count)
-			{
-				num -= count;
-			}
-			VECTOR3F position = m_controlPoint[num].second;
-			point.position = position;
+	//同じ場所で4回打ったら
+	//次の場所を決める
+	//if (m_shootCount == 4)
+	//{
+	//	m_canRun = true;
+	//	m_shootCount = 0;
+	//	int count = static_cast<int>(m_controlPoint.size());
+	//	//ルートを決める
+	//	for (int i = 1; i <= 3; ++i)
+	//	{
+	//		int num = i + selectNo;
+	//		if (num >= count)
+	//		{
+	//			num -= count;
+	//		}
+	//		VECTOR3F position = m_controlPoint[num].second;
+	//		point.position = position;
 
-			if (collision.JudgeSphereAndSphere(point, stage))
-				m_selectMovePoint.emplace_back(position);
-		}
+	//		if (collision.JudgeSphereAndSphere(point, stage))
+	//		{
+	//			m_selectMovePoint.emplace_back(position);
+	//			selectNo = num;
+	//		}
+	//	}
 
-		if (m_selectMovePoint.size() != 3)
-		{
-			m_selectMovePoint.clear();
-			for (int i = 1; i <= 3; ++i)
-			{
-				int num = selectNo - i;
-				if (num < 0)
-				{
-					num += count;
-				}
-				VECTOR3F position = m_controlPoint[num].second;
-				point.position = position;
+	//	if (m_selectMovePoint.size() != 3)
+	//	{
+	//		m_selectMovePoint.clear();
+	//		for (int i = 1; i <= 3; ++i)
+	//		{
+	//			int num = selectNo - i;
+	//			if (num < 0)
+	//			{
+	//				num += count;
+	//			}
+	//			VECTOR3F position = m_controlPoint[num].second;
+	//			point.position = position;
 
-				if (collision.JudgeSphereAndSphere(point, stage))
-					m_selectMovePoint.emplace_back(position);
-			}
-		}
+	//			if (collision.JudgeSphereAndSphere(point, stage))
+	//			{
+	//				m_selectMovePoint.emplace_back(position);
+	//				selectNo = num;
+	//			}
+	//		}
+	//	}
 
-		if(m_selectMovePoint.empty())
-			m_selectMovePoint.emplace_back(atkPos);
-
-	}
+	//	if(m_selectMovePoint.empty())
+	//		m_selectMovePoint.emplace_back(atkPos);
+	//}
 
 	m_hasRotated = false;
 //	m_moveParm.velocity = NormalizeVec3(m_selectMovePoint.back() - m_transformParm.position);
-
-#if _DEBUG
 	m_debugObjects.controlPoint.GetInstance().clear();
 	if (m_debugObjects.controlPoint.GetInstance().empty())
 	{
@@ -600,7 +615,7 @@ bool Archer::FindAttackPoint()
 			m_debugObjects.controlPoint.GetInstanceData(i).CreateWorld();
 		}
 	}
-#endif
+
 	return true;
 }
 
@@ -1001,7 +1016,7 @@ bool Archer::Revival()
 
 void Archer::ImGui(ID3D11Device* device)
 {
-#ifdef _DEBUG
+#if _DEBUG //_DEBUG
 
 	ImGui::Begin("ArcherCharacter", nullptr, ImGuiWindowFlags_MenuBar);//メニューバーをつかうならこのBEGIN
 
@@ -1710,7 +1725,64 @@ ImGui::Combo("Name_of_BoneName",
 #endif
 	ImGui::End();
 
+
+#else
+ReleaseAdjust();
 #endif
+}
+
+void Archer::ReleaseAdjust()
+{
+	float width = 1600.0f;
+	float height = 100.0f;
+	ImGui::SetNextWindowPos(ImVec2(width, height));
+	ImGui::Begin("ArcherCharacter");
+
+	ImGui::BulletText(u8"選択されたタスク群");
+	{
+		ImGui::BeginChild("Test", ImVec2(200, 100), true);
+	for (auto& task : m_currentPlanList)
+	{
+		ImGui::Text("%s", task->GetTaskName().data());
+	}
+	ImGui::EndChild();
+	}
+	ImGui::BulletText(u8"現在のタスク");
+	{
+		std::string taskName = m_currentPlanList[m_currentTask]->GetTaskName();
+		ImGui::Text("%s", taskName.data());
+	}
+	ImGui::BulletText(u8"次のタスク");
+	{
+		int nextTask = m_currentTask + 1;
+		int maxtaskList = m_currentPlanList.size();
+		std::string taskName;
+		if (nextTask >= maxtaskList)
+			taskName = "これで終わり";
+		else
+			 taskName = m_currentPlanList[nextTask]->GetTaskName();
+		ImGui::Text("%s", taskName.data());
+	}
+
+	ImGui::Checkbox(u8"球体可視化", &m_isAdjust);
+	ImGui::BulletText(u8"攻撃地点->球体");
+	{
+		ImGui::BeginChild("攻撃種類", ImVec2(200, 80), true);
+		ImGui::Text(u8"青->攻撃可能ポイント");
+		ImGui::Text(u8"赤->攻撃不可ポイント");
+		ImGui::Text(u8"緑->選択した攻撃ポイント");
+		ImGui::EndChild();
+	}
+
+	ImGui::BulletText(u8"逃走方向->球体");
+	{
+		ImGui::BeginChild("逃走種類", ImVec2(200, 80), true);
+		ImGui::Text(u8"青->逃走可能ポイント");
+		ImGui::Text(u8"赤->逃走不可ポイント");
+		ImGui::Text(u8"緑->選択した逃走ポイント");
+		ImGui::EndChild();
+	}
+	ImGui::End();
 }
 
 void AttackArrow::UpdateTime(float& elapsedTime)

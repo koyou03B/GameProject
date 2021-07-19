@@ -275,6 +275,8 @@ namespace Source
 
 				m_stickLeftXValue =  m_xPad.Gamepad.sThumbLX;														   
 				m_stickLeftYValue =  m_xPad.Gamepad.sThumbLY;
+				m_stickRightXValue = m_xPad.Gamepad.sThumbRX;
+				m_stickRightYValue = m_xPad.Gamepad.sThumbRY;
 
 				if (m_vibrationTimer >= 0)
 					--m_vibrationTimer;

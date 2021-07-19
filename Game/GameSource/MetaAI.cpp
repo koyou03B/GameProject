@@ -149,7 +149,7 @@ bool MetaAI::CollisionEnemyAttack(EnemyType type, CharacterParameter::Collision&
 				hasBigDamaged = true;
 			}
 
-			VECTOR3F enemyPosition  = enemy->GetWorldTransform().position;
+			VECTOR3F enemyPosition = enemy->GetWorldTransform().position;
 			VECTOR3F playerPosition = player->GetWorldTransform().position;
 			VECTOR3F vector = enemyPosition - playerPosition;
 			VECTOR3F& damageVector = player->GetDamage().vector;
