@@ -596,7 +596,7 @@ void Enemy::ImGui(ID3D11Device* device)
 					float maxDirection = static_cast<float>(selectNearNode->GetMaxDirection());
 					ImGui::BulletText("MaxDirection -> %f", maxDirection);
 					static float direction = 0.0f;
-					ImGui::SliderFloat("MaxDirection", &direction, 0.0f, 100.0f);
+					ImGui::SliderFloat("MaxDirection", &direction, 0.0f, 120.0f);
 					if (ImGui::Button("SetDirection"))
 						selectNearNode->SetMaxDirection(direction);
 

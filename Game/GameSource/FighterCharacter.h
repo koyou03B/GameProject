@@ -130,6 +130,5 @@ private:
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 	Source::Input::Input* m_input;
 	float m_padDeadLine;
-	float m_elapsedTime;
 	bool m_adjustAnimation;
 };

@@ -36,7 +36,6 @@ public:
 	inline CharacterParameter::BlendAnimation& GetBlendAnimation() { return m_blendAnimation; }
 	inline std::unique_ptr<Stone>& GetStone() { return m_stone; }
 	inline uint32_t& GetSignalAnimFrame(const int animNo) { return m_signalFrame[animNo]; }
-	inline float& GetElapsedTime() { return m_elapsedTime; }
 	template<class T>
 	void serialize(T& archive, const std::uint32_t version)
 	{
@@ -130,5 +129,4 @@ private:
 	std::vector<CharacterParameter::Attack>	m_attackParm;
 	uint32_t m_signalFrame[4] = {};
 	int m_moveState;
-	float m_elapsedTime;
 };

@@ -170,7 +170,6 @@ private:
 	int m_shootCount;
 	int m_selectPoint;
 	int m_selectCharacter;
-	float m_elapsedTime;
 	float m_writeTimer;
 	float m_recoverTimer;
 	float m_recoverMaxTimer;

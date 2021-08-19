@@ -59,9 +59,16 @@ public:
 		}
 	}
 private:
-	float m_maxDirection = 0.0f;
+	static constexpr float HitCountPoint = 0.5f;
+	static constexpr float MaxCoolTime = 1.0f;
 	uint32_t m_selectCount = 0;
+	int m_coolCount = 0;
+	int m_maxCoolCount = 0;
+	float m_fighterPoint = 0.0f;
+	float m_archerPoint = 0.0f;
+	float m_maxDirection = 0.0f;
 	bool m_isUse = false;
+
 };
 
 CEREAL_CLASS_VERSION(EnemyChaseNode, 3);

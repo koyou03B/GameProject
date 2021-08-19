@@ -180,14 +180,10 @@ void AgentAI::CreatePerception(Archer* mySelf)
 
 	#pragma endregion
 
-	//足して8以上(8は適当)なら回復する
-	//が、プレイヤーの信頼度が低いなら8から12らへん
+
 	int recoverMaxMeter = mySelf->GetPlayerCreditLv() < 0.5f ? 11 : 7;
 
-	//最終的に回復が8,12以上なら回復
-	//攻撃が5以上なら
-	//回避が8以上なら
-	//で判断もちろん変更はする
+
 	if (worldState._recoverMeter > recoverMaxMeter)
 	{
 		if (mySelf->GetCanRecover())
@@ -209,8 +205,8 @@ void AgentAI::CreatePerception(Archer* mySelf)
 		}
 	}
 
-	int avoidMaxMeter = 7;
-	int atkMaxMeter = 6;
+	int avoidMaxMeter = 5;
+	int atkMaxMeter = 4;
 	if (m_gameMaker.GetRootTaskType() == CompoundTaskType::Avoid)
 	{
 		avoidMaxMeter = 12;

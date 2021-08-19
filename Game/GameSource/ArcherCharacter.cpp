@@ -478,8 +478,8 @@ bool Archer::FindAttackPoint()
 	//‚»‚µ‚Ä‘I‘ð
 	for (int i = 0; i < 8; ++i)
 	{
-		m_controlPoint[i].second.x = ePosition.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.6f);
-		m_controlPoint[i].second.z = ePosition.z + sinf(radius * 0.01745f) * (kSafeAreaRadius * 0.6f);
+		m_controlPoint[i].second.x = ePosition.x + cosf(radius * 0.01745f) * (kSafeAreaRadius * 0.7f);
+		m_controlPoint[i].second.z = ePosition.z + sinf(radius * 0.01745f) * (kSafeAreaRadius * 0.7f);
 		radius += 45.0f;
 
 		VECTOR3F normalizeDist = NormalizeVec3(m_controlPoint[i].second - ePosition);

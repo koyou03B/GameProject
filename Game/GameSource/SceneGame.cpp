@@ -273,7 +273,8 @@ void Game::Render(ID3D11DeviceContext* immediateContext, float elapsedTime)
 
 		m_stage->Render(immediateContext);
 		m_metaAI->Render(immediateContext);
-		m_metaAI->RenderOfEffect(immediateContext);
+		if(m_eventState == GameEvent::FIGHT)
+			m_metaAI->RenderOfEffect(immediateContext);
 
 		m_sceneEffect.DeactivateEffect(immediateContext,SceneEffectType::FOG);
 		m_metaAI->DeactivateEffect(immediateContext, SceneEffectType::VIGNETTE);

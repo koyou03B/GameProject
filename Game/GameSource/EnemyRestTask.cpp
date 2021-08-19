@@ -30,6 +30,7 @@ void EnemyRestTask::Run(Enemy* enemy)
 		{
 			m_taskState = TASK_STATE::END;
 			m_moveState = 0;
+			m_restTime = 0.0f;
 			enemy->GetJudgeElement().moveCount = 0;
 			enemy->GetJudgeElement().attackCount = 0;
 			enemy->GetJudgeElement().damageCount = 0;

@@ -53,6 +53,9 @@ std::shared_ptr<EnemyBehaviorNode> EnemyBehaviorNode::SelectOfActivedNode(const 
 				priority = nodePriority;
 			}
 		}
+		//もしレストが連続するようなことが起きたら攻撃に
+		if (priority == 0)
+			selectChild = 2;
 
 		return m_family.childs.at(selectChild);
 	}
